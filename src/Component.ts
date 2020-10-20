@@ -83,7 +83,6 @@ export default class Component {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         if (tempList[i].startsWith('-') && (argsStatus || argsList.indexOf(tempList[i]) >= 0)) {
-          console.log(tempList[i]);
           // eslint-disable-next-line no-unused-vars
           indexTemp = i;
           let tempArgs = tempList[i].startsWith('--')
