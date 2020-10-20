@@ -1,5 +1,8 @@
 const path = require('path');
+const os = require('os');
 const fs = require('fs');
+const colors = require('colors');
+const yaml = require('js-yaml');
 import Context from './Context';
 import { downComponent, getRemoteComponentVersion } from './utils';
 interface ComponentContext {
@@ -59,6 +62,29 @@ export default class Component {
     }
   }
 
+  private getSpace(num:number) {
+    const tempSpace = ' ';
+    let tempResult = '';
+    for (let i = 0; i < (num > 0 ? parseInt(String(num)) : 0); i++) {
+      tempResult = tempResult + tempSpace;
+    }
+    return tempResult;
+  }
+  
+  private getLogMessage(message: string, type: string, style:number, num:number) {
+    return this.getSpace(num || 2) + (style === 1 ? type : '') + message;
+  }
+
+  private isColor() {
+    const profPath = path.join(os.homedir(), `.s/set-config.yml`);
+    try {
+      const profile = yaml.safeLoad(fs.readFileSync(profPath, 'utf8')) || {};
+      return profile['output-color'];
+    } catch (err) {
+      return true;
+    }
+  }
+
   args(args: any, boolList?:[], moreList?:[], argsList?:[]) {
     /*
      *  变更：
@@ -82,7 +108,7 @@ export default class Component {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         if (tempList[i].startsWith('-') && (argsStatus || argsList.indexOf(tempList[i]) >= 0)) {
-          console.log(tempList[i])
+          console.log(tempList[i]);
           // eslint-disable-next-line no-unused-vars
           indexTemp = i;
           let tempArgs = tempList[i].startsWith('--')
@@ -172,6 +198,32 @@ export default class Component {
     } catch (ex) {}
   }
 
+  log(message: string, style?:number, num?: number) {
+    message = this.getLogMessage(message, '[LOG] ', style || 0, num || 2);
+    if (process.env['verbose'] === 'true') {
+      console.log(this.isColor() ? colors.grey(message) : message);
+    }
+  }
+
+  warn(message: string, style?:number, num?: number) {
+    message = this.getLogMessage(message, '[WARN] ', style || 0, num || 2);
+    console.log(this.isColor() ? colors.yellow(message) : message);
+  }
+
+  error(message: string, style?:number, num?: number) {
+    message = this.getLogMessage(message, '[ERROR] ', style || 0, num || 2);
+    console.log(this.isColor() ? colors.red(message) : message);
+  }
+
+  info(message: string, style?:number, num?: number) {
+    message = this.getLogMessage(message, '[INFO] ', style || 0, num || 2);
+    console.log(this.isColor() ? colors.blue(message) : message);
+  }
+
+  success(message: string, style?:number, num?: number) {
+    message = this.getLogMessage(message, '[LOG] ', style || 0, num || 2);
+    console.log(this.isColor() ? colors.green(message) : message);
+  }
 
   async load(componentName: any, componentAlias = '', provider = 'alibaba' ) {
     let externalComponentPath;
