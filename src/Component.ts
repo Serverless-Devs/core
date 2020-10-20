@@ -1,3 +1,5 @@
+import {inspect} from 'util';
+
 const path = require('path');
 const os = require('os');
 const fs = require('fs');
@@ -199,30 +201,35 @@ export default class Component {
     } catch (ex) {}
   }
 
-  log(message: string, style?:number, num?: number) {
+  log(message: string, option?:any) {
+    const {style, num, output} = option || {};
     message = this.getLogMessage(message, '[LOG] ', style || 0, num || 2);
-    if (process.env['verbose'] === 'true') {
+    if (process.env['verbose'] === 'true' || output === true) {
       console.log(this.isColor() ? colors.grey(message) : message);
     }
   }
 
-  warn(message: string, style?:number, num?: number) {
+  warn(message: string, option?:any) {
+    const {style, num} = option || {};
     message = this.getLogMessage(message, '[WARN] ', style || 0, num || 2);
     console.log(this.isColor() ? colors.yellow(message) : message);
   }
 
-  error(message: string, style?:number, num?: number) {
+  error(message: string, option?:any) {
+    const {style, num} = option || {};
     message = this.getLogMessage(message, '[ERROR] ', style || 0, num || 2);
     throw new Error(message);
     // console.log(this.isColor() ? colors.red(message) : message);
   }
 
-  info(message: string, style?:number, num?: number) {
+  info(message: string, option?:any) {
+    const {style, num} = option || {};
     message = this.getLogMessage(message, '[INFO] ', style || 0, num || 2);
     console.log(this.isColor() ? colors.blue(message) : message);
   }
 
-  success(message: string, style?:number, num?: number) {
+  success(message: string, option?:any) {
+    const {style, num} = option || {};
     message = this.getLogMessage(message, '[LOG] ', style || 0, num || 2);
     console.log(this.isColor() ? colors.green(message) : message);
   }

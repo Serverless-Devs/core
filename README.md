@@ -5,6 +5,9 @@ s-core是Serverless-Devs-Tool的一个官方组件，通过该组件您可以轻
 - 状态存储、读取
 - 组件加载、调用
 - 参数转换等
+- 帮助文档
+- 日志输出
+- 打包压缩
 
 ## 整体使用方法
 
@@ -165,3 +168,92 @@ this.help(inputs, {
 
 
 ```
+
+## 日志输出
+
+系统默认提供多种格式日志输出，基本使用方法：
+
+```
+this.log(`Waiting for service ${serviceName} ${beforeDeployLog}...`)
+```
+
+或者增加一定的设置：
+
+```
+this.log(`Waiting for service ${serviceName} ${beforeDeployLog}...`, {output: true})
+```
+
+### log
+该种格式会输出灰色字符串。
+
+如果执行指令的时候，没有加`--verbose`，系统不会输出该类型数据，只有加`--verbose`才会输出；如果组件开发者想默认输出该类型内容，可以设置参数`output: true`
+
+如果系统设置的`output-color`为`disable`，则不会输出颜色，只有`output-color`为`enable`，才可以输出颜色；
+
+`log`方法参数有：
+
+- `message`: 日志信息   
+- `option`: 设置，`object`       
+    - `style`: 输出类型，默认为0，表示直接输出，取值为1时，会在输出前面默认添加`[LOG] `   
+    - `number`：前面添加的空格个数，Number类型   
+    - `output`: 取值`false`（默认）不输出日志，只有在加`--verbose`时输出日志，取值`true`默认输出日志
+
+### warn
+该种格式会输出黄色字符串。
+
+如果系统设置的`output-color`为`disable`，则不会输出颜色，只有`output-color`为`enable`，才可以输出颜色；
+
+`warn`方法参数有：
+
+- `message`: 日志信息   
+- `option`: 设置，`object`       
+   - `style`: 输出类型，默认为0，表示直接输出，取值为1时，会在输出前面默认添加`[WARN] `   
+   - `number`：前面添加的空格个数，Number类型   
+
+### error
+
+该种格式会输出红色字符串，并且为标准错误，如果需要，可以捕捉。
+
+`error`方法参数有：
+
+- `message`: 日志信息   
+- `option`: 设置，`object`        
+   - `style`: 输出类型，默认为0，表示直接输出，取值为1时，会在输出前面默认添加`[ERROR] `   
+   - `number`：前面添加的空格个数，Number类型   
+
+### info
+
+该种格式会输出蓝色字符串。
+
+如果系统设置的`output-color`为`disable`，则不会输出颜色，只有`output-color`为`enable`，才可以输出颜色；
+
+`info`方法参数有：
+
+- `message`: 日志信息   
+- `option`: 设置，`object`        
+   - `style`: 输出类型，默认为0，表示直接输出，取值为1时，会在输出前面默认添加`[INFO] `   
+   - `number`：前面添加的空格个数，Number类型   
+
+### success
+
+该种格式会输出绿色字符串。
+
+如果系统设置的`output-color`为`disable`，则不会输出颜色，只有`output-color`为`enable`，才可以输出颜色；
+
+`success`方法参数有：
+
+- `message`: 日志信息   
+- `option`: 设置，`object`   
+   - `style`: 输出类型，默认为0，表示直接输出，取值为1时，会在输出前面默认添加`[SUCCESS] `   
+   - `number`：前面添加的空格个数，Number类型   
+   
+   
+## 打包压缩
+
+可以通过`zip()`方法进行打包，其中该方法参数有：
+
+- `codeUri`： 打包的路径
+- `exclude`： 不包括的文件（list）
+- `include`： 额外包括的文件（list）
+- `outputFileName` ：打包后的名字
+- `outputFilePath` ：输出的路径
