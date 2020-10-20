@@ -28,7 +28,7 @@ export default class Component {
   }
   log(message: any, option?:any) {
     const {style, num, output} = option || {};
-    message = this.getLogMessage(message, '[LOG] ', style || 0, num || 2);
+    message = this.getLogMessage(message, '[LOG] ', style || 0, num || 0);
     if (process.env['verbose'] === 'true' || output === true) {
       console.log(this.isColor() ? colors.grey(message) : message);
     }
@@ -36,26 +36,26 @@ export default class Component {
 
   warn(message: any, option?:any) {
     const {style, num} = option || {};
-    message = this.getLogMessage(message, '[WARN] ', style || 0, num || 2);
+    message = this.getLogMessage(message, '[WARN] ', style || 0, num || 0);
     console.log(this.isColor() ? colors.yellow(message) : message);
   }
 
   error(message: any, option?:any) {
     const {style, num} = option || {};
-    message = this.getLogMessage(message, '[ERROR] ', style || 0, num || 2);
+    message = this.getLogMessage(message, '[ERROR] ', style || 0, num || 0);
     // throw new Error(message);
     console.log(this.isColor() ? colors.red(message) : message);
   }
 
   info(message: any, option?:any) {
     const {style, num} = option || {};
-    message = this.getLogMessage(message, '[INFO] ', style || 0, num || 2);
+    message = this.getLogMessage(message, '[INFO] ', style || 0, num || 0);
     console.log(this.isColor() ? colors.blue(message) : message);
   }
 
   success(message: any, option?:any) {
     const {style, num} = option || {};
-    message = this.getLogMessage(message, '[LOG] ', style || 0, num || 2);
+    message = this.getLogMessage(message, '[LOG] ', style || 0, num || 0);
     console.log(this.isColor() ? colors.green(message) : message);
   }
 }
