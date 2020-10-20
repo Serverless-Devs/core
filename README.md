@@ -185,6 +185,8 @@ const { Log } = require('/Users/jiangyu/Desktop/core/lib')
 const log = new Log()
 ```
 
+接下来就可以使用日志能力了：
+
 ```
 log.log(`Waiting for service ${serviceName} ${beforeDeployLog}...`)
 ```
