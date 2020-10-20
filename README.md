@@ -173,14 +173,26 @@ this.help(inputs, {
 
 系统默认提供多种格式日志输出，基本使用方法：
 
+首先导入：
+
 ```
-this.log(`Waiting for service ${serviceName} ${beforeDeployLog}...`)
+const { Log } = require('/Users/jiangyu/Desktop/core/lib')
+```
+
+然后创建对象：
+
+```
+const log = new Log()
+```
+
+```
+log.log(`Waiting for service ${serviceName} ${beforeDeployLog}...`)
 ```
 
 或者增加一定的设置：
 
 ```
-this.log(`Waiting for service ${serviceName} ${beforeDeployLog}...`, {output: true})
+log.log(`Waiting for service ${serviceName} ${beforeDeployLog}...`, {output: true})
 ```
 
 ### log
