@@ -176,7 +176,7 @@ this.help(inputs, {
 首先导入：
 
 ```
-const { Log } = require('/Users/jiangyu/Desktop/core/lib')
+const { Log } = require('@serverless-devs/s-core')
 ```
 
 然后创建对象：
