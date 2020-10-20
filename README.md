@@ -226,7 +226,7 @@ log.log(`Waiting for service ${serviceName} ${beforeDeployLog}...`, {output: tru
 
 ### error
 
-该种格式会输出红色字符串，并且为标准错误，如果需要，可以捕捉。
+该种格式会输出红色字符串。
 
 `error`方法参数有：
 

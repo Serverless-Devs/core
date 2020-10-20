@@ -43,8 +43,8 @@ export default class Component {
   error(message: string, option?:any) {
     const {style, num} = option || {};
     message = this.getLogMessage(message, '[ERROR] ', style || 0, num || 2);
-    throw new Error(message);
-    // console.log(this.isColor() ? colors.red(message) : message);
+    // throw new Error(message);
+    console.log(this.isColor() ? colors.red(message) : message);
   }
 
   info(message: string, option?:any) {
