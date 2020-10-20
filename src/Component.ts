@@ -3,6 +3,7 @@ const os = require('os');
 const fs = require('fs');
 const colors = require('colors');
 const yaml = require('js-yaml');
+const { packTo } = require('@serverless-devs/s-zip');
 import Context from './Context';
 import { downComponent, getRemoteComponentVersion } from './utils';
 interface ComponentContext {
@@ -212,7 +213,8 @@ export default class Component {
 
   error(message: string, style?:number, num?: number) {
     message = this.getLogMessage(message, '[ERROR] ', style || 0, num || 2);
-    console.log(this.isColor() ? colors.red(message) : message);
+    throw new Error(message);
+    // console.log(this.isColor() ? colors.red(message) : message);
   }
 
   info(message: string, style?:number, num?: number) {
@@ -223,6 +225,15 @@ export default class Component {
   success(message: string, style?:number, num?: number) {
     message = this.getLogMessage(message, '[LOG] ', style || 0, num || 2);
     console.log(this.isColor() ? colors.green(message) : message);
+  }
+  
+  async zip(packToParame: any) {
+    try {
+      return await packTo(packToParame);
+    } catch (err) {
+      throw new Error(err);
+    }
+    
   }
 
   async load(componentName: any, componentAlias = '', provider = 'alibaba' ) {

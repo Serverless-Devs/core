@@ -27,6 +27,7 @@
   },
   "main": "./lib/index.js",
   "dependencies": {
+    "@serverless-devs/s-zip": "0.0.8",
     "@serverless-devs/s-progress-bar": "^0.0.2",
     "axios": "^0.20.0",
     "download": "^8.0.0",
