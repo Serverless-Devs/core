@@ -1,6 +1,6 @@
 {
   "name": "@serverless-devs/s-core",
-  "version": "0.0.20",
+  "version": "0.0.21",
   "description": "Serverless Devs Tool Core Component",
   "keywords": [
     "Serverless",
@@ -18,7 +18,7 @@
   "bugs": {
     "url": "https://github.com/Serverless-Devs/s-core/issues"
   },
-  "homepage": "https://www.serverless.cn",
+  "homepage": "https://www.serverless-devs.com",
   "typings": "",
   "scripts": {
     "watch": "tsc -w -p compile.tsconfig.json",
@@ -32,7 +32,8 @@
     "axios": "^0.20.0",
     "download": "^8.0.0",
     "fs-extra": "^9.0.1",
-    "colors": "^1.4.0"
+    "colors": "^1.4.0",
+    "js-yaml": "^3.14.0"
   },
   "devDependencies": {
     "@types/node": "^14.0.23",
