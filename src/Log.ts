@@ -50,7 +50,7 @@ export default class Component {
   info(message: any, option?:any) {
     const {style, num} = option || {};
     message = this.getLogMessage(message, '[INFO] ', style || 0, num || 0);
-    console.log(this.isColor() ? colors.blue(message) : message);
+    console.log(this.isColor() ? colors.cyan(message) : message);
   }
 
   success(message: any, option?:any) {
