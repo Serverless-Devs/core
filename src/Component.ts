@@ -1,6 +1,9 @@
+
+const util = require('util');
 const path = require('path');
 const fs = require('fs');
 const { packTo } = require('@serverless-devs/s-zip');
+const exec = util.promisify(require('child_process').exec);
 import Context from './Context';
 import { downComponent, getRemoteComponentVersion } from './utils';
 interface ComponentContext {
@@ -171,14 +174,14 @@ export default class Component {
       }
     } catch (ex) {}
   }
-  
+
   async zip(packToParame: any) {
     try {
       return await packTo(packToParame);
     } catch (err) {
       throw new Error(err);
     }
-    
+
   }
 
   async load(componentName: any, componentAlias = '', provider = 'alibaba' ) {
@@ -199,6 +202,24 @@ export default class Component {
 
     if (!fs.existsSync(externalComponentPath)) {
       await downComponent(componentName, provider, path.join(this.context.instance.componentPathRoot, tempPath));
+      // 判断是否需要安装依赖
+      const basePath = path.join(this.context.instance.componentPathRoot, tempPath)
+      const havePackageJson = fs.existsSync(path.join(basePath, 'package.json'))
+      const haveNodeModules = fs.existsSync(path.join(basePath, 'node_modules'))
+
+      console.log('Installing dependencies in serverless-devs core ...');
+
+      if (havePackageJson && !haveNodeModules) {
+        const {stdout, stderr} = await exec('npm install --registry=https://registry.npm.taobao.org', {
+          cwd: basePath,
+        });
+        if (stderr) {
+          console.error(stderr);
+        } else {
+          console.log(stdout);
+        }
+      }
+
     }
     const childComponent = await require(externalComponentPath);
 
