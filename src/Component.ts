@@ -7,6 +7,7 @@ const exec = util.promisify(require('child_process').exec);
 import Context from './Context';
 const inquirer = require('inquirer');
 import { GetManager } from './utils/getAccess';
+import { AddManager } from './utils/addAccess';
 import { downComponent, getRemoteComponentVersion } from './utils';
 interface ComponentContext {
   instance: Context
@@ -97,10 +98,20 @@ export default class Component {
         result = answers.access;
       });
     if (result === 'create') {
-      return undefined;
+        const addManager = new AddManager();
+        const result = await addManager.inputLengthZero(Provider);
+
+        // 2020-9-23 修复部署过程中增加密钥信息，无法存储到系统的bug
+        const inputProviderAlias = `${Provider}.${addManager.aliasName || 'default'}`;
+        addManager.inputFullData[inputProviderAlias] = result;
+        addManager.writeData(addManager.globalFilePath, addManager.inputFullData);
+
+        return result;
     }
     return providerMap[result];
   }
+
+
 
   private getNewKey(key: any) {
     try {
