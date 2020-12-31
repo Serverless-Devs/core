@@ -8,6 +8,7 @@ s-core是Serverless-Devs-Tool的一个官方组件，通过该组件您可以轻
 - 帮助文档
 - 日志输出
 - 打包压缩
+- 获取密钥信息
 
 ## 整体使用方法
 
@@ -271,3 +272,7 @@ log.log(`Waiting for service ${serviceName} ${beforeDeployLog}...`, {output: tru
 - `include`： 额外包括的文件（list）
 - `outputFileName` ：打包后的名字
 - `outputFilePath` ：输出的路径
+
+## 获取密钥信息
+
+通过`await this.credentials(inputs)`可获取密钥信息。

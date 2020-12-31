@@ -5,6 +5,8 @@ const fs = require('fs');
 const { packTo } = require('@serverless-devs/s-zip');
 const exec = util.promisify(require('child_process').exec);
 import Context from './Context';
+const inquirer = require('inquirer');
+import { GetManager } from './utils/getAccess';
 import { downComponent, getRemoteComponentVersion } from './utils';
 interface ComponentContext {
   instance: Context
@@ -44,6 +46,60 @@ export default class Component {
     return new Promise((resolve) => {
       setTimeout(resolve, ms);
     });
+  }
+
+  async credentials(inputs: any){
+    if(Object.keys(inputs.Credentials).length > 0){
+      return inputs.Credentials
+    }
+
+    const Provider = inputs.Project.Provider || "Alibaba"
+    const configUserInput = {
+      Provider: Provider
+    }
+
+    const getManager = new GetManager();
+    await getManager.initAccessData(configUserInput);
+    const providerMap: {
+      [key: string]: any;
+    } = await getManager.getUserSecretID(configUserInput);
+
+    let result = '';
+    // 选择
+    const selectObject = [];
+    Object.keys(providerMap).forEach(item => {
+      const temp = {
+        name: item.startsWith('project')
+          ? `${item.replace('project.', 'project: ')}`
+          : `${item.replace(Provider + '.', Provider + ': ')}`,
+        value: item,
+      };
+      if (Provider) {
+        if (item.startsWith(Provider) || item.startsWith('project')) {
+          selectObject.push(temp);
+        }
+      } else {
+        selectObject.push(temp);
+      }
+    });
+
+    selectObject.push({name: 'Create a new account', value: 'create'});
+    await inquirer
+      .prompt([
+        {
+          type: 'list',
+          name: 'access',
+          message: 'Please select an access:',
+          choices: selectObject,
+        },
+      ])
+      .then((answers: any) => {
+        result = answers.access;
+      });
+    if (result === 'create') {
+      return undefined;
+    }
+    return providerMap[result];
   }
 
   private getNewKey(key: any) {
