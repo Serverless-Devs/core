@@ -131,7 +131,6 @@ export async function proxyDownload(url: string, dest: string, options: any) {
 
   await download(url, dest, options).on(
     'downloadProgress', progress => {
-      // console.log(progress.transferred);
       bar.update(progress.transferred);
     });
   // clear progress bar

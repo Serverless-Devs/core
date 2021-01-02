@@ -1,14 +1,16 @@
 
-const util = require('util');
+// const util = require('util');
 const path = require('path');
 const fs = require('fs');
 const { packTo } = require('@serverless-devs/s-zip');
-const exec = util.promisify(require('child_process').exec);
+const spawnSync = require('child_process').spawnSync;
+// const exec = util.promisify(require('child_process').exec);
 import Context from './Context';
 const inquirer = require('inquirer');
 import { GetManager } from './utils/getAccess';
 import { AddManager } from './utils/addAccess';
 import { downComponent, getRemoteComponentVersion } from './utils';
+// import { message } from "./utils/getMessage"
 interface ComponentContext {
   instance: Context
   log?: (msg: string) => void
@@ -253,6 +255,7 @@ export default class Component {
 
   async load(componentName: any, componentAlias = '', provider = 'alibaba' ) {
     let externalComponentPath;
+    let lockPath
 
     const version = await getRemoteComponentVersion({
       name: componentName,
@@ -263,31 +266,29 @@ export default class Component {
 
     if (this.context.instance.componentPathRoot) { // s component
       externalComponentPath = path.resolve(this.context.instance.componentPathRoot, tempPath, 'index.js');
+      lockPath = path.resolve(this.context.instance.componentPathRoot, tempPath, '.s.lock');
     } else {
       externalComponentPath = path.resolve(componentName);
+      lockPath = path.resolve(externalComponentPath, '.s.lock');
     }
 
-    if (!fs.existsSync(externalComponentPath)) {
+    if (!fs.existsSync(lockPath)) {
       await downComponent(componentName, provider, path.join(this.context.instance.componentPathRoot, tempPath));
       // 判断是否需要安装依赖
       const basePath = path.join(this.context.instance.componentPathRoot, tempPath)
       const havePackageJson = fs.existsSync(path.join(basePath, 'package.json'))
       const haveNodeModules = fs.existsSync(path.join(basePath, 'node_modules'))
 
-      console.log('Installing dependencies in serverless-devs core ...');
-
       if (havePackageJson && !haveNodeModules) {
-        const {stdout, stderr} = await exec('npm install --registry=https://registry.npm.taobao.org', {
-          cwd: basePath,
-        });
-        if (stderr) {
-          console.error(stderr);
-        } else {
-          console.log(stdout);
+        console.log('Installing dependencies in serverless-devs core ...');
+        const result = spawnSync('npm install --registry=https://registry.npm.taobao.org', [], {cwd: basePath, stdio:'inherit', shell: true});
+        if(result && result.status !== 0){
+          throw Error("> Execute Error")
         }
       }
-
+      await fs.writeFileSync(lockPath, `${componentName}-${version}`)
     }
+
     const childComponent = await require(externalComponentPath);
 
     const childComponentId = `${this.id}.${componentAlias || childComponent.name}`;
