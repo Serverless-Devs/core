@@ -32,40 +32,6 @@ async function componentDemo() {
 
 ## API 接口
 
-#### load
-
-- 用于加载组件,组件会下载到 ~/.s/components 目录下面。
-
-```typescript
-const { HComponent, IComponent } = require('@serverless-devs/core');
-
-class ComponentDemo {
-  @HComponent() component: IComponent;
-
-  async deploy() {
-    await this.component.load('fc', 'alibaba');
-  }
-}
-```
-
-![Demo](https://img.alicdn.com/imgextra/i1/O1CN01LukqOH1bJr6l77VGk_!!6000000003445-1-tps-1312-200.gif)
-
-- 支持下载特定版本的组件使用方式为
-
-```typescript
-const { HComponent, IComponent } = require('@serverless-devs/core');
-
-class ComponentDemo {
-  @HComponent() component: IComponent;
-
-  async deploy() {
-    this.component.load('fc@0.1.2', 'alibaba');
-  }
-}
-```
-
-![Demo](https://img.alicdn.com/imgextra/i1/O1CN01LukqOH1bJr6l77VGk_!!6000000003445-1-tps-1312-200.gif)
-
 #### args
 
 命令行参数解析工具，用于解析命令行参数。格式为 args(Input, options)

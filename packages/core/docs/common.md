@@ -85,6 +85,26 @@ class ReportDemo {
 
 ![Demo](https://img.alicdn.com/imgextra/i2/O1CN01XJzCmp1qJb7ZUvFEi_!!6000000005475-1-tps-1312-73.gif)
 
+## load
+
+- 用于加载组件,组件会下载到 ~/.s/components 目录下面。
+
+```typescript
+const { load } = require('@serverless-devs/core');
+load('fc', 'alibaba');
+```
+
+![Demo](https://img.alicdn.com/imgextra/i1/O1CN01LukqOH1bJr6l77VGk_!!6000000003445-1-tps-1312-200.gif)
+
+- 支持下载特定版本的组件使用方式为
+
+```typescript
+const { load } = require('@serverless-devs/core');
+load('fc@0.1.2', 'alibaba');
+```
+
+![Demo](https://img.alicdn.com/imgextra/i1/O1CN01LukqOH1bJr6l77VGk_!!6000000003445-1-tps-1312-200.gif)
+
 ## spinner
 
 #### Elegant terminal spinner
@@ -132,7 +152,7 @@ zip({ codeUri, include, exclude, outputFileName, outputFilePath });
 
 #### 用于解压文件，具体使用请查看[文档](https://github.com/kevva/decompress)
 
-#### help
+## help
 
 显示文档帮助信息，具体使用请查看[文档](https://github.com/75lb/command-line-usage)
 
@@ -206,7 +226,7 @@ Examples
 
 ```
 
-#### i18n
+## i18n
 
 用于国际化，具体使用请查看[文档](https://github.com/75lb/command-line-usage)
 
