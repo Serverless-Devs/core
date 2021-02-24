@@ -1,4 +1,4 @@
-import { request, downloadRequest } from '../common';
+import { request, downloadRequest } from '../request';
 
 export const SERVERLESS_API = 'https://tool.serverlessfans.com/api';
 
@@ -32,4 +32,3 @@ export async function getComponentDownloadUrl(params: IRemoteComponentParams) {
 export async function execComponentDownload(url: string, tempDir: string) {
   return downloadRequest(url, tempDir, { extract: true, strip: 1 });
 }
-

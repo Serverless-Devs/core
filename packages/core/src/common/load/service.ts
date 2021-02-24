@@ -1,8 +1,8 @@
 import fs from 'fs-extra';
 import path from 'path';
 import { getComponentVersion, getComponentDownloadUrl, execComponentDownload } from './utils';
-import { IComponentParams } from '../interface';
-import { Logger } from '../logger/index';
+import { IComponentParams } from '../../interface';
+import { Logger } from '../../logger/index';
 
 const { spawnSync } = require('child_process');
 
@@ -51,11 +51,15 @@ export const installDependency = async (
   const existPackageJson = fs.existsSync(path.join(componentPath, 'package.json'));
   if (existPackageJson) {
     Logger.log('Installing dependencies in serverless-devs core ...');
-    const result = await spawnSync('npm install --production --registry=https://registry.npm.taobao.org', [], {
-      cwd: componentPath,
-      stdio: 'inherit',
-      shell: true,
-    });
+    const result = await spawnSync(
+      'npm install --production --registry=https://registry.npm.taobao.org',
+      [],
+      {
+        cwd: componentPath,
+        stdio: 'inherit',
+        shell: true,
+      },
+    );
     if (result && result.status !== 0) {
       throw Error('> Execute Error');
     }
@@ -64,16 +68,21 @@ export const installDependency = async (
   await fs.writeFileSync(lockPath, `${name}-${componentVersion}`);
 };
 
-export const downloadComponent = async (outputDir: string, { name, provider }: IComponentParams) => {
+export const downloadComponent = async (
+  outputDir: string,
+  { name, provider }: IComponentParams,
+) => {
   await fs.ensureDirSync(outputDir);
   const Response = await getComponentDownloadUrl({ name, provider });
   await execComponentDownload(Response.Url, outputDir);
 };
 
 export const buildComponentInstance = async (componentPath: string) => {
-  const requiredComponentPath = componentPath.lastIndexOf('index') > -1 ? componentPath : path.join(componentPath, 'index');
+  const requiredComponentPath =
+    componentPath.lastIndexOf('index') > -1 ? componentPath : path.join(componentPath, 'index');
   const baseChildComponent = await require(requiredComponentPath);
-  const ChildComponent = baseChildComponent.default ? baseChildComponent.default : baseChildComponent;
+  const ChildComponent = baseChildComponent.default
+    ? baseChildComponent.default
+    : baseChildComponent;
   return new ChildComponent();
 };
-

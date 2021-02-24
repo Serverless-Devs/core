@@ -34,10 +34,6 @@ class CredentialsDemo {
     return await this.component.credentials(input);
   }
 
-  async load() {
-    await this.component.load('fc@0.1.2', 'alibaba');
-  }
-
   args() {
     return this.component.args({
       args: '-x 3 -y 4 -n5 -abc --beep=boop foo bar baz',
@@ -46,6 +42,5 @@ class CredentialsDemo {
 }
 
 const demo = new CredentialsDemo();
-demo.load();
-// demo.credentials();
+demo.credentials();
 // console.log(demo.args());

@@ -34,7 +34,7 @@ class LoggerDemo {
 }
 ```
 
-![Demo](https://img.alicdn.com/imgextra/i2/O1CN01spuqbA1Lz2sIWL99t_!!6000000001369-1-tps-435-61.gif)
+![Demo](https://img.alicdn.com/imgextra/i4/O1CN01rMXgGM1wJx7iIBckd_!!6000000006288-1-tps-1215-142.gif)
 
 - component demo
 
@@ -64,7 +64,7 @@ function loggerDemo() {
 }
 ```
 
-![Demo](https://img.alicdn.com/imgextra/i2/O1CN01spuqbA1Lz2sIWL99t_!!6000000001369-1-tps-435-61.gif)
+![Demo](https://img.alicdn.com/imgextra/i4/O1CN01rMXgGM1wJx7iIBckd_!!6000000006288-1-tps-1215-142.gif)
 
 - component demo
 

@@ -33,7 +33,6 @@
   "dependencies": {
     "@b-mamba/s-progress-bar": "^0.0.3",
     "@serverless-devs/s-progress-bar": "^0.0.2",
-    "@serverless-devs/s-zip": "0.0.8",
     "@tsed/logger": "^5.5.5",
     "archiver": "^5.2.0",
     "chalk": "^4.1.0",
