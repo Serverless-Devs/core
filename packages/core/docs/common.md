@@ -133,3 +133,82 @@ zip({ codeUri, include, exclude, outputFileName, outputFilePath });
 #### 用于解压文件，具体使用请查看[文档](https://github.com/kevva/decompress)
 
 ![Demo](https://img.alicdn.com/imgextra/i3/O1CN01fypNFP1NkxvharJmk_!!6000000001609-1-tps-1337-112.gif)
+
+#### help
+
+显示文档帮助信息，具体使用请查看[文档](https://github.com/75lb/command-line-usage)
+
+```typescript
+const { help } = require('@serverless-devs/core');
+
+function test() {
+  const sections = [
+    {
+      header: 'A typical app',
+      content: 'Generates something {italic very} important.',
+    },
+    {
+      header: 'Options',
+      optionList: [
+        {
+          name: 'input',
+          typeLabel: '{underline file}',
+          description: 'The input to process.',
+        },
+        {
+          name: 'help',
+          description: 'Print this usage guide.',
+        },
+      ],
+    },
+    {
+      header: 'Examples',
+      content: [
+        {
+          desc: '1. A concise example. ',
+          example: '$ example -t 100 lib/*.js',
+        },
+        {
+          desc: '2. A long example. ',
+          example: '$ example --timeout 100 --src lib/*.js',
+        },
+        {
+          desc:
+            '3. This example will scan space for unknown things. Take cure when scanning space, it could take some time. ',
+          example:
+            '$ example --src galaxy1.facts galaxy1.facts galaxy2.facts galaxy3.facts galaxy4.facts galaxy5.facts',
+        },
+      ],
+    },
+  ];
+  help(sections);
+}
+```
+
+![Demo](https://img.alicdn.com/imgextra/i2/O1CN01QGUzRz1qIDvq8gUPR_!!6000000005472-1-tps-1337-221.gif)
+
+输出数据
+
+```
+
+A typical app
+
+  Generates something very important.
+
+Options
+
+  --input file    The input to process.
+  --help string   Print this usage guide.
+
+Examples
+
+  1. A concise example.                                                                                          $ example -t 100 lib/*.js
+  2. A long example.                                                                                             $ example --timeout 100 --src lib/*.js
+  3. This example will scan space for unknown things. Take cure when scanning space, it could take some time.    $ example --src galaxy1.facts galaxy1.facts galaxy2.facts galaxy3.facts galaxy4.facts galaxy5.facts
+
+```
+
+#### i18n
+
+用于国际化，具体使用请查看[文档](https://github.com/75lb/command-line-usage)
+当前语言默认读取 ~/.s/set-config.yml 文件的 locale 属性

@@ -8,15 +8,12 @@ import {
   installDependency,
 } from './load.service';
 import credentials from './credentials';
-import commandLineUsage, { Section } from 'command-line-usage';
 import { IInputs, IV1Inputs } from '../interface';
-import { Logger } from '../logger';
 import minimist from 'minimist';
 
 export interface IComponent {
   load: (name: string, provider: string) => Promise<any>;
   credentials: (inputs: IInputs | IV1Inputs) => Promise<any>;
-  help: (inputs: IInputs | IV1Inputs) => null;
   args: (inputs: IInputs | IV1Inputs, opts?: object) => { rawData?: string; data: object };
 }
 
@@ -57,10 +54,5 @@ export class Component {
       rawData: argsStr,
       data: minimist(argsStr.split(/[\s]+/g), opts || {}),
     };
-  }
-
-  help(sections: Section) {
-    const usage = commandLineUsage(sections);
-    Logger.log(usage);
   }
 }
