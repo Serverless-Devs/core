@@ -1,0 +1,6 @@
+{
+  "preset": "ts-jest",
+  "testEnvironment": "node",
+  "testPathIgnorePatterns": ["./test/fixtures"],
+  "coveragePathIgnorePatterns": ["./test/"]
+}

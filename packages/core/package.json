@@ -1,0 +1,73 @@
+{
+  "name": "@serverless-devs/core",
+  "version": "0.0.20",
+  "description": "Serverless Devs Tool Core Component",
+  "keywords": [
+    "Serverless",
+    "Serverless-Devs",
+    "Serverless-Core"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "http://registry.npmjs.org"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Serverless-Devs/s-core"
+  },
+  "bugs": {
+    "url": "https://github.com/Serverless-Devs/s-core/issues"
+  },
+  "homepage": "https://www.serverless-devs.com",
+  "scripts": {
+    "debug": "ts-node test/fixtures/spinner.ts",
+    "test": "npx jest",
+    "build": "npx tsc",
+    "test:cov": "jest --coverage",
+    "lint": "npm run typecheck && f2elint scan -i src",
+    "fix": "f2elint fix",
+    "typecheck": "npx tsc -p tsconfig.json --noEmit"
+  },
+  "main": "./lib/index.js",
+  "dependencies": {
+    "@b-mamba/s-progress-bar": "^0.0.3",
+    "@serverless-devs/s-progress-bar": "^0.0.3",
+    "@tsed/logger": "^5.5.5",
+    "archiver": "^5.2.0",
+    "chalk": "^4.1.0",
+    "command-line-usage": "^6.1.1",
+    "download": "^8.0.0",
+    "fs-extra": "^9.0.1",
+    "i18n": "^0.13.2",
+    "ignore": "^5.1.8",
+    "inquirer": "^7.3.3",
+    "js-yaml": "^3.14.0",
+    "minimist": "^1.2.5",
+    "ora": "^5.3.0",
+    "readline": "^1.3.0",
+    "uid": "^2.0.0"
+  },
+  "devDependencies": {
+    "@serverless-devs/s-progress-bar": "^0.0.2",
+    "@types/command-line-usage": "^5.0.1",
+    "@types/download": "^6.2.4",
+    "@types/fs-extra": "^9.0.1",
+    "colors": "^1.4.0",
+    "typescript": "^4.1.3"
+  },
+  "husky": {
+    "hooks": {
+      "commit-msg": "f2elint exec commitlint -E HUSKY_GIT_PARAMS",
+      "pre-commit": "f2elint exec lint-staged"
+    }
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,ts}": "f2elint exec eslint"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node"
+  },
+  "gitHead": "5c83621635ae4a0fe30173176b163a51107ef3b9"
+}
