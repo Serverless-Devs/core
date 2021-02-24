@@ -34,7 +34,7 @@ class LoggerDemo {
 }
 ```
 
-![Demo](https://img.alicdn.com/imgextra/i1/O1CN01CJ2He61oBEeuhhYLK_!!6000000005186-1-tps-1312-73.gif)
+![Demo](https://img.alicdn.com/imgextra/i2/O1CN01spuqbA1Lz2sIWL99t_!!6000000001369-1-tps-435-61.gif)
 
 - component demo
 
@@ -50,7 +50,7 @@ class ComponentDemo {
 }
 ```
 
-![Demo](https://img.alicdn.com/imgextra/i1/O1CN01LukqOH1bJr6l77VGk_!!6000000003445-1-tps-1312-200.gif)
+![Demo](https://img.alicdn.com/imgextra/i4/O1CN010qLFzh1ukOlBB30UT_!!6000000006075-1-tps-1215-401.gif)
 
 2. 类使用方式(在纯函数中)
 
@@ -64,7 +64,7 @@ function loggerDemo() {
 }
 ```
 
-![Demo](https://img.alicdn.com/imgextra/i1/O1CN01CJ2He61oBEeuhhYLK_!!6000000005186-1-tps-1312-73.gif)
+![Demo](https://img.alicdn.com/imgextra/i2/O1CN01spuqbA1Lz2sIWL99t_!!6000000001369-1-tps-435-61.gif)
 
 - component demo
 
@@ -76,7 +76,7 @@ async function componentDemo() {
 }
 ```
 
-![Demo](https://img.alicdn.com/imgextra/i1/O1CN01LukqOH1bJr6l77VGk_!!6000000003445-1-tps-1312-200.gif)
+![Demo](https://img.alicdn.com/imgextra/i4/O1CN010qLFzh1ukOlBB30UT_!!6000000006075-1-tps-1215-401.gif)
 
 ## 详细文档
 
