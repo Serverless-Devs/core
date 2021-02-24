@@ -5,7 +5,7 @@
 1.decorator 使用方式(推荐)
 
 ```typescript
-const { Component, IComponent } = require('@serverless-devs/core');
+const { HComponent, IComponent } = require('@serverless-devs/core');
 
 class ComponentDemo {
   @HComponent() component: IComponent;
@@ -16,7 +16,7 @@ class ComponentDemo {
 }
 ```
 
-![Demo](https://img.alicdn.com/imgextra/i2/O1CN01odpYZ727xlK1uHeMH_!!6000000007864-1-tps-1337-112.gif)
+![Demo](https://img.alicdn.com/imgextra/i1/O1CN01LukqOH1bJr6l77VGk_!!6000000003445-1-tps-1312-200.gif)
 
 2. 类使用方式(在纯函数中)
 
@@ -28,7 +28,7 @@ async function componentDemo() {
 }
 ```
 
-![Demo](https://img.alicdn.com/imgextra/i2/O1CN01odpYZ727xlK1uHeMH_!!6000000007864-1-tps-1337-112.gif)
+![Demo](https://img.alicdn.com/imgextra/i1/O1CN01LukqOH1bJr6l77VGk_!!6000000003445-1-tps-1312-200.gif)
 
 ## API 接口
 
@@ -37,7 +37,7 @@ async function componentDemo() {
 - 用于加载组件,组件会下载到 ~/.s/components 目录下面。
 
 ```typescript
-const { Component, IComponent } = require('@serverless-devs/core');
+const { HComponent, IComponent } = require('@serverless-devs/core');
 
 class ComponentDemo {
   @HComponent() component: IComponent;
@@ -48,12 +48,12 @@ class ComponentDemo {
 }
 ```
 
-![Demo](https://img.alicdn.com/imgextra/i2/O1CN01odpYZ727xlK1uHeMH_!!6000000007864-1-tps-1337-112.gif)
+![Demo](https://img.alicdn.com/imgextra/i1/O1CN01LukqOH1bJr6l77VGk_!!6000000003445-1-tps-1312-200.gif)
 
 - 支持下载特定版本的组件使用方式为
 
 ```typescript
-const { Component, IComponent } = require('@serverless-devs/core');
+const { HComponent, IComponent } = require('@serverless-devs/core');
 
 class ComponentDemo {
   @HComponent() component: IComponent;
@@ -64,7 +64,7 @@ class ComponentDemo {
 }
 ```
 
-![Demo](https://img.alicdn.com/imgextra/i2/O1CN01odpYZ727xlK1uHeMH_!!6000000007864-1-tps-1337-112.gif)
+![Demo](https://img.alicdn.com/imgextra/i1/O1CN01LukqOH1bJr6l77VGk_!!6000000003445-1-tps-1312-200.gif)
 
 #### args
 
@@ -72,7 +72,7 @@ class ComponentDemo {
 解析工具采用 [minimist](https://github.com/substack/minimist) 详细使用查看[文档](https://github.com/substack/minimist)
 
 ```typescript
-const { Component, IComponent } = require('@serverless-devs/core');
+const { HComponent, IComponent } = require('@serverless-devs/core');
 
 class ComponentDemo {
   @HComponent() component: IComponent;
@@ -85,7 +85,7 @@ class ComponentDemo {
 }
 ```
 
-![Demo](https://img.alicdn.com/imgextra/i2/O1CN01FINmqV1RX0JpUmEx3_!!6000000002120-1-tps-1337-185.gif)
+![Demo](https://img.alicdn.com/imgextra/i1/O1CN01dsAaDX1ayKUcjHVcU_!!6000000003398-1-tps-1312-273.gif)
 
 输出数据
 
@@ -110,7 +110,7 @@ class ComponentDemo {
 用于获取密钥信息, 目前 Provider 支持 [alibaba/aws/azure/baidu/google/huawei/tencent/custom]
 
 ```typescript
-const { Component, IComponent } = require('@serverless-devs/core');
+const { HComponent, IComponent } = require('@serverless-devs/core');
 
 class ComponentDemo {
   @HComponent() component: IComponent;
@@ -150,12 +150,12 @@ class ComponentDemo {
 
 - Provider 为空的 case
 
-![demo](https://img.alicdn.com/imgextra/i2/O1CN011qZLkF203hWviFAS9_!!6000000006794-1-tps-1337-221.gif)
+![demo](https://img.alicdn.com/imgextra/i2/O1CN01JBu5EO1Q9oeNdQCzr_!!6000000001934-1-tps-1312-273.gif)
 
 - Provider 为 alibaba 的 case
 
-![demo](https://img.alicdn.com/imgextra/i2/O1CN01VgcDDQ1xYtf7dmfdQ_!!6000000006456-1-tps-1337-221.gif)
+![demo](https://img.alicdn.com/imgextra/i4/O1CN01EstoE11ltiH06n6rE_!!6000000004877-1-tps-1312-273.gif)
 
 - Provider 为 custom 的 case
 
-![demo](https://img.alicdn.com/imgextra/i3/O1CN01vCLAUJ1g5GZQuOIZ9_!!6000000004090-1-tps-1337-221.gif)
+![demo](https://img.alicdn.com/imgextra/i2/O1CN013aOETJ1CdfqojG1IH_!!6000000000104-1-tps-1312-337.gif)

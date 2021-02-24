@@ -26,5 +26,5 @@ class ReportDemo {
 
 const demo = new ReportDemo();
 
-// demo.error();
-demo.component();
+demo.error();
+// demo.component();

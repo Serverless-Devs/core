@@ -7,8 +7,6 @@ class SpinnerDemo {
     await sleep(1000);
     vm.text = 'hhh';
     vm.color = 'red';
-
-    await Promise.resolve();
     await sleep(1000);
     vm.succeed('执行成功');
     // vm.stop();

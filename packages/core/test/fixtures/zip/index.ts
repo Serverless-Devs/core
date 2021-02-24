@@ -13,13 +13,13 @@ class ZipDemo {
     });
   }
   async testUnzip() {
-    await unzip('./zipdist/provider.jar', 'unzip-dist');
+    await unzip('./zipdist/provider.zip', 'unzip-dist');
     console.log('done!');
   }
 }
 
 const demo = new ZipDemo();
 
-demo.testZip();
+// demo.testZip();
 
-// demo.testUnzip();
+demo.testUnzip();

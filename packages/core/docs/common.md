@@ -21,7 +21,7 @@ function test_request_hint() {
 }
 ```
 
-![Demo](https://img.alicdn.com/imgextra/i4/O1CN015PTSmc1Kq3TybwnpK_!!6000000001214-1-tps-729-61.gif)
+![Demo](https://img.alicdn.com/imgextra/i1/O1CN01KZM5eM22LDuoZY3ZB_!!6000000007103-1-tps-1312-73.gif)
 
 ## downloadRequest
 
@@ -39,7 +39,7 @@ function test_request_hint() {
 downloadRequest(url, outDir, { extract: true, strip: 1 });
 ```
 
-![Demo](https://img.alicdn.com/imgextra/i2/O1CN018yjxKC1XdJTAffXBY_!!6000000002946-1-tps-729-61.gif)
+![Demo](https://img.alicdn.com/imgextra/i1/O1CN01LukqOH1bJr6l77VGk_!!6000000003445-1-tps-1312-200.gif)
 
 ## report
 
@@ -64,7 +64,7 @@ class ReportDemo {
 }
 ```
 
-![Demo](https://img.alicdn.com/imgextra/i2/O1CN01KvGJug1SDb9dHSlXV_!!6000000002213-1-tps-1337-112.gif)
+![Demo](https://img.alicdn.com/imgextra/i3/O1CN01OW9lSg1SEyLJ2TXxo_!!6000000002216-1-tps-1312-73.gif)
 
 #### 错误上报
 
@@ -83,7 +83,7 @@ class ReportDemo {
 }
 ```
 
-![Demo](https://img.alicdn.com/imgextra/i4/O1CN01SPmZbn1N6f4qvwaQp_!!6000000001521-1-tps-1337-112.gif)
+![Demo](https://img.alicdn.com/imgextra/i2/O1CN01XJzCmp1qJb7ZUvFEi_!!6000000005475-1-tps-1312-73.gif)
 
 ## spinner
 
@@ -109,7 +109,7 @@ async start() {
 
 ```
 
-![Demo](https://img.alicdn.com/imgextra/i1/O1CN01hEm5Uf1Er4fe9JqW0_!!6000000000404-1-tps-1337-112.gif)
+![Demo](https://img.alicdn.com/imgextra/i2/O1CN01L81nr81ZfimlgCPpp_!!6000000003222-1-tps-1312-73.gif)
 
 ## zip
 
@@ -126,13 +126,11 @@ async start() {
 zip({ codeUri, include, exclude, outputFileName, outputFilePath });
 ```
 
-![Demo](https://img.alicdn.com/imgextra/i3/O1CN01fypNFP1NkxvharJmk_!!6000000001609-1-tps-1337-112.gif)
+![Demo](https://img.alicdn.com/imgextra/i1/O1CN01YOb4ij1dRImEsBk1i_!!6000000003732-1-tps-1312-103.gif)
 
 ## unzip
 
 #### 用于解压文件，具体使用请查看[文档](https://github.com/kevva/decompress)
-
-![Demo](https://img.alicdn.com/imgextra/i3/O1CN01fypNFP1NkxvharJmk_!!6000000001609-1-tps-1337-112.gif)
 
 #### help
 
@@ -185,7 +183,7 @@ function test() {
 }
 ```
 
-![Demo](https://img.alicdn.com/imgextra/i2/O1CN01QGUzRz1qIDvq8gUPR_!!6000000005472-1-tps-1337-221.gif)
+![Demo](https://img.alicdn.com/imgextra/i2/O1CN0105D6t51lUWUKlSt3g_!!6000000004822-1-tps-1312-326.gif)
 
 输出数据
 
@@ -211,4 +209,5 @@ Examples
 #### i18n
 
 用于国际化，具体使用请查看[文档](https://github.com/75lb/command-line-usage)
-当前语言默认读取 ~/.s/set-config.yml 文件的 locale 属性
+
+- 当前语言默认读取 ~/.s/set-config.yml 文件的 locale 属性

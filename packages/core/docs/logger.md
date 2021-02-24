@@ -16,7 +16,7 @@ class LoggerDemo {
 }
 ```
 
-![Demo](https://img.alicdn.com/imgextra/i4/O1CN01EiQwKM1JcU8PI6GAz_!!6000000001049-1-tps-1337-112.gif)
+![Demo](https://img.alicdn.com/imgextra/i1/O1CN01CJ2He61oBEeuhhYLK_!!6000000005186-1-tps-1312-73.gif)
 
 2. 类使用方式(在纯函数中)
 
@@ -28,7 +28,7 @@ function loggerDemo() {
 }
 ```
 
-![Demo](https://img.alicdn.com/imgextra/i4/O1CN01EiQwKM1JcU8PI6GAz_!!6000000001049-1-tps-1337-112.gif)
+![Demo](https://img.alicdn.com/imgextra/i1/O1CN01CJ2He61oBEeuhhYLK_!!6000000005186-1-tps-1312-73.gif)
 
 #### context
 
