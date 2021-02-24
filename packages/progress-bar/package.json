@@ -1,0 +1,53 @@
+{
+  "name": "@b-mamba/s-progress-bar",
+  "version": "0.0.3",
+  "description": "Serverless Devs Tool Core Component",
+  "keywords": [
+    "Serverless",
+    "Serverless-Devs",
+    "Serverless-Progress-Bar"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Serverless-Devs/s-core"
+  },
+  "bugs": {
+    "url": "https://github.com/Serverless-Devs/s-core/issues"
+  },
+  "homepage": "https://www.serverless-devs.com",
+  "scripts": {
+    "test": "npx jest",
+    "build": "npx tsc -w",
+    "test:cov": "jest --coverage",
+    "lint": "npm run typecheck && f2elint scan -i src",
+    "fix": "f2elint fix",
+    "typecheck": "npx tsc -p tsconfig.json --noEmit"
+  },
+  "main": "./lib/index.js",
+  "dependencies": {
+    "progress": "^2.0.3"
+  },
+  "peerDependencies": {
+    "colors": "^1.4.0"
+  },
+  "devDependencies": {
+    "@types/progress": "^2.0.3"
+  },
+  "husky": {
+    "hooks": {
+      "commit-msg": "f2elint exec commitlint -E HUSKY_GIT_PARAMS",
+      "pre-commit": "f2elint exec lint-staged"
+    }
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,ts}": "f2elint exec eslint"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node"
+  }
+}

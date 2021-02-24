@@ -1,49 +1,44 @@
 {
-  "name": "@serverless-devs/s-core",
-  "version": "0.0.28",
-  "description": "Serverless Devs Tool Core Component",
-  "keywords": [
-    "Serverless",
-    "Serverless-Core",
-    "Serverless-Devs"
-  ],
-  "publishConfig": {
-    "access": "public"
-  },
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/Serverless-Devs/s-core"
-  },
-  "bugs": {
-    "url": "https://github.com/Serverless-Devs/s-core/issues"
-  },
-  "homepage": "https://www.serverless-devs.com",
-  "typings": "",
+  "private": true,
   "scripts": {
-    "watch": "tsc -w -p compile.tsconfig.json",
-    "release": "rm -rf ./lib && tsc -p compile.tsconfig.json && npm publish",
-    "release-ignore": "npm publish"
+    "publish": "lerna publish",
+    "test": "jest",
+    "test:cov": "jest --coverage",
+    "lint": "f2elint scan -i src",
+    "fix": "f2elint fix",
+    "typecheck": "npx tsc -p tsconfig.json --noEmit"
   },
-  "main": "./lib/index.js",
-  "dependencies": {
-    "@serverless-devs/s-zip": "0.0.8",
-    "@serverless-devs/s-progress-bar": "^0.0.2",
-    "axios": "^0.20.0",
-    "download": "^8.0.0",
-    "fs-extra": "^9.0.1",
-    "colors": "^1.4.0",
-    "js-yaml": "^3.14.0",
-    "inquirer": "^7.3.3"
+  "config": {
+    "commitizen": {
+      "path": "git-cz"
+    }
   },
   "devDependencies": {
-    "@types/node": "^14.0.23",
-    "@typescript-eslint/eslint-plugin": "^3.10.0",
-    "@typescript-eslint/parser": "^3.10.0",
-    "@types/download": "^6.2.4",
-    "@types/fs-extra": "^9.0.1",
-    "eslint": "^7.7.0",
-    "ts-node": "^8.10.2",
+    "@types/jest": "^26.0.10",
+    "@types/node": "^12.12.6",
+    "f2elint": "^0.4.4",
+    "git-cz": "^4.7.6",
+    "jest": "^26.4.0",
+    "lerna": "^3.22.1",
+    "rimraf": "^3.0.2",
+    "ts-jest": "^26.2.0",
+    "ts-node": "^9.1.1",
     "typescript": "^3.9.7"
+  },
+  "husky": {
+    "hooks": {
+      "commit-msg": "f2elint exec commitlint -E HUSKY_GIT_PARAMS",
+      "pre-commit": "f2elint exec lint-staged"
+    }
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,ts}": "f2elint exec eslint"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node"
+  },
+  "dependencies": {
+    "i18n": "^0.13.2"
   }
 }

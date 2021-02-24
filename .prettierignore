@@ -1,0 +1,15 @@
+**/test/fixtures/**/*
+!packages/scope-manager/test/fixtures/**/*
+**/test/fixture/**/*
+**/dist
+**/lib
+**/coverage
+**/shared-fixtures
+**/.vscode
+**/.nyc_output
+**/.vs
+src/eslint-plugin-tslint/test/test-tslint-rules-directory/alwaysFailRule.js
+.github
+src/eslint-plugin/src/configs/*.json
+.all-contributorsrc
+CONTRIBUTORS.md
