@@ -80,8 +80,19 @@ async function componentDemo() {
 
 ## 详细文档
 
-[common(request/downloadRequest/report/spinner/zip/unzip) ](https://github.com/heimanba/s-core/blob/master/packages/core/docs/common.md)
+#### [组件component ](https://github.com/heimanba/s-core/blob/master/packages/core/docs/component.md)
+- load 组件加载, 组件会加载到 ~/.s/components目录下
+- args 命令行参数解析工具，用于解析命令行参数。格式为 args(Input, options) 解析工具采用 minimist 详细使用查看
+- credentials  用于获取密钥信息, 目前 Provider 支持 [alibaba/aws/azure/baidu/google/huawei/tencent/custom(自定义)]
 
-[logger ](https://github.com/heimanba/s-core/blob/master/packages/core/docs/logger.md)
+#### [common](https://github.com/heimanba/s-core/blob/master/packages/core/docs/common.md)
+- HTTP请求 (request/download)
+- report (错误上报)
+- spinner (状态展示)
+- zip/unzip (打包/解包)
+- help 显示文档帮助信息
+- i18n 用于国际化
 
-[component ](https://github.com/heimanba/s-core/blob/master/packages/core/docs/component.md)
+#### [logger](https://github.com/heimanba/s-core/blob/master/packages/core/docs/logger.md)
+- log 打印到终端, 具备显示不同颜色的能力
+- info/debug/warn/error 打印到本地文件以及终端中

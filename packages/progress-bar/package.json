@@ -1,6 +1,6 @@
 {
-  "name": "@b-mamba/s-progress-bar",
-  "version": "0.0.3",
+  "name": "@serverless-devs/s-progress-bar",
+  "version": "0.0.2",
   "description": "Serverless Devs Tool Core Component",
   "keywords": [
     "Serverless",
