@@ -37,8 +37,5 @@
   "jest": {
     "preset": "ts-jest",
     "testEnvironment": "node"
-  },
-  "dependencies": {
-    "i18n": "^0.13.2"
   }
 }
