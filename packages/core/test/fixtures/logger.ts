@@ -5,7 +5,11 @@ class LoggerDemo {
   @HLogger('S-CORE') logger;
 
   getDefaultLog() {
+    this.logger.debug('abc');
     this.logger.info('abc');
+    this.logger.warn('abc');
+    this.logger.error('abc');
+    this.logger.fatal('abc');
   }
 
   getDefaultLogObect() {

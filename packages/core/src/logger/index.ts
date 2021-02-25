@@ -65,14 +65,14 @@ export const logger = (name: string): ILogger => {
   const stdLog = loggers.appenders.set('std-log', {
     type: 'stdout',
     layout: { type: 'colored' },
-    level: (args.debug ? ['debug'] : []).concat(['info', 'warn', 'error', 'fatal']),
+    levels: (args.debug ? ['debug'] : []).concat(['info', 'warn', 'error', 'fatal']),
   });
 
   logName &&
     stdLog.set('all-log-file', {
       type: 'file',
       filename: `${S_ROOT_HOME}/logs/${logName}/app.log`,
-      level: ['trace', 'debug', 'info', 'warn', 'error', 'fatal'],
+      levels: ['trace', 'debug', 'info', 'warn', 'error', 'fatal'],
       pattern: '.yyyy-MM-dd',
       maxLogSize: 5,
       layout: {
