@@ -36,22 +36,6 @@ class LoggerDemo {
 
 ![Demo](https://img.alicdn.com/imgextra/i4/O1CN01rMXgGM1wJx7iIBckd_!!6000000006288-1-tps-1215-142.gif)
 
-- component demo
-
-```typescript
-const { HComponent, IComponent } = require('@serverless-devs/core');
-
-class ComponentDemo {
-  @HComponent() component: IComponent;
-
-  async deploy() {
-    await this.component.load('fc', 'alibaba');
-  }
-}
-```
-
-![Demo](https://img.alicdn.com/imgextra/i4/O1CN010qLFzh1ukOlBB30UT_!!6000000006075-1-tps-1215-401.gif)
-
 2. 类使用方式(在纯函数中)
 
 - logger demo
@@ -65,18 +49,6 @@ function loggerDemo() {
 ```
 
 ![Demo](https://img.alicdn.com/imgextra/i4/O1CN01rMXgGM1wJx7iIBckd_!!6000000006288-1-tps-1215-142.gif)
-
-- component demo
-
-```typescript
-const { Component } = require('@serverless-devs/core');
-
-async function componentDemo() {
-  return await Component.load('fc', 'alibaba');
-}
-```
-
-![Demo](https://img.alicdn.com/imgextra/i4/O1CN010qLFzh1ukOlBB30UT_!!6000000006075-1-tps-1215-401.gif)
 
 ## 详细文档
 
