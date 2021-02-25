@@ -8,7 +8,8 @@
     "Serverless-Progress-Bar"
   ],
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "registry": "http://registry.npmjs.org"
   },
   "license": "MIT",
   "repository": {
@@ -49,5 +50,6 @@
   "jest": {
     "preset": "ts-jest",
     "testEnvironment": "node"
-  }
+  },
+  "gitHead": "aec19d7a89cb711f0a246ecf77e79d3668fcb8da"
 }

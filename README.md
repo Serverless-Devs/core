@@ -82,12 +82,12 @@ async function componentDemo() {
 
 #### [组件 component ](https://github.com/Serverless-Devs/s-core/blob/develop/packages/core/docs/component.md)
 
-- load 组件加载, 组件会加载到 ~/.s/components 目录下
 - args 命令行参数解析工具，用于解析命令行参数。格式为 args(Input, options) 解析工具采用 minimist 详细使用查看
 - credentials 用于获取密钥信息, 目前 Provider 支持 [alibaba/aws/azure/baidu/google/huawei/tencent/custom(自定义)]
 
 #### [common](https://github.com/Serverless-Devs/s-core/blob/develop/packages/core/docs/common.md)
 
+- load 组件加载, 组件会加载到 ~/.s/components 目录下
 - HTTP 请求 (request/download)
 - report (错误上报)
 - spinner (状态展示)
