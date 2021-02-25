@@ -10,7 +10,7 @@ class CredentialsDemo {
       Project: {
         ProjectName: 'ExpressComponent',
         Component: 'express',
-        // Provider: 'alibaba',
+        Provider: 'alibaba',
         AccessAlias: 'dankun',
       },
       Properties: {
