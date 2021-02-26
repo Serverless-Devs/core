@@ -1,4 +1,4 @@
-import i18n from '../../../libs/i18n';
+import i18n from '../../libs/i18n';
 
 export const providerArray: string[] = [
   'alibaba',

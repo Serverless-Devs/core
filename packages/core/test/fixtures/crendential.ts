@@ -1,10 +1,16 @@
-import { getCredential, setCredential } from '../../src/common';
+import { getCredential } from '../../src/common';
 
-async function test() {
-  getCredential();
-  const c = await setCredential('alibaba');
-  console.log();
+async function get() {
+  const c = await getCredential('alibaba', 'endx');
+  // const c = await getCredential('google');
   console.log('c', c);
 }
 
-test();
+get();
+
+// async function set() {
+//   const c = await setCredential('alibaba');
+//   console.log('c', c);
+// }
+
+// set()
