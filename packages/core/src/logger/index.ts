@@ -67,11 +67,12 @@ function getProjectName() {
 export const logger = (name: string): ILogger => {
   const loggers = new MyLogger(name);
   const args = minimist(process.argv.slice(2));
+  const debug = args.debug || process.env.temp_params.includes('--debug');
   const projectName = getProjectName();
   const stdLog = loggers.appenders.set('std-log', {
     type: 'stdout',
     layout: { type: 'colored' },
-    levels: (args.debug ? ['debug'] : []).concat(['info', 'warn', 'error', 'fatal']),
+    levels: (debug ? ['debug'] : []).concat(['info', 'warn', 'error', 'fatal']),
   });
 
   projectName &&
