@@ -5,7 +5,7 @@ import addAccess from '../setCredential/addAccess';
 
 async function getCredential(provider: string, accessAlias?: string) {
   if (!provider) {
-    throw Error(`The cloud vendor[${provider}] was required`);
+    throw Error('The cloud vendor [provider] was required');
   }
   if (!providerArray.includes(provider)) {
     throw Error(
