@@ -97,6 +97,10 @@ export const logger = (name: string): ILogger => {
 };
 
 export class Logger {
+  context: string;
+  constructor(context?: string) {
+    this.context = context;
+  }
   static log(message: any, color?: LogColor) {
     return process.stdout.write(`${color ? chalk[color](message) : message}\n`);
   }
@@ -118,6 +122,29 @@ export class Logger {
 
   static error(name: string, data) {
     const Loggers = logger(name);
+    Loggers.error(data);
+  }
+  log(message: any, color?: LogColor) {
+    return process.stdout.write(`${color ? chalk[color](message) : message}\n`);
+  }
+
+  debug(data) {
+    const Loggers = logger(this.context);
+    Loggers.debug(data);
+  }
+
+  info(data) {
+    const Loggers = logger(this.context);
+    Loggers.info(data);
+  }
+
+  warn(data) {
+    const Loggers = logger(this.context);
+    Loggers.warn(data);
+  }
+
+  error(data) {
+    const Loggers = logger(this.context);
     Loggers.error(data);
   }
 }
