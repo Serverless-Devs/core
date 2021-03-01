@@ -1,5 +1,5 @@
-import { S_CURRENT_HOME } from '../../libs/common';
-import { readJsonFile, writeJsonFile } from '../../libs/utils';
+import { S_CURRENT_HOME } from '../libs/common';
+import { readJsonFile, writeJsonFile } from '../libs/utils';
 import path from 'path';
 import fs from 'fs-extra';
 

@@ -1,11 +1,11 @@
-// import { setState } from '../../src/common';
+import { setState } from '../../src/common';
 
-// setState('shl', '{age.b').then((res) => {
-//   console.log(res);
-// });
-
-import { getState } from '../../src/common';
-
-getState('shl').then((res) => {
+setState('state', { name: '名称', age: 18 }).then((res) => {
   console.log(res);
 });
+
+// import { getState } from '../../src/common';
+
+// getState('state').then((res) => {
+//   console.log(typeof res);
+// });

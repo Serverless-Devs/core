@@ -107,7 +107,7 @@ load('fc@0.1.2', 'alibaba');
 
 ## spinner
 
-#### Elegant terminal spinner
+#### 状态展示
 
 ```typescript
 const { spinner } = require('@serverless-devs/core');
@@ -268,9 +268,25 @@ function test() {
 }
 ```
 
-## credentials
+## getCredential
 
-用于获取密钥信息, 目前 Provider 支持 [alibaba/aws/azure/baidu/google/huawei/tencent/custom]
+#### 用于获取密钥信息, 该方法接收两个参数，第一个参数是 provider，该参数必传，目前 provider 支持 [alibaba/aws/azure/baidu/google/huawei/tencent/custom]，第二个参数是 accessAlias，该参数选填
+
+- provider 为 alibaba
+
+```typescript
+const { getCredential } = require('@serverless-devs/core');
+async function get() {
+  const c = await getCredential('alibaba');
+  console.log('c', c);
+}
+```
+
+![demo](https://img.alicdn.com/imgextra/i3/O1CN01OOJ9sV1sbZtp1370z_!!6000000005785-1-tps-1215-409.gif)
+
+## setCredential
+
+#### 用于设置密钥信息, 该方法接收一个参数 provider, 目前 provider 支持 [alibaba/aws/azure/baidu/google/huawei/tencent/custom]
 
 ```typescript
 const { setCredential } = require('@serverless-devs/core');
@@ -292,3 +308,33 @@ async function set() {
 - Provider 为 custom 的 case
 
 ![demo](https://img.alicdn.com/imgextra/i2/O1CN013aOETJ1CdfqojG1IH_!!6000000000104-1-tps-1312-337.gif)
+
+## getState
+
+#### 用于获取文件内容， 文件存放于 ~/.s 目录下面。
+
+```typescript
+const { getState } = require('@serverless-devs/core');
+
+async function get() {
+  const c = await getState('state');
+  console.log('c', c);
+}
+```
+
+![demo](https://img.alicdn.com/imgextra/i4/O1CN01pXFJUZ1IVKKVKhvny_!!6000000000898-1-tps-1215-97.gif)
+
+## setState
+
+#### 用于设置文件内容， 文件存放于 ~/.s 目录下面。
+
+```typescript
+const { setState } = require('@serverless-devs/core');
+
+async function set() {
+  const c = await setState('state', { name: '名称', age: 18 });
+  console.log('c', c);
+}
+```
+
+![demo](https://img.alicdn.com/imgextra/i4/O1CN01pXFJUZ1IVKKVKhvny_!!6000000000898-1-tps-1215-97.gif)
