@@ -73,6 +73,7 @@ function loggerDemo() {
 - zip/unzip (打包/解包)
 - help 显示文档帮助信息
 - i18n 用于国际化
+- getState，setState 用于获取和设置文件内容
 
 #### [logger](https://github.com/Serverless-Devs/s-core/blob/develop/packages/core/docs/logger.md)
 
