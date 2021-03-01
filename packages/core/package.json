@@ -1,6 +1,6 @@
 {
   "name": "@serverless-devs/core",
-  "version": "0.0.20",
+  "version": "0.0.26",
   "description": "Serverless Devs Tool Core Component",
   "keywords": [
     "Serverless",
@@ -27,12 +27,13 @@
     "test:cov": "jest --coverage",
     "lint": "npm run typecheck && f2elint scan -i src",
     "fix": "f2elint fix",
+    "s-publish": "npm run build && npm publish",
     "typecheck": "npx tsc -p tsconfig.json --noEmit"
   },
   "main": "./lib/index.js",
   "dependencies": {
     "@b-mamba/s-progress-bar": "^0.0.3",
-    "@serverless-devs/s-progress-bar": "^0.0.3",
+    "@serverless-devs/s-progress-bar": "^0.0.4",
     "@tsed/logger": "^5.5.5",
     "archiver": "^5.2.0",
     "chalk": "^4.1.0",
