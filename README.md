@@ -64,17 +64,20 @@ function loggerDemo() {
 
 #### [common](https://github.com/Serverless-Devs/s-core/blob/develop/packages/core/docs/common.md)
 
-- load 组件加载, 组件会加载到 ~/.s/components 目录下
-- commadParse 命令行参数解析工具，用于解析命令行参数。格式为 args(Input, options) 解析工具采用 minimist 详细使用查看
-- getCredential，setCredential 用于获取和创建密钥信息, 目前 Provider 支持 [alibaba/aws/azure/baidu/google/huawei/tencent/custom(自定义)]
-- HTTP 请求 (request/download)
-- report (错误上报)
-- spinner (状态展示)
-- zip/unzip (打包/解包)
-- help 显示文档帮助信息
-- i18n 用于国际化
+- [request](https://github.com/Serverless-Devs/s-core/blob/develop/packages/core/docs/common.md#request)/[download](https://github.com/Serverless-Devs/s-core/blob/develop/packages/core/docs/common.md#downloadrequest)(HTTP 请求)
+- [report](https://github.com/Serverless-Devs/s-core/blob/develop/packages/core/docs/common.md#report) (组件上报/错误上报)
+- [load](https://github.com/Serverless-Devs/s-core/blob/develop/packages/core/docs/common.md#load) 组件加载, 组件会加载到 ~/.s/components 目录下
+- [spinner](https://github.com/Serverless-Devs/s-core/blob/develop/packages/core/docs/common.md#spinner) (状态展示)
+- [zip](https://github.com/Serverless-Devs/s-core/blob/develop/packages/core/docs/common.md#zip)/[unzip](https://github.com/Serverless-Devs/s-core/blob/develop/packages/core/docs/common.md#unzip) (打包/解包)
+- [help](https://github.com/Serverless-Devs/s-core/blob/develop/packages/core/docs/common.md#help) 显示文档帮助信息
+- [i18n](https://github.com/Serverless-Devs/s-core/blob/develop/packages/core/docs/common.md#i18n) 用于国际化
+- [commadParse](https://github.com/Serverless-Devs/s-core/blob/develop/packages/core/docs/common.md#commandparse) 命令行参数解析工具，用于解析命令行参数。格式为 args(Input, options) 解析工具采用 minimist 详细使用查看
+
+- [getCredential](https://github.com/Serverless-Devs/s-core/blob/develop/packages/core/docs/common.md#getCredential)/[setCredential](https://github.com/Serverless-Devs/s-core/blob/develop/packages/core/docs/common.md#setCredential) 用于获取和创建密钥信息, 目前 provider 支持 [alibaba/aws/azure/baidu/google/huawei/tencent/custom(自定义)]
+
+- [getState](https://github.com/Serverless-Devs/s-core/blob/develop/packages/core/docs/common.md#getState)/[setState](https://github.com/Serverless-Devs/s-core/blob/develop/packages/core/docs/common.md#setState) 用于获取和设置文件内容
 
 #### [logger](https://github.com/Serverless-Devs/s-core/blob/develop/packages/core/docs/logger.md)
 
-- log 打印到终端, 具备显示不同颜色的能力
-- info/debug/warn/error 打印到本地文件以及终端中
+- [log](https://github.com/Serverless-Devs/s-core/blob/develop/packages/core/docs/logger.md#log) 打印到终端, 具备显示不同颜色的能力
+- [debug/info/warn/error](https://github.com/Serverless-Devs/s-core/blob/develop/packages/core/docs/logger.md#levels) 打印到本地文件以及终端中

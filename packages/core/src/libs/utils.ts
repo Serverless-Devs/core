@@ -4,6 +4,7 @@
 
 import { uid } from 'uid/secure';
 import * as fs from 'fs-extra';
+import i18n from './i18n';
 
 /* eslint-disable @typescript-eslint/no-use-before-define */
 export const isUndefined = (obj: any): obj is undefined => typeof obj === 'undefined';
@@ -56,14 +57,18 @@ export const map = (object, callback): Array<{ [key: string]: any }> => {
 export const uuid = uid;
 
 export function readJsonFile(filePath: string) {
-  let result = {};
-  const data = fs.readFileSync(filePath, 'utf8');
-  try {
-    result = JSON.parse(data);
-  } catch (e) {
-    // ignore exception
+  if (fs.existsSync(filePath)) {
+    let result = {};
+    const data = fs.readFileSync(filePath, 'utf8');
+    try {
+      result = JSON.parse(data);
+    } catch (e) {
+      throw new Error(e);
+    }
+    return result;
+  } else {
+    throw new Error(i18n.__('The current file does not exist'));
   }
-  return result;
 }
 
 export function writeJsonFile(filePath: string, data: any) {
