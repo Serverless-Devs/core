@@ -15,7 +15,7 @@ export interface IRemoteComponentParams {
  */
 export const getComponentVersion = (params: IRemoteComponentParams) => {
   return request(`${SERVERLESS_API}/package/object/version`, {
-    data: Object.assign({ type: 'component' }, params),
+    params: Object.assign({ type: 'component' }, params),
   });
 };
 
@@ -25,7 +25,7 @@ export const getComponentVersion = (params: IRemoteComponentParams) => {
  */
 export async function getComponentDownloadUrl(params: IRemoteComponentParams) {
   return request(`${SERVERLESS_API}/package/get/object/url`, {
-    data: Object.assign({ type: 'component' }, params),
+    params: Object.assign({ type: 'component' }, params),
   });
 }
 

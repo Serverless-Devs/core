@@ -14,7 +14,7 @@ class SpinnerDemo {
   }
   async test_request_hint() {
     await request('https://api.github.com/users/octocat', {
-      data: {
+      params: {
         tag: 'fc',
         error: 'error',
       },
@@ -28,5 +28,5 @@ class SpinnerDemo {
 }
 
 const demo = new SpinnerDemo();
-// demo.test_request_hint();
-demo.start();
+demo.test_request_hint();
+// demo.start();
