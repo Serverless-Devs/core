@@ -64,7 +64,7 @@ function loggerDemo() {
 
 #### [common](https://github.com/Serverless-Devs/s-core/blob/develop/packages/core/docs/common.md)
 
-- [request](https://github.com/Serverless-Devs/s-core/blob/develop/packages/core/docs/common.md#request)/[download](https://github.com/Serverless-Devs/s-core/blob/develop/packages/core/docs/common.md#downloadrequest)(基于 node-fetch 封装的 HTTP 请求)
+- [request](https://github.com/Serverless-Devs/s-core/blob/develop/packages/core/docs/common.md#request)/[downloadRequest](https://github.com/Serverless-Devs/s-core/blob/develop/packages/core/docs/common.md#downloadrequest)(基于 node-fetch 封装的 HTTP 请求)
 - [report](https://github.com/Serverless-Devs/s-core/blob/develop/packages/core/docs/common.md#report) (组件上报/错误上报)
 - [load](https://github.com/Serverless-Devs/s-core/blob/develop/packages/core/docs/common.md#load) 组件加载, 组件会加载到 ~/.s/components 目录下
 - [spinner](https://github.com/Serverless-Devs/s-core/blob/develop/packages/core/docs/common.md#spinner) (状态展示)

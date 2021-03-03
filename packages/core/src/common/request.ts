@@ -85,9 +85,11 @@ export async function request(url: string, options: RequestOptions = {}): Promis
       const contentType = response.headers.get('content-type');
       if (contentType.includes('text/html')) {
         return response.text();
-      } else {
+      } else if (contentType.includes('application/json')) {
         const data: any = await response.json();
-        return data.Response;
+        return data.Response || data;
+      } else {
+        return response;
       }
     } else {
       error && spinner(error).fail();
