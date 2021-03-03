@@ -21,5 +21,6 @@
   "Azure (azure)": "Azure (azure)",
   "Google Cloud (google)": "谷歌云 (google)",
   "Custom (custom)": "自定义 (custom)",
-  "The current file does not exist": "当前文件不存在"
+  "The current file does not exist": "当前文件不存在",
+  "System exception": "系统异常"
 }

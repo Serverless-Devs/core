@@ -1,6 +1,6 @@
 ## request
 
-#### 基于 node-fetch 封装的 HTTP 请求， 用于统一网络请求，支持 loading 效果
+#### HTTP 请求， 用于统一网络请求，支持 loading 效果
 
 - get, `method` 默认 `get` 请求, 通过 `params` 传递参数
 
@@ -14,36 +14,18 @@ request(url, {
 });
 ```
 
-- post，通过 `body` 传递参数, `body` 类型可为 `string | object`
-- 当 `body` 为 `object` 时， `Content-Type` 默认为 `application/json`, 如果需要以 form 的形式传递参数，设置 `Content-Type` 为 `application/x-www-form-urlencoded` 即可，注意该参数在 headers 里设置
+- post，通过 `body` 传递参数
 
 ```typescript
 const { request } = require('@serverless-devs/core');
 
-// string
-request(url, {
-  method: 'post'
-  body:'a=1',
-});
-
- // json
 request(url, {
   method: 'post'
   body: {
-    a: 1
+    key: 'value',
   },
 });
 
-// form
-request(url, {
-  method: 'post'
-  headers:{
-    'Content-Type':'application/x-www-form-urlencoded'
-  }
-  body: {
-    a: 1
-  },
-});
 ```
 
 ```typescript

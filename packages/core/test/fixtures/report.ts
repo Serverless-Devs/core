@@ -1,6 +1,5 @@
-import { report, request } from '../../src/common';
+import { report } from '../../src/common';
 import { HLogger, ILogger } from '../../src';
-const fetch = require('node-fetch');
 
 class ReportDemo {
   @HLogger('S-CORE') logger: ILogger;
@@ -23,36 +22,9 @@ class ReportDemo {
     });
     this.logger.info('成功上报');
   }
-  async get() {
-    // const params = new URLSearchParams();
-    // params.append('a', '1');
-    // const response = await fetch('https://httpbin.org/post', {
-    //   method: 'POST',
-    //   body: params,
-    //   headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    // });
-
-    const response = await fetch('https://github.com/');
-    const contentType = response.headers.get('content-type');
-    console.log(contentType);
-    // const data = await response.json();
-    // console.log(data);
-  }
-  async form() {
-    const response = await request('https://httpbin.org/post', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: { a: 1 },
-    });
-    console.log(response);
-  }
 }
 
 const demo = new ReportDemo();
 
 // demo.error();
-// demo.get();
-// demo.component();
-demo.form();
+demo.component();
