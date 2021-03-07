@@ -9,3 +9,4 @@ export { default as load } from './load';
 export { default as commandParse } from './commandParse';
 export { getCredential, setCredential } from './credential';
 export { getState, setState } from './state';
+export { default as checkYaml } from './checkYaml';
