@@ -3,20 +3,7 @@ import { checkYaml } from '../../src/common';
 const fc = {
   Region: {
     Required: true,
-    Type: [
-      {
-        List: {
-          label: {
-            Required: true,
-            Type: ['String'],
-          },
-          value: {
-            Required: true,
-            Type: ['String'],
-          },
-        },
-      },
-    ],
+    Type: ['String'],
   },
   Service: {
     Required: true,
@@ -55,6 +42,23 @@ const fc = {
               },
             ],
           },
+          Nas: {
+            Required: true,
+            Type: [
+              {
+                List: {
+                  label: {
+                    Required: true,
+                    Type: ['String'],
+                  },
+                  value: {
+                    Required: true,
+                    Type: ['String'],
+                  },
+                },
+              },
+            ],
+          },
         },
       },
     ],
@@ -62,18 +66,16 @@ const fc = {
 };
 
 const input = {
-  Region: [
-    {
-      label: 123,
-      value: 'cn-hangzhou',
-    },
-  ],
+  Region: 'cn-hangzhou',
   Service: {
     Name: 'ServerlessToolProject',
-    Log: {
-      LogStore: 'xx',
-      Project: 'pp',
-    },
+    Log: 'Aut',
+    Nas: [
+      {
+        label: 'x',
+        value: 'a',
+      },
+    ],
   },
 };
 
