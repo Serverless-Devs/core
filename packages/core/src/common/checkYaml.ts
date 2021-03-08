@@ -92,8 +92,8 @@ async function checkYaml(publish, input, prefix?: string) {
               }
             } else if (key.includes('List')) {
               if (Array.isArray(input[a])) {
-                input[a].forEach((b) => {
-                  checkYaml(value, b, `${errorKey}[]`);
+                input[a].forEach((b, i) => {
+                  checkYaml(value, b, `${errorKey}[${i}]`);
                 });
               } else {
                 throw new Error(`${errorKey}的值是 List`);
@@ -106,6 +106,5 @@ async function checkYaml(publish, input, prefix?: string) {
       }
     }
   });
-  return true;
 }
 export default checkYaml;
