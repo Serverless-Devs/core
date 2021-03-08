@@ -14,7 +14,7 @@ request(url, {
 });
 ```
 
-- post，通过 `body` 传递参数
+- post，通过 `body` 传递参数， 默认 json 数据，如果需要传递 form-data，可传递参数 form 为 true 即可
 
 ```typescript
 const { request } = require('@serverless-devs/core');
@@ -24,6 +24,7 @@ request(url, {
   body: {
     key: 'value',
   },
+  // form: true
 });
 
 ```
