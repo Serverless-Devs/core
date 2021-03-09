@@ -16,15 +16,15 @@ enum BaseType {
 }
 
 /*  eslint valid-typeof: "off"  */
-async function checkYaml(publish, input, prefix?: string) {
-  Object.keys(publish).forEach((a) => {
+async function checkYaml(publish, input, errors, prefix?: string) {
+  Object.keys(publish).forEach(async (a) => {
     const errorKey = prefix ? `${prefix}.${a}` : a;
     if (publish[a].Required) {
       if (input[a]) {
         const { Type } = publish[a];
         if (Type.length > 1) {
           let errorCount = 0;
-          Type.forEach((item) => {
+          Type.forEach(async (item) => {
             if (typeof item === 'string') {
               if (BaseType[item].includes('array-')) {
                 if (Array.isArray(input[a])) {
@@ -49,7 +49,7 @@ async function checkYaml(publish, input, prefix?: string) {
                 }
               } else if (key.includes('Struct')) {
                 if (typeof input[a] === 'object') {
-                  checkYaml(value, input[a], errorKey);
+                  await checkYaml(value, input[a], errors, errorKey);
                 } else {
                   errorCount += 1;
                 }
@@ -57,7 +57,9 @@ async function checkYaml(publish, input, prefix?: string) {
             }
           });
           if (errorCount === Type.length) {
-            throw new Error(`${errorKey}的值不正确`);
+            errors.push({
+              [errorKey]: '请检查值的正确性',
+            });
           }
         } else {
           const item = Type[0];
@@ -67,14 +69,20 @@ async function checkYaml(publish, input, prefix?: string) {
               if (Array.isArray(input[a])) {
                 input[a].forEach((b) => {
                   if (typeof b !== BaseType[item].split('-')[1]) {
-                    throw new Error(`${errorKey}的类型是 ${item}`);
+                    errors.push({
+                      [errorKey]: `请检查值的正确性，需设置为 [${item}]`,
+                    });
                   }
                 });
               } else {
-                throw new Error(`${errorKey}的类型是 ${item}`);
+                errors.push({
+                  [errorKey]: `请检查值的正确性，需设置为 [${item}]`,
+                });
               }
             } else if (typeof input[a] !== BaseType[item]) {
-              throw new Error(`${errorKey}的类型是 ${item}`);
+              errors.push({
+                [errorKey]: `请检查值的正确性，需设置为 [${item}]`,
+              });
             }
           } else {
             // object, key为 Enum, Struct List
@@ -82,29 +90,43 @@ async function checkYaml(publish, input, prefix?: string) {
             if (key.includes('Enum')) {
               const filterList = value.filter((obj) => obj === input[a]);
               if (filterList.length === 0) {
-                throw new Error(`${errorKey}的值是 [${value}]`);
+                errors.push({
+                  [errorKey]: `请检查值的正确性，需设置为 [${value}]`,
+                });
               }
             } else if (key.includes('Struct')) {
               if (typeof input[a] === 'object') {
-                checkYaml(value, input[a], errorKey);
+                await checkYaml(value, input[a], errors, errorKey);
               } else {
-                throw new Error(`${errorKey}的值是 object`);
+                errors.push({
+                  [errorKey]: '请检查值的正确性，需设置为 [object]',
+                });
               }
             } else if (key.includes('List')) {
               if (Array.isArray(input[a])) {
-                input[a].forEach((b, i) => {
-                  checkYaml(value, b, `${errorKey}[${i}]`);
+                input[a].forEach(async (b, i) => {
+                  await checkYaml(value, b, errors, `${errorKey}[${i}]`);
                 });
               } else {
-                throw new Error(`${errorKey}的值是 List`);
+                errors.push({
+                  [errorKey]: '请检查值的正确性，需设置为 [List]',
+                });
               }
             }
           }
         }
       } else {
-        throw Error(`${errorKey}是必填字段`);
+        errors.push({
+          [errorKey]: '必填字段',
+        });
       }
     }
   });
 }
-export default checkYaml;
+
+async function publicCheckYaml(publish, input) {
+  const errors = [];
+  await checkYaml(publish, input, errors);
+  return errors.length > 0 ? [true, errors] : [false, null];
+}
+export default publicCheckYaml;

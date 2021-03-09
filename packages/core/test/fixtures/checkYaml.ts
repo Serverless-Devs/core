@@ -3,7 +3,11 @@ import { checkYaml } from '../../src/common';
 const fc = {
   Region: {
     Required: true,
-    Type: ['String'],
+    Type: [
+      {
+        Enum: ['cn-hangzhou', 'cn-shanghai'],
+      },
+    ],
   },
   Service: {
     Required: true,
@@ -66,17 +70,22 @@ const fc = {
 };
 
 const input = {
-  Region: 'cn-hangzhou',
+  Region: 'cn-hangzhoux',
   Service: {
-    Name: 'ServerlessToolProject',
+    Name: 'xx',
     Log: 'Aut',
     Nas: [
       {
-        label: 'x',
+        label: '',
         value: 'a',
       },
     ],
   },
 };
 
-checkYaml(fc, input);
+async function test() {
+  const [is, errors] = await checkYaml(fc, input);
+  console.log(is, errors);
+}
+
+test();
