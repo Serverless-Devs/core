@@ -10,12 +10,12 @@ const fc = {
     ],
   },
   Service: {
-    Required: true,
+    Required: false,
     Type: [
       {
         Struct: {
           Name: {
-            Required: true,
+            Required: false,
             Type: ['String'],
           },
           Log: {
@@ -72,8 +72,8 @@ const fc = {
 const input = {
   Region: 'cn-hangzhoux',
   Service: {
-    Name: 'xx',
-    Log: 'Aut',
+    // Name: 'xx',
+    Log: 'Auto',
     Nas: [
       {
         label: '',
