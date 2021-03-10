@@ -1,6 +1,6 @@
 {
   "name": "@serverless-devs/core",
-  "version": "0.0.31",
+  "version": "0.0.32",
   "description": "Serverless Devs Tool Core Component",
   "keywords": [
     "Serverless",
@@ -41,6 +41,7 @@
     "decompress": "^4.2.1",
     "download": "^8.0.0",
     "fs-extra": "9.0.1",
+    "got": "^8.3.2",
     "i18n": "^0.13.2",
     "ignore": "^5.1.8",
     "inquirer": "^7.3.3",
