@@ -26,7 +26,7 @@ async function checkYaml(publish, input, errors, prefix?: string) {
     const errorKey = prefix ? `${prefix}.${a}` : a;
     if (input[a]) {
       const { Type } = publish[a];
-      if (Type.length > 1) {
+      if (Array.isArray(Type) && Type.length > 1) {
         let errorCount = 0;
         Type.forEach(async (item) => {
           if (typeof item === 'string') {
@@ -66,7 +66,7 @@ async function checkYaml(publish, input, errors, prefix?: string) {
           });
         }
       } else {
-        const item = Type[0];
+        const item = Array.isArray(Type) ? Type[0] : Type;
         // string, boolean, number, List<string>
         if (typeof item === 'string') {
           if (BaseType[item].includes('array-')) {

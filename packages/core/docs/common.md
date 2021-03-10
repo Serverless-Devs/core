@@ -364,3 +364,91 @@ async function set() {
 ```
 
 ![demo](https://img.alicdn.com/imgextra/i4/O1CN01pXFJUZ1IVKKVKhvny_!!6000000000898-1-tps-1215-97.gif)
+
+## checkYaml
+
+#### 用于检查 input 的 yaml 格式是否正确，通过返回 null，不通过返回 错误信息
+
+```typescript
+const { checkYaml } = require('@serverless-devs/core');
+const input = {
+  Provider: 'alibaba',
+  Component: 'fc',
+  Properties: {
+    Region: 'cn-hangzhou',
+    Service: {
+      Name: 'ServerlessToolProject',
+      Log: {
+        LogStore: 'loghub中的logstore名称',
+        Project: 'loghub中的project名称',
+      },
+      Nas: [
+        {
+          label: 'xx',
+          value: 'xx',
+        },
+        {
+          label: '',
+          value: 'xx',
+        },
+      ],
+    },
+  },
+};
+
+// publish.yaml Properties demo
+// Properties:
+//   Region:
+//     Required: true
+//     Type:
+//     - Enum:
+//       - cn-hangzhou
+//       - cn-shanghai
+//   Service:
+//     Required: false
+//     Type:
+//     - Struct:
+//         Name:
+//           Required: true
+//           Type:
+//           - String
+//         Log:
+//           Required: true
+//           Type:
+//           - Enum[简单配置/Simple configuration]:
+//             - Auto
+//           - Struct[详细配置/Detailed configuration]:
+//               LogStore:
+//                 Required: true
+//                 Description:
+//                   zh: loghub中的logstore名称
+//                   en: Logstore name in loghub
+//                 Type:
+//                 - String
+//               Project:
+//                 Required: true
+//                 Description:
+//                   zh: loghub中的project名称
+//                   en: Project name in loghub
+//                 Type:
+//                 - String
+//         Nas:
+//           Required: true
+//           Type:
+//           - List:
+//               label:
+//                 Required: true
+//                 Type:
+//                 - String
+//               value:
+//                 Required: true
+//                 Type:
+//                 - String
+
+async function test() {
+  const errors = await checkYaml(input);
+  console.log('errors', errors);
+}
+```
+
+![demo](https://img.alicdn.com/imgextra/i1/O1CN01vMID0V1UvE7SfqloB_!!6000000002579-1-tps-1215-697.gif)
