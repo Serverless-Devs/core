@@ -11,8 +11,8 @@ import {
 /**
  * @description 主要的方法，用于load组件。
  * 组件会下载到 ~/.s/components 目录下面
- * name: 组件名, 默认load最新版本组件，支持load某个版本组件 load@0.11
- * provider: SERVERLESS厂商
+ * @componentName: 组件名, 默认load最新版本组件，支持load某个版本组件load@0.11
+ * @provider: SERVERLESS厂商
  */
 
 async function load(componentName: string, provider: string) {
