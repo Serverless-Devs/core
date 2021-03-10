@@ -31,4 +31,6 @@ async function load(componentName: string, provider: string) {
   return await buildComponentInstance(componentPath);
 }
 
+export const loadComponent = load;
+
 export default load;
