@@ -80,7 +80,7 @@ async function checkYaml(publish, input, errors, prefix?: string) {
               });
             } else {
               errors.push({
-                [errorKey]: `请检查值的正确性，需设置为 [${item}]`,
+                [errorKey]: '请检查值的正确性，需设置为 [List]',
               });
             }
           } else if (typeof input[a] !== BaseType[item]) {
@@ -179,7 +179,7 @@ async function getPublishPath(Component: string, Provider: string) {
   throw new Error('未找到publish.yaml或者publish.yml文件');
 }
 
-async function readPublish(input) {
+async function validateProps(input) {
   const { Component, Properties, Provider } = input;
   if (!Component) {
     return [{ Component: '必填字段' }];
@@ -211,4 +211,4 @@ async function readPublish(input) {
     return null;
   }
 }
-export default readPublish;
+export default validateProps;

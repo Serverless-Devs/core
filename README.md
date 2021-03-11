@@ -9,6 +9,7 @@ s-core 是 Serverless-Devs 的一个官方组件，通过该组件您可以轻�
 - 状态上报
 - 打包压缩
 - 获取密钥信息
+- 数据校验
 
 ## 安装
 
@@ -77,7 +78,7 @@ function loggerDemo() {
 
 - [getState](https://github.com/Serverless-Devs/s-core/blob/develop/packages/core/docs/common.md#getState)/[setState](https://github.com/Serverless-Devs/s-core/blob/develop/packages/core/docs/common.md#setState) 用于获取和设置文件内容
 
-- [checkYaml](https://github.com/Serverless-Devs/s-core/blob/develop/packages/core/docs/common.md#checkYaml) 用于检验 `input` 的 `Properties` 属性格式是否正确
+- [validateProps](https://github.com/Serverless-Devs/s-core/blob/develop/packages/core/docs/common.md#validateProps) 用于检验 `input` 的 `Properties` 属性格式是否正确
 
 #### [logger](https://github.com/Serverless-Devs/s-core/blob/develop/packages/core/docs/logger.md)
 

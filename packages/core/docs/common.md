@@ -365,12 +365,12 @@ async function set() {
 
 ![demo](https://img.alicdn.com/imgextra/i4/O1CN01pXFJUZ1IVKKVKhvny_!!6000000000898-1-tps-1215-97.gif)
 
-## checkYaml
+## validateProps
 
 #### 用于检查 input 的 yaml 格式是否正确，通过返回 null，不通过返回 错误信息
 
 ```typescript
-const { checkYaml } = require('@serverless-devs/core');
+const { validateProps } = require('@serverless-devs/core');
 const input = {
   Provider: 'alibaba',
   Component: 'fc',
@@ -446,7 +446,7 @@ const input = {
 //                 - String
 
 async function test() {
-  const errors = await checkYaml(input);
+  const errors = await validateProps(input);
   console.log('errors', errors);
 }
 ```
