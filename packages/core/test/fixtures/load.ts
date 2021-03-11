@@ -1,6 +1,7 @@
-import { load } from '../../src/common';
+import { loadComponent } from '../../src/common';
 
-load('fc@0.1.2', 'alibaba');
+loadComponent('alibaba/fc', 'https://tool.serverlessfans.com/api');
+loadComponent('Serverless-Devs/Serverless-Devs');
 
 // import { downloadRequest } from '../../src/common';
 
