@@ -36,13 +36,16 @@ async function loadServerless(source: string, storageDirectory: string) {
 }
 
 async function loadGithub(source: string, storageDirectory: string) {
+  const [user, name] = source.split('/');
+  if (fs.existsSync(`${storageDirectory}/${name}`)) {
+    return true;
+  }
   const result: any = await got(`${RegistryEnum.github}/${source}/releases/latest`);
   if (result.body) {
     try {
       const { zipball_url, tag_name } = JSON.parse(result.body);
       await downloadRequest(zipball_url, storageDirectory);
       const files = fs.readdirSync(storageDirectory);
-      const [user, name] = source.split('/');
       const filename = files.find((item) => item.includes(`${user}-${name}-${tag_name}`));
       const vm = spinner(i18n.__('File unzipping...'));
       await decompress(`${storageDirectory}/${filename}`, `${storageDirectory}/${name}`, {
@@ -50,10 +53,12 @@ async function loadGithub(source: string, storageDirectory: string) {
       });
       await fs.unlink(`${storageDirectory}/${filename}`);
       vm.succeed(i18n.__('File decompression completed'));
+      return true;
     } catch (e) {
       throw new Error(e.message);
     }
   }
+  return false;
 }
 
 export async function loadType(source: string, storageDirectory: string, registry?: Registry) {

@@ -1,6 +1,6 @@
 import download, { DownloadOptions as MyDownloadOptions } from 'download';
 import got from 'got';
-import { ProgressService, ProgressType, ProgressBarOptions } from '@serverless-devs/s-progress-bar';
+import { ProgressService, ProgressType } from '@serverless-devs/s-progress-bar';
 import { green } from 'colors';
 import spinner from './spinner';
 import { Logger } from '../logger';
@@ -62,10 +62,10 @@ export async function request(url: string, options?: RequestOptions): Promise<an
   return body.Response;
 }
 
-export async function downloadRequest(url, dest, options?: MyDownloadOptions) {
+export async function downloadRequest(url: string, dest: string, options?: MyDownloadOptions) {
   const { extract, strip, ...rest } = options || {};
   Logger.log('prepare downloading');
-  let len;
+  let len: number;
   try {
     const { headers } = await got(url, { method: 'HEAD' });
     len = parseInt(headers['content-length'], 10);
@@ -73,17 +73,12 @@ export async function downloadRequest(url, dest, options?: MyDownloadOptions) {
     // ignore error
   }
 
-  let bar;
+  let bar: ProgressService;
   if (len) {
-    const pbo: ProgressBarOptions = { total: len };
-    bar = new ProgressService(ProgressType.Bar, pbo);
+    bar = new ProgressService(ProgressType.Bar, { total: len });
   } else {
-    const pbo: ProgressBarOptions = {
-      total: 120,
-      width: 30,
-    };
-    const format = `((:bar)) ${green(':loading')} ${green('downloading')} `;
-    bar = new ProgressService(ProgressType.Loading, pbo, format);
+    const format = `${green(':loading')} ${green('downloading')} `;
+    bar = new ProgressService(ProgressType.Loading, { total: 100 }, format);
   }
   Logger.log('start downloading');
 
@@ -92,10 +87,9 @@ export async function downloadRequest(url, dest, options?: MyDownloadOptions) {
   });
   bar.terminate();
   Logger.log('download success');
-
   if (extract) {
     const files = fs.readdirSync(dest);
-    const filename = files.find((item) => url.includes(item));
+    const filename = files[0];
     const vm = spinner(i18n.__('File unzipping...'));
     await decompress(`${dest}/${filename}`, dest, { strip });
     await fs.unlink(`${dest}/${filename}`);
