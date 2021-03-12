@@ -1,5 +1,5 @@
 import fs from 'fs-extra';
-import { S_ROOT_HOME_COMPONENT } from '../../libs/common';
+import { S_ROOT_HOME_COMPONENT, S_CURRENT } from '../../libs/common';
 import {
   buildComponentInstance,
   downloadComponent,
@@ -21,14 +21,11 @@ enum RegistryEnum {
   serverless = 'https://tool.serverlessfans.com/api',
 }
 
-async function loadServerless(source: string) {
+async function loadServerless(source: string, storageDirectory: string) {
   const [provider, componentName] = source.split('/');
   const [name, version] = componentName.split('@');
   const baseArgs = { name, version, provider };
-  const componentPaths: IComponentPath = await generateComponentPath(
-    baseArgs,
-    S_ROOT_HOME_COMPONENT,
-  );
+  const componentPaths: IComponentPath = await generateComponentPath(baseArgs, storageDirectory);
   const { componentPath, lockPath } = componentPaths;
   // 通过是否存在 .s.lock文件来判断
   if (!fs.existsSync(lockPath)) {
@@ -38,20 +35,20 @@ async function loadServerless(source: string) {
   return await buildComponentInstance(componentPath);
 }
 
-async function loadGithub(source: string) {
+async function loadGithub(source: string, storageDirectory: string) {
   const result: any = await got(`${RegistryEnum.github}/${source}/releases/latest`);
   if (result.body) {
     try {
       const { zipball_url, tag_name } = JSON.parse(result.body);
-      await downloadRequest(zipball_url, S_ROOT_HOME_COMPONENT);
-      const files = fs.readdirSync(S_ROOT_HOME_COMPONENT);
+      await downloadRequest(zipball_url, storageDirectory);
+      const files = fs.readdirSync(storageDirectory);
       const [user, name] = source.split('/');
       const filename = files.find((item) => item.includes(`${user}-${name}-${tag_name}`));
       const vm = spinner(i18n.__('File unzipping...'));
-      await decompress(`${S_ROOT_HOME_COMPONENT}/${filename}`, `${S_ROOT_HOME_COMPONENT}/${name}`, {
+      await decompress(`${storageDirectory}/${filename}`, `${storageDirectory}/${name}`, {
         strip: 1,
       });
-      await fs.unlink(`${S_ROOT_HOME_COMPONENT}/${filename}`);
+      await fs.unlink(`${storageDirectory}/${filename}`);
       vm.succeed(i18n.__('File decompression completed'));
     } catch (e) {
       throw new Error(e.message);
@@ -59,20 +56,65 @@ async function loadGithub(source: string) {
   }
 }
 
-export async function loadComponent(source: string, registry?: Registry) {
+export async function loadType(source: string, storageDirectory: string, registry?: Registry) {
+  if (registry === RegistryEnum.serverless) {
+    return await loadServerless(source, storageDirectory);
+  }
+  if (registry === RegistryEnum.github) {
+    return await loadGithub(source, storageDirectory);
+  }
+}
+
+async function tryfun(f: Promise<any>) {
+  try {
+    return await f;
+  } catch (error) {
+    // ignore error
+  }
+}
+
+export async function loadCommon(source: string, storageDirectory: string, registry?: Registry) {
   // gui
   if ((process.versions as any).electron) {
-    // TODO
+    let result: any;
+    if (registry) {
+      result = await tryfun(loadType(source, storageDirectory, registry));
+      if (result) return result;
+    }
+    if (config.getConfig('registry')) {
+      result = await tryfun(loadType(source, storageDirectory, config.getConfig('registry')));
+      if (result) return result;
+    }
+    result = await tryfun(loadType(source, storageDirectory, RegistryEnum.serverless));
+    if (result) return result;
+    result = await tryfun(loadType(source, storageDirectory, RegistryEnum.github));
+    if (result) return result;
+    return `未找到${source}相关资源`;
   } else {
     // cli
-    const usedRegistry = registry || config.getConfig('registry') || RegistryEnum.github;
-    if (usedRegistry === RegistryEnum.serverless) {
-      return await loadServerless(source);
+    let result: any;
+    if (registry) {
+      result = await tryfun(loadType(source, storageDirectory, registry));
+      if (result) return result;
     }
-    if (usedRegistry === RegistryEnum.github) {
-      return await loadGithub(source);
+    if (config.getConfig('registry')) {
+      result = await tryfun(loadType(source, storageDirectory, config.getConfig('registry')));
+      if (result) return result;
     }
+    result = await tryfun(loadType(source, storageDirectory, RegistryEnum.github));
+    if (result) return result;
+    result = await tryfun(loadType(source, storageDirectory, RegistryEnum.serverless));
+    if (result) return result;
+    return `未找到${source}相关资源`;
   }
+}
+
+export async function loadComponent(source: string, registry?: Registry) {
+  return await loadCommon(source, S_ROOT_HOME_COMPONENT, registry);
+}
+
+export async function loadApplication(source: string, registry?: Registry) {
+  return await loadCommon(source, S_CURRENT, registry);
 }
 
 export const load = loadComponent;
