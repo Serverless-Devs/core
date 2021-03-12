@@ -1,9 +1,11 @@
-import { loadComponent } from '../../src/common';
+import { loadApplication } from '../../src/common';
 
-loadComponent('alibaba/fc', 'https://tool.serverlessfans.com/api');
+// loadComponent('alibaba/fc', 'https://api.github.com/repos');
 // loadComponent('Serverless-Devs/Serverless-Devs').then((res) => {
 //   console.log('res', res);
 // });
+
+loadApplication('Serverless-Devs/Serverless-Devs');
 
 // import { downloadRequest } from '../../src/common';
 

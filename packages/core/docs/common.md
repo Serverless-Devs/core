@@ -111,13 +111,18 @@ class ReportDemo {
 
 ![Demo](https://img.alicdn.com/imgextra/i2/O1CN01XJzCmp1qJb7ZUvFEi_!!6000000005475-1-tps-1312-73.gif)
 
-## load
+## loadComponent
 
-- 用于加载组件,组件会下载到 ~/.s/components 目录下面。
+- `loadComponent` 方法是 `load` 方法的`别名`，用于加载组件，组件会下载到 ~/.s/components 目录下面。
+- type Registry = 'https://tool.serverlessfans.com/api' | 'https://api.github.com/repos';
+- loadComponent(source: string, registry?: Registry)
+- 优先读取方法传入的参数 registry，如果找不到，然后读取 ~/.s/components/set-config.yml 文件里的 registry，如果找不到
+- cli case: 先读取 github 源，如果找不到在读取 serverless hub 源
+- gui case: 先读取 serverless hub 源，如果找不到在读取 github 源
 
 ```typescript
-const { load } = require('@serverless-devs/core');
-load('fc', 'alibaba');
+const { loadComponent } = require('@serverless-devs/core');
+loadComponent('alibaba/fc');
 ```
 
 ![Demo](https://img.alicdn.com/imgextra/i1/O1CN01LukqOH1bJr6l77VGk_!!6000000003445-1-tps-1312-200.gif)
@@ -125,11 +130,21 @@ load('fc', 'alibaba');
 - 支持下载特定版本的组件使用方式为
 
 ```typescript
-const { load } = require('@serverless-devs/core');
-load('fc@0.1.2', 'alibaba');
+const { loadComponent } = require('@serverless-devs/core');
+loadComponent('alibaba/fc@0.1.2');
 ```
 
 ![Demo](https://img.alicdn.com/imgextra/i1/O1CN01LukqOH1bJr6l77VGk_!!6000000003445-1-tps-1312-200.gif)
+
+## loadApplication
+
+- 用于加载应用，方法读取逻辑同 `loadComponent`，区别是应用会下载到当前目录下。
+
+```typescript
+const { loadComponent } = require('@serverless-devs/core');
+loadApplication('Serverless-Devs/Serverless-Devs');
+// loadApplication('Serverless-Devs/Serverless-Devs', 'https://api.github.com/repos');
+```
 
 ## spinner
 

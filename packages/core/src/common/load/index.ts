@@ -10,9 +10,6 @@ import {
 import * as config from '../../libs/handler-set-config';
 import got from 'got';
 import { downloadRequest } from '../request';
-import spinner from '../spinner';
-import decompress from 'decompress';
-import i18n from '../../libs/i18n';
 
 type Registry = 'https://tool.serverlessfans.com/api' | 'https://api.github.com/repos';
 
@@ -36,23 +33,18 @@ async function loadServerless(source: string, storageDirectory: string) {
 }
 
 async function loadGithub(source: string, storageDirectory: string) {
-  const [user, name] = source.split('/');
-  if (fs.existsSync(`${storageDirectory}/${name}`)) {
+  const filename = source.split('/')[1];
+  if (fs.existsSync(`${storageDirectory}/${filename}`)) {
     return true;
   }
   const result: any = await got(`${RegistryEnum.github}/${source}/releases/latest`);
   if (result.body) {
     try {
-      const { zipball_url, tag_name } = JSON.parse(result.body);
-      await downloadRequest(zipball_url, storageDirectory);
-      const files = fs.readdirSync(storageDirectory);
-      const filename = files.find((item) => item.includes(`${user}-${name}-${tag_name}`));
-      const vm = spinner(i18n.__('File unzipping...'));
-      await decompress(`${storageDirectory}/${filename}`, `${storageDirectory}/${name}`, {
+      const { zipball_url } = JSON.parse(result.body);
+      await downloadRequest(zipball_url, `${storageDirectory}/${filename}`, {
+        extract: true,
         strip: 1,
       });
-      await fs.unlink(`${storageDirectory}/${filename}`);
-      vm.succeed(i18n.__('File decompression completed'));
       return true;
     } catch (e) {
       throw new Error(e.message);
