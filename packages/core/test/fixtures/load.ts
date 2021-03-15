@@ -1,11 +1,20 @@
-import { loadApplication } from '../../src/common';
+import { loadComponent } from '../../src/common';
 
-// loadComponent('alibaba/fc', 'https://api.github.com/repos');
+async function test() {
+  // const [FC] = await loadComponent('alibaba/fc', 'https://tool.serverlessfans.com/api');
+
+  // const [FC] = await loadComponent('Serverless-Devs/Serverless-Devs@1.1.13');
+  const [FC] = await loadComponent('Serverless-Devs/Serverless-Devs');
+  console.log(FC);
+}
+
+test();
+
 // loadComponent('Serverless-Devs/Serverless-Devs').then((res) => {
 //   console.log('res', res);
 // });
 
-loadApplication('Serverless-Devs/Serverless-Devs');
+// loadApplication('Serverless-Devs/Serverless-Devs');
 
 // import { downloadRequest } from '../../src/common';
 

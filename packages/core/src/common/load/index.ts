@@ -1,28 +1,29 @@
 import fs from 'fs-extra';
-import { S_ROOT_HOME_COMPONENT, S_CURRENT } from '../../libs/common';
+import { S_ROOT_HOME_COMPONENT } from '../../libs/common';
 import {
   buildComponentInstance,
   downloadComponent,
   generateComponentPath,
   IComponentPath,
   installDependency,
+  RegistryEnum,
+  Registry,
+  getGithubReleases,
+  getGithubReleasesLatest,
 } from './service';
 import * as config from '../../libs/handler-set-config';
-import got from 'got';
 import { downloadRequest } from '../request';
 
-type Registry = 'https://tool.serverlessfans.com/api' | 'https://api.github.com/repos';
-
-enum RegistryEnum {
-  github = 'https://api.github.com/repos',
-  serverless = 'https://tool.serverlessfans.com/api',
-}
-
-async function loadServerless(source: string, storageDirectory: string) {
+async function loadServerless(source: string) {
+  if (!source.includes('/')) return;
   const [provider, componentName] = source.split('/');
+  if (!componentName) return;
   const [name, version] = componentName.split('@');
   const baseArgs = { name, version, provider };
-  const componentPaths: IComponentPath = await generateComponentPath(baseArgs, storageDirectory);
+  const componentPaths: IComponentPath = await generateComponentPath(
+    baseArgs,
+    S_ROOT_HOME_COMPONENT,
+  );
   const { componentPath, lockPath } = componentPaths;
   // 通过是否存在 .s.lock文件来判断
   if (!fs.existsSync(lockPath)) {
@@ -32,33 +33,41 @@ async function loadServerless(source: string, storageDirectory: string) {
   return await buildComponentInstance(componentPath);
 }
 
-async function loadGithub(source: string, storageDirectory: string) {
-  const filename = source.split('/')[1];
-  if (fs.existsSync(`${storageDirectory}/${filename}`)) {
-    return true;
+async function loadGithub(source: string) {
+  if (!source.includes('/')) return;
+  const [user, componentName] = source.split('/');
+  if (!componentName) return;
+  const [name, version] = componentName.split('@');
+  let zipball_url: string;
+  let componentPath: string;
+  if (version) {
+    const result = await getGithubReleases(user, name);
+    const findObj = result.find((item) => item.tag_name === version);
+    if (!findObj) return;
+    zipball_url = findObj.zipball_url;
+    componentPath = `${S_ROOT_HOME_COMPONENT}/github.com/${user}/${componentName}`;
+  } else {
+    const result = await getGithubReleasesLatest(user, name);
+    zipball_url = result.zipball_url;
+    componentPath = `${S_ROOT_HOME_COMPONENT}/github.com//${user}/${componentName}@${result.tag_name}`;
   }
-  const result: any = await got(`${RegistryEnum.github}/${source}/releases/latest`);
-  if (result.body) {
-    try {
-      const { zipball_url } = JSON.parse(result.body);
-      await downloadRequest(zipball_url, `${storageDirectory}/${filename}`, {
-        extract: true,
-        strip: 1,
-      });
-      return true;
-    } catch (e) {
-      throw new Error(e.message);
-    }
+  const lockPath = `${componentPath}/.s.lock`;
+  if (!fs.existsSync(lockPath)) {
+    await downloadRequest(zipball_url, componentPath, {
+      extract: true,
+      strip: 1,
+    });
+    fs.writeFileSync(lockPath, zipball_url);
   }
-  return false;
+  return await buildComponentInstance(componentPath);
 }
 
-export async function loadType(source: string, storageDirectory: string, registry?: Registry) {
+async function loadType(source: string, registry?: Registry) {
   if (registry === RegistryEnum.serverless) {
-    return await loadServerless(source, storageDirectory);
+    return await loadServerless(source);
   }
   if (registry === RegistryEnum.github) {
-    return await loadGithub(source, storageDirectory);
+    return await loadGithub(source);
   }
 }
 
@@ -70,48 +79,41 @@ async function tryfun(f: Promise<any>) {
   }
 }
 
-export async function loadCommon(source: string, storageDirectory: string, registry?: Registry) {
+async function loadComponent(source: string, registry?: Registry) {
   // gui
   if ((process.versions as any).electron) {
     let result: any;
     if (registry) {
-      result = await tryfun(loadType(source, storageDirectory, registry));
-      if (result) return result;
+      result = await tryfun(loadType(source, registry));
+      if (typeof result === 'function') return [result, null];
     }
     if (config.getConfig('registry')) {
-      result = await tryfun(loadType(source, storageDirectory, config.getConfig('registry')));
-      if (result) return result;
+      result = await tryfun(loadType(source, config.getConfig('registry')));
+      if (typeof result === 'function') return [result, null];
     }
-    result = await tryfun(loadType(source, storageDirectory, RegistryEnum.serverless));
-    if (result) return result;
-    result = await tryfun(loadType(source, storageDirectory, RegistryEnum.github));
-    if (result) return result;
-    return `未找到${source}相关资源`;
+    result = await tryfun(loadServerless(source));
+    if (typeof result === 'function') return [result, null];
+
+    result = await tryfun(loadGithub(source));
+    if (typeof result === 'function') return [result, null];
+    return [null, new Error(`未找到${source}相关资源`)];
   } else {
     // cli
     let result: any;
     if (registry) {
-      result = await tryfun(loadType(source, storageDirectory, registry));
-      if (result) return result;
+      result = await tryfun(loadType(source, registry));
+      if (typeof result === 'function') return [result, null];
     }
     if (config.getConfig('registry')) {
-      result = await tryfun(loadType(source, storageDirectory, config.getConfig('registry')));
-      if (result) return result;
+      result = await tryfun(loadType(source, config.getConfig('registry')));
+      if (typeof result === 'function') return [result, null];
     }
-    result = await tryfun(loadType(source, storageDirectory, RegistryEnum.github));
-    if (result) return result;
-    result = await tryfun(loadType(source, storageDirectory, RegistryEnum.serverless));
-    if (result) return result;
-    return `未找到${source}相关资源`;
+    result = await tryfun(loadGithub(source));
+    if (typeof result === 'function') return [result, null];
+    result = await tryfun(loadServerless(source));
+    if (typeof result === 'function') return [result, null];
+    return [null, new Error(`未找到${source}相关资源`)];
   }
-}
-
-export async function loadComponent(source: string, registry?: Registry) {
-  return await loadCommon(source, S_ROOT_HOME_COMPONENT, registry);
-}
-
-export async function loadApplication(source: string, registry?: Registry) {
-  return await loadCommon(source, S_CURRENT, registry);
 }
 
 export const load = loadComponent;

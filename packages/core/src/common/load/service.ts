@@ -1,5 +1,6 @@
 import fs from 'fs-extra';
 import path from 'path';
+import got from 'got';
 import { getComponentVersion, getComponentDownloadUrl, execComponentDownload } from './utils';
 import { IComponentParams } from '../../interface';
 import { Logger } from '../../logger/index';
@@ -10,6 +11,13 @@ export interface IComponentPath {
   componentVersion: string;
   componentPath: string;
   lockPath: string;
+}
+
+export type Registry = 'https://tool.serverlessfans.com/api' | 'https://api.github.com/repos';
+
+export enum RegistryEnum {
+  github = 'https://api.github.com/repos',
+  serverless = 'https://tool.serverlessfans.com/api',
 }
 
 /**
@@ -26,22 +34,12 @@ export const generateComponentPath = async (
     const Response = await getComponentVersion({ name, provider });
     version = Response.Version;
   }
-  const rootPath = `./${name}-${provider}@${version}`;
-  // 如果有根路径
-  if (componentPathRoot) {
-    return {
-      componentPath: path.resolve(componentPathRoot, rootPath),
-      componentVersion: version,
-      lockPath: path.resolve(componentPathRoot, rootPath, '.s.lock'),
-    };
-  } else {
-    const componentPath = path.resolve(name);
-    return {
-      componentPath,
-      componentVersion: version,
-      lockPath: path.resolve(componentPath, '.s.lock'),
-    };
-  }
+  const rootPath = `./serverlessfans.com/${provider}/${name}@${version}`;
+  return {
+    componentPath: path.resolve(componentPathRoot, rootPath),
+    componentVersion: version,
+    lockPath: path.resolve(componentPathRoot, rootPath, '.s.lock'),
+  };
 };
 
 export const installDependency = async (
@@ -84,5 +82,15 @@ export const buildComponentInstance = async (componentPath: string) => {
   const ChildComponent = baseChildComponent.default
     ? baseChildComponent.default
     : baseChildComponent;
-  return new ChildComponent();
+  return ChildComponent;
+};
+
+export const getGithubReleases = async (user: string, name: string) => {
+  const result: any = await got(`${RegistryEnum.github}/${user}/${name}/releases`);
+  return JSON.parse(result.body);
+};
+
+export const getGithubReleasesLatest = async (user: string, name: string) => {
+  const result: any = await got(`${RegistryEnum.github}/${user}/${name}/releases/latest`);
+  return JSON.parse(result.body);
 };
