@@ -1,10 +1,10 @@
 import { loadComponent } from '../../src/common';
 
 async function test() {
-  const [FC] = await loadComponent('alibaba/fc', 'https://tool.serverlessfans.com/api');
-  // const [FC] = await loadComponent('Serverless-Devs/Serverless-Devs@1.1.13');
-  // const [FC] = await loadComponent('Serverless-Devs/Serverless-Devs');
-  console.log(FC);
+  const fc = await loadComponent('alibaba/fcxx', 'https://tool.serverlessfans.com/api');
+  // const fc = await loadComponent('Serverless-Devs/Serverless-Devs@1.1.13', 'https://api.github.com/repos');
+  // const fc = await loadComponent('Serverless-Devs/Serverless-Devs');
+  console.log(fc);
   // await loadApplication('alibaba/fc', 'https://tool.serverlessfans.com/api');
 }
 

@@ -13,6 +13,7 @@ import {
 } from './service';
 import * as config from '../../libs/handler-set-config';
 import { downloadRequest } from '../request';
+import { Logger } from '../../logger';
 
 async function loadServerless(source: string) {
   if (!source.includes('/')) return;
@@ -85,35 +86,36 @@ async function loadComponent(source: string, registry?: Registry) {
     let result: any;
     if (registry) {
       result = await tryfun(loadType(source, registry));
-      if (typeof result === 'function') return [result, null];
+      if (typeof result === 'function') return result;
     }
     if (config.getConfig('registry')) {
       result = await tryfun(loadType(source, config.getConfig('registry')));
-      if (typeof result === 'function') return [result, null];
+      if (typeof result === 'function') return result;
     }
     result = await tryfun(loadServerless(source));
-    if (typeof result === 'function') return [result, null];
+    if (typeof result === 'function') return result;
 
     result = await tryfun(loadGithub(source));
-    if (typeof result === 'function') return [result, null];
-    return [null, new Error(`未找到${source}相关资源`)];
+    if (typeof result === 'function') return result;
   } else {
     // cli
     let result: any;
     if (registry) {
       result = await tryfun(loadType(source, registry));
-      if (typeof result === 'function') return [result, null];
+      if (typeof result === 'function') return result;
     }
     if (config.getConfig('registry')) {
       result = await tryfun(loadType(source, config.getConfig('registry')));
-      if (typeof result === 'function') return [result, null];
+      if (typeof result === 'function') return result;
     }
     result = await tryfun(loadGithub(source));
-    if (typeof result === 'function') return [result, null];
+    if (typeof result === 'function') return result;
     result = await tryfun(loadServerless(source));
-    if (typeof result === 'function') return [result, null];
-    return [null, new Error(`未找到${source}相关资源`)];
+    if (typeof result === 'function') return result;
   }
+  const logger = new Logger();
+  logger.warn(`未找到${source}相关资源`);
+  return null;
 }
 
 export const load = loadComponent;

@@ -127,7 +127,7 @@ loadComponent('alibaba/fc');
 
 ![Demo](https://img.alicdn.com/imgextra/i1/O1CN01LukqOH1bJr6l77VGk_!!6000000003445-1-tps-1312-200.gif)
 
-- 支持下载特定版本的组件使用方式为
+- 支持下载特定版本的组件
 
 ```typescript
 const { loadComponent } = require('@serverless-devs/core');
@@ -145,6 +145,17 @@ const { loadComponent } = require('@serverless-devs/core');
 loadApplication('Serverless-Devs/Serverless-Devs');
 // loadApplication('Serverless-Devs/Serverless-Devs', 'https://api.github.com/repos');
 ```
+
+![Demo](https://img.alicdn.com/imgextra/i1/O1CN01LukqOH1bJr6l77VGk_!!6000000003445-1-tps-1312-200.gif)
+
+- 支持下载特定版本的应用
+
+```typescript
+const { loadComponent } = require('@serverless-devs/core');
+loadApplication('Serverless-Devs/Serverless-Devs@1.1.13');
+```
+
+![Demo](https://img.alicdn.com/imgextra/i1/O1CN01LukqOH1bJr6l77VGk_!!6000000003445-1-tps-1312-200.gif)
 
 ## spinner
 
