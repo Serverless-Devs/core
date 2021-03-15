@@ -24,7 +24,7 @@ export enum RegistryEnum {
  * @description 获取组件路径
  * @param name
  * @param provider
- * @param componentPathRoot 组件根目录
+ * @param componentPathRoot 组件serverlessfans根目录
  */
 export const generateComponentPath = async (
   { name, provider, version }: IComponentParams,
@@ -34,7 +34,7 @@ export const generateComponentPath = async (
     const Response = await getComponentVersion({ name, provider });
     version = Response.Version;
   }
-  const rootPath = `./serverlessfans.com/${provider}/${name}@${version}`;
+  const rootPath = `./${provider}/${name}@${version}`;
   return {
     componentPath: path.resolve(componentPathRoot, rootPath),
     componentVersion: version,

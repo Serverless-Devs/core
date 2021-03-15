@@ -1,6 +1,6 @@
 import fs from 'fs-extra';
 import yaml from 'js-yaml';
-import load from './load';
+import { loadComponent } from './load';
 import { S_ROOT_HOME } from '../libs/common';
 
 function getKeys(obj: object) {
@@ -195,7 +195,7 @@ async function validateProps(input) {
     publishYamlPath = await getLocalPublishPath(Component);
   } else {
     // 远程获取
-    await load(Component, Provider);
+    await loadComponent(`${Provider}/${Component}`);
     publishYamlPath = await getPublishPath(Component, Provider);
   }
   let content: any;
