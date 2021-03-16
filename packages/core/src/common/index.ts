@@ -10,3 +10,4 @@ export { default as commandParse } from './commandParse';
 export { getCredential, setCredential } from './credential';
 export { getState, setState } from './state';
 export { default as validateProps } from './validateProps';
+export { default as modifyProps } from './modifyProps';
