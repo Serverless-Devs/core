@@ -14,7 +14,7 @@ export default async function report(message: any, options: ReportOptions) {
     case 'error': {
       const result = await request('https://tool.serverlessfans.com/error/center', {
         method: 'post',
-        data: {
+        body: {
           tag: context,
           error: message,
         },
@@ -25,7 +25,7 @@ export default async function report(message: any, options: ReportOptions) {
     case 'component': {
       const result = await request('https://tool.serverlessfans.com/component/actions', {
         method: 'post',
-        data: Object.assign(
+        body: Object.assign(
           {
             message,
             component: context,

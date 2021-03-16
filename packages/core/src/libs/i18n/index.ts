@@ -1,4 +1,4 @@
-import * as config from './handler-set-config';
+import * as config from '../handler-set-config';
 const { I18n } = require('i18n');
 const path = require('path');
 

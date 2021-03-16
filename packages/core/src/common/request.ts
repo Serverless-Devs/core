@@ -1,6 +1,6 @@
 import download, { DownloadOptions as MyDownloadOptions } from 'download';
 import got from 'got';
-import { ProgressService, ProgressType, ProgressBarOptions } from '@serverless-devs/s-progress-bar';
+import { ProgressService, ProgressType } from '@serverless-devs/s-progress-bar';
 import { green } from 'colors';
 import spinner from './spinner';
 import { Logger } from '../logger';
@@ -13,23 +13,19 @@ interface HintOptions {
   success?: string;
   error?: string;
 }
-export interface requestOptions {
-  method?: 'get' | 'post';
-  data?: object;
-  json?: boolean;
+interface RequestOptions {
+  method?: string;
+  body?: object;
+  params?: object;
   hint?: HintOptions;
+  [key: string]: any;
 }
 
 export type DownloadOptions = MyDownloadOptions;
 
-enum METHOD_ENUM {
-  get = 'query',
-  post = 'body',
-}
-
-export async function request(url: string, options?: requestOptions): Promise<any> {
-  // @ts-ignore
-  const { method = 'get', data, json, hint = {} } = options || {};
+export async function request(url: string, options?: RequestOptions): Promise<any> {
+  const { method = 'get', params, body: bodyFromOptions, hint = {}, json = true, ...rest } =
+    options || {};
   const { loading, success, error } = hint;
   let vm = null;
   let result = null;
@@ -38,10 +34,12 @@ export async function request(url: string, options?: requestOptions): Promise<an
   loading && (vm = spinner(loading));
 
   try {
+    const isGet = method.toUpperCase() === 'GET';
     result = await got(url, {
-      method: method.toUpperCase(),
-      [METHOD_ENUM[method]]: data,
-      json: json || true,
+      method,
+      [isGet ? 'query' : 'body']: isGet ? params : bodyFromOptions,
+      json,
+      ...rest,
     });
     loading && vm.stop();
   } catch (e) {
@@ -54,7 +52,7 @@ export async function request(url: string, options?: requestOptions): Promise<an
 
   if (statusCode !== 200) {
     error && spinner(error).fail();
-    throw new Error(errorMessage(statusCode, '系统异常'));
+    throw new Error(errorMessage(statusCode, i18n.__('System exception')));
   } else if (body.Error) {
     error && spinner(error).fail();
     throw new Error(errorMessage(body.Error.Code, body.Error.Message));
@@ -64,10 +62,10 @@ export async function request(url: string, options?: requestOptions): Promise<an
   return body.Response;
 }
 
-export async function downloadRequest(url, dest, options?: MyDownloadOptions) {
+export async function downloadRequest(url: string, dest: string, options?: MyDownloadOptions) {
   const { extract, strip, ...rest } = options || {};
   Logger.log('prepare downloading');
-  let len;
+  let len: number;
   try {
     const { headers } = await got(url, { method: 'HEAD' });
     len = parseInt(headers['content-length'], 10);
@@ -75,17 +73,12 @@ export async function downloadRequest(url, dest, options?: MyDownloadOptions) {
     // ignore error
   }
 
-  let bar;
+  let bar: ProgressService;
   if (len) {
-    const pbo: ProgressBarOptions = { total: len };
-    bar = new ProgressService(ProgressType.Bar, pbo);
+    bar = new ProgressService(ProgressType.Bar, { total: len });
   } else {
-    const pbo: ProgressBarOptions = {
-      total: 120,
-      width: 30,
-    };
-    const format = `((:bar)) ${green(':loading')} ${green('downloading')} `;
-    bar = new ProgressService(ProgressType.Loading, pbo, format);
+    const format = `${green(':loading')} ${green('downloading')} `;
+    bar = new ProgressService(ProgressType.Loading, { total: 100 }, format);
   }
   Logger.log('start downloading');
 
@@ -94,10 +87,9 @@ export async function downloadRequest(url, dest, options?: MyDownloadOptions) {
   });
   bar.terminate();
   Logger.log('download success');
-
   if (extract) {
     const files = fs.readdirSync(dest);
-    const filename = files.find((item) => url.includes(item));
+    const filename = files[0];
     const vm = spinner(i18n.__('File unzipping...'));
     await decompress(`${dest}/${filename}`, dest, { strip });
     await fs.unlink(`${dest}/${filename}`);

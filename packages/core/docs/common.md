@@ -1,14 +1,40 @@
 ## request
 
-#### 用于统一 HTTP 网络请求。加上 loading 效果
+#### HTTP 请求， 用于统一网络请求，支持 loading 效果
+
+- get, `method` 默认 `get` 请求, 通过 `params` 传递参数
+
+```typescript
+const { request } = require('@serverless-devs/core');
+
+request(url, {
+  params: {
+    key: 'value',
+  },
+});
+```
+
+- post，通过 `body` 传递参数， 默认 json 数据，如果需要传递 form-data，可传递参数 form 为 true 即可
+
+```typescript
+const { request } = require('@serverless-devs/core');
+
+request(url, {
+  method: 'post'
+  body: {
+    key: 'value',
+  },
+  // form: true
+});
+
+```
 
 ```typescript
 const { request } = require('@serverless-devs/core');
 
 function test_request_hint() {
   request('https://api.github.com/users/octocat', {
-    method: 'get',
-    data: {
+    params: {
       tag: 'fc',
       error: 'error',
     },
@@ -85,22 +111,58 @@ class ReportDemo {
 
 ![Demo](https://img.alicdn.com/imgextra/i2/O1CN01XJzCmp1qJb7ZUvFEi_!!6000000005475-1-tps-1312-73.gif)
 
-## load
+## loadComponent
 
-- 用于加载组件,组件会下载到 ~/.s/components 目录下面。
+#### `loadComponent` 方法是 `load` 方法的`别名`，用于加载组件，组件会下载到 ~/.s/components 目录下面。
+
+- loadComponent(source: string, registry?: Registry)
+
+```txt
+source 传参数格式:
+serverless hub 源为 `<云厂商>/<组件名>` 会下载最新版本，`<云厂商>/<组件名>@<组件版本号>` 会下载指定版本
+github 源为 `<用户名>/<项目名称>` 会下载最新版本，`<用户名>/<项目名称>@<项目发布的版本号>` 会下载指定版本
+支持本地调试，可传本地组件的当前路径
+
+type Registry = 'https://tool.serverlessfans.com/api' | 'https://api.github.com/repos'
+
+- 优先读取方法传入的参数 registry，如果找不到，然后读取 ~/.s/components/set-config.yml 文件里的 registry，如果找不到
+- cli case: 先读取 github 源，如果找不到在读取 serverless hub 源
+- gui case: 先读取 serverless hub 源，如果找不到在读取 github 源
+```
 
 ```typescript
-const { load } = require('@serverless-devs/core');
-load('fc', 'alibaba');
+const { loadComponent } = require('@serverless-devs/core');
+loadComponent('alibaba/fc');
 ```
 
 ![Demo](https://img.alicdn.com/imgextra/i1/O1CN01LukqOH1bJr6l77VGk_!!6000000003445-1-tps-1312-200.gif)
 
-- 支持下载特定版本的组件使用方式为
+- 支持下载特定版本的组件
 
 ```typescript
-const { load } = require('@serverless-devs/core');
-load('fc@0.1.2', 'alibaba');
+const { loadComponent } = require('@serverless-devs/core');
+loadComponent('alibaba/fc@0.1.2');
+```
+
+![Demo](https://img.alicdn.com/imgextra/i1/O1CN01LukqOH1bJr6l77VGk_!!6000000003445-1-tps-1312-200.gif)
+
+## loadApplication
+
+- 用于加载应用，方法读取逻辑同 `loadComponent`，区别是应用会下载到当前目录下, 该方法无返回值。
+
+```typescript
+const { loadComponent } = require('@serverless-devs/core');
+loadApplication('Serverless-Devs/Serverless-Devs');
+// loadApplication('Serverless-Devs/Serverless-Devs', 'https://api.github.com/repos');
+```
+
+![Demo](https://img.alicdn.com/imgextra/i1/O1CN01LukqOH1bJr6l77VGk_!!6000000003445-1-tps-1312-200.gif)
+
+- 支持下载特定版本的应用
+
+```typescript
+const { loadComponent } = require('@serverless-devs/core');
+loadApplication('Serverless-Devs/Serverless-Devs@1.1.13');
 ```
 
 ![Demo](https://img.alicdn.com/imgextra/i1/O1CN01LukqOH1bJr6l77VGk_!!6000000003445-1-tps-1312-200.gif)
@@ -338,3 +400,91 @@ async function set() {
 ```
 
 ![demo](https://img.alicdn.com/imgextra/i4/O1CN01pXFJUZ1IVKKVKhvny_!!6000000000898-1-tps-1215-97.gif)
+
+## validateProps
+
+#### 用于检查 input 的 yaml 格式是否正确，通过返回 null，不通过返回 错误信息
+
+```typescript
+const { validateProps } = require('@serverless-devs/core');
+const input = {
+  Provider: 'alibaba',
+  Component: 'fc',
+  Properties: {
+    Region: 'cn-hangzhou',
+    Service: {
+      Name: 'ServerlessToolProject',
+      Log: {
+        LogStore: 'loghub中的logstore名称',
+        Project: 'loghub中的project名称',
+      },
+      Nas: [
+        {
+          label: 'xx',
+          value: 'xx',
+        },
+        {
+          label: '',
+          value: 'xx',
+        },
+      ],
+    },
+  },
+};
+
+// publish.yaml Properties demo
+// Properties:
+//   Region:
+//     Required: true
+//     Type:
+//     - Enum:
+//       - cn-hangzhou
+//       - cn-shanghai
+//   Service:
+//     Required: false
+//     Type:
+//     - Struct:
+//         Name:
+//           Required: true
+//           Type:
+//           - String
+//         Log:
+//           Required: true
+//           Type:
+//           - Enum[简单配置/Simple configuration]:
+//             - Auto
+//           - Struct[详细配置/Detailed configuration]:
+//               LogStore:
+//                 Required: true
+//                 Description:
+//                   zh: loghub中的logstore名称
+//                   en: Logstore name in loghub
+//                 Type:
+//                 - String
+//               Project:
+//                 Required: true
+//                 Description:
+//                   zh: loghub中的project名称
+//                   en: Project name in loghub
+//                 Type:
+//                 - String
+//         Nas:
+//           Required: true
+//           Type:
+//           - List:
+//               label:
+//                 Required: true
+//                 Type:
+//                 - String
+//               value:
+//                 Required: true
+//                 Type:
+//                 - String
+
+async function test() {
+  const errors = await validateProps(input);
+  console.log('errors', errors);
+}
+```
+
+![demo](https://img.alicdn.com/imgextra/i1/O1CN01vMID0V1UvE7SfqloB_!!6000000002579-1-tps-1215-697.gif)

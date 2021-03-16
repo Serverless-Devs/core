@@ -1,7 +1,7 @@
 import { getCredential } from '../../src/common';
 
 async function get() {
-  const c = await getCredential('alibaba', 'endx');
+  const c = await getCredential('alibaba');
   // const c = await getCredential('google');
   console.log('c', c);
 }
@@ -13,4 +13,4 @@ get();
 //   console.log('c', c);
 // }
 
-// set()
+// set();

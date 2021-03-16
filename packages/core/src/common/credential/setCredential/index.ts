@@ -26,7 +26,11 @@ async function setCredential(provider?: string) {
   if (access === 'create') {
     return addAccess(provider);
   }
-  return accessContent[access];
+  const [, Alias] = access.split('.');
+  return {
+    Alias,
+    ...accessContent[access],
+  };
 }
 
 export default setCredential;
