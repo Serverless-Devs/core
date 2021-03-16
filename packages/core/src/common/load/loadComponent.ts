@@ -85,7 +85,7 @@ function isComponent(result) {
   return !!result;
 }
 
-async function loadComponent(source: string, registry?: Registry) {
+async function loadRemoteComponent(source: string, registry?: Registry) {
   let result: any;
   // gui
   if ((process.versions as any).electron) {
@@ -121,6 +121,15 @@ async function loadComponent(source: string, registry?: Registry) {
   // TODO: `下载的${source}的资源中，未找到相关组件`
   logger.warn(`未找到${source}相关资源`);
   return null;
+}
+
+async function loadComponent(source: string, registry?: Registry) {
+  // 本地调试
+  if (fs.existsSync(source)) {
+    return await buildComponentInstance(source);
+  } else {
+    loadRemoteComponent(source, registry);
+  }
 }
 
 export const load = loadComponent;

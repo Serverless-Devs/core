@@ -1,7 +1,10 @@
 import { loadComponent } from '../../src/common';
 
 async function test() {
-  const fc = await loadComponent('alibaba/fc@0.0.7', 'https://tool.serverlessfans.com/api');
+  const fc = await loadComponent(
+    '/Users/shihuali/.s/components/serverlessfans.com/alibaba/fc@0.1.2',
+  );
+  // const fc = await loadComponent('alibaba/fc@0.0.7', 'https://tool.serverlessfans.com/api');
   // const fc = await loadComponent('Serverless-Devs/Serverless-Devs');
   // const fc = await loadComponent('Serverless-Devs/Serverless-Devs');
   console.log(fc);
