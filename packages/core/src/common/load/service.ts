@@ -9,6 +9,7 @@ const { spawnSync } = require('child_process');
 
 export interface IComponentPath {
   componentVersion: string;
+  applicationPath: string;
   componentPath: string;
   lockPath: string;
 }
@@ -37,6 +38,7 @@ export const generateComponentPath = async (
   const rootPath = `./${provider}/${name}@${version}`;
   return {
     componentPath: path.resolve(componentPathRoot, rootPath),
+    applicationPath: path.resolve(componentPathRoot, `./${name}`),
     componentVersion: version,
     lockPath: path.resolve(componentPathRoot, rootPath, '.s.lock'),
   };
@@ -46,7 +48,7 @@ export const installDependency = async (
   name: string,
   { componentPath, componentVersion, lockPath }: IComponentPath,
 ) => {
-  const existPackageJson = fs.existsSync(path.join(componentPath, 'package.json'));
+  const existPackageJson = fs.existsSync(path.resolve(componentPath, 'package.json'));
   if (existPackageJson) {
     Logger.log('Installing dependencies in serverless-devs core ...');
     const result = await spawnSync(
@@ -64,6 +66,21 @@ export const installDependency = async (
   }
 
   await fs.writeFileSync(lockPath, `${name}-${componentVersion}`);
+};
+
+export const installAppDependency = async (applicationPath: string) => {
+  const existPackageJson = fs.existsSync(path.resolve(applicationPath, 'package.json'));
+  if (existPackageJson) {
+    Logger.log('Installing dependencies in serverless-devs core ...');
+    const result = await spawnSync('npm install --registry=https://registry.npm.taobao.org', [], {
+      cwd: applicationPath,
+      stdio: 'inherit',
+      shell: true,
+    });
+    if (result && result.status !== 0) {
+      throw Error('> Execute Error');
+    }
+  }
 };
 
 export const downloadComponent = async (

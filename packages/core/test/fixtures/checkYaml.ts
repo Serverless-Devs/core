@@ -1,4 +1,4 @@
-import { checkYaml } from '../../src/common';
+import { validateProps } from '../../src/common';
 
 const input = {
   Provider: 'alibaba',
@@ -28,7 +28,7 @@ const input = {
 };
 
 async function test() {
-  const errors = await checkYaml(input);
+  const errors = await validateProps(input);
   console.log(errors);
 }
 

@@ -80,40 +80,45 @@ async function tryfun(f: Promise<any>) {
   }
 }
 
+// TODO: 如何判断是一个组件
+function isComponent(result) {
+  return !!result;
+}
+
 async function loadComponent(source: string, registry?: Registry) {
+  let result: any;
   // gui
   if ((process.versions as any).electron) {
-    let result: any;
     if (registry) {
       result = await tryfun(loadType(source, registry));
-      if (typeof result === 'function') return result;
+      if (isComponent(result)) return result;
     }
     if (config.getConfig('registry')) {
       result = await tryfun(loadType(source, config.getConfig('registry')));
-      if (typeof result === 'function') return result;
+      if (isComponent(result)) return result;
     }
     result = await tryfun(loadServerless(source));
-    if (typeof result === 'function') return result;
+    if (isComponent(result)) return result;
 
     result = await tryfun(loadGithub(source));
-    if (typeof result === 'function') return result;
+    if (isComponent(result)) return result;
   } else {
     // cli
-    let result: any;
     if (registry) {
       result = await tryfun(loadType(source, registry));
-      if (typeof result === 'function') return result;
+      if (isComponent(result)) return result;
     }
     if (config.getConfig('registry')) {
       result = await tryfun(loadType(source, config.getConfig('registry')));
-      if (typeof result === 'function') return result;
+      if (isComponent(result)) return result;
     }
     result = await tryfun(loadGithub(source));
-    if (typeof result === 'function') return result;
+    if (isComponent(result)) return result;
     result = await tryfun(loadServerless(source));
-    if (typeof result === 'function') return result;
+    if (isComponent(result)) return result;
   }
   const logger = new Logger();
+  // TODO: `下载的${source}的资源中，未找到相关组件`
   logger.warn(`未找到${source}相关资源`);
   return null;
 }

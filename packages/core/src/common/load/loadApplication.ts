@@ -1,10 +1,9 @@
-import fs from 'fs-extra';
 import { S_CURRENT } from '../../libs/common';
 import {
   downloadComponent,
   generateComponentPath,
   IComponentPath,
-  installDependency,
+  installAppDependency,
   RegistryEnum,
   Registry,
   getGithubReleases,
@@ -20,12 +19,9 @@ async function loadServerless(source: string) {
   const [name, version] = componentName.split('@');
   const baseArgs = { name, version, provider };
   const componentPaths: IComponentPath = await generateComponentPath(baseArgs, S_CURRENT);
-  const { componentPath, lockPath } = componentPaths;
-  // 通过是否存在 .s.lock文件来判断
-  if (!fs.existsSync(lockPath)) {
-    await downloadComponent(componentPath, baseArgs);
-    await installDependency(baseArgs.name, componentPaths);
-  }
+  const { applicationPath } = componentPaths;
+  await downloadComponent(applicationPath, { name, provider });
+  await installAppDependency(applicationPath);
   return true;
 }
 
@@ -41,20 +37,16 @@ async function loadGithub(source: string) {
     const findObj = result.find((item) => item.tag_name === version);
     if (!findObj) return;
     zipball_url = findObj.zipball_url;
-    componentPath = `${S_CURRENT}/${user}/${componentName}`;
+    componentPath = `${S_CURRENT}/${componentName}`;
   } else {
     const result = await getGithubReleasesLatest(user, name);
     zipball_url = result.zipball_url;
-    componentPath = `${S_CURRENT}/${user}/${componentName}@${result.tag_name}`;
+    componentPath = `${S_CURRENT}/${componentName}`;
   }
-  const lockPath = `${componentPath}/.s.lock`;
-  if (!fs.existsSync(lockPath)) {
-    await downloadRequest(zipball_url, componentPath, {
-      extract: true,
-      strip: 1,
-    });
-    fs.writeFileSync(lockPath, zipball_url);
-  }
+  await downloadRequest(zipball_url, componentPath, {
+    extract: true,
+    strip: 1,
+  });
   return true;
 }
 
