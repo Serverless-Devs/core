@@ -119,7 +119,10 @@ async function addAccess(provider?: string) {
     });
   }
   await writeData({ selectedProvider, info, accessAlias });
-  return info;
+  return {
+    Alias: accessAlias,
+    ...info,
+  };
 }
 
 export default addAccess;
