@@ -93,9 +93,9 @@ export const downloadComponent = async (
 };
 
 export const buildComponentInstance = async (componentPath: string) => {
-  const requiredComponentPath =
-    componentPath.lastIndexOf('index') > -1 ? componentPath : path.join(componentPath, 'index');
-  const baseChildComponent = await require(requiredComponentPath);
+  // const requiredComponentPath =
+  //   componentPath.lastIndexOf('index') > -1 ? componentPath : path.join(componentPath, 'index');
+  const baseChildComponent = await require(componentPath);
   const ChildComponent = baseChildComponent.default
     ? baseChildComponent.default
     : baseChildComponent;
