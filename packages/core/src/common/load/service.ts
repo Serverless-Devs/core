@@ -99,7 +99,7 @@ export const buildComponentInstance = async (componentPath: string) => {
   const ChildComponent = baseChildComponent.default
     ? baseChildComponent.default
     : baseChildComponent;
-  return ChildComponent;
+  return new ChildComponent();
 };
 
 export const getGithubReleases = async (user: string, name: string) => {
