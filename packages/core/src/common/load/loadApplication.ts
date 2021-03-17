@@ -67,7 +67,7 @@ async function tryfun(f: Promise<any>) {
   }
 }
 
-async function loadApplication(source: string, registry?: Registry) {
+async function loadApplication(source: string, registry?: Registry, target?: string) {
   // gui
   if ((process.versions as any).electron) {
     let result: any;

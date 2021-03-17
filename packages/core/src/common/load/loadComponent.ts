@@ -128,7 +128,7 @@ async function loadComponent(source: string, registry?: Registry) {
   if (fs.existsSync(source)) {
     return await buildComponentInstance(source);
   } else {
-    loadRemoteComponent(source, registry);
+    return await loadRemoteComponent(source, registry);
   }
 }
 
