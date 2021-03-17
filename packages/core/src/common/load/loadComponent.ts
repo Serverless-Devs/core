@@ -1,4 +1,5 @@
 import fs from 'fs-extra';
+
 import { S_ROOT_HOME_COMPONENT } from '../../libs/common';
 import {
   buildComponentInstance,
@@ -50,7 +51,7 @@ async function loadGithub(source: string) {
   } else {
     const result = await getGithubReleasesLatest(user, name);
     zipball_url = result.zipball_url;
-    componentPath = `${S_ROOT_HOME_COMPONENT}/github.com//${user}/${componentName}@${result.tag_name}`;
+    componentPath = `${S_ROOT_HOME_COMPONENT}/github.com/${user}/${componentName}@${result.tag_name}`;
   }
   const lockPath = `${componentPath}/.s.lock`;
   if (!fs.existsSync(lockPath)) {

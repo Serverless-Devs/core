@@ -22,7 +22,7 @@ async function loadServerless(source: string) {
   const { applicationPath } = componentPaths;
   await downloadComponent(applicationPath, { name, provider });
   await installAppDependency(applicationPath);
-  return true;
+  return applicationPath;
 }
 
 async function loadGithub(source: string) {
@@ -47,7 +47,7 @@ async function loadGithub(source: string) {
     extract: true,
     strip: 1,
   });
-  return true;
+  return componentPath;
 }
 
 async function loadType(source: string, registry?: Registry) {
@@ -68,34 +68,33 @@ async function tryfun(f: Promise<any>) {
 }
 
 async function loadApplication(source: string, registry?: Registry, target?: string) {
+  let appPath: string;
   // gui
   if ((process.versions as any).electron) {
-    let result: any;
     if (registry) {
-      result = await tryfun(loadType(source, registry));
-      if (result) return;
+      appPath = await tryfun(loadType(source, registry));
+      if (appPath) return appPath;
     }
     if (config.getConfig('registry')) {
-      result = await tryfun(loadType(source, config.getConfig('registry')));
-      if (result) return;
+      appPath = await tryfun(loadType(source, config.getConfig('registry')));
+      if (appPath) return appPath;
     }
-    result = await tryfun(loadServerless(source));
-    if (result) return;
-    await tryfun(loadGithub(source));
+    appPath = await tryfun(loadServerless(source));
+    if (appPath) return appPath;
+    return await tryfun(loadGithub(source));
   } else {
     // cli
-    let result: any;
     if (registry) {
-      result = await tryfun(loadType(source, registry));
-      if (result) return;
+      appPath = await tryfun(loadType(source, registry));
+      if (appPath) return appPath;
     }
     if (config.getConfig('registry')) {
-      result = await tryfun(loadType(source, config.getConfig('registry')));
-      if (result) return;
+      appPath = await tryfun(loadType(source, config.getConfig('registry')));
+      if (appPath) return appPath;
     }
-    result = await tryfun(loadGithub(source));
-    if (result) return;
-    await tryfun(loadServerless(source));
+    appPath = await tryfun(loadGithub(source));
+    if (appPath) return appPath;
+    return await tryfun(loadServerless(source));
   }
 }
 

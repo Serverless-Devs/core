@@ -5,8 +5,10 @@ async function test() {
   //   '/Users/shihuali/.s/components/serverlessfans.com/alibaba/fc@0.1.2',
   // );
   // const fc = await loadComponent('alibaba/fc@0.0.7', 'https://tool.serverlessfans.com/api');
-  const fc = await loadComponent('Serverless-Devs-Awesome/express-alibaba-component');
+  // const fc = await loadComponent('Serverless-Devs-Awesome/express-alibaba-component');
   // const fc = await loadComponent('Serverless-Devs/Serverless-Devs');
+  const fc = await loadComponent('Serverless-Devs-Awesome/express-alibaba-component','https://api.github.com/repos')
+
   console.log(fc);
   // await loadApplication('Serverless-Devs/Serverless-Devs', 'https://tool.serverlessfans.com/api');
 }
