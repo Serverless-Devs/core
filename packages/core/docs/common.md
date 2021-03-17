@@ -146,6 +146,15 @@ loadComponent('alibaba/fc@0.1.2');
 
 ![Demo](https://img.alicdn.com/imgextra/i1/O1CN01LukqOH1bJr6l77VGk_!!6000000003445-1-tps-1312-200.gif)
 
+- 支持加载本地组件
+
+```typescript
+const { loadComponent } = require('@serverless-devs/core');
+loadComponent('/Users/shihuali/.s/components/serverlessfans.com/alibaba/fc@0.1.2');
+```
+
+![Demo](https://img.alicdn.com/imgextra/i1/O1CN01LukqOH1bJr6l77VGk_!!6000000003445-1-tps-1312-200.gif)
+
 ## loadApplication
 
 - 用于加载应用，方法读取逻辑同 `loadComponent`，区别是应用会下载到当前目录下, 该方法无返回值。

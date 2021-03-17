@@ -1,0 +1,27 @@
+MyFunctionDemo:
+  Component: fc
+  Provider: alibaba
+  Properties:
+    Region: cn-hangz
+    Service:
+      Name: xx
+      Description: Serverless 为你写诗
+    Function:
+      Name: serverless_poem
+      Description: Serverless 为你写诗
+      CodeUri: ./src
+      Handler: index.handler
+      MemorySize: 128
+      Runtime: python3
+      Timeout: 5
+      Triggers:
+        - Name: PoemTrigger
+          Type: HTTP
+          Parameters:
+            AuthType: ANONYMOUS
+            Methods:
+              - GET
+              - POST
+              - PUT
+            Domains:
+              - Domain: Auto
