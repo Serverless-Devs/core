@@ -1,5 +1,5 @@
 import fs from 'fs-extra';
-
+import path from 'path';
 import { S_ROOT_HOME_COMPONENT } from '../../libs/common';
 import {
   buildComponentInstance,
@@ -24,7 +24,7 @@ async function loadServerless(source: string) {
   const baseArgs = { name, version, provider };
   const componentPaths: IComponentPath = await generateComponentPath(
     baseArgs,
-    `${S_ROOT_HOME_COMPONENT}/serverlessfans.com`,
+    path.resolve(S_ROOT_HOME_COMPONENT, 'serverlessfans.com'),
   );
   const { componentPath, lockPath } = componentPaths;
   // 通过是否存在 .s.lock文件来判断
@@ -47,13 +47,18 @@ async function loadGithub(source: string) {
     const findObj = result.find((item) => item.tag_name === version);
     if (!findObj) return;
     zipball_url = findObj.zipball_url;
-    componentPath = `${S_ROOT_HOME_COMPONENT}/github.com/${user}/${componentName}`;
+    componentPath = path.resolve(S_ROOT_HOME_COMPONENT, 'github.com', user, componentName);
   } else {
     const result = await getGithubReleasesLatest(user, name);
     zipball_url = result.zipball_url;
-    componentPath = `${S_ROOT_HOME_COMPONENT}/github.com/${user}/${componentName}@${result.tag_name}`;
+    componentPath = path.resolve(
+      S_ROOT_HOME_COMPONENT,
+      'github.com',
+      user,
+      `${componentName}@${result.tag_name}`,
+    );
   }
-  const lockPath = `${componentPath}/.s.lock`;
+  const lockPath = path.resolve(componentPath, '.s.lock');
   if (!fs.existsSync(lockPath)) {
     await downloadRequest(zipball_url, componentPath, {
       extract: true,
@@ -61,6 +66,7 @@ async function loadGithub(source: string) {
     });
     fs.writeFileSync(lockPath, zipball_url);
   }
+  await installDependency(name, { componentPath, componentVersion: zipball_url, lockPath });
   return await buildComponentInstance(componentPath);
 }
 

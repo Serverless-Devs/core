@@ -1,4 +1,4 @@
-import { loadApplication } from '../../src/common';
+import { loadComponent } from '../../src/common';
 
 async function test() {
   // const fc = await loadComponent(
@@ -10,11 +10,13 @@ async function test() {
   //   // '../',
   //   '/Users/shihuali/workspace/s-core/packages/core',
   // );
-  // const fc = await loadComponent('Serverless-Devs-Awesome/express-alibaba-component');
+  const fc = await loadComponent('Serverless-Devs-Awesome/express-alibaba-component');
   // const fc = await loadComponent('Serverless-Devs/Serverless-Devs');
   // const fc = await loadComponent('Serverless-Devs-Awesome/express-alibaba-component','https://api.github.com/repos')
 
-  const fc = await loadApplication('Serverless-Devs/Serverless-Devs@1.1.13');
+  // const fc = await loadApplication('Serverless-Devs/Serverless-Devs@1.1.13');
+
+  // const fc = await loadComponent('alibaba/fc@0.1.7');
   console.log(fc);
 }
 

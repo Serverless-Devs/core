@@ -9,7 +9,7 @@ const { spawnSync } = require('child_process');
 
 export interface IComponentPath {
   componentVersion: string;
-  applicationPath: string;
+  applicationPath?: string;
   componentPath: string;
   lockPath: string;
 }
