@@ -497,3 +497,47 @@ async function test() {
 ```
 
 ![demo](https://img.alicdn.com/imgextra/i1/O1CN01vMID0V1UvE7SfqloB_!!6000000002579-1-tps-1215-697.gif)
+
+## modifyProps
+
+#### 用于修改当前目录下 <s.yml> 文件的 `Properties` 属性， 第一次执行该方法时，会备份<s.yml>到<s.origin.yml>
+
+第一个参数接收 <s.yml> 的 service, 第二个参数 接收 Properties，其值会 merge 到 <s.yml> 的 Properties
+
+```typescript
+const { modifyProps } = require('@serverless-devs/core');
+
+// s.yml demo
+
+// MyFunctionDemo:
+//   Component: fc
+//   Provider: alibaba
+//   Properties:
+//     Region: cn-hangzhou
+//     Service:
+//       Name: ServerlessToolProject
+//       Description: 欢迎使用ServerlessTool
+//     Function:
+//       Name: serverless_demo_python3_http
+//       Description: 这是一个Python3-HTTP的测试案例
+//       CodeUri: ./
+//       Handler: index.handler
+//       MemorySize: 128
+//       Runtime: python3
+//       Timeout: 5
+//       Triggers:
+//         - Name: TriggerNameHttp
+//           Type: HTTP
+//           Parameters:
+//             AuthType: ANONYMOUS
+//             Methods:
+//               - GET
+//               - POST
+//               - PUT
+//             Domains:
+//               - Domain: AUTO
+
+modifyProps('MyFunctionDemo', {
+  Region: 'cn-shanghai',
+});
+```

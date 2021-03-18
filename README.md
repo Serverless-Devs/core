@@ -82,6 +82,8 @@ function loggerDemo() {
 
 - [validateProps](https://github.com/Serverless-Devs/s-core/blob/develop/packages/core/docs/common.md#validateProps) 用于检验 `input` 的 `Properties` 属性格式是否正确
 
+- [modifyProps](https://github.com/Serverless-Devs/s-core/blob/develop/packages/core/docs/common.md#modifyProps) 用于修改当前目录下 <s.yml> 文件的 `Properties` 属性
+
 #### [logger](https://github.com/Serverless-Devs/s-core/blob/develop/packages/core/docs/logger.md)
 
 - [log](https://github.com/Serverless-Devs/s-core/blob/develop/packages/core/docs/logger.md#log) 打印到终端, 具备显示不同颜色的能力
