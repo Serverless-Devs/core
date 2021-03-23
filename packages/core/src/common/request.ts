@@ -3,7 +3,6 @@ import got from 'got';
 import { ProgressService, ProgressType } from '@serverless-devs/s-progress-bar';
 import { green } from 'colors';
 import spinner from './spinner';
-import { Logger } from '../logger';
 import decompress from 'decompress';
 import fs from 'fs-extra';
 import i18n from '../libs/i18n';
@@ -64,7 +63,7 @@ export async function request(url: string, options?: RequestOptions): Promise<an
 
 export async function downloadRequest(url: string, dest: string, options?: MyDownloadOptions) {
   const { extract, strip, ...rest } = options || {};
-  Logger.log('prepare downloading');
+  const spin = spinner('prepare downloading');
   let len: number;
   try {
     const { headers } = await got(url, { method: 'HEAD' });
@@ -80,19 +79,18 @@ export async function downloadRequest(url: string, dest: string, options?: MyDow
     const format = `${green(':loading')} ${green('downloading')} `;
     bar = new ProgressService(ProgressType.Loading, { total: 100 }, format);
   }
-  Logger.log('start downloading');
-
+  spin.text = 'start downloading';
   await download(url, dest, rest).on('downloadProgress', (progress) => {
     bar.update(progress.transferred);
   });
   bar.terminate();
-  Logger.log('download success');
+  spin.text = 'download success';
   if (extract) {
     const files = fs.readdirSync(dest);
     const filename = files[0];
-    const vm = spinner(i18n.__('File unzipping...'));
+    spin.text = i18n.__('File unzipping...');
     await decompress(`${dest}/${filename}`, dest, { strip });
     await fs.unlink(`${dest}/${filename}`);
-    vm.succeed(i18n.__('File decompression completed'));
+    spin.succeed(i18n.__('File decompression completed'));
   }
 }
