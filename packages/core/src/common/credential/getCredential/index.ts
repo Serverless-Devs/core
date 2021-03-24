@@ -47,9 +47,18 @@ async function getCredential(provider: string, accessAlias?: string) {
     return addAccess(provider);
   }
   const [, Alias] = access.split('.');
+  const formatObj = accessContent[access];
+  if (Object.prototype.hasOwnProperty.call(formatObj, 'AccountID')) {
+    return {
+      Alias,
+      ...formatObj,
+      AccountID:
+        typeof formatObj.AccountID === 'string' ? formatObj.AccountID : String(formatObj.AccountID),
+    };
+  }
   return {
     Alias,
-    ...accessContent[access],
+    ...formatObj,
   };
 }
 
