@@ -3,7 +3,7 @@ import { getCredential } from '../../src/common';
 async function get() {
   const c = await getCredential('alibaba');
   // const c = await getCredential('google');
-  console.log(typeof c.AccountID);
+  console.log(c);
 }
 
 get();

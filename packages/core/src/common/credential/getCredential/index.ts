@@ -2,6 +2,7 @@ import inquirer from 'inquirer';
 import { providerArray } from '../constant';
 import getAccess from './getAccess';
 import addAccess from '../setCredential/addAccess';
+import get from 'lodash.get';
 
 async function getCredential(provider: string, accessAlias?: string) {
   if (!provider) {
@@ -11,6 +12,16 @@ async function getCredential(provider: string, accessAlias?: string) {
     throw Error(
       `The cloud vendor[${provider}] was not found. [alibaba/aws/azure/baidu/google/huawei/tencent/custom]`,
     );
+  }
+  const AccountKeyIDFromEnv = get(process, 'env.AccessKeyID');
+  const AccessKeySecretFromEnv = get(process, 'env.AccessKeySecret');
+  if (AccountKeyIDFromEnv && AccessKeySecretFromEnv) {
+    return {
+      Alias: get(process, 'env.AccessKeySecret', 'default'),
+      AccountID: get(process, 'env.AccountID'),
+      AccessKeyID: AccountKeyIDFromEnv,
+      AccessKeySecret: AccessKeySecretFromEnv,
+    };
   }
 
   const accessContent = getAccess(provider, accessAlias);
