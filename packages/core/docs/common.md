@@ -541,3 +541,13 @@ modifyProps('MyFunctionDemo', {
   Region: 'cn-shanghai',
 });
 ```
+
+## installDependency
+
+#### 用于安装依赖
+
+```typescript
+const { installDependency } = require('@serverless-devs/core');
+
+installDependency({ cwd: process.cwd(), stdio: 'inherit', production: true });
+```
