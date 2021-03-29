@@ -16,7 +16,7 @@ async function test() {
 
   // const fc = await loadApplication('Serverless-Devs/Serverless-Devs@1.1.13');
 
-  const fc = await loadComponent('alibaba/fc@0.1.8');
+  const fc = await loadComponent('alibaba/tornado');
   console.log(fc);
 }
 

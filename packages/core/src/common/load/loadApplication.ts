@@ -1,13 +1,12 @@
 import { S_CURRENT } from '../../libs/common';
 import {
-  downloadComponent,
-  generateComponentPath,
-  IComponentPath,
   installAppDependency,
   RegistryEnum,
   Registry,
   getGithubReleases,
   getGithubReleasesLatest,
+  getServerlessReleases,
+  getServerlessReleasesLatest,
 } from './service';
 import path from 'path';
 import * as config from '../../libs/handler-set-config';
@@ -15,13 +14,24 @@ import { downloadRequest } from '../request';
 
 async function loadServerless(source: string, target?: string) {
   if (!source.includes('/')) return;
-  const [provider, componentName] = source.split('/');
+  const [, componentName] = source.split('/');
   if (!componentName) return;
   const [name, version] = componentName.split('@');
-  const baseArgs = { name, version, provider };
-  const componentPaths: IComponentPath = await generateComponentPath(baseArgs, target);
-  const { applicationPath } = componentPaths;
-  await downloadComponent(applicationPath, { name, provider });
+  let zipball_url: string;
+  if (version) {
+    const result = await getServerlessReleases(name);
+    const findObj = result.find((item) => item.tag_name === version);
+    if (!findObj) return;
+    zipball_url = findObj.zipball_url;
+  } else {
+    const result = await getServerlessReleasesLatest(name);
+    zipball_url = result.zipball_url;
+  }
+  const applicationPath = path.resolve(target, name);
+  await downloadRequest(zipball_url, applicationPath, {
+    extract: true,
+    strip: 1,
+  });
   await installAppDependency(applicationPath);
   return applicationPath;
 }

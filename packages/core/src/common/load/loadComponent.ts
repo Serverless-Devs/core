@@ -3,14 +3,13 @@ import path from 'path';
 import { S_ROOT_HOME_COMPONENT } from '../../libs/common';
 import {
   buildComponentInstance,
-  downloadComponent,
-  generateComponentPath,
-  IComponentPath,
   installDependency,
   RegistryEnum,
   Registry,
   getGithubReleases,
   getGithubReleasesLatest,
+  getServerlessReleases,
+  getServerlessReleasesLatest,
 } from './service';
 import * as config from '../../libs/handler-set-config';
 import { downloadRequest } from '../request';
@@ -18,19 +17,34 @@ import { Logger } from '../../logger';
 
 async function loadServerless(source: string) {
   if (!source.includes('/')) return;
-  const [provider, componentName] = source.split('/');
+  const [, componentName] = source.split('/');
   if (!componentName) return;
   const [name, version] = componentName.split('@');
-  const baseArgs = { name, version, provider };
-  const componentPaths: IComponentPath = await generateComponentPath(
-    baseArgs,
-    path.resolve(S_ROOT_HOME_COMPONENT, 'serverlessfans.com'),
-  );
-  const { componentPath, lockPath } = componentPaths;
-  // 通过是否存在 .s.lock文件来判断
+  let zipball_url: string;
+  let componentPath: string;
+  if (version) {
+    const result = await getServerlessReleases(name);
+    const findObj = result.find((item) => item.tag_name === version);
+    if (!findObj) return;
+    zipball_url = findObj.zipball_url;
+    componentPath = path.resolve(S_ROOT_HOME_COMPONENT, 'serverlessfans.cn', componentName);
+  } else {
+    const result = await getServerlessReleasesLatest(name);
+    zipball_url = result.zipball_url;
+    componentPath = path.resolve(
+      S_ROOT_HOME_COMPONENT,
+      'serverlessfans.cn',
+      `${componentName}@${result.tag_name}`,
+    );
+  }
+  const lockPath = path.resolve(componentPath, '.s.lock');
   if (!fs.existsSync(lockPath)) {
-    await downloadComponent(componentPath, baseArgs);
-    await installDependency(baseArgs.name, componentPaths);
+    await downloadRequest(zipball_url, componentPath, {
+      extract: true,
+      strip: 1,
+    });
+    await installDependency(name, { componentPath, componentVersion: zipball_url, lockPath });
+    fs.writeFileSync(lockPath, zipball_url);
   }
   return await buildComponentInstance(componentPath);
 }
@@ -64,9 +78,9 @@ async function loadGithub(source: string) {
       extract: true,
       strip: 1,
     });
+    await installDependency(name, { componentPath, componentVersion: zipball_url, lockPath });
     fs.writeFileSync(lockPath, zipball_url);
   }
-  await installDependency(name, { componentPath, componentVersion: zipball_url, lockPath });
   return await buildComponentInstance(componentPath);
 }
 

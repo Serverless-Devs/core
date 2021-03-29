@@ -123,7 +123,7 @@ serverless hub 源为 `<云厂商>/<组件名>` 会下载最新版本，`<云厂
 github 源为 `<用户名>/<项目名称>` 会下载最新版本，`<用户名>/<项目名称>@<项目发布的版本号>` 会下载指定版本
 支持本地调试，可传本地组件的当前路径
 
-type Registry = 'https://tool.serverlessfans.com/api' | 'https://api.github.com/repos'
+type Registry = 'http://registry.serverlessfans.cn/simple' | 'https://api.github.com/repos'
 
 - 优先读取方法传入的参数 registry，如果找不到，然后读取 ~/.s/components/set-config.yml 文件里的 registry，如果找不到
 - cli case: 先读取 github 源，如果找不到在读取 serverless hub 源
