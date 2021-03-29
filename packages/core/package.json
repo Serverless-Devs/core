@@ -54,6 +54,7 @@
     "uid": "^2.0.0"
   },
   "devDependencies": {
+    "@types/archiver": "^5.1.0",
     "@types/command-line-usage": "^5.0.1",
     "@types/download": "^6.2.4",
     "@types/fs-extra": "9.0.1",

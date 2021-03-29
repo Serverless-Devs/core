@@ -1,8 +1,11 @@
-const fs = require('fs-extra');
-const archiver = require('archiver');
-const path = require('path');
-const ignore = require('ignore');
-const readline = require('readline');
+import fs from 'fs-extra';
+import archiver from 'archiver';
+import get from 'lodash.get';
+import { green } from 'colors';
+import { ProgressService, ProgressType } from '@serverless-devs/s-progress-bar';
+import path from 'path';
+import ignore from 'ignore';
+import readline from 'readline';
 const processCwd = process.cwd();
 
 const isWindows = process.platform === 'win32';
@@ -58,6 +61,17 @@ async function zip(options: Options) {
   }
 
   return await new Promise((resolve, reject) => {
+    let bar: ProgressService;
+    zipArchiver.on('progress', (processOptions) => {
+      if (!bar) {
+        bar = new ProgressService(
+          ProgressType.Bar,
+          { total: get(processOptions, 'fs.totalBytes') },
+          `${green('ziping')} ((:bar)) :current/:total(Bytes) :percent :etas`,
+        );
+      }
+      bar.update(get(processOptions, 'fs.processedBytes'));
+    });
     output.on('close', () => {
       const compressedSize = zipArchiver.pointer();
       console.log('Package complete.');
