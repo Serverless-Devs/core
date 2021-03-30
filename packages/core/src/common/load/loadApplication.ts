@@ -1,6 +1,5 @@
 import { S_CURRENT } from '../../libs/common';
 import {
-  installAppDependency,
   RegistryEnum,
   Registry,
   getGithubReleases,
@@ -11,6 +10,7 @@ import {
 import path from 'path';
 import * as config from '../../libs/handler-set-config';
 import { downloadRequest } from '../request';
+import installDependency from '../installDependency';
 
 async function loadServerless(source: string, target?: string) {
   if (!source.includes('/')) return;
@@ -32,7 +32,7 @@ async function loadServerless(source: string, target?: string) {
     extract: true,
     strip: 1,
   });
-  await installAppDependency(applicationPath);
+  await installDependency({ cwd: applicationPath });
   return applicationPath;
 }
 
@@ -56,7 +56,7 @@ async function loadGithub(source: string, target?: string) {
     extract: true,
     strip: 1,
   });
-  await installAppDependency(applicationPath);
+  await installDependency({ cwd: applicationPath });
   return applicationPath;
 }
 

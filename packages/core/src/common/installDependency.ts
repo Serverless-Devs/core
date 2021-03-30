@@ -43,7 +43,6 @@ async function installDependency(options?: IOptions) {
     }
     return Promise.reject('> Execute Error');
   }
-  return Promise.reject(`${cwd}/package.json file not found`);
 }
 
 export default installDependency;

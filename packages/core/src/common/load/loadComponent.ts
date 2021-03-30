@@ -3,7 +3,6 @@ import path from 'path';
 import { S_ROOT_HOME_COMPONENT } from '../../libs/common';
 import {
   buildComponentInstance,
-  installDependency,
   RegistryEnum,
   Registry,
   getGithubReleases,
@@ -14,6 +13,7 @@ import {
 import * as config from '../../libs/handler-set-config';
 import { downloadRequest } from '../request';
 import { Logger } from '../../logger';
+import installDependency from '../installDependency';
 
 async function loadServerless(source: string) {
   if (!source.includes('/')) return;
@@ -38,12 +38,13 @@ async function loadServerless(source: string) {
     );
   }
   const lockPath = path.resolve(componentPath, '.s.lock');
+
   if (!fs.existsSync(lockPath)) {
     await downloadRequest(zipball_url, componentPath, {
       extract: true,
       strip: 1,
     });
-    await installDependency(name, { componentPath, componentVersion: zipball_url, lockPath });
+    await installDependency({ cwd: componentPath, production: true });
     fs.writeFileSync(lockPath, zipball_url);
   }
   return await buildComponentInstance(componentPath);
@@ -78,7 +79,7 @@ async function loadGithub(source: string) {
       extract: true,
       strip: 1,
     });
-    await installDependency(name, { componentPath, componentVersion: zipball_url, lockPath });
+    await installDependency({ cwd: componentPath, production: true });
     fs.writeFileSync(lockPath, zipball_url);
   }
   return await buildComponentInstance(componentPath);
@@ -148,9 +149,8 @@ async function loadComponent(source: string, registry?: Registry) {
   // 本地调试
   if (fs.existsSync(source)) {
     return await buildComponentInstance(source);
-  } else {
-    return await loadRemoteComponent(source, registry);
   }
+  return await loadRemoteComponent(source, registry);
 }
 
 export const load = loadComponent;

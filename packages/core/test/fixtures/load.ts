@@ -1,4 +1,4 @@
-import { loadComponent } from '../../src/common';
+import { loadApplication } from '../../src/common';
 
 async function test() {
   // const fc = await loadComponent(
@@ -16,7 +16,7 @@ async function test() {
 
   // const fc = await loadApplication('Serverless-Devs/Serverless-Devs@1.1.13');
 
-  const fc = await loadComponent('alibaba/tornado');
+  const fc = await loadApplication('alibaba/tornado');
   console.log(fc);
 }
 
