@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
-import yaml from 'js-yaml';
 import { loadComponent } from './load';
 import { S_ROOT_HOME } from '../libs/common';
+import getYamlContent from './getYamlContent';
 
 function getKeys(obj: object) {
   const key = Object.keys(obj)[0];
@@ -133,28 +133,22 @@ async function publicCheckYaml(publish, input) {
   return errors.length > 0 ? errors : null;
 }
 
-async function getLocalPublishPath(component: string) {
+async function getLocalPublish(component: string) {
   const arr = component.split('/');
   const parentDirectory = arr.slice(0, arr.length - 2).join('/');
-  if (fs.existsSync(`${parentDirectory}/publish.yaml`)) {
-    return `${parentDirectory}/publish.yaml`;
-  }
-  if (fs.existsSync(`${parentDirectory}/publish.yml`)) {
-    return `${parentDirectory}/publish.yml`;
-  }
+  let result: any;
+  result = getYamlContent(`${parentDirectory}/publish.yaml`);
+  if (result) return result;
+
   const sameLevelDirectory = arr.slice(0, arr.length - 1).join('/');
-  if (fs.existsSync(`${sameLevelDirectory}/publish.yaml`)) {
-    return `${sameLevelDirectory}/publish.yaml`;
-  }
-  if (fs.existsSync(`${sameLevelDirectory}/publish.yml`)) {
-    return `${sameLevelDirectory}/publish.yml`;
-  }
+  result = getYamlContent(`${sameLevelDirectory}/publish.yaml`);
+  if (result) return result;
   throw new Error(
     `未找到publish.yaml或者publish.yml文件，寻找${component}的同级目录或者上级目录下的publish.yaml或者publish.yaml文件， 同级目录优先级大于上级目录`,
   );
 }
 
-async function getPublishPath(Component: string, Provider: string) {
+async function getPublish(Component: string, Provider: string) {
   let publishYamlPath: string;
   if (Component.includes('@')) {
     const [name, version] = Component.split('@');
@@ -170,12 +164,8 @@ async function getPublishPath(Component: string, Provider: string) {
     });
     publishYamlPath = `${S_ROOT_HOME}/components/${maxVersion}`;
   }
-  if (fs.existsSync(`${publishYamlPath}/publish.yaml`)) {
-    return `${publishYamlPath}/publish.yaml`;
-  }
-  if (fs.existsSync(`${publishYamlPath}/publish.yml`)) {
-    return `${publishYamlPath}/publish.yml`;
-  }
+  const result = getYamlContent(`${publishYamlPath}/publish.yaml`);
+  if (result) return;
   throw new Error('未找到publish.yaml或者publish.yml文件');
 }
 
@@ -189,20 +179,14 @@ async function validateProps(input) {
   }
   const exist = fs.existsSync(Component);
 
-  let publishYamlPath: string;
+  let content: any;
   // 本地调试
   if (exist) {
-    publishYamlPath = await getLocalPublishPath(Component);
+    content = await getLocalPublish(Component);
   } else {
     // 远程获取
     await loadComponent(`${Provider}/${Component}`);
-    publishYamlPath = await getPublishPath(Component, Provider);
-  }
-  let content: any;
-  try {
-    content = yaml.safeLoad(fs.readFileSync(publishYamlPath, 'utf8'));
-  } catch (e) {
-    throw new Error(e.message);
+    content = await getPublish(Component, Provider);
   }
 
   if (content.Properties) {
