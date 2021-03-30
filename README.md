@@ -87,6 +87,8 @@ function loggerDemo() {
 
 - [installDependency](https://github.com/Serverless-Devs/s-core/blob/develop/packages/core/docs/common.md#installDependency) 用于安装依赖
 
+- [getYamlContent](https://github.com/Serverless-Devs/s-core/blob/develop/packages/core/docs/common.md#getYamlContent) 用于获取文件内容，兼容 yaml 和 yml 文件
+
 #### [logger](https://github.com/Serverless-Devs/s-core/blob/develop/packages/core/docs/logger.md)
 
 - [log](https://github.com/Serverless-Devs/s-core/blob/develop/packages/core/docs/logger.md#log) 打印到终端, 具备显示不同颜色的能力

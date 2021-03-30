@@ -551,3 +551,14 @@ const { installDependency } = require('@serverless-devs/core');
 
 installDependency({ cwd: process.cwd(), stdio: 'inherit', production: true });
 ```
+
+## getYamlContent
+
+#### 用于获取文件内容，兼容 yaml 和 yml 文件
+
+```typescript
+const { getYamlContent } = require('@serverless-devs/core');
+
+// 路径 请更换为 自己项目的 yaml或者yml文件的 当前路径
+getYamlContent('/Users/shihuali/workspace/s-core/s.yaml');
+```
