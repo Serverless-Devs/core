@@ -8,19 +8,19 @@ const input = {
   Properties: {
     Region: 'cn-hangzhouxx',
     Service: {
-      // Name: 'xx',
+      Name: 'xx',
       Log: {
-        LogStore: '',
-        Project: 'xx',
+        LogStore: 'xx',
+        Project: '',
       },
       Nas: [
         {
           label: 'xx',
-          value: 'xx',
+          value: [{ name: 'xx', age: '20' }],
         },
         {
-          label: '',
-          value: 'xx',
+          label: 'xx',
+          value: [{ name: 'xx', age: '20' }],
         },
       ],
     },

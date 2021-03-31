@@ -11,49 +11,97 @@ function getKeys(obj: object) {
   };
 }
 
-enum BaseType {
-  String = 'string',
-  Boolean = 'boolean',
-  Number = 'number',
-  'List<String>' = 'array-string',
-  'List<Boolean>' = 'array-boolean',
-  'List<Number>' = 'array-number',
+function isArray(value: any): boolean {
+  return Array.isArray(value);
+}
+
+function getValueType(value: any) {
+  return typeof value;
 }
 
 /*  eslint valid-typeof: "off"  */
 async function checkYaml(publish, input, errors, prefix?: string) {
   Object.keys(publish).forEach(async (a) => {
     const errorKey = prefix ? `${prefix}.${a}` : a;
+    // if value exist
     if (input[a]) {
       const { Type } = publish[a];
-      if (Array.isArray(Type) && Type.length > 1) {
+      // type为数组且长度大于1的case，满足条件其一即可
+      if (isArray(Type) && Type.length > 1) {
         let errorCount = 0;
         Type.forEach(async (item) => {
-          if (typeof item === 'string') {
-            if (BaseType[item].includes('array-')) {
-              if (Array.isArray(input[a])) {
-                input[a].forEach((b) => {
-                  if (typeof b !== BaseType[item].split('-')[1]) {
-                    errorCount += 1;
-                  }
-                });
-              } else {
-                errorCount += 1;
-              }
-            } else if (typeof input[a] !== BaseType[item]) {
+          if (item === 'String') {
+            getValueType(input[a]) !== 'string' && (errorCount += 1);
+          }
+
+          if (item === 'Number') {
+            getValueType(input[a]) !== 'number' && (errorCount += 1);
+          }
+
+          if (item === 'Boolean') {
+            getValueType(input[a]) !== 'boolean' && (errorCount += 1);
+          }
+
+          if (item === 'Null') {
+            input[a] !== null && (errorCount += 1);
+          }
+
+          if (item === 'List<String>') {
+            if (isArray(input[a])) {
+              input[a].some((obj) => getValueType(obj) !== 'string') && (errorCount += 1);
+            } else {
               errorCount += 1;
             }
-          } else {
-            // object, key为 Enum, Struct, List
+          }
+
+          if (item === 'List<Number>') {
+            if (isArray(input[a])) {
+              input[a].some((obj) => getValueType(obj) !== 'number') && (errorCount += 1);
+            } else {
+              errorCount += 1;
+            }
+          }
+
+          if (item === 'List<Boolean>') {
+            if (isArray(input[a])) {
+              input[a].some((obj) => getValueType(obj) !== 'boolean') && (errorCount += 1);
+            } else {
+              errorCount += 1;
+            }
+          }
+
+          if (item === 'List<Null>') {
+            if (isArray(input[a])) {
+              input[a].some((obj) => obj !== null) && (errorCount += 1);
+            } else {
+              errorCount += 1;
+            }
+          }
+
+          // typeof item 为 object 的 case
+          if (getValueType(item) === 'object') {
             const { key, value } = getKeys(item);
+            // key为 Enum, Struct List
             if (key.includes('Enum')) {
               const filterList = value.filter((obj) => obj === input[a]);
               if (filterList.length === 0) {
                 errorCount += 1;
               }
-            } else if (key.includes('Struct')) {
-              if (typeof input[a] === 'object') {
+            }
+
+            if (key.includes('Struct')) {
+              if (getValueType(input[a]) === 'object') {
                 await checkYaml(value, input[a], errors, errorKey);
+              } else {
+                errorCount += 1;
+              }
+            }
+
+            if (key.includes('List')) {
+              if (isArray(input[a])) {
+                input[a].forEach(async (b, i) => {
+                  await checkYaml(value, b, errors, `${errorKey}[${i}]`);
+                });
               } else {
                 errorCount += 1;
               }
@@ -66,31 +114,101 @@ async function checkYaml(publish, input, errors, prefix?: string) {
           });
         }
       } else {
-        const item = Array.isArray(Type) ? Type[0] : Type;
-        // string, boolean, number, List<string>
-        if (typeof item === 'string') {
-          if (BaseType[item].includes('array-')) {
-            if (Array.isArray(input[a])) {
-              input[a].forEach((b) => {
-                if (typeof b !== BaseType[item].split('-')[1]) {
-                  errors.push({
-                    [errorKey]: `请检查值的正确性，需设置为 [${item}]`,
-                  });
-                }
-              });
-            } else {
-              errors.push({
-                [errorKey]: '请检查值的正确性，需设置为 [List]',
-              });
-            }
-          } else if (typeof input[a] !== BaseType[item]) {
+        const item = isArray(Type) ? Type[0] : Type;
+        // typeof item 为 string 的 case
+        // String, Number, Boolean, Null, List<T>
+        if (item === 'String') {
+          getValueType(input[a]) !== 'string' &&
             errors.push({
-              [errorKey]: `请检查值的正确性，需设置为 [${item}]`,
+              [errorKey]: '请检查值的类型，需设置为 [String] 类型',
+            });
+        }
+
+        if (item === 'Number') {
+          getValueType(input[a]) !== 'number' &&
+            errors.push({
+              [errorKey]: '请检查值的类型，需设置为 [Number] 类型',
+            });
+        }
+
+        if (item === 'Boolean') {
+          getValueType(input[a]) !== 'boolean' &&
+            errors.push({
+              [errorKey]: '请检查值的类型，需设置为 [Boolean] 类型',
+            });
+        }
+
+        if (item === 'Null') {
+          input[a] !== null &&
+            errors.push({
+              [errorKey]: '请检查值的正确性，需设置为 null',
+            });
+        }
+
+        if (item === 'List<String>') {
+          if (isArray(input[a])) {
+            input[a].forEach((obj, index) => {
+              getValueType(obj) !== 'string' &&
+                errors.push({
+                  [`${errorKey}[${index}]`]: '请检查值的类型，需设置为 [String] 类型',
+                });
+            });
+          } else {
+            errors.push({
+              [errorKey]: '请检查值的正确性，需设置为 [List]',
             });
           }
-        } else {
-          // object, key为 Enum, Struct List
+        }
+
+        if (item === 'List<Number>') {
+          if (isArray(input[a])) {
+            input[a].forEach((obj, index) => {
+              getValueType(obj) !== 'number' &&
+                errors.push({
+                  [`${errorKey}[${index}]`]: '请检查值的类型，需设置为 [Number] 类型',
+                });
+            });
+          } else {
+            errors.push({
+              [errorKey]: '请检查值的正确性，需设置为 [List]',
+            });
+          }
+        }
+
+        if (item === 'List<Boolean>') {
+          if (isArray(input[a])) {
+            input[a].forEach((obj, index) => {
+              getValueType(obj) !== 'boolean' &&
+                errors.push({
+                  [`${errorKey}[${index}]`]: '请检查值的类型，需设置为 [Boolean] 类型',
+                });
+            });
+          } else {
+            errors.push({
+              [errorKey]: '请检查值的正确性，需设置为 [List]',
+            });
+          }
+        }
+
+        if (item === 'List<Null>') {
+          if (isArray(input[a])) {
+            input[a].forEach((obj, index) => {
+              obj !== null &&
+                errors.push({
+                  [`${errorKey}[${index}]`]: '请检查值的正确性，需设置为 [null]',
+                });
+            });
+          } else {
+            errors.push({
+              [errorKey]: '请检查值的正确性，需设置为 [List]',
+            });
+          }
+        }
+
+        // typeof item 为 object 的 case
+        if (getValueType(item) === 'object') {
           const { key, value } = getKeys(item);
+          // key为 Enum, Struct List
           if (key.includes('Enum')) {
             const filterList = value.filter((obj) => obj === input[a]);
             if (filterList.length === 0) {
@@ -98,16 +216,20 @@ async function checkYaml(publish, input, errors, prefix?: string) {
                 [errorKey]: `请检查值的正确性，需设置为 [${value}]`,
               });
             }
-          } else if (key.includes('Struct')) {
-            if (typeof input[a] === 'object') {
+          }
+
+          if (key.includes('Struct')) {
+            if (getValueType(input[a]) === 'object') {
               await checkYaml(value, input[a], errors, errorKey);
             } else {
               errors.push({
-                [errorKey]: '请检查值的正确性，需设置为 [object]',
+                [errorKey]: '请检查值的正确性，需设置为 [Object]',
               });
             }
-          } else if (key.includes('List')) {
-            if (Array.isArray(input[a])) {
+          }
+
+          if (key.includes('List')) {
+            if (isArray(input[a])) {
               input[a].forEach(async (b, i) => {
                 await checkYaml(value, b, errors, `${errorKey}[${i}]`);
               });
@@ -120,6 +242,7 @@ async function checkYaml(publish, input, errors, prefix?: string) {
         }
       }
     } else if (publish[a].Required) {
+      // value is required or not
       errors.push({
         [errorKey]: '必填字段',
       });
