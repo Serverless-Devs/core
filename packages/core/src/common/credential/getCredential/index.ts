@@ -4,6 +4,22 @@ import getAccess from './getAccess';
 import addAccess from '../setCredential/addAccess';
 import get from 'lodash.get';
 
+/**
+ *
+ * @param accessAlias
+ * @param ...envKeys
+ * @returns
+ * 更改:
+ * 1. 没有provider概念
+ * 2. 环境变量 第二个参数
+ * getCredential(null, 'AccessKeyID', 'AccessKeySecret')
+ * return {
+ *  AccessKeyID: process.env.AccessKeyID
+ *  AccessKeySecret: process.env.AccessKeySecret
+ * }
+ * 3. accessAlias默认会使用default密钥信息,如果使用default的时候，consle.log(使用默认的default密钥信息)
+ * 4. 密钥加密
+ */
 async function getCredential(provider: string, accessAlias?: string) {
   if (!provider) {
     throw Error('The cloud vendor [provider] was required');
