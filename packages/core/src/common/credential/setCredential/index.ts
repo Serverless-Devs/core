@@ -2,6 +2,11 @@ import inquirer from 'inquirer';
 import getAccess from './getAccess';
 import addAccess from './addAccess';
 
+/**
+ *
+ * @param ...envKeys
+ * @returns
+ */
 async function setCredential(provider?: string) {
   const accessContent = getAccess(provider);
   const choices = [];
