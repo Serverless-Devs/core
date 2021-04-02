@@ -111,6 +111,11 @@ async function zipFolder(zipArchiver, folder, folders, funignore, codeUri, prefi
   const dir = path.join(...folders);
   const dirItems = await fs.readdir(dir);
 
+  // 判断是否为空文件
+  if (dirItems.length === 0) {
+    return zipArchiver.file(dir, { name: folder });
+  }
+
   const pmaps: Array<number> = await Promise.all(
     dirItems.map(async (f) => {
       const fPath = path.join(dir, f);

@@ -4,7 +4,37 @@ import yaml from 'js-yaml';
 import { S_CURRENT } from '../libs/common';
 import { merge } from '../libs/utils';
 import minimist from 'minimist';
-import getYamlContent from './getYamlContent';
+// import getYamlContent from './getYamlContent';
+// TODO：后续 getYamlContent 方法从外部引入
+
+/**
+ *
+ * @param filePath 文件的当前路径
+ * @description 函数内部会兼容yaml和yml文件，返回文件内容
+ */
+async function getYamlContent(filePath: string) {
+  // yaml 文件
+  if (filePath.endsWith('yaml')) {
+    if (fs.existsSync(filePath)) {
+      return yaml.safeLoad(fs.readFileSync(filePath, 'utf8'));
+    }
+    const ymlPath = filePath.replace('.yaml', '.yml');
+    if (fs.existsSync(ymlPath)) {
+      return yaml.safeLoad(fs.readFileSync(ymlPath, 'utf8'));
+    }
+  }
+
+  // yml 文件
+  if (filePath.endsWith('yml')) {
+    if (fs.existsSync(filePath)) {
+      return yaml.safeLoad(fs.readFileSync(filePath, 'utf8'));
+    }
+    const yamlPath = filePath.replace('.yml', '.yaml');
+    if (fs.existsSync(yamlPath)) {
+      return yaml.safeLoad(fs.readFileSync(yamlPath, 'utf8'));
+    }
+  }
+}
 
 async function modifyProps(service: string, options: object) {
   const args = minimist(process.argv.slice(2));
@@ -17,6 +47,7 @@ async function modifyProps(service: string, options: object) {
       templte = 's.yml';
     }
   }
+  if (!templte) return;
   const [name, end] = templte.split('.');
   const originPath = path.resolve(S_CURRENT, `${name}.origin.${end}`);
   const filePath = path.resolve(S_CURRENT, templte);
