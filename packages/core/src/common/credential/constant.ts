@@ -155,7 +155,7 @@ export const checkProviderList: any[] = [
   {
     type: 'list',
     name: 'provider',
-    message: 'Please select a provider:',
+    message: 'Please select a template:',
     choices: [
       { name: i18n.__('Alibaba Cloud (alibaba)'), value: 'alibaba' },
       { name: i18n.__('AWS (aws)'), value: 'aws' },

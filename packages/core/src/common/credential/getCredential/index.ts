@@ -1,7 +1,7 @@
 import inquirer from 'inquirer';
 import { providerArray } from '../constant';
 import getAccess from './getAccess';
-import addAccess from '../setCredential/addAccess';
+import addAccess from '../setCredential';
 import get from 'lodash.get';
 
 /**
