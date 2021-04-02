@@ -73,6 +73,9 @@ async function writeData({ info, accessAlias }) {
   }
 }
 
+/**
+ * @param args 可选参数，接收设置密钥的key，如果不传方法内部提供了设置密钥的相关模版
+ */
 async function setCredential(...args: any[]) {
   let selectedProvider: string;
   let info: any;

@@ -1,33 +1,19 @@
 import inquirer from 'inquirer';
-import { providerArray } from '../constant';
 import getAccess from './getAccess';
-import addAccess from '../setCredential';
+import setCredential from '../setCredential';
 import get from 'lodash.get';
 
 /**
- *
- * @param accessAlias
- * @param ...envKeys
- * @returns
- * 更改:
- * 1. 没有provider概念
- * 2. 环境变量 第二个参数
- * getCredential(null, 'AccessKeyID', 'AccessKeySecret')
- * return {
- *  AccessKeyID: process.env.AccessKeyID
- *  AccessKeySecret: process.env.AccessKeySecret
- * }
- * 3. accessAlias默认会使用default密钥信息,如果使用default的时候，consle.log(使用默认的default密钥信息)
- * 4. 密钥加密
+ * @param access 可选参数，密钥的别名
+ * @param args 可选参数，接收设置密钥的key，如果不传新建密钥的时候，方法内部提供了设置密钥的相关模版
  */
-async function getCredential(provider: string, accessAlias?: string) {
-  if (!provider) {
-    throw Error('The cloud vendor [provider] was required');
-  }
-  if (!providerArray.includes(provider)) {
-    throw Error(
-      `The cloud vendor[${provider}] was not found. [alibaba/aws/azure/baidu/google/huawei/tencent/custom]`,
-    );
+async function getCredential(access?: string, ...args: any[]) {
+  let accessAlias: string;
+  if (access) {
+    accessAlias = access;
+  } else {
+    console.log('使用默认的default密钥信息');
+    accessAlias = 'default';
   }
   const AccountKeyIDFromEnv = get(process, 'env.AccessKeyID');
   const AccessKeySecretFromEnv = get(process, 'env.AccessKeySecret');
@@ -40,29 +26,37 @@ async function getCredential(provider: string, accessAlias?: string) {
     };
   }
 
-  const accessContent = getAccess(provider, accessAlias);
+  const accessContent = await getAccess(accessAlias);
+
   const accessKeys = Object.keys(accessContent);
-  if (accessAlias && accessKeys.length > 0) {
-    return accessContent[`${provider}.${accessAlias}`];
-  }
-  const choices = [];
-  if (accessKeys.length === 0) {
-    choices.push({
-      name: `未找到${provider}${accessAlias ? `.${accessAlias}` : ''}的相关信息，选择此选项退出`,
-      value: 'over',
-    });
-  } else {
-    Object.keys(accessContent).forEach((item) => {
-      const [start, end] = item.split('.');
-      const temp = {
-        name: `${start}: ${end}`,
-        value: item,
+
+  // 找到已经创建过的密钥，直接返回密钥信息
+  if (accessKeys.length > 0) {
+    const formatObj = accessContent[accessAlias];
+    if (Object.prototype.hasOwnProperty.call(formatObj, 'AccountID')) {
+      return {
+        Alias: accessAlias,
+        ...formatObj,
+        AccountID:
+          typeof formatObj.AccountID === 'string'
+            ? formatObj.AccountID
+            : String(formatObj.AccountID),
       };
-      choices.push(temp);
-    });
+    }
+    return {
+      Alias: accessAlias,
+      ...formatObj,
+    };
   }
-  choices.push({ name: 'Create a new account', value: 'create' });
-  const { access } = await inquirer.prompt([
+
+  const choices = [
+    {
+      name: `未找到${accessAlias}的相关信息，选择此选项退出`,
+      value: 'over',
+    },
+    { name: 'Create a new account', value: 'create' },
+  ];
+  const { access: selectAccess } = await inquirer.prompt([
     {
       type: 'list',
       name: 'access',
@@ -70,23 +64,9 @@ async function getCredential(provider: string, accessAlias?: string) {
       choices,
     },
   ]);
-  if (access === 'create') {
-    return addAccess(provider);
+  if (selectAccess === 'create') {
+    return setCredential(...args);
   }
-  const [, Alias] = access.split('.');
-  const formatObj = accessContent[access];
-  if (Object.prototype.hasOwnProperty.call(formatObj, 'AccountID')) {
-    return {
-      Alias,
-      ...formatObj,
-      AccountID:
-        typeof formatObj.AccountID === 'string' ? formatObj.AccountID : String(formatObj.AccountID),
-    };
-  }
-  return {
-    Alias,
-    ...formatObj,
-  };
 }
 
 export default getCredential;
