@@ -148,6 +148,14 @@ async function loadComponent(source: string, registry?: Registry) {
   if (fs.existsSync(source)) {
     return await buildComponentInstance(source);
   }
+  // js里引用下, 判断 registry 值是否 合法
+  if (registry) {
+    if (registry !== RegistryEnum.github && registry !== RegistryEnum.serverless) {
+      throw new Error(
+        `请检查registry的值，需设置为[${RegistryEnum.github}, ${RegistryEnum.serverless}]`,
+      );
+    }
+  }
   return await loadRemoteComponent(source, registry);
 }
 

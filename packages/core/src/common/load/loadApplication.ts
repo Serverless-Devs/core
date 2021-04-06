@@ -76,6 +76,15 @@ async function tryfun(f: Promise<any>) {
 }
 
 async function loadApplication(source: string, registry?: Registry, target?: string) {
+  // js里引用下, 判断 registry 值是否 合法
+  if (registry) {
+    if (registry !== RegistryEnum.github && registry !== RegistryEnum.serverless) {
+      throw new Error(
+        `请检查registry的值，需设置为[${RegistryEnum.github}, ${RegistryEnum.serverless}]`,
+      );
+    }
+  }
+
   const targetPath = target || S_CURRENT;
   let appPath: string;
   // gui
