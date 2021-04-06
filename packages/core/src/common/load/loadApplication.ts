@@ -30,7 +30,6 @@ async function loadServerless(source: string, target?: string) {
   const applicationPath = path.resolve(target, name);
   await downloadRequest(zipball_url, applicationPath, {
     extract: true,
-    strip: 1,
   });
   await installDependency({ cwd: applicationPath });
   return applicationPath;
@@ -54,7 +53,6 @@ async function loadGithub(source: string, target?: string) {
   const applicationPath = path.resolve(target, name);
   await downloadRequest(zipball_url, applicationPath, {
     extract: true,
-    strip: 1,
   });
   await installDependency({ cwd: applicationPath });
   return applicationPath;

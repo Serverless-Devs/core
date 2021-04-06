@@ -81,10 +81,11 @@ export async function downloadRequest(url: string, dest: string, options?: MyDow
   }
   spin.text = 'start downloading';
   await download(url, dest, rest).on('downloadProgress', (progress) => {
+    spin.stop();
     bar.update(progress.transferred);
   });
   bar.terminate();
-  spin.text = 'download success';
+  spin.start('download success');
   if (extract) {
     const files = fs.readdirSync(dest);
     const filename = files[0];

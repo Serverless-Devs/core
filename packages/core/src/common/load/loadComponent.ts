@@ -42,7 +42,6 @@ async function loadServerless(source: string) {
   if (!fs.existsSync(lockPath)) {
     await downloadRequest(zipball_url, componentPath, {
       extract: true,
-      strip: 1,
     });
     await installDependency({ cwd: componentPath, production: true });
     fs.writeFileSync(lockPath, zipball_url);
@@ -77,7 +76,6 @@ async function loadGithub(source: string) {
   if (!fs.existsSync(lockPath)) {
     await downloadRequest(zipball_url, componentPath, {
       extract: true,
-      strip: 1,
     });
     await installDependency({ cwd: componentPath, production: true });
     fs.writeFileSync(lockPath, zipball_url);
