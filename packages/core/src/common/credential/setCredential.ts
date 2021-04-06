@@ -6,7 +6,7 @@ import yaml from 'js-yaml';
 import { providerCollection, checkProviderList } from './constant';
 import i18n from '../../libs/i18n';
 import getYamlContent from '../getYamlContent';
-const CryptoTS = require('crypto-ts');
+const Crypto = require('crypto-js');
 
 async function handleCustom(info: any) {
   const option = {
@@ -50,7 +50,7 @@ function output({ info, accessAlias }) {
 function encrypt(info: any = {}) {
   const cloneInfo = Object.assign({}, info);
   Object.keys(cloneInfo).forEach((key) => {
-    const ciphertext = CryptoTS.AES.encrypt(cloneInfo[key], 'SecretKey123');
+    const ciphertext = Crypto.AES.encrypt(cloneInfo[key], 'SecretKey123');
     cloneInfo[key] = ciphertext.toString();
   });
   return cloneInfo;

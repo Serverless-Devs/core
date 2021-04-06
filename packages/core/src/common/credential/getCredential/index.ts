@@ -2,13 +2,13 @@ import inquirer from 'inquirer';
 import getAccess from './getAccess';
 import setCredential from '../setCredential';
 import get from 'lodash.get';
-const CryptoTS = require('crypto-ts');
+const Crypto = require('crypto-js');
 
 function decrypt(info: any = {}) {
   const cloneInfo = Object.assign({}, info);
   Object.keys(cloneInfo).forEach((key) => {
-    const bytes = CryptoTS.AES.decrypt(cloneInfo[key], 'SecretKey123');
-    cloneInfo[key] = bytes.toString(CryptoTS.enc.Utf8);
+    const bytes = Crypto.AES.decrypt(cloneInfo[key], 'SecretKey123');
+    cloneInfo[key] = bytes.toString(Crypto.enc.Utf8);
   });
   return cloneInfo;
 }
