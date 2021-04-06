@@ -6,6 +6,7 @@ import yaml from 'js-yaml';
 import { providerCollection, checkProviderList } from './constant';
 import i18n from '../../libs/i18n';
 import getYamlContent from '../getYamlContent';
+const CryptoTS = require('crypto-ts');
 
 async function handleCustom(info: any) {
   const option = {
@@ -46,6 +47,15 @@ function output({ info, accessAlias }) {
   console.info('Configuration successful');
 }
 
+function encrypt(info: any = {}) {
+  const cloneInfo = Object.assign({}, info);
+  Object.keys(cloneInfo).forEach((key) => {
+    const ciphertext = CryptoTS.AES.encrypt(cloneInfo[key], 'SecretKey123');
+    cloneInfo[key] = ciphertext.toString();
+  });
+  return cloneInfo;
+}
+
 async function writeData({ info, accessAlias }) {
   const filePath = path.join(os.homedir(), '.s/access.yaml');
   const content = await getYamlContent(filePath);
@@ -57,7 +67,7 @@ async function writeData({ info, accessAlias }) {
       );
     } else {
       try {
-        fs.appendFileSync(filePath, yaml.dump({ [accessAlias]: info }));
+        fs.appendFileSync(filePath, yaml.dump({ [accessAlias]: encrypt(info) }));
         output({ info, accessAlias });
       } catch (err) {
         throw Error('Configuration failed');
@@ -65,7 +75,7 @@ async function writeData({ info, accessAlias }) {
     }
   } else {
     try {
-      fs.writeFileSync(filePath, yaml.dump({ [accessAlias]: info }));
+      fs.writeFileSync(filePath, yaml.dump({ [accessAlias]: encrypt(info) }));
       output({ info, accessAlias });
     } catch (err) {
       throw Error('Configuration failed');

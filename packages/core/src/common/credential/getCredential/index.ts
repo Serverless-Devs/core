@@ -2,6 +2,16 @@ import inquirer from 'inquirer';
 import getAccess from './getAccess';
 import setCredential from '../setCredential';
 import get from 'lodash.get';
+const CryptoTS = require('crypto-ts');
+
+function decrypt(info: any = {}) {
+  const cloneInfo = Object.assign({}, info);
+  Object.keys(cloneInfo).forEach((key) => {
+    const bytes = CryptoTS.AES.decrypt(cloneInfo[key], 'SecretKey123');
+    cloneInfo[key] = bytes.toString(CryptoTS.enc.Utf8);
+  });
+  return cloneInfo;
+}
 
 /**
  * @param access 可选参数，密钥的别名
@@ -15,8 +25,11 @@ async function getCredential(access?: string, ...args: any[]) {
     console.log('使用默认的default密钥信息');
     accessAlias = 'default';
   }
+
+  // 从环境变量获取
   const AccountKeyIDFromEnv = get(process, 'env.AccessKeyID');
   const AccessKeySecretFromEnv = get(process, 'env.AccessKeySecret');
+
   if (AccountKeyIDFromEnv && AccessKeySecretFromEnv) {
     return {
       Alias: get(process, 'env.AccessKeySecret', 'default'),
@@ -32,7 +45,7 @@ async function getCredential(access?: string, ...args: any[]) {
 
   // 找到已经创建过的密钥，直接返回密钥信息
   if (accessKeys.length > 0) {
-    const formatObj = accessContent[accessAlias];
+    const formatObj = decrypt(accessContent[accessAlias]);
     if (Object.prototype.hasOwnProperty.call(formatObj, 'AccountID')) {
       return {
         Alias: accessAlias,

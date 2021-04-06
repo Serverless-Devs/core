@@ -38,6 +38,7 @@
     "archiver": "^5.2.0",
     "chalk": "^4.1.0",
     "command-line-usage": "^6.1.1",
+    "crypto-ts": "^1.0.2",
     "decompress": "^4.2.1",
     "download": "^8.0.0",
     "fs-extra": "9.0.1",
