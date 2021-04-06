@@ -113,7 +113,7 @@ async function zipFolder(zipArchiver, folder, folders, funignore, codeUri, prefi
 
   // 判断是否为空文件
   if (dirItems.length === 0) {
-    return zipArchiver.file(dir, { name: folder });
+    return zipArchiver.file(dir, { name: path.relative(codeUri, dir) });
   }
 
   const pmaps: Array<number> = await Promise.all(
