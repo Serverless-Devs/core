@@ -1,4 +1,8 @@
 import { request } from '../request';
+import { readJsonFile } from '../../libs/utils';
+import path from 'path';
+import fs from 'fs';
+import get from 'lodash.get';
 
 export type Registry = 'http://registry.serverlessfans.cn/simple' | 'https://api.github.com/repos';
 
@@ -8,9 +12,39 @@ export enum RegistryEnum {
 }
 
 export const buildComponentInstance = async (componentPath: string) => {
-  // const requiredComponentPath =
-  //   componentPath.lastIndexOf('index') > -1 ? componentPath : path.join(componentPath, 'index');
-  const baseChildComponent = await require(componentPath);
+  let index: string;
+  const packageInfo: any = readJsonFile(path.resolve(componentPath, 'package.json'));
+  // 首先寻找 package.json 文件下的 main
+  if (packageInfo.main) {
+    index = packageInfo.main;
+  }
+  // 其次检查 tsconfig.json 文件下的 outDir
+  if (!index) {
+    const tsconfigPath = path.resolve(componentPath, 'tsconfig.json');
+    if (fs.existsSync(tsconfigPath)) {
+      const tsconfigInfo: any = readJsonFile(tsconfigPath);
+      index = get(tsconfigInfo, 'compilerOptions.outDir');
+    }
+  }
+
+  // 其次寻找 src/index.js
+  if (!index) {
+    const srcIndexPath = path.resolve(componentPath, './src/index.js');
+    if (fs.existsSync(srcIndexPath)) {
+      index = './src/index.js';
+    }
+  }
+
+  // 最后寻找 ./index.js
+  if (!index) {
+    const indexPath = path.resolve(componentPath, './index.js');
+    if (fs.existsSync(indexPath)) {
+      index = './index.js';
+    }
+  }
+
+  if (!index) return;
+  const baseChildComponent = await require(path.resolve(componentPath, index));
   const ChildComponent = baseChildComponent.default
     ? baseChildComponent.default
     : baseChildComponent;
@@ -26,11 +60,9 @@ export const getGithubReleasesLatest = async (user: string, name: string) => {
 };
 
 export const getServerlessReleases = async (name: string) => {
-  const result: any = await request(`${RegistryEnum.serverless}/${name}/releases`);
-  return result;
+  return await request(`${RegistryEnum.serverless}/${name}/releases`);
 };
 
 export const getServerlessReleasesLatest = async (name: string) => {
-  const result: any = await request(`${RegistryEnum.serverless}/${name}/releases/latest`);
-  return result;
+  return await request(`${RegistryEnum.serverless}/${name}/releases/latest`);
 };
