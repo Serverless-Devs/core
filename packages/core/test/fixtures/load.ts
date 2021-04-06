@@ -11,12 +11,12 @@ async function test() {
   //   '/Users/shihuali/workspace/s-core/packages/core',
   // );
   // const fc = await loadComponent('Serverless-Devs-Awesome/express-alibaba-component');
-  // const fc = await loadComponent('Serverless-Devs/Serverless-Devs');
+  const fc = await loadComponent('Serverless-Devs/Serverless-Devs');
   // const fc = await loadComponent('Serverless-Devs-Awesome/express-alibaba-component','https://api.github.com/repos')
 
   // const fc = await loadApplication('Serverless-Devs/Serverless-Devs@1.1.13');
 
-  const fc = await loadComponent('alibaba/fc');
+  // const fc = await loadComponent('alibaba/fc');
   console.log(fc);
 }
 

@@ -1,4 +1,3 @@
-import got from 'got';
 import { request } from '../request';
 
 export type Registry = 'http://registry.serverlessfans.cn/simple' | 'https://api.github.com/repos';
@@ -19,13 +18,11 @@ export const buildComponentInstance = async (componentPath: string) => {
 };
 
 export const getGithubReleases = async (user: string, name: string) => {
-  const result: any = await got(`${RegistryEnum.github}/${user}/${name}/releases`);
-  return JSON.parse(result.body);
+  return await request(`${RegistryEnum.github}/${user}/${name}/releases`);
 };
 
 export const getGithubReleasesLatest = async (user: string, name: string) => {
-  const result: any = await got(`${RegistryEnum.github}/${user}/${name}/releases/latest`);
-  return JSON.parse(result.body);
+  return await request(`${RegistryEnum.github}/${user}/${name}/releases/latest`);
 };
 
 export const getServerlessReleases = async (name: string) => {

@@ -58,7 +58,7 @@ export async function request(url: string, options?: RequestOptions): Promise<an
   }
 
   success && spinner(success).succeed();
-  return body.Response;
+  return body.Response || body;
 }
 
 export async function downloadRequest(url: string, dest: string, options?: MyDownloadOptions) {
@@ -80,18 +80,22 @@ export async function downloadRequest(url: string, dest: string, options?: MyDow
     bar = new ProgressService(ProgressType.Loading, { total: 100 }, format);
   }
   spin.text = 'start downloading';
-  await download(url, dest, rest).on('downloadProgress', (progress) => {
+  try {
+    await download(url, dest, rest).on('downloadProgress', (progress) => {
+      spin.stop();
+      bar.update(progress.transferred);
+    });
+    bar.terminate();
+    spin.start('download success');
+    if (extract) {
+      const files = fs.readdirSync(dest);
+      const filename = files[0];
+      spin.text = i18n.__('File unzipping...');
+      await decompress(`${dest}/${filename}`, dest, { strip });
+      await fs.unlink(`${dest}/${filename}`);
+      spin.succeed(i18n.__('File decompression completed'));
+    }
+  } catch (error) {
     spin.stop();
-    bar.update(progress.transferred);
-  });
-  bar.terminate();
-  spin.start('download success');
-  if (extract) {
-    const files = fs.readdirSync(dest);
-    const filename = files[0];
-    spin.text = i18n.__('File unzipping...');
-    await decompress(`${dest}/${filename}`, dest, { strip });
-    await fs.unlink(`${dest}/${filename}`);
-    spin.succeed(i18n.__('File decompression completed'));
   }
 }
