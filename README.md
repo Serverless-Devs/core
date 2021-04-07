@@ -77,7 +77,7 @@ function loggerDemo() {
 - [i18n](https://github.com/Serverless-Devs/s-core/blob/develop/packages/core/docs/common.md#i18n) 用于国际化
 - [commadParse](https://github.com/Serverless-Devs/s-core/blob/develop/packages/core/docs/common.md#commandparse) 命令行参数解析工具，用于解析命令行参数。格式为 args(Input, options) 解析工具采用 minimist 详细使用查看
 
-- [getCredential](https://github.com/Serverless-Devs/s-core/blob/develop/packages/core/docs/common.md#getCredential)/[setCredential](https://github.com/Serverless-Devs/s-core/blob/develop/packages/core/docs/common.md#setCredential) 用于获取和创建密钥信息, 目前 provider 支持 [alibaba/aws/azure/baidu/google/huawei/tencent/custom(自定义)]
+- [getCredential](https://github.com/Serverless-Devs/s-core/blob/develop/packages/core/docs/common.md#getCredential)/[setCredential](https://github.com/Serverless-Devs/s-core/blob/develop/packages/core/docs/common.md#setCredential) 用于获取和创建密钥信息
 
 - [getState](https://github.com/Serverless-Devs/s-core/blob/develop/packages/core/docs/common.md#getState)/[setState](https://github.com/Serverless-Devs/s-core/blob/develop/packages/core/docs/common.md#setState) 用于获取和设置文件内容
 

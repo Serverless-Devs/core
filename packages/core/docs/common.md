@@ -356,7 +356,7 @@ function test() {
 
 #### 用于获取密钥信息，可接收（alias, ...envKeys)
 
-- 不传任何参数的时候，会获取 default 密钥密钥
+- 不传任何参数的时候，会获取 `default` 密钥信息
 
 ```typescript
 const { getCredential } = require('@serverless-devs/core');
