@@ -117,34 +117,32 @@ class ReportDemo {
 
 - loadComponent(source: string, registry?: Registry)
 
-```txt
-source 传参数格式:
-serverless hub 源为 `<云厂商>/<组件名>` 会下载最新版本，`<云厂商>/<组件名>@<组件版本号>` 会下载指定版本
-github 源为 `<用户名>/<项目名称>` 会下载最新版本，`<用户名>/<项目名称>@<项目发布的版本号>` 会下载指定版本
-支持本地调试，可传本地组件的当前路径
-
-type Registry = 'http://registry.serverlessfans.cn/simple' | 'https://api.github.com/repos'
-
-- 优先读取方法传入的参数 registry，如果找不到，然后读取 ~/.s/components/set-config.yml 文件里的 registry，如果找不到
-- cli case: 先读取 github 源，如果找不到在读取 serverless hub 源
-- gui case: 先读取 serverless hub 源，如果找不到在读取 github 源
+```typescript
+/**
+ * source 传参数格式说明
+ * 1.serverless hub 源为 `<组件名>` 会下载最新版本，`<组件名>@<组件版本号>` 会下载指定版本
+ * 2.github 源为 `<用户名>/<项目名称>` 会下载最新版本，`<用户名>/<项目名称>@<项目发布的版本号>` 会下载指定版本
+ * 3.支持本地调试，可传本地组件的当前路径
+ *
+ * registry 参数说明，值为 'http://registry.serverlessfans.cn/simple' 或者 'https://api.github.com/repos'
+ * 优先读取方法传入的参数 registry，如果找不到，然后读取 ~/.s/components/set-config.yml 文件里的 registry，如果找不到
+ * cli case: 先读取 github 源，如果找不到在读取 serverless hub 源
+ * gui case: 先读取 serverless hub 源，如果找不到在读取 github 源
+ *
+ * /
 ```
 
 ```typescript
 const { loadComponent } = require('@serverless-devs/core');
-loadComponent('alibaba/fc');
+loadComponent('fc-deploy');
 ```
-
-![Demo](https://img.alicdn.com/imgextra/i1/O1CN01LukqOH1bJr6l77VGk_!!6000000003445-1-tps-1312-200.gif)
 
 - 支持下载特定版本的组件
 
 ```typescript
 const { loadComponent } = require('@serverless-devs/core');
-loadComponent('alibaba/fc@0.1.2');
+loadComponent('fc-deploy@0.1.2');
 ```
-
-![Demo](https://img.alicdn.com/imgextra/i1/O1CN01LukqOH1bJr6l77VGk_!!6000000003445-1-tps-1312-200.gif)
 
 - 支持加载本地组件
 
@@ -153,11 +151,30 @@ const { loadComponent } = require('@serverless-devs/core');
 loadComponent('/Users/shihuali/.s/components/serverlessfans.com/alibaba/fc@0.1.2');
 ```
 
-![Demo](https://img.alicdn.com/imgextra/i1/O1CN01LukqOH1bJr6l77VGk_!!6000000003445-1-tps-1312-200.gif)
-
 ## loadApplication
 
-- 用于加载应用，方法读取逻辑同 `loadComponent`，区别是应用会下载到当前目录下, 该方法无返回值。
+#### 用于加载应用，支持下载到指定目录，如果不指定，则默认会下载到当前目录
+
+- loadComponent(source: string, registry?: string, target?:string)
+
+```typescript
+/**
+ * source 传参数格式说明
+ * 1.serverless hub 源为 `<应用名>` 会下载最新版本，`<应用名>@<应用版本号>` 会下载指定版本
+ * 2.github 源为 `<用户名>/<项目名称>` 会下载最新版本，`<用户名>/<项目名称>@<项目发布的版本号>` 会下载指定版本
+ * 3.自定义源 为 `<应用名>`， 会下载指定资源
+ *
+ * registry 参数说明
+ * 优先读取方法传入的参数 registry，如果找不到，然后读取 ~/.s/components/set-config.yml 文件里的 registry，如果找不到
+ * cli case: 先读取 github 源，如果找不到在读取 serverless hub 源
+ * gui case: 先读取 serverless hub 源，如果找不到在读取 github 源
+ * 1.serverless hub 源 为：http://registry.serverlessfans.cn/simple
+ * 2.github 源为：https://api.github.com/repos
+ * 3.自定义源
+ *
+ * target 参数，下载资源的存放路径
+ * /
+```
 
 ```typescript
 const { loadComponent } = require('@serverless-devs/core');
@@ -165,16 +182,12 @@ loadApplication('Serverless-Devs/Serverless-Devs');
 // loadApplication('Serverless-Devs/Serverless-Devs', 'https://api.github.com/repos');
 ```
 
-![Demo](https://img.alicdn.com/imgextra/i1/O1CN01LukqOH1bJr6l77VGk_!!6000000003445-1-tps-1312-200.gif)
-
 - 支持下载特定版本的应用
 
 ```typescript
 const { loadComponent } = require('@serverless-devs/core');
 loadApplication('Serverless-Devs/Serverless-Devs@1.1.13');
 ```
-
-![Demo](https://img.alicdn.com/imgextra/i1/O1CN01LukqOH1bJr6l77VGk_!!6000000003445-1-tps-1312-200.gif)
 
 ## spinner
 
@@ -341,23 +354,37 @@ function test() {
 
 ## getCredential
 
-#### 用于获取密钥信息, 该方法接收两个参数，第一个参数是 provider，该参数必传，目前 provider 支持 [alibaba/aws/azure/baidu/google/huawei/tencent/custom]，第二个参数是 accessAlias，该参数选填
+#### 用于获取密钥信息，可接收（alias, ...envKeys)
 
-- provider 为 alibaba
+- 不传任何参数的时候，会获取 default 密钥密钥
 
 ```typescript
 const { getCredential } = require('@serverless-devs/core');
 async function get() {
-  const c = await getCredential('alibaba');
+  const c = await getCredential();
   console.log('c', c);
 }
 ```
 
-![demo](https://img.alicdn.com/imgextra/i3/O1CN01OOJ9sV1sbZtp1370z_!!6000000005785-1-tps-1215-409.gif)
+![demo](https://img.alicdn.com/imgextra/i3/O1CN016HGrtn1fZCrBDZWHb_!!6000000004020-1-tps-1215-319.gif)
+
+- 传参数
+
+```typescript
+const { getCredential } = require('@serverless-devs/core');
+async function get() {
+  const c = await getCredential('custom', 'AccountIdByCustom', 'SecretIDByCustom');
+  console.log('c', c);
+}
+```
+
+![demo](https://img.alicdn.com/imgextra/i1/O1CN01fBzz3W1ljBAyz0wfc_!!6000000004854-1-tps-1215-702.gif)
 
 ## setCredential
 
-#### 用于设置密钥信息, 该方法接收一个参数 provider, 目前 provider 支持 [alibaba/aws/azure/baidu/google/huawei/tencent/custom]
+#### 用于设置密钥信息, 可接收（...envKeys)
+
+- 不传任何参数的时候，会提供 模版[alibaba/aws/azure/baidu/google/huawei/tencent/custom] 来 创建密钥信息
 
 ```typescript
 const { setCredential } = require('@serverless-devs/core');
@@ -368,17 +395,20 @@ async function set() {
 }
 ```
 
-- Provider 为空的 case
+![demo](https://img.alicdn.com/imgextra/i2/O1CN01D1CUb01NlsjX7Rtvq_!!6000000001611-1-tps-1215-459.gif)
 
-![demo](https://img.alicdn.com/imgextra/i2/O1CN01JBu5EO1Q9oeNdQCzr_!!6000000001934-1-tps-1312-273.gif)
+- 传参数
 
-- Provider 为 alibaba 的 case
+```typescript
+const { setCredential } = require('@serverless-devs/core');
 
-![demo](https://img.alicdn.com/imgextra/i4/O1CN01EstoE11ltiH06n6rE_!!6000000004877-1-tps-1312-273.gif)
+async function set() {
+  const c = await setCredential('AccountIdByCustom', 'SecretIDByCustom');
+  console.log('c', c);
+}
+```
 
-- Provider 为 custom 的 case
-
-![demo](https://img.alicdn.com/imgextra/i2/O1CN013aOETJ1CdfqojG1IH_!!6000000000104-1-tps-1312-337.gif)
+![demo](https://gw.alicdn.com/imgextra/i2/O1CN01w8fORm1sYN8lWmGsb_!!6000000005778-1-tps-1215-459.gif)
 
 ## getState
 

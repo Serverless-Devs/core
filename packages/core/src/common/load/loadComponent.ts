@@ -16,10 +16,7 @@ import { Logger } from '../../logger';
 import installDependency from '../installDependency';
 
 async function loadServerless(source: string) {
-  if (!source.includes('/')) return;
-  const [, componentName] = source.split('/');
-  if (!componentName) return;
-  const [name, version] = componentName.split('@');
+  const [name, version] = source.split('@');
   let zipball_url: string;
   let componentPath: string;
   if (version) {
@@ -27,14 +24,14 @@ async function loadServerless(source: string) {
     const findObj = result.find((item) => item.tag_name === version);
     if (!findObj) return;
     zipball_url = findObj.zipball_url;
-    componentPath = path.resolve(S_ROOT_HOME_COMPONENT, 'serverlessfans.cn', componentName);
+    componentPath = path.resolve(S_ROOT_HOME_COMPONENT, 'serverlessfans.cn', source);
   } else {
     const result = await getServerlessReleasesLatest(name);
     zipball_url = result.zipball_url;
     componentPath = path.resolve(
       S_ROOT_HOME_COMPONENT,
       'serverlessfans.cn',
-      `${componentName}@${result.tag_name}`,
+      `${source}@${result.tag_name}`,
     );
   }
   const lockPath = path.resolve(componentPath, '.s.lock');

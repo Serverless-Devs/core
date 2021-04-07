@@ -1,6 +1,6 @@
 {
   "name": "@serverless-devs/core",
-  "version": "0.0.44",
+  "version": "0.0.45",
   "description": "Serverless Devs Tool Core Component",
   "keywords": [
     "Serverless",
@@ -28,7 +28,7 @@
     "test:cov": "jest --coverage",
     "lint": "npm run typecheck && f2elint scan -i src",
     "fix": "f2elint fix",
-    "publish": "bash publish.sh",
+    "pub": "npm run build && npm publish",
     "typecheck": "npx tsc -p tsconfig.json --noEmit"
   },
   "main": "./lib/index.js",

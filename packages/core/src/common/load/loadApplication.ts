@@ -12,10 +12,7 @@ import { downloadRequest } from '../request';
 import installDependency from '../installDependency';
 
 async function loadServerless(source: string, target?: string) {
-  if (!source.includes('/')) return;
-  const [, componentName] = source.split('/');
-  if (!componentName) return;
-  const [name, version] = componentName.split('@');
+  const [name, version] = source.split('@');
   let zipball_url: string;
   if (version) {
     const result = await getServerlessReleases(name);
