@@ -37,10 +37,11 @@ async function installDependency(options?: IOptions) {
         shell: true,
       },
     );
-    spin.succeed();
     if (get(result, 'status') === 0) {
+      spin.succeed();
       return Promise.resolve(true);
     }
+    spin.fail();
     return Promise.reject('> Execute Error');
   }
 }

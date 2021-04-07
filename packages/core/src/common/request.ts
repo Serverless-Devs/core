@@ -86,14 +86,16 @@ export async function downloadRequest(url: string, dest: string, options?: MyDow
       bar.update(progress.transferred);
     });
     bar.terminate();
-    spin.start('download success');
     if (extract) {
+      spin.start('download success');
       const files = fs.readdirSync(dest);
       const filename = files[0];
       spin.text = i18n.__('File unzipping...');
       await decompress(`${dest}/${filename}`, dest, { strip });
       await fs.unlink(`${dest}/${filename}`);
       spin.succeed(i18n.__('File decompression completed'));
+    } else {
+      spin.succeed('download success');
     }
   } catch (error) {
     spin.stop();

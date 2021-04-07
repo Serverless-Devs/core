@@ -1,7 +1,6 @@
 import { S_CURRENT } from '../../libs/common';
 import {
   RegistryEnum,
-  Registry,
   getGithubReleases,
   getGithubReleasesLatest,
   getServerlessReleases,
@@ -60,7 +59,7 @@ async function loadGithub(source: string, target?: string) {
   return applicationPath;
 }
 
-async function loadType(source: string, registry?: Registry, target?: string) {
+async function loadType(source: string, registry?: string, target?: string) {
   if (registry === RegistryEnum.serverless) {
     return await loadServerless(source, target);
   }
@@ -77,17 +76,25 @@ async function tryfun(f: Promise<any>) {
   }
 }
 
-async function loadApplication(source: string, registry?: Registry, target?: string) {
-  // js里引用下, 判断 registry 值是否 合法
+async function loadApplicationByUrl(source: string, registry?: string, target?: string) {
+  const applicationPath = path.resolve(target, source);
+  await downloadRequest(registry, applicationPath, {
+    extract: true,
+    strip: 1,
+  });
+  await installDependency({ cwd: applicationPath });
+  return applicationPath;
+}
+
+async function loadApplication(source: string, registry?: string, target?: string) {
+  const targetPath = target || S_CURRENT;
   if (registry) {
     if (registry !== RegistryEnum.github && registry !== RegistryEnum.serverless) {
-      throw new Error(
-        `请检查registry的值，需设置为[${RegistryEnum.github}, ${RegistryEnum.serverless}]`,
-      );
+      // 支持 自定义
+      return await loadApplicationByUrl(source, registry, targetPath);
     }
   }
 
-  const targetPath = target || S_CURRENT;
   let appPath: string;
   // gui
   if ((process.versions as any).electron) {
