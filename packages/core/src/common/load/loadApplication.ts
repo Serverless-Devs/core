@@ -76,6 +76,7 @@ async function tryfun(f: Promise<any>) {
 async function loadApplicationByUrl(source: string, registry?: string, target?: string) {
   const applicationPath = path.resolve(target, source);
   await downloadRequest(registry, applicationPath, {
+    postfix: 'zip',
     extract: true,
     strip: 1,
   });

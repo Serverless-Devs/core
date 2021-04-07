@@ -12,10 +12,11 @@ async function test() {
   // const fc = await loadApplication('Serverless-Devs/Serverless-Devs');
   // const fc = await loadComponent('Serverless-Devs-Awesome/express-alibaba-component','https://api.github.com/repos')
 
-  const fc = await loadApplication('vue', 'https://api.github.com/repos/vuejs/vue/zipball/v2.6.11');
+  const fc = await loadApplication('vue', 'https://download.registry.serverlessfans.cn/init/alibaba-node.js12-http');
 
   // const fc = await loadComponent('alibaba/fc-deploy');
   console.log(fc);
 }
 
 test();
+

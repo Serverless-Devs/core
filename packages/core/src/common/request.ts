@@ -5,6 +5,7 @@ import { green } from 'colors';
 import spinner from './spinner';
 import decompress from 'decompress';
 import fs from 'fs-extra';
+import path from 'path';
 import i18n from '../libs/i18n';
 
 interface HintOptions {
@@ -20,7 +21,9 @@ interface RequestOptions {
   [key: string]: any;
 }
 
-export type DownloadOptions = MyDownloadOptions;
+export interface DownloadOptions extends MyDownloadOptions {
+  postfix?: string;
+}
 
 export async function request(url: string, options?: RequestOptions): Promise<any> {
   const { method = 'get', params, body: bodyFromOptions, hint = {}, json = true, ...rest } =
@@ -39,6 +42,7 @@ export async function request(url: string, options?: RequestOptions): Promise<an
       [isGet ? 'query' : 'body']: isGet ? params : bodyFromOptions,
       json,
       ...rest,
+      rejectUnauthorized: false,
     });
     loading && vm.stop();
   } catch (e) {
@@ -61,8 +65,8 @@ export async function request(url: string, options?: RequestOptions): Promise<an
   return body.Response || body;
 }
 
-export async function downloadRequest(url: string, dest: string, options?: MyDownloadOptions) {
-  const { extract, strip, ...rest } = options || {};
+export async function downloadRequest(url: string, dest: string, options?: DownloadOptions) {
+  const { extract, postfix, strip, ...rest } = options || {};
   const spin = spinner('prepare downloading');
   let len: number;
   try {
@@ -81,15 +85,23 @@ export async function downloadRequest(url: string, dest: string, options?: MyDow
   }
   spin.text = 'start downloading';
   try {
-    await download(url, dest, rest).on('downloadProgress', (progress) => {
-      spin.stop();
-      bar.update(progress.transferred);
-    });
+    await download(url, dest, { ...rest, rejectUnauthorized: false }).on(
+      'downloadProgress',
+      (progress) => {
+        spin.stop();
+        bar.update(progress.transferred);
+      },
+    );
     bar.terminate();
+
     if (extract) {
       spin.start('download success');
       const files = fs.readdirSync(dest);
-      const filename = files[0];
+      let filename = files[0];
+      if (postfix) {
+        fs.rename(path.resolve(dest, filename), path.resolve(dest, filename) + `.${postfix}`);
+        filename = filename + `.${postfix}`;
+      }
       spin.text = i18n.__('File unzipping...');
       await decompress(`${dest}/${filename}`, dest, { strip });
       await fs.unlink(`${dest}/${filename}`);
@@ -98,6 +110,7 @@ export async function downloadRequest(url: string, dest: string, options?: MyDow
       spin.succeed('download success');
     }
   } catch (error) {
+    console.error(error);
     spin.stop();
   }
 }
