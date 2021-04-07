@@ -98,7 +98,7 @@ export async function downloadRequest(url: string, dest: string, options?: Downl
       spin.start('download success');
       const files = fs.readdirSync(dest);
       let filename = files[0];
-      if (postfix) {
+      if (postfix && !filename.slice(filename.lastIndexOf('.')).startsWith('.')) {
         fs.rename(path.resolve(dest, filename), path.resolve(dest, filename) + `.${postfix}`);
         filename = filename + `.${postfix}`;
       }
