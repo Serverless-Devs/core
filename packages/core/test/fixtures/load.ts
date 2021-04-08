@@ -1,7 +1,9 @@
 import { loadComponent } from '../../src/common';
 
 async function test() {
-  // const fc = await loadComponent('/Users/shihuali/learn/fc-atom/fc-ram-alibaba-component');
+  const fc = await loadComponent('/Users/shihuali/learn/fc-atom/fc-ram-alibaba-component', null, {
+    a: 1,
+  });
   // const fc = await loadApplication(
   //   'alibaba/fc@0.0.7',
   //   'https://tool.serverlessfans.com/api',
@@ -17,7 +19,7 @@ async function test() {
   //   'https://download.registry.serverlessfans.cn/init/alibaba-node.js12-http',
   // );
 
-  const fc = await loadComponent('fc', 'http://registry.serverlessfans.cn/simple', { a: 1 });
+  // const fc = await loadComponent('fc', null, { a: 1 });
   console.log(fc);
 }
 

@@ -146,7 +146,7 @@ async function loadRemoteComponent(source: string, registry?: Registry, params?:
 async function loadComponent(source: string, registry?: Registry, params?: any) {
   // 本地调试
   if (fs.existsSync(source)) {
-    return await buildComponentInstance(source);
+    return await buildComponentInstance(source, params);
   }
   // js里引用下, 判断 registry 值是否 合法
   if (registry) {
