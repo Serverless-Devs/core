@@ -5,7 +5,7 @@ import fs from 'fs';
 import get from 'lodash.get';
 import { RegistryEnum } from '../constant';
 
-export const buildComponentInstance = async (componentPath: string) => {
+export const buildComponentInstance = async (componentPath: string, params?: any) => {
   let index: string;
   const packageInfo: any = readJsonFile(path.resolve(componentPath, 'package.json'));
   // 首先寻找 package.json 文件下的 main
@@ -42,7 +42,7 @@ export const buildComponentInstance = async (componentPath: string) => {
   const ChildComponent = baseChildComponent.default
     ? baseChildComponent.default
     : baseChildComponent;
-  return new ChildComponent();
+  return new ChildComponent(params);
 };
 
 export const getGithubReleases = async (user: string, name: string) => {

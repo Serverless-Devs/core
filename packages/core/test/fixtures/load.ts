@@ -1,4 +1,4 @@
-import { loadApplication } from '../../src/common';
+import { loadComponent } from '../../src/common';
 
 async function test() {
   // const fc = await loadComponent('/Users/shihuali/learn/fc-atom/fc-ram-alibaba-component');
@@ -12,12 +12,12 @@ async function test() {
   // const fc = await loadApplication('Serverless-Devs/Serverless-Devs');
   // const fc = await loadComponent('Serverless-Devs-Awesome/express-alibaba-component','https://api.github.com/repos')
 
-  const fc = await loadApplication(
-    'vue',
-    'https://download.registry.serverlessfans.cn/init/alibaba-node.js12-http',
-  );
+  // const fc = await loadApplication(
+  //   'vue',
+  //   'https://download.registry.serverlessfans.cn/init/alibaba-node.js12-http',
+  // );
 
-  // const fc = await loadComponent('alibaba/fc-deploy');
+  const fc = await loadComponent('alibaba/fc-deploy');
   console.log(fc);
 }
 

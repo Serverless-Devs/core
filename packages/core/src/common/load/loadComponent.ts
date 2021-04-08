@@ -14,8 +14,9 @@ import { downloadRequest } from '../request';
 import { Logger } from '../../logger';
 import installDependency from '../installDependency';
 
-async function loadServerless(source: string) {
-  const [name, version] = source.split('@');
+async function loadServerless(source: string, params?: any) {
+  const componentName = source.includes('/') ? source.split('/')[1] : source;
+  const [name, version] = componentName.split('@');
   let zipball_url: string;
   let componentPath: string;
   if (version) {
@@ -23,14 +24,15 @@ async function loadServerless(source: string) {
     const findObj = result.find((item) => item.tag_name === version);
     if (!findObj) return;
     zipball_url = findObj.zipball_url;
-    componentPath = path.resolve(S_ROOT_HOME_COMPONENT, 'serverlessfans.cn', source);
+    componentPath = path.resolve(S_ROOT_HOME_COMPONENT, 'serverlessfans.cn', componentName);
   } else {
     const result = await getServerlessReleasesLatest(name);
+    if (!result.zipball_url) return;
     zipball_url = result.zipball_url;
     componentPath = path.resolve(
       S_ROOT_HOME_COMPONENT,
       'serverlessfans.cn',
-      `${source}@${result.tag_name}`,
+      `${componentName}@${result.tag_name}`,
     );
   }
   const lockPath = path.resolve(componentPath, '.s.lock');
@@ -42,10 +44,10 @@ async function loadServerless(source: string) {
     await installDependency({ cwd: componentPath, production: true });
     fs.writeFileSync(lockPath, zipball_url);
   }
-  return await buildComponentInstance(componentPath);
+  return await buildComponentInstance(componentPath, params);
 }
 
-async function loadGithub(source: string) {
+async function loadGithub(source: string, params?: any) {
   if (!source.includes('/')) return;
   const [user, componentName] = source.split('/');
   if (!componentName) return;
@@ -60,6 +62,7 @@ async function loadGithub(source: string) {
     componentPath = path.resolve(S_ROOT_HOME_COMPONENT, 'github.com', user, componentName);
   } else {
     const result = await getGithubReleasesLatest(user, name);
+    if (!result.zipball_url) return;
     zipball_url = result.zipball_url;
     componentPath = path.resolve(
       S_ROOT_HOME_COMPONENT,
@@ -76,15 +79,15 @@ async function loadGithub(source: string) {
     await installDependency({ cwd: componentPath, production: true });
     fs.writeFileSync(lockPath, zipball_url);
   }
-  return await buildComponentInstance(componentPath);
+  return await buildComponentInstance(componentPath, params);
 }
 
-async function loadType(source: string, registry?: Registry) {
+async function loadType(source: string, registry?: Registry, params?: any) {
   if (registry === RegistryEnum.serverless) {
-    return await loadServerless(source);
+    return await loadServerless(source, params);
   }
   if (registry === RegistryEnum.github) {
-    return await loadGithub(source);
+    return await loadGithub(source, params);
   }
 }
 
@@ -101,45 +104,43 @@ function isComponent(result) {
   return !!result;
 }
 
-async function loadRemoteComponent(source: string, registry?: Registry) {
+async function loadRemoteComponent(source: string, registry?: Registry, params?: any) {
   let result: any;
   // gui
   if ((process.versions as any).electron) {
     if (registry) {
-      result = await tryfun(loadType(source, registry));
+      result = await tryfun(loadType(source, registry, params));
       if (isComponent(result)) return result;
     }
     if (config.getConfig('registry')) {
-      result = await tryfun(loadType(source, config.getConfig('registry')));
+      result = await tryfun(loadType(source, config.getConfig('registry'), params));
       if (isComponent(result)) return result;
     }
-    result = await tryfun(loadServerless(source));
+    result = await tryfun(loadServerless(source, params));
     if (isComponent(result)) return result;
 
-    result = await tryfun(loadGithub(source));
+    result = await tryfun(loadGithub(source, params));
     if (isComponent(result)) return result;
   } else {
     // cli
     if (registry) {
-      result = await tryfun(loadType(source, registry));
+      result = await tryfun(loadType(source, registry, params));
       if (isComponent(result)) return result;
     }
     if (config.getConfig('registry')) {
-      result = await tryfun(loadType(source, config.getConfig('registry')));
+      result = await tryfun(loadType(source, config.getConfig('registry'), params));
       if (isComponent(result)) return result;
     }
-    result = await tryfun(loadGithub(source));
-    if (isComponent(result)) return result;
-    result = await tryfun(loadServerless(source));
+    result = await tryfun(loadGithub(source, params));
     if (isComponent(result)) return result;
   }
   const logger = new Logger();
   // TODO: `下载的${source}的资源中，未找到相关组件`
-  logger.warn(`未找到${source}相关资源`);
+  logger.warn(`未找到${source}组件，请确定组件名或者源是否正确`);
   return null;
 }
 
-async function loadComponent(source: string, registry?: Registry) {
+async function loadComponent(source: string, registry?: Registry, params?: any) {
   // 本地调试
   if (fs.existsSync(source)) {
     return await buildComponentInstance(source);
@@ -152,7 +153,7 @@ async function loadComponent(source: string, registry?: Registry) {
       );
     }
   }
-  return await loadRemoteComponent(source, registry);
+  return await loadRemoteComponent(source, registry, params);
 }
 
 export const load = loadComponent;

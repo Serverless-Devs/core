@@ -115,7 +115,7 @@ class ReportDemo {
 
 #### `loadComponent` 方法是 `load` 方法的`别名`，用于加载组件，组件会下载到 ~/.s/components 目录下面。
 
-- loadComponent(source: string, registry?: Registry)
+- loadComponent(source: string, registry?: Registry, params: any)
 
 ```typescript
 /**
@@ -126,8 +126,10 @@ class ReportDemo {
  *
  * registry 参数说明，值为 'http://registry.serverlessfans.cn/simple' 或者 'https://api.github.com/repos'
  * 优先读取方法传入的参数 registry，如果找不到，然后读取 ~/.s/components/set-config.yml 文件里的 registry，如果找不到
- * cli case: 先读取 github 源，如果找不到在读取 serverless hub 源
+ * cli case: 读取 github 源
  * gui case: 先读取 serverless hub 源，如果找不到在读取 github 源
+ *
+ * params 参数说明，方法内部在require组件的时候会new一次，params会在new的时候透传给组件
  *
  * /
 ```
@@ -155,7 +157,7 @@ loadComponent('/Users/shihuali/.s/components/serverlessfans.com/alibaba/fc@0.1.2
 
 #### 用于加载应用，支持下载到指定目录，如果不指定，则默认会下载到当前目录
 
-- loadComponent(source: string, registry?: string, target?:string)
+- loadApplication(source: string, registry?: string, target?:string)
 
 ```typescript
 /**

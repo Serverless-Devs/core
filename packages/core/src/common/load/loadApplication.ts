@@ -21,6 +21,7 @@ async function loadServerless(source: string, target?: string) {
     zipball_url = findObj.zipball_url;
   } else {
     const result = await getServerlessReleasesLatest(name);
+    if (!result.zipball_url) return;
     zipball_url = result.zipball_url;
   }
   const applicationPath = path.resolve(target, name);
@@ -44,6 +45,7 @@ async function loadGithub(source: string, target?: string) {
     zipball_url = findObj.zipball_url;
   } else {
     const result = await getGithubReleasesLatest(user, name);
+    if (!result.zipball_url) return;
     zipball_url = result.zipball_url;
   }
   const applicationPath = path.resolve(target, name);
