@@ -34,7 +34,7 @@ function getProjectName() {
       const content = yaml.safeLoad(fs.readFileSync(file, 'utf8'));
       return Object.keys(content)[0];
     } catch (error) {
-      // ignore exception
+      console.error(error);
     }
   }
   const args = minimist(process.argv.slice(2));

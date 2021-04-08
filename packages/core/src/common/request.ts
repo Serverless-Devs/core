@@ -3,10 +3,11 @@ import got from 'got';
 import { ProgressService, ProgressType } from '@serverless-devs/s-progress-bar';
 import { green } from 'colors';
 import spinner from './spinner';
-import { Logger } from '../logger';
 import decompress from 'decompress';
 import fs from 'fs-extra';
+import path from 'path';
 import i18n from '../libs/i18n';
+import { RegistryEnum } from './constant';
 
 interface HintOptions {
   loading?: string;
@@ -21,7 +22,9 @@ interface RequestOptions {
   [key: string]: any;
 }
 
-export type DownloadOptions = MyDownloadOptions;
+export interface DownloadOptions extends MyDownloadOptions {
+  postfix?: string;
+}
 
 export async function request(url: string, options?: RequestOptions): Promise<any> {
   const { method = 'get', params, body: bodyFromOptions, hint = {}, json = true, ...rest } =
@@ -40,6 +43,7 @@ export async function request(url: string, options?: RequestOptions): Promise<an
       [isGet ? 'query' : 'body']: isGet ? params : bodyFromOptions,
       json,
       ...rest,
+      rejectUnauthorized: false,
     });
     loading && vm.stop();
   } catch (e) {
@@ -59,20 +63,21 @@ export async function request(url: string, options?: RequestOptions): Promise<an
   }
 
   success && spinner(success).succeed();
-  return body.Response;
+  return body.Response || body;
 }
 
-export async function downloadRequest(url: string, dest: string, options?: MyDownloadOptions) {
-  const { extract, strip, ...rest } = options || {};
-  Logger.log('prepare downloading');
+export async function downloadRequest(url: string, dest: string, options?: DownloadOptions) {
+  const { extract, postfix, strip, ...rest } = options || {};
+  const spin = spinner('prepare downloading');
   let len: number;
-  try {
-    const { headers } = await got(url, { method: 'HEAD' });
-    len = parseInt(headers['content-length'], 10);
-  } catch (err) {
-    // ignore error
+  if (url.startsWith(RegistryEnum.serverless)) {
+    try {
+      const { headers } = await got(url, { method: 'HEAD' });
+      len = parseInt(headers['content-length'], 10);
+    } catch (error) {
+      console.error(error);
+    }
   }
-
   let bar: ProgressService;
   if (len) {
     bar = new ProgressService(ProgressType.Bar, { total: len });
@@ -80,19 +85,34 @@ export async function downloadRequest(url: string, dest: string, options?: MyDow
     const format = `${green(':loading')} ${green('downloading')} `;
     bar = new ProgressService(ProgressType.Loading, { total: 100 }, format);
   }
-  Logger.log('start downloading');
+  spin.text = 'start downloading';
+  try {
+    await download(url, dest, { ...rest, rejectUnauthorized: false }).on(
+      'downloadProgress',
+      (progress) => {
+        spin.stop();
+        bar.update(progress.transferred);
+      },
+    );
+    bar.terminate();
 
-  await download(url, dest, rest).on('downloadProgress', (progress) => {
-    bar.update(progress.transferred);
-  });
-  bar.terminate();
-  Logger.log('download success');
-  if (extract) {
-    const files = fs.readdirSync(dest);
-    const filename = files[0];
-    const vm = spinner(i18n.__('File unzipping...'));
-    await decompress(`${dest}/${filename}`, dest, { strip });
-    await fs.unlink(`${dest}/${filename}`);
-    vm.succeed(i18n.__('File decompression completed'));
+    if (extract) {
+      spin.start('download success');
+      const files = fs.readdirSync(dest);
+      let filename = files[0];
+      if (postfix && !filename.slice(filename.lastIndexOf('.')).startsWith('.')) {
+        fs.rename(path.resolve(dest, filename), path.resolve(dest, filename) + `.${postfix}`);
+        filename = filename + `.${postfix}`;
+      }
+      spin.text = i18n.__('File unzipping...');
+      await decompress(`${dest}/${filename}`, dest, { strip });
+      await fs.unlink(`${dest}/${filename}`);
+      spin.succeed(i18n.__('File decompression completed'));
+    } else {
+      spin.succeed('download success');
+    }
+  } catch (error) {
+    spin.stop();
+    console.error(error);
   }
 }

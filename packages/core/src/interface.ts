@@ -31,10 +31,3 @@ export interface IV1Inputs {
     ConfigPath?: string;
   };
 }
-
-export interface IComponentParams {
-  name: string;
-  provider: string;
-  type?: string;
-  version?: string;
-}

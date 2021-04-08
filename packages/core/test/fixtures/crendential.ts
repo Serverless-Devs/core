@@ -1,16 +1,15 @@
-import { getCredential } from '../../src/common';
+import { setCredential } from '../../src/common';
 
-async function get() {
-  const c = await getCredential('alibaba');
-  // const c = await getCredential('google');
-  console.log('c', c);
-}
-
-get();
-
-// async function set() {
-//   const c = await setCredential('alibaba');
-//   console.log('c', c);
+// async function get() {
+//   const c = await getCredential('custom', 'AccountIdByCustom', 'SecretIDByCustom');
+//   console.log(c);
 // }
 
-// set();
+// get();
+
+async function set() {
+  const c = await setCredential('AccountIdByCustom', 'SecretIDByCustom');
+  console.log(c);
+}
+
+set();

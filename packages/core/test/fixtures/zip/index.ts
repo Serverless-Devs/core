@@ -1,8 +1,8 @@
 import { zip, unzip } from '../../../src/common';
 
 class ZipDemo {
-  testZip() {
-    zip({
+  async testZip() {
+    await zip({
       codeUri: './demo',
       include: ['../spinner.ts'],
       exclude: ['a.md'],
@@ -20,6 +20,6 @@ class ZipDemo {
 
 const demo = new ZipDemo();
 
-// demo.testZip();
+demo.testZip();
 
-demo.testUnzip();
+// demo.testUnzip();

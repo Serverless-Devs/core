@@ -115,36 +115,36 @@ class ReportDemo {
 
 #### `loadComponent` 方法是 `load` 方法的`别名`，用于加载组件，组件会下载到 ~/.s/components 目录下面。
 
-- loadComponent(source: string, registry?: Registry)
+- loadComponent(source: string, registry?: Registry, params: any)
 
-```txt
-source 传参数格式:
-serverless hub 源为 `<云厂商>/<组件名>` 会下载最新版本，`<云厂商>/<组件名>@<组件版本号>` 会下载指定版本
-github 源为 `<用户名>/<项目名称>` 会下载最新版本，`<用户名>/<项目名称>@<项目发布的版本号>` 会下载指定版本
-支持本地调试，可传本地组件的当前路径
-
-type Registry = 'https://tool.serverlessfans.com/api' | 'https://api.github.com/repos'
-
-- 优先读取方法传入的参数 registry，如果找不到，然后读取 ~/.s/components/set-config.yml 文件里的 registry，如果找不到
-- cli case: 先读取 github 源，如果找不到在读取 serverless hub 源
-- gui case: 先读取 serverless hub 源，如果找不到在读取 github 源
+```typescript
+/**
+ * source 传参数格式说明
+ * 1.serverless hub 源为 `<组件名>` 会下载最新版本，`<组件名>@<组件版本号>` 会下载指定版本
+ * 2.github 源为 `<用户名>/<项目名称>` 会下载最新版本，`<用户名>/<项目名称>@<项目发布的版本号>` 会下载指定版本
+ * 3.支持本地调试，可传本地组件的当前路径
+ *
+ * registry 参数说明，值为 'http://registry.serverlessfans.cn/simple' 或者 'https://api.github.com/repos'
+ * 优先读取方法传入的参数 registry，如果找不到，然后读取 ~/.s/components/set-config.yml 文件里的 registry，如果找不到
+ * cli case: 读取 github 源
+ * gui case: 先读取 serverless hub 源，如果找不到在读取 github 源
+ *
+ * params 参数说明，方法内部在require组件的时候会new一次，params会在new的时候透传给组件
+ *
+ * /
 ```
 
 ```typescript
 const { loadComponent } = require('@serverless-devs/core');
-loadComponent('alibaba/fc');
+loadComponent('fc-deploy');
 ```
-
-![Demo](https://img.alicdn.com/imgextra/i1/O1CN01LukqOH1bJr6l77VGk_!!6000000003445-1-tps-1312-200.gif)
 
 - 支持下载特定版本的组件
 
 ```typescript
 const { loadComponent } = require('@serverless-devs/core');
-loadComponent('alibaba/fc@0.1.2');
+loadComponent('fc-deploy@0.1.2');
 ```
-
-![Demo](https://img.alicdn.com/imgextra/i1/O1CN01LukqOH1bJr6l77VGk_!!6000000003445-1-tps-1312-200.gif)
 
 - 支持加载本地组件
 
@@ -153,11 +153,30 @@ const { loadComponent } = require('@serverless-devs/core');
 loadComponent('/Users/shihuali/.s/components/serverlessfans.com/alibaba/fc@0.1.2');
 ```
 
-![Demo](https://img.alicdn.com/imgextra/i1/O1CN01LukqOH1bJr6l77VGk_!!6000000003445-1-tps-1312-200.gif)
-
 ## loadApplication
 
-- 用于加载应用，方法读取逻辑同 `loadComponent`，区别是应用会下载到当前目录下, 该方法无返回值。
+#### 用于加载应用，支持下载到指定目录，如果不指定，则默认会下载到当前目录
+
+- loadApplication(source: string, registry?: string, target?:string)
+
+```typescript
+/**
+ * source 传参数格式说明
+ * 1.serverless hub 源为 `<应用名>` 会下载最新版本，`<应用名>@<应用版本号>` 会下载指定版本
+ * 2.github 源为 `<用户名>/<项目名称>` 会下载最新版本，`<用户名>/<项目名称>@<项目发布的版本号>` 会下载指定版本
+ * 3.自定义源 为 `<应用名>`， 会下载指定资源
+ *
+ * registry 参数说明
+ * 优先读取方法传入的参数 registry，如果找不到，然后读取 ~/.s/components/set-config.yml 文件里的 registry，如果找不到
+ * cli case: 先读取 github 源，如果找不到在读取 serverless hub 源
+ * gui case: 先读取 serverless hub 源，如果找不到在读取 github 源
+ * 1.serverless hub 源 为：http://registry.serverlessfans.cn/simple
+ * 2.github 源为：https://api.github.com/repos
+ * 3.自定义源
+ *
+ * target 参数，下载资源的存放路径
+ * /
+```
 
 ```typescript
 const { loadComponent } = require('@serverless-devs/core');
@@ -165,16 +184,12 @@ loadApplication('Serverless-Devs/Serverless-Devs');
 // loadApplication('Serverless-Devs/Serverless-Devs', 'https://api.github.com/repos');
 ```
 
-![Demo](https://img.alicdn.com/imgextra/i1/O1CN01LukqOH1bJr6l77VGk_!!6000000003445-1-tps-1312-200.gif)
-
 - 支持下载特定版本的应用
 
 ```typescript
 const { loadComponent } = require('@serverless-devs/core');
 loadApplication('Serverless-Devs/Serverless-Devs@1.1.13');
 ```
-
-![Demo](https://img.alicdn.com/imgextra/i1/O1CN01LukqOH1bJr6l77VGk_!!6000000003445-1-tps-1312-200.gif)
 
 ## spinner
 
@@ -341,23 +356,37 @@ function test() {
 
 ## getCredential
 
-#### 用于获取密钥信息, 该方法接收两个参数，第一个参数是 provider，该参数必传，目前 provider 支持 [alibaba/aws/azure/baidu/google/huawei/tencent/custom]，第二个参数是 accessAlias，该参数选填
+#### 用于获取密钥信息，可接收（alias, ...envKeys)
 
-- provider 为 alibaba
+- 不传任何参数的时候，会获取 `default` 密钥信息
 
 ```typescript
 const { getCredential } = require('@serverless-devs/core');
 async function get() {
-  const c = await getCredential('alibaba');
+  const c = await getCredential();
   console.log('c', c);
 }
 ```
 
-![demo](https://img.alicdn.com/imgextra/i3/O1CN01OOJ9sV1sbZtp1370z_!!6000000005785-1-tps-1215-409.gif)
+![demo](https://img.alicdn.com/imgextra/i3/O1CN016HGrtn1fZCrBDZWHb_!!6000000004020-1-tps-1215-319.gif)
+
+- 传参数
+
+```typescript
+const { getCredential } = require('@serverless-devs/core');
+async function get() {
+  const c = await getCredential('custom', 'AccountIdByCustom', 'SecretIDByCustom');
+  console.log('c', c);
+}
+```
+
+![demo](https://img.alicdn.com/imgextra/i1/O1CN01fBzz3W1ljBAyz0wfc_!!6000000004854-1-tps-1215-702.gif)
 
 ## setCredential
 
-#### 用于设置密钥信息, 该方法接收一个参数 provider, 目前 provider 支持 [alibaba/aws/azure/baidu/google/huawei/tencent/custom]
+#### 用于设置密钥信息, 可接收（...envKeys)
+
+- 不传任何参数的时候，会提供 模版[alibaba/aws/azure/baidu/google/huawei/tencent/custom] 来 创建密钥信息
 
 ```typescript
 const { setCredential } = require('@serverless-devs/core');
@@ -368,17 +397,20 @@ async function set() {
 }
 ```
 
-- Provider 为空的 case
+![demo](https://img.alicdn.com/imgextra/i2/O1CN01D1CUb01NlsjX7Rtvq_!!6000000001611-1-tps-1215-459.gif)
 
-![demo](https://img.alicdn.com/imgextra/i2/O1CN01JBu5EO1Q9oeNdQCzr_!!6000000001934-1-tps-1312-273.gif)
+- 传参数
 
-- Provider 为 alibaba 的 case
+```typescript
+const { setCredential } = require('@serverless-devs/core');
 
-![demo](https://img.alicdn.com/imgextra/i4/O1CN01EstoE11ltiH06n6rE_!!6000000004877-1-tps-1312-273.gif)
+async function set() {
+  const c = await setCredential('AccountIdByCustom', 'SecretIDByCustom');
+  console.log('c', c);
+}
+```
 
-- Provider 为 custom 的 case
-
-![demo](https://img.alicdn.com/imgextra/i2/O1CN013aOETJ1CdfqojG1IH_!!6000000000104-1-tps-1312-337.gif)
+![demo](https://gw.alicdn.com/imgextra/i2/O1CN01w8fORm1sYN8lWmGsb_!!6000000005778-1-tps-1215-459.gif)
 
 ## getState
 
@@ -497,3 +529,68 @@ async function test() {
 ```
 
 ![demo](https://img.alicdn.com/imgextra/i1/O1CN01vMID0V1UvE7SfqloB_!!6000000002579-1-tps-1215-697.gif)
+
+## modifyProps
+
+#### 用于修改当前目录下 <s.yml> 文件的 `Properties` 属性， 第一次执行该方法时，会备份<s.yml>到<s.origin.yml>
+
+第一个参数接收 <s.yml> 的 service, 第二个参数 接收 Properties，其值会 merge 到 <s.yml> 的 Properties
+
+```typescript
+const { modifyProps } = require('@serverless-devs/core');
+
+// s.yml demo
+
+// MyFunctionDemo:
+//   Component: fc
+//   Provider: alibaba
+//   Properties:
+//     Region: cn-hangzhou
+//     Service:
+//       Name: ServerlessToolProject
+//       Description: 欢迎使用ServerlessTool
+//     Function:
+//       Name: serverless_demo_python3_http
+//       Description: 这是一个Python3-HTTP的测试案例
+//       CodeUri: ./
+//       Handler: index.handler
+//       MemorySize: 128
+//       Runtime: python3
+//       Timeout: 5
+//       Triggers:
+//         - Name: TriggerNameHttp
+//           Type: HTTP
+//           Parameters:
+//             AuthType: ANONYMOUS
+//             Methods:
+//               - GET
+//               - POST
+//               - PUT
+//             Domains:
+//               - Domain: AUTO
+
+modifyProps('MyFunctionDemo', {
+  Region: 'cn-shanghai',
+});
+```
+
+## installDependency
+
+#### 用于安装依赖
+
+```typescript
+const { installDependency } = require('@serverless-devs/core');
+
+installDependency({ cwd: process.cwd(), stdio: 'inherit', production: true });
+```
+
+## getYamlContent
+
+#### 用于获取文件内容，兼容 yaml 和 yml 文件
+
+```typescript
+const { getYamlContent } = require('@serverless-devs/core');
+
+// 路径 请更换为 自己项目的 yaml或者yml文件的 当前路径
+getYamlContent('/Users/shihuali/workspace/s-core/s.yaml');
+```

@@ -1,7 +1,7 @@
 import { modifyProps } from '../../../src/common';
 
 modifyProps('MyFunctionDemo', {
-  Region: 'cn-hangz',
+  Region: 'cn-hangzhou',
   Service: {
     Name: 'xx',
   },

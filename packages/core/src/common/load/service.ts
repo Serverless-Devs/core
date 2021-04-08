@@ -1,113 +1,62 @@
-import fs from 'fs-extra';
+import { request } from '../request';
+import { readJsonFile } from '../../libs/utils';
 import path from 'path';
-import got from 'got';
-import { getComponentVersion, getComponentDownloadUrl, execComponentDownload } from './utils';
-import { IComponentParams } from '../../interface';
-import { Logger } from '../../logger/index';
+import fs from 'fs';
+import get from 'lodash.get';
+import { RegistryEnum } from '../constant';
 
-const { spawnSync } = require('child_process');
-
-export interface IComponentPath {
-  componentVersion: string;
-  applicationPath: string;
-  componentPath: string;
-  lockPath: string;
-}
-
-export type Registry = 'https://tool.serverlessfans.com/api' | 'https://api.github.com/repos';
-
-export enum RegistryEnum {
-  github = 'https://api.github.com/repos',
-  serverless = 'https://tool.serverlessfans.com/api',
-}
-
-/**
- * @description 获取组件路径
- * @param name
- * @param provider
- * @param componentPathRoot 组件serverlessfans根目录
- */
-export const generateComponentPath = async (
-  { name, provider, version }: IComponentParams,
-  componentPathRoot: string,
-): Promise<IComponentPath> => {
-  if (!version) {
-    const Response = await getComponentVersion({ name, provider });
-    version = Response.Version;
+export const buildComponentInstance = async (componentPath: string, params?: any) => {
+  let index: string;
+  const packageInfo: any = readJsonFile(path.resolve(componentPath, 'package.json'));
+  // 首先寻找 package.json 文件下的 main
+  if (packageInfo.main) {
+    index = packageInfo.main;
   }
-  const rootPath = `./${provider}/${name}@${version}`;
-  return {
-    componentPath: path.resolve(componentPathRoot, rootPath),
-    applicationPath: path.resolve(componentPathRoot, `./${name}`),
-    componentVersion: version,
-    lockPath: path.resolve(componentPathRoot, rootPath, '.s.lock'),
-  };
-};
-
-export const installDependency = async (
-  name: string,
-  { componentPath, componentVersion, lockPath }: IComponentPath,
-) => {
-  const existPackageJson = fs.existsSync(path.resolve(componentPath, 'package.json'));
-  if (existPackageJson) {
-    Logger.log('Installing dependencies in serverless-devs core ...');
-    const result = await spawnSync(
-      'npm install --production --registry=https://registry.npm.taobao.org',
-      [],
-      {
-        cwd: componentPath,
-        stdio: 'inherit',
-        shell: true,
-      },
-    );
-    if (result && result.status !== 0) {
-      throw Error('> Execute Error');
+  // 其次检查 tsconfig.json 文件下的 outDir
+  if (!index) {
+    const tsconfigPath = path.resolve(componentPath, 'tsconfig.json');
+    if (fs.existsSync(tsconfigPath)) {
+      const tsconfigInfo: any = readJsonFile(tsconfigPath);
+      index = get(tsconfigInfo, 'compilerOptions.outDir');
     }
   }
 
-  await fs.writeFileSync(lockPath, `${name}-${componentVersion}`);
-};
-
-export const installAppDependency = async (applicationPath: string) => {
-  const existPackageJson = fs.existsSync(path.resolve(applicationPath, 'package.json'));
-  if (existPackageJson) {
-    Logger.log('Installing dependencies in serverless-devs core ...');
-    const result = await spawnSync('npm install --registry=https://registry.npm.taobao.org', [], {
-      cwd: applicationPath,
-      stdio: 'inherit',
-      shell: true,
-    });
-    if (result && result.status !== 0) {
-      throw Error('> Execute Error');
+  // 其次寻找 src/index.js
+  if (!index) {
+    const srcIndexPath = path.resolve(componentPath, './src/index.js');
+    if (fs.existsSync(srcIndexPath)) {
+      index = './src/index.js';
     }
   }
-};
 
-export const downloadComponent = async (
-  outputDir: string,
-  { name, provider }: IComponentParams,
-) => {
-  await fs.ensureDirSync(outputDir);
-  const Response = await getComponentDownloadUrl({ name, provider });
-  await execComponentDownload(Response.Url, outputDir);
-};
+  // 最后寻找 ./index.js
+  if (!index) {
+    const indexPath = path.resolve(componentPath, './index.js');
+    if (fs.existsSync(indexPath)) {
+      index = './index.js';
+    }
+  }
 
-export const buildComponentInstance = async (componentPath: string) => {
-  const requiredComponentPath =
-    componentPath.lastIndexOf('index') > -1 ? componentPath : path.join(componentPath, 'index');
-  const baseChildComponent = await require(requiredComponentPath);
+  if (!index) return;
+  const baseChildComponent = await require(path.resolve(componentPath, index));
   const ChildComponent = baseChildComponent.default
     ? baseChildComponent.default
     : baseChildComponent;
-  return new ChildComponent();
+  return new ChildComponent(params);
 };
 
 export const getGithubReleases = async (user: string, name: string) => {
-  const result: any = await got(`${RegistryEnum.github}/${user}/${name}/releases`);
-  return JSON.parse(result.body);
+  return await request(`${RegistryEnum.github}/${user}/${name}/releases`);
 };
 
 export const getGithubReleasesLatest = async (user: string, name: string) => {
-  const result: any = await got(`${RegistryEnum.github}/${user}/${name}/releases/latest`);
-  return JSON.parse(result.body);
+  return await request(`${RegistryEnum.github}/${user}/${name}/releases/latest`);
+};
+
+export const getServerlessReleases = async (name: string) => {
+  return await request(`${RegistryEnum.serverless}/${name}/releases`);
+};
+
+export const getServerlessReleasesLatest = async (name: string) => {
+  return await request(`${RegistryEnum.serverless}/${name}/releases/latest`);
 };
