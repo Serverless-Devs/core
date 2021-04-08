@@ -7,6 +7,7 @@ import decompress from 'decompress';
 import fs from 'fs-extra';
 import path from 'path';
 import i18n from '../libs/i18n';
+import { RegistryEnum } from './constant';
 
 interface HintOptions {
   loading?: string;
@@ -69,13 +70,14 @@ export async function downloadRequest(url: string, dest: string, options?: Downl
   const { extract, postfix, strip, ...rest } = options || {};
   const spin = spinner('prepare downloading');
   let len: number;
-  try {
-    const { headers } = await got(url, { method: 'HEAD' });
-    len = parseInt(headers['content-length'], 10);
-  } catch (err) {
-    // ignore error
+  if (url.startsWith(RegistryEnum.serverless)) {
+    try {
+      const { headers } = await got(url, { method: 'HEAD' });
+      len = parseInt(headers['content-length'], 10);
+    } catch (error) {
+      console.error(error);
+    }
   }
-
   let bar: ProgressService;
   if (len) {
     bar = new ProgressService(ProgressType.Bar, { total: len });
@@ -110,7 +112,7 @@ export async function downloadRequest(url: string, dest: string, options?: Downl
       spin.succeed('download success');
     }
   } catch (error) {
-    console.error(error);
     spin.stop();
+    console.error(error);
   }
 }

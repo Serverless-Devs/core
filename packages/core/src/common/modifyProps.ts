@@ -60,7 +60,7 @@ async function modifyProps(service: string, options: object) {
     userInfo[service].Properties = merge(userInfo[service].Properties, options);
     fs.writeFileSync(filePath, yaml.dump(userInfo));
   } catch (error) {
-    // ignore
+    console.error(error);
   }
 }
 

@@ -3,13 +3,12 @@ import path from 'path';
 import { S_ROOT_HOME_COMPONENT } from '../../libs/common';
 import {
   buildComponentInstance,
-  RegistryEnum,
-  Registry,
   getGithubReleases,
   getGithubReleasesLatest,
   getServerlessReleases,
   getServerlessReleasesLatest,
 } from './service';
+import { RegistryEnum, Registry } from '../constant';
 import * as config from '../../libs/handler-set-config';
 import { downloadRequest } from '../request';
 import { Logger } from '../../logger';
@@ -93,7 +92,7 @@ async function tryfun(f: Promise<any>) {
   try {
     return await f;
   } catch (error) {
-    // ignore error
+    // ignore error, 不抛出错误，需要寻找不同的源
   }
 }
 

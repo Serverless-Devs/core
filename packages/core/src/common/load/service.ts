@@ -3,13 +3,7 @@ import { readJsonFile } from '../../libs/utils';
 import path from 'path';
 import fs from 'fs';
 import get from 'lodash.get';
-
-export type Registry = 'http://registry.serverlessfans.cn/simple' | 'https://api.github.com/repos';
-
-export enum RegistryEnum {
-  github = 'https://api.github.com/repos',
-  serverless = 'http://registry.serverlessfans.cn/simple',
-}
+import { RegistryEnum } from '../constant';
 
 export const buildComponentInstance = async (componentPath: string) => {
   let index: string;

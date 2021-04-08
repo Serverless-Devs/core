@@ -1,11 +1,11 @@
 import { S_CURRENT } from '../../libs/common';
 import {
-  RegistryEnum,
   getGithubReleases,
   getGithubReleasesLatest,
   getServerlessReleases,
   getServerlessReleasesLatest,
 } from './service';
+import { RegistryEnum } from '../constant';
 import path from 'path';
 import * as config from '../../libs/handler-set-config';
 import { downloadRequest } from '../request';
@@ -67,7 +67,7 @@ async function tryfun(f: Promise<any>) {
   try {
     return await f;
   } catch (error) {
-    // ignore error
+    // ignore error, 不抛出错误，需要寻找不同的源
   }
 }
 
