@@ -17,7 +17,7 @@ async function test() {
   //   'https://download.registry.serverlessfans.cn/init/alibaba-node.js12-http',
   // );
 
-  const fc = await loadComponent('alibaba/fc-deploy');
+  const fc = await loadComponent('fc', 'http://registry.serverlessfans.cn/simple', { a: 1 });
   console.log(fc);
 }
 

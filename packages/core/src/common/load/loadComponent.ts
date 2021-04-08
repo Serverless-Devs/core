@@ -133,6 +133,9 @@ async function loadRemoteComponent(source: string, registry?: Registry, params?:
     }
     result = await tryfun(loadGithub(source, params));
     if (isComponent(result)) return result;
+
+    result = await tryfun(loadServerless(source, params));
+    if (isComponent(result)) return result;
   }
   const logger = new Logger();
   // TODO: `下载的${source}的资源中，未找到相关组件`

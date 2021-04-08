@@ -36,12 +36,19 @@ export const buildComponentInstance = async (componentPath: string, params?: any
       index = './index.js';
     }
   }
-
   if (!index) return;
-  const baseChildComponent = await require(path.resolve(componentPath, index));
+
+  let baseChildComponent: any;
+  try {
+    baseChildComponent = await require(path.resolve(componentPath, index));
+  } catch (error) {
+    console.error(error);
+  }
+
   const ChildComponent = baseChildComponent.default
     ? baseChildComponent.default
     : baseChildComponent;
+
   return new ChildComponent(params);
 };
 
