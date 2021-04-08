@@ -412,6 +412,21 @@ async function set() {
 
 ![demo](https://gw.alicdn.com/imgextra/i2/O1CN01w8fORm1sYN8lWmGsb_!!6000000005778-1-tps-1215-459.gif)
 
+## decryptCredential
+
+```typescript
+const { decryptCredential } = require('@serverless-devs/core');
+
+const c = decryptCredential({
+  AccountID: 'U2FsdGVkX1+jAj7Kxp3X1lHwFSUtBoSqkpFXp/dYEB0=',
+  SecretID: 'U2FsdGVkX1/NKNJ6MDERFRhQ6GIukaUogeKcFJrhMRU=',
+  SecretKey: 'U2FsdGVkX1/OSprVoM65l3trkwg4CgAjtQZzt/wN798=',
+});
+console.log('c', c);
+```
+
+#### 用于解密密钥信息
+
 ## getState
 
 #### 用于获取文件内容， 文件存放于 ~/.s 目录下面。

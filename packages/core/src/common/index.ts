@@ -7,7 +7,7 @@ export { default as i18n } from './i18n';
 export { default as help } from './help';
 export { loadComponent, load, loadApplication } from './load';
 export { default as commandParse } from './commandParse';
-export { getCredential, setCredential } from './credential';
+export { getCredential, setCredential, decryptCredential } from './credential';
 export { getState, setState } from './state';
 export { default as validateProps } from './validateProps';
 export { default as modifyProps } from './modifyProps';
