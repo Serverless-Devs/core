@@ -75,7 +75,7 @@ export async function downloadRequest(url: string, dest: string, options?: Downl
       const { headers } = await got(url, { method: 'HEAD' });
       len = parseInt(headers['content-length'], 10);
     } catch (error) {
-      console.error(error);
+      // ignore error
     }
   }
   let bar: ProgressService;
@@ -113,6 +113,6 @@ export async function downloadRequest(url: string, dest: string, options?: Downl
     }
   } catch (error) {
     spin.stop();
-    console.error(error);
+    throw error;
   }
 }

@@ -39,13 +39,8 @@ export const buildComponentInstance = async (componentPath: string, params?: any
       }
     }
   }
-  let baseChildComponent: any;
-  try {
-    const requirePath = fsStat.isFile() ? componentPath : path.resolve(componentPath, index);
-    baseChildComponent = await require(requirePath);
-  } catch (error) {
-    console.error(error);
-  }
+  const requirePath = fsStat.isFile() ? componentPath : path.resolve(componentPath, index);
+  const baseChildComponent = await require(requirePath);
 
   const ChildComponent = baseChildComponent.default
     ? baseChildComponent.default
