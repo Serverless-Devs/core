@@ -1,5 +1,5 @@
 import inquirer from 'inquirer';
-import fs from 'fs';
+import fs from 'fs-extra';
 import path from 'path';
 import os from 'os';
 import yaml from 'js-yaml';
@@ -56,15 +56,39 @@ function encrypt(info: any = {}) {
   return cloneInfo;
 }
 
-async function writeData({ info, accessAlias }) {
+async function writeData(data: any) {
+  const { info, accessAlias } = data;
   const filePath = path.join(os.homedir(), '.s/access.yaml');
   const content = await getYamlContent(filePath);
   if (content) {
     const providerAliasKeys = Object.keys(content);
     if (providerAliasKeys.includes(accessAlias)) {
-      throw Error(
-        `Alias already exists. You can set a different alias or modify it through: s config update -a ${accessAlias}`,
-      );
+      const option = {
+        type: 'list',
+        name: 'name',
+        message: 'Alias already exists. Please select a type:',
+        choices: [
+          { name: 'overwrite', value: 'overwrite' },
+          { name: 'rename', value: 'rename' },
+          { name: 'exit', value: 'exit' },
+        ],
+      };
+      const { name } = await inquirer.prompt(option);
+      if (name === 'overwrite') {
+        content[accessAlias] = encrypt(info);
+        fs.writeFileSync(filePath, yaml.dump(content));
+        output({ info, accessAlias });
+      }
+      if (name === 'rename') {
+        const accessAliasObj = {
+          type: 'input',
+          message: 'Please create alias for key pair. If not, please enter to skip',
+          name: 'aliasName',
+          default: await getAlias(),
+        };
+        const { aliasName } = await inquirer.prompt(accessAliasObj);
+        return await writeData({ info, accessAlias: aliasName });
+      }
     } else {
       try {
         fs.appendFileSync(filePath, yaml.dump({ [accessAlias]: encrypt(info) }));
@@ -81,6 +105,27 @@ async function writeData({ info, accessAlias }) {
       throw Error('Configuration failed');
     }
   }
+  return data;
+}
+
+async function getAlias() {
+  const filePath = path.join(os.homedir(), '.s/access.yaml');
+  if (fs.existsSync(filePath)) {
+    const info = await getYamlContent(filePath);
+    const keys = Object.keys(info).filter((item) => item.includes('default'));
+    if (keys.length === 0) {
+      return 'default';
+    }
+    let max: string = '0';
+    keys.forEach((item) => {
+      const [, end] = item.split('-');
+      if (end > max) {
+        max = end;
+      }
+    });
+    return `default-${parseInt(max) + 1}`;
+  }
+  return 'default';
 }
 
 /**
@@ -101,7 +146,7 @@ async function setCredential(...args: any[]) {
     type: 'input',
     message: 'Please create alias for key pair. If not, please enter to skip',
     name: 'aliasName',
-    default: 'default',
+    default: await getAlias(),
   };
   if (selectedProvider === 'custom') {
     await handleCustom((info = {}));
@@ -124,9 +169,9 @@ async function setCredential(...args: any[]) {
       }
     });
   }
-  await writeData({ info, accessAlias });
+  const { accessAlias: Alias } = await writeData({ info, accessAlias });
   return {
-    Alias: accessAlias,
+    Alias,
     ...info,
   };
 }
