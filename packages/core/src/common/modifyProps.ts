@@ -6,7 +6,7 @@ import { merge } from '../libs/utils';
 import minimist from 'minimist';
 import getYamlContent from './getYamlContent';
 
-async function modifyProps(service: string, options: object) {
+async function modifyProps(component: string, options: object) {
   const args = minimist(process.argv.slice(2));
   let templte = args.t || args.template;
   if (!templte) {
@@ -25,7 +25,7 @@ async function modifyProps(service: string, options: object) {
     fs.copyFileSync(filePath, originPath);
   }
   const userInfo: any = await getYamlContent(filePath);
-  userInfo[service].Properties = merge(userInfo[service].Properties, options);
+  userInfo.services[component].props = merge(userInfo.services[component].props, options);
   fs.writeFileSync(filePath, yaml.dump(userInfo));
 }
 

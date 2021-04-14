@@ -8,7 +8,7 @@ import { setCredential } from '../../src/common';
 // get();
 
 async function set() {
-  const c = await setCredential('AccountIdByCustom', 'SecretIDByCustom');
+  const c = await setCredential('AccountID', 'SecretID', 'SecretKey');
   console.log(c);
 }
 
