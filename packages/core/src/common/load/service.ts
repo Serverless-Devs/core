@@ -57,10 +57,10 @@ export const getGithubReleasesLatest = async (user: string, name: string) => {
   return await request(`${RegistryEnum.github}/${user}/${name}/releases/latest`);
 };
 
-export const getServerlessReleases = async (name: string) => {
-  return await request(`${RegistryEnum.serverless}/${name}/releases`);
+export const getServerlessReleases = async (provider: string, name: string) => {
+  return await request(`${RegistryEnum.serverless}/${provider}/${name}/releases`);
 };
 
-export const getServerlessReleasesLatest = async (name: string) => {
-  return await request(`${RegistryEnum.serverless}/${name}/releases/latest`);
+export const getServerlessReleasesLatest = async (provider: string, name: string) => {
+  return await request(`${RegistryEnum.serverless}/${provider}/${name}/releases/latest`);
 };
