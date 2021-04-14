@@ -23,7 +23,7 @@ async function test() {
   //   'https://download.registry.serverlessfans.cn/init/alibaba-node.js12-http',
   // );
 
-  const fc = await loadComponent('fc');
+  const fc = await loadComponent('devsapp/nas');
   console.log(fc);
 }
 

@@ -20,15 +20,18 @@ async function tryfun(f: Promise<any>) {
 }
 
 async function loadServerless(source: string, target?: string) {
-  const [name, version] = source.split('@');
+  if (!source.includes('/')) return;
+  const [provider, componentName] = source.split('/');
+  if (!componentName) return;
+  const [name, version] = componentName.split('@');
   let zipball_url: string;
   if (version) {
-    const result = await tryfun(getServerlessReleases(name));
+    const result = await tryfun(getServerlessReleases(provider, name));
     const findObj = result.find((item) => item.tag_name === version);
     if (!findObj) return;
     zipball_url = findObj.zipball_url;
   } else {
-    const result = await tryfun(getServerlessReleasesLatest(name));
+    const result = await tryfun(getServerlessReleasesLatest(provider, name));
     if (!result.zipball_url) return;
     zipball_url = result.zipball_url;
   }
