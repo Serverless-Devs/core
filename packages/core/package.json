@@ -1,6 +1,6 @@
 {
   "name": "@serverless-devs/core",
-  "version": "0.0.56",
+  "version": "0.0.57",
   "description": "Serverless Devs Tool Core Component",
   "keywords": [
     "Serverless",
@@ -21,6 +21,7 @@
   },
   "homepage": "https://www.serverless-devs.com",
   "scripts": {
+    "dev": "npx tsc -w -p tsconfig.json",
     "ncc": "ncc build lib/index.js -o dist",
     "debug": "ts-node test/fixtures/spinner.ts",
     "test": "npx jest",

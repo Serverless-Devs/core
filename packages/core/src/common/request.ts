@@ -31,6 +31,7 @@ export async function request(url: string, options?: RequestOptions): Promise<an
   const { method = 'get', params, body: bodyFromOptions, hint = {}, json = true, ...rest } =
     options || {};
   const { loading, success, error } = hint;
+  const logger = new Logger();
   let vm = null;
   let result = null;
   const errorMessage = (code: string | number, message: string) =>
@@ -39,6 +40,7 @@ export async function request(url: string, options?: RequestOptions): Promise<an
 
   try {
     const isGet = method.toUpperCase() === 'GET';
+    logger.debug(`URL: ${url}`);
     result = await got(url, {
       method,
       [isGet ? 'query' : 'body']: isGet ? params : bodyFromOptions,

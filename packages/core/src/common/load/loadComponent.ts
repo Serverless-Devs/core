@@ -24,7 +24,7 @@ async function tryfun(f: Promise<any>) {
 }
 
 async function loadServerless(source: string, params?: any) {
-  if (!source.includes('/')) return;
+  if (!source.includes('/')) source = `devsapp/${source}`;
   const [provider, componentName] = source.split('/');
   if (!componentName) return;
   const [name, version] = componentName.split('@');
@@ -134,17 +134,20 @@ async function loadRemoteComponent(source: string, registry?: Registry, params?:
     if (isComponent(result)) return result;
   } else {
     // cli
+    console.log(232323);
     if (registry) {
       result = await loadType(source, registry, params);
       if (isComponent(result)) return result;
     }
+    console.log(232323222);
     if (config.getConfig('registry')) {
       result = await loadType(source, config.getConfig('registry'), params);
       if (isComponent(result)) return result;
     }
+    console.log(2222);
     result = await loadGithub(source, params);
     if (isComponent(result)) return result;
-
+    console.log(2222211111);
     result = await loadServerless(source, params);
     if (isComponent(result)) return result;
   }
