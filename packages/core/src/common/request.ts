@@ -8,6 +8,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import i18n from '../libs/i18n';
 import { RegistryEnum } from './constant';
+import { Logger } from '../logger';
 
 interface HintOptions {
   loading?: string;
@@ -68,6 +69,7 @@ export async function request(url: string, options?: RequestOptions): Promise<an
 
 export async function downloadRequest(url: string, dest: string, options?: DownloadOptions) {
   const { extract, postfix, strip, ...rest } = options || {};
+  const logger = new Logger();
   const spin = spinner('prepare downloading');
   let len: number;
   if (url.startsWith(RegistryEnum.serverless)) {
@@ -86,6 +88,7 @@ export async function downloadRequest(url: string, dest: string, options?: Downl
     bar = new ProgressService(ProgressType.Loading, { total: 100 }, format);
   }
   spin.text = 'start downloading';
+  logger.debug(`${spin.text} ${url}`);
   try {
     await download(url, dest, { ...rest, rejectUnauthorized: false }).on(
       'downloadProgress',
@@ -101,8 +104,8 @@ export async function downloadRequest(url: string, dest: string, options?: Downl
       const files = fs.readdirSync(dest);
       let filename = files[0];
       if (postfix && !filename.slice(filename.lastIndexOf('.')).startsWith('.')) {
-        fs.rename(path.resolve(dest, filename), path.resolve(dest, filename) + `.${postfix}`);
-        filename = filename + `.${postfix}`;
+        fs.rename(path.resolve(dest, filename), `${path.resolve(dest, filename)}.${postfix}`);
+        filename += `.${postfix}`;
       }
       spin.text = i18n.__('File unzipping...');
       await decompress(`${dest}/${filename}`, dest, { strip });

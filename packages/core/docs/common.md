@@ -77,39 +77,15 @@ const { report, HLogger, ILogger } = require('@serverless-devs/core');
 class ReportDemo {
   @HLogger('S-CORE') logger: ILogger;
   async component() {
-    await report('组件数据上报', {
-      type: 'component',
-      context: 'fc',
-      params: {
-        action: 'deploy',
-        account: '123435',
-      },
+    await reportComponent('website', {
+      command: 'deploy',
+      uid: '123435',
+      remark: 'test',
     });
     this.logger.info('成功上报');
   }
 }
 ```
-
-![Demo](https://img.alicdn.com/imgextra/i3/O1CN01OW9lSg1SEyLJ2TXxo_!!6000000002216-1-tps-1312-73.gif)
-
-#### 错误上报
-
-```typescript
-const { report, HLogger, ILogger } = require('@serverless-devs/core');
-
-class ReportDemo {
-  @HLogger('S-CORE') logger: ILogger;
-  async error() {
-    await report('错误上报', {
-      type: 'error',
-      context: 'fc',
-    });
-    this.logger.error('错误上报');
-  }
-}
-```
-
-![Demo](https://img.alicdn.com/imgextra/i2/O1CN01XJzCmp1qJb7ZUvFEi_!!6000000005475-1-tps-1312-73.gif)
 
 ## loadComponent
 

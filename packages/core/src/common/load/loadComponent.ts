@@ -14,6 +14,7 @@ import { downloadRequest } from '../request';
 import { Logger } from '../../logger';
 import installDependency from '../installDependency';
 
+const logger = new Logger();
 async function tryfun(f: Promise<any>) {
   try {
     return await f;
@@ -137,7 +138,7 @@ async function loadRemoteComponent(source: string, registry?: Registry, params?:
     result = await loadServerless(source, params);
     if (isComponent(result)) return result;
   }
-  const logger = new Logger();
+
   // TODO: `下载的${source}的资源中，未找到相关组件`
   logger.warn(`未找到${source}组件，请确定组件名或者源是否正确`);
   return null;
