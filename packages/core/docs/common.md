@@ -72,7 +72,7 @@ downloadRequest(url, outDir, { extract: true, strip: 1 });
 #### 组件上报
 
 ```typescript
-const { report, HLogger, ILogger } = require('@serverless-devs/core');
+const { reportComponent, HLogger, ILogger } = require('@serverless-devs/core');
 
 class ReportDemo {
   @HLogger('S-CORE') logger: ILogger;
