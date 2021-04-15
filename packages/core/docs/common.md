@@ -96,8 +96,9 @@ class ReportDemo {
 ```typescript
 /**
  * source 传参数格式说明
- * 1.serverless hub 源为 `<组件名>` 会下载最新版本，`<组件名>@<组件版本号>` 会下载指定版本
- * 2.github 源为 `<用户名>/<项目名称>` 会下载最新版本，`<用户名>/<项目名称>@<项目发布的版本号>` 会下载指定版本
+ * 1.serverless hub 源为 `<org名>/<组件名>` 会下载最新版本，`<org名>/<组件名>@<组件版本号>` 会下载指定版本
+ * serverless hub官方的org名默认为devsapp，
+ * 2.github 源为 `<org名>/<项目名称>` 会下载最新版本，`<org名>/<项目名称>@<项目发布的版本号>` 会下载指定版本
  * 3.支持本地调试，可传本地组件的当前路径
  *
  * registry 参数说明，值为 'http://registry.serverlessfans.cn/simple' 或者 'https://api.github.com/repos'
@@ -112,14 +113,14 @@ class ReportDemo {
 
 ```typescript
 const { loadComponent } = require('@serverless-devs/core');
-loadComponent('fc-deploy');
+loadComponent('devsapp/fc-deploy');
 ```
 
 - 支持下载特定版本的组件
 
 ```typescript
 const { loadComponent } = require('@serverless-devs/core');
-loadComponent('fc-deploy@0.1.2');
+loadComponent('devsapp/fc-deploy@0.1.2');
 ```
 
 - 支持加载本地组件
