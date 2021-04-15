@@ -11,16 +11,27 @@ import * as config from '../../libs/handler-set-config';
 import { downloadRequest } from '../request';
 import installDependency from '../installDependency';
 
+async function tryfun(f: Promise<any>) {
+  try {
+    return await f;
+  } catch (error) {
+    // ignore error, 不抛出错误，需要寻找不同的源
+  }
+}
+
 async function loadServerless(source: string, target?: string) {
-  const [name, version] = source.split('@');
+  if (!source.includes('/')) return;
+  const [provider, componentName] = source.split('/');
+  if (!componentName) return;
+  const [name, version] = componentName.split('@');
   let zipball_url: string;
   if (version) {
-    const result = await getServerlessReleases(name);
+    const result = await tryfun(getServerlessReleases(provider, name));
     const findObj = result.find((item) => item.tag_name === version);
     if (!findObj) return;
     zipball_url = findObj.zipball_url;
   } else {
-    const result = await getServerlessReleasesLatest(name);
+    const result = await tryfun(getServerlessReleasesLatest(provider, name));
     if (!result.zipball_url) return;
     zipball_url = result.zipball_url;
   }
@@ -39,12 +50,12 @@ async function loadGithub(source: string, target?: string) {
   const [name, version] = componentName.split('@');
   let zipball_url: string;
   if (version) {
-    const result = await getGithubReleases(user, name);
+    const result = await tryfun(getGithubReleases(user, name));
     const findObj = result.find((item) => item.tag_name === version);
     if (!findObj) return;
     zipball_url = findObj.zipball_url;
   } else {
-    const result = await getGithubReleasesLatest(user, name);
+    const result = await tryfun(getGithubReleasesLatest(user, name));
     if (!result.zipball_url) return;
     zipball_url = result.zipball_url;
   }
@@ -62,14 +73,6 @@ async function loadType(source: string, registry?: string, target?: string) {
   }
   if (registry === RegistryEnum.github) {
     return await loadGithub(source, target);
-  }
-}
-
-async function tryfun(f: Promise<any>) {
-  try {
-    return await f;
-  } catch (error) {
-    // ignore error, 不抛出错误，需要寻找不同的源
   }
 }
 
@@ -96,29 +99,29 @@ async function loadApplication(source: string, registry?: string, target?: strin
   // gui
   if ((process.versions as any).electron) {
     if (registry) {
-      appPath = await tryfun(loadType(source, registry, targetPath));
+      appPath = await loadType(source, registry, targetPath);
       if (appPath) return appPath;
     }
     if (config.getConfig('registry')) {
-      appPath = await tryfun(loadType(source, config.getConfig('registry'), targetPath));
+      appPath = await loadType(source, config.getConfig('registry'), targetPath);
       if (appPath) return appPath;
     }
-    appPath = await tryfun(loadServerless(source, targetPath));
+    appPath = await loadServerless(source, targetPath);
     if (appPath) return appPath;
-    return await tryfun(loadGithub(source, targetPath));
+    return await loadGithub(source, targetPath);
   } else {
     // cli
     if (registry) {
-      appPath = await tryfun(loadType(source, registry, targetPath));
+      appPath = await loadType(source, registry, targetPath);
       if (appPath) return appPath;
     }
     if (config.getConfig('registry')) {
-      appPath = await tryfun(loadType(source, config.getConfig('registry'), targetPath));
+      appPath = await loadType(source, config.getConfig('registry'), targetPath);
       if (appPath) return appPath;
     }
-    appPath = await tryfun(loadGithub(source, targetPath));
+    appPath = await loadGithub(source, targetPath);
     if (appPath) return appPath;
-    return await tryfun(loadServerless(source, targetPath));
+    return await loadServerless(source, targetPath);
   }
 }
 

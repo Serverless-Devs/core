@@ -30,12 +30,8 @@ export interface ILogger {
 
 function getProjectName() {
   function readContent(file: string) {
-    try {
-      const content = yaml.safeLoad(fs.readFileSync(file, 'utf8'));
-      return Object.keys(content)[0];
-    } catch (error) {
-      console.error(error);
-    }
+    const content = yaml.safeLoad(fs.readFileSync(file, 'utf8'));
+    return Object.keys(content)[0];
   }
   const args = minimist(process.argv.slice(2));
   const templte = args.t || args.template;

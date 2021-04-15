@@ -10,6 +10,7 @@ s-core 是 Serverless-Devs 的一个官方组件，通过该组件您可以轻�
 - 状态上报
 - 打包压缩
 - 获取密钥信息
+- 密钥解密
 - 数据校验以及修改
 - 安装依赖
 
@@ -78,6 +79,8 @@ function loggerDemo() {
 - [commadParse](https://github.com/Serverless-Devs/s-core/blob/develop/packages/core/docs/common.md#commandparse) 命令行参数解析工具，用于解析命令行参数。格式为 args(Input, options) 解析工具采用 minimist 详细使用查看
 
 - [getCredential](https://github.com/Serverless-Devs/s-core/blob/develop/packages/core/docs/common.md#getCredential)/[setCredential](https://github.com/Serverless-Devs/s-core/blob/develop/packages/core/docs/common.md#setCredential) 用于获取和创建密钥信息
+
+- [decryptCredential](https://github.com/Serverless-Devs/s-core/blob/develop/packages/core/docs/common.md#decryptCredential) 用于解密密钥信息
 
 - [getState](https://github.com/Serverless-Devs/s-core/blob/develop/packages/core/docs/common.md#getState)/[setState](https://github.com/Serverless-Devs/s-core/blob/develop/packages/core/docs/common.md#setState) 用于获取和设置文件内容
 

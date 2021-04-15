@@ -77,39 +77,15 @@ const { report, HLogger, ILogger } = require('@serverless-devs/core');
 class ReportDemo {
   @HLogger('S-CORE') logger: ILogger;
   async component() {
-    await report('组件数据上报', {
-      type: 'component',
-      context: 'fc',
-      params: {
-        action: 'deploy',
-        account: '123435',
-      },
+    await reportComponent('website', {
+      command: 'deploy',
+      uid: '123435',
+      remark: 'test',
     });
     this.logger.info('成功上报');
   }
 }
 ```
-
-![Demo](https://img.alicdn.com/imgextra/i3/O1CN01OW9lSg1SEyLJ2TXxo_!!6000000002216-1-tps-1312-73.gif)
-
-#### 错误上报
-
-```typescript
-const { report, HLogger, ILogger } = require('@serverless-devs/core');
-
-class ReportDemo {
-  @HLogger('S-CORE') logger: ILogger;
-  async error() {
-    await report('错误上报', {
-      type: 'error',
-      context: 'fc',
-    });
-    this.logger.error('错误上报');
-  }
-}
-```
-
-![Demo](https://img.alicdn.com/imgextra/i2/O1CN01XJzCmp1qJb7ZUvFEi_!!6000000005475-1-tps-1312-73.gif)
 
 ## loadComponent
 
@@ -120,8 +96,9 @@ class ReportDemo {
 ```typescript
 /**
  * source 传参数格式说明
- * 1.serverless hub 源为 `<组件名>` 会下载最新版本，`<组件名>@<组件版本号>` 会下载指定版本
- * 2.github 源为 `<用户名>/<项目名称>` 会下载最新版本，`<用户名>/<项目名称>@<项目发布的版本号>` 会下载指定版本
+ * 1.serverless hub 源为 `<org名>/<组件名>` 会下载最新版本，`<org名>/<组件名>@<组件版本号>` 会下载指定版本
+ * serverless hub官方的org名默认为devsapp，
+ * 2.github 源为 `<org名>/<项目名称>` 会下载最新版本，`<org名>/<项目名称>@<项目发布的版本号>` 会下载指定版本
  * 3.支持本地调试，可传本地组件的当前路径
  *
  * registry 参数说明，值为 'http://registry.serverlessfans.cn/simple' 或者 'https://api.github.com/repos'
@@ -136,14 +113,14 @@ class ReportDemo {
 
 ```typescript
 const { loadComponent } = require('@serverless-devs/core');
-loadComponent('fc-deploy');
+loadComponent('devsapp/fc-deploy');
 ```
 
 - 支持下载特定版本的组件
 
 ```typescript
 const { loadComponent } = require('@serverless-devs/core');
-loadComponent('fc-deploy@0.1.2');
+loadComponent('devsapp/fc-deploy@0.1.2');
 ```
 
 - 支持加载本地组件
@@ -411,6 +388,21 @@ async function set() {
 ```
 
 ![demo](https://gw.alicdn.com/imgextra/i2/O1CN01w8fORm1sYN8lWmGsb_!!6000000005778-1-tps-1215-459.gif)
+
+## decryptCredential
+
+```typescript
+const { decryptCredential } = require('@serverless-devs/core');
+
+const c = decryptCredential({
+  AccountID: 'U2FsdGVkX1+jAj7Kxp3X1lHwFSUtBoSqkpFXp/dYEB0=',
+  SecretID: 'U2FsdGVkX1/NKNJ6MDERFRhQ6GIukaUogeKcFJrhMRU=',
+  SecretKey: 'U2FsdGVkX1/OSprVoM65l3trkwg4CgAjtQZzt/wN798=',
+});
+console.log('c', c);
+```
+
+#### 用于解密密钥信息
 
 ## getState
 

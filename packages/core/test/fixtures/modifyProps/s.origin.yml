@@ -1,27 +1,38 @@
-MyFunctionDemo:
-  Component: fc
-  Provider: alibaba
-  Properties:
-    Region: cn-hangz
-    Service:
-      Name: xx
-      Description: Serverless 为你写诗
-    Function:
-      Name: serverless_poem
-      Description: Serverless 为你写诗
-      CodeUri: ./src
-      Handler: index.handler
-      MemorySize: 128
-      Runtime: python3
-      Timeout: 5
-      Triggers:
-        - Name: PoemTrigger
-          Type: HTTP
-          Parameters:
-            AuthType: ANONYMOUS
-            Methods:
-              - GET
-              - POST
-              - PUT
-            Domains:
-              - Domain: Auto
+edition: 1.0.0
+services:
+  website:
+    component: /Users/shihuali/workspace/website/lib/index.js # 指向项目路径
+    access: my
+    props:
+      bucket: shl-website-test01
+      src:
+        src: './src'
+        dist: './build'
+        hook: npm run build
+        index: index.html
+        error: index.html
+      region: cn-hangzhou
+      hosts:
+        - host: shl2.shihuali.top
+          https:
+            certInfo:
+              switch: on
+              certType: free
+              certName: xxx
+              serverCertificate: xxx
+              privateKey: xxx
+            http2: on
+            forceHttps: on
+          access:
+            referer:
+              refererType: blacklist
+              allowEmpty: true 
+              referers: 
+                - 'aliyun.com'
+                - 'taobao.com'
+
+
+
+      # cors:
+      #   allowedOrigin: '*'
+      #   allowedMethod: ['GET']

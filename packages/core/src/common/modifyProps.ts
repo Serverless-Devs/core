@@ -4,39 +4,9 @@ import yaml from 'js-yaml';
 import { S_CURRENT } from '../libs/common';
 import { merge } from '../libs/utils';
 import minimist from 'minimist';
-// import getYamlContent from './getYamlContent';
-// TODO：后续 getYamlContent 方法从外部引入
+import getYamlContent from './getYamlContent';
 
-/**
- *
- * @param filePath 文件的当前路径
- * @description 函数内部会兼容yaml和yml文件，返回文件内容
- */
-async function getYamlContent(filePath: string) {
-  // yaml 文件
-  if (filePath.endsWith('yaml')) {
-    if (fs.existsSync(filePath)) {
-      return yaml.safeLoad(fs.readFileSync(filePath, 'utf8'));
-    }
-    const ymlPath = filePath.replace('.yaml', '.yml');
-    if (fs.existsSync(ymlPath)) {
-      return yaml.safeLoad(fs.readFileSync(ymlPath, 'utf8'));
-    }
-  }
-
-  // yml 文件
-  if (filePath.endsWith('yml')) {
-    if (fs.existsSync(filePath)) {
-      return yaml.safeLoad(fs.readFileSync(filePath, 'utf8'));
-    }
-    const yamlPath = filePath.replace('.yml', '.yaml');
-    if (fs.existsSync(yamlPath)) {
-      return yaml.safeLoad(fs.readFileSync(yamlPath, 'utf8'));
-    }
-  }
-}
-
-async function modifyProps(service: string, options: object) {
+async function modifyProps(component: string, options: object) {
   const args = minimist(process.argv.slice(2));
   let templte = args.t || args.template;
   if (!templte) {
@@ -54,14 +24,9 @@ async function modifyProps(service: string, options: object) {
   if (!fs.existsSync(originPath)) {
     fs.copyFileSync(filePath, originPath);
   }
-  let userInfo: { [x: string]: any };
-  try {
-    userInfo = await getYamlContent(filePath);
-    userInfo[service].Properties = merge(userInfo[service].Properties, options);
-    fs.writeFileSync(filePath, yaml.dump(userInfo));
-  } catch (error) {
-    console.error(error);
-  }
+  const userInfo: any = await getYamlContent(filePath);
+  userInfo.services[component].props = merge(userInfo.services[component].props, options);
+  fs.writeFileSync(filePath, yaml.dump(userInfo));
 }
 
 export default modifyProps;

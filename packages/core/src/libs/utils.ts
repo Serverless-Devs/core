@@ -59,14 +59,8 @@ export const uuid = uid;
 
 export function readJsonFile(filePath: string) {
   if (fs.existsSync(filePath)) {
-    let result = {};
     const data = fs.readFileSync(filePath, 'utf8');
-    try {
-      result = JSON.parse(data);
-    } catch (e) {
-      throw new Error(e);
-    }
-    return result;
+    return JSON.parse(data);
   } else {
     throw new Error(i18n.__('The current file does not exist'));
   }

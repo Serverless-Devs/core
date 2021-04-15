@@ -8,6 +8,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import i18n from '../libs/i18n';
 import { RegistryEnum } from './constant';
+import { Logger } from '../logger';
 
 interface HintOptions {
   loading?: string;
@@ -30,6 +31,7 @@ export async function request(url: string, options?: RequestOptions): Promise<an
   const { method = 'get', params, body: bodyFromOptions, hint = {}, json = true, ...rest } =
     options || {};
   const { loading, success, error } = hint;
+  const logger = new Logger();
   let vm = null;
   let result = null;
   const errorMessage = (code: string | number, message: string) =>
@@ -38,6 +40,7 @@ export async function request(url: string, options?: RequestOptions): Promise<an
 
   try {
     const isGet = method.toUpperCase() === 'GET';
+    logger.debug(`URL: ${url}`);
     result = await got(url, {
       method,
       [isGet ? 'query' : 'body']: isGet ? params : bodyFromOptions,
@@ -68,6 +71,7 @@ export async function request(url: string, options?: RequestOptions): Promise<an
 
 export async function downloadRequest(url: string, dest: string, options?: DownloadOptions) {
   const { extract, postfix, strip, ...rest } = options || {};
+  const logger = new Logger();
   const spin = spinner('prepare downloading');
   let len: number;
   if (url.startsWith(RegistryEnum.serverless)) {
@@ -75,7 +79,7 @@ export async function downloadRequest(url: string, dest: string, options?: Downl
       const { headers } = await got(url, { method: 'HEAD' });
       len = parseInt(headers['content-length'], 10);
     } catch (error) {
-      console.error(error);
+      // ignore error
     }
   }
   let bar: ProgressService;
@@ -86,6 +90,7 @@ export async function downloadRequest(url: string, dest: string, options?: Downl
     bar = new ProgressService(ProgressType.Loading, { total: 100 }, format);
   }
   spin.text = 'start downloading';
+  logger.debug(`${spin.text} ${url}`);
   try {
     await download(url, dest, { ...rest, rejectUnauthorized: false }).on(
       'downloadProgress',
@@ -101,8 +106,8 @@ export async function downloadRequest(url: string, dest: string, options?: Downl
       const files = fs.readdirSync(dest);
       let filename = files[0];
       if (postfix && !filename.slice(filename.lastIndexOf('.')).startsWith('.')) {
-        fs.rename(path.resolve(dest, filename), path.resolve(dest, filename) + `.${postfix}`);
-        filename = filename + `.${postfix}`;
+        fs.rename(path.resolve(dest, filename), `${path.resolve(dest, filename)}.${postfix}`);
+        filename += `.${postfix}`;
       }
       spin.text = i18n.__('File unzipping...');
       await decompress(`${dest}/${filename}`, dest, { strip });
@@ -113,6 +118,6 @@ export async function downloadRequest(url: string, dest: string, options?: Downl
     }
   } catch (error) {
     spin.stop();
-    console.error(error);
+    throw error;
   }
 }

@@ -1,39 +1,24 @@
 import { request } from './request';
-import { isEmpty } from '../libs/utils';
-import { Logger } from '../logger';
 
-interface ReportOptions {
-  type: 'error' | 'component';
-  context?: string;
-  params?: object;
+export interface IReportComponent {
+  uid: string;
+  command: string;
+  remark?: string;
 }
 
-export default async function report(message: any, options: ReportOptions) {
-  const { type, context, params } = options;
-  switch (type) {
-    case 'error': {
-      const result = await request('https://tool.serverlessfans.com/error/center', {
-        method: 'post',
-        body: {
-          tag: context,
-          error: message,
-        },
-      });
-      !isEmpty(result) && Logger.log(result[0], 'green');
-      return result;
-    }
-    case 'component': {
-      const result = await request('https://tool.serverlessfans.com/component/actions', {
-        method: 'post',
-        body: Object.assign(
-          {
-            message,
-            component: context,
-          },
-          params,
-        ),
-      });
-      return result;
-    }
+export async function reportComponent(componentName: string, options: IReportComponent) {
+  console.log({ component: componentName, ...options });
+  try {
+    const abc = await request('https://registry.serverlessfans.cn/report/component', {
+      method: 'post',
+      form: true,
+      body: {
+        component: componentName,
+        ...options,
+      },
+    });
+    console.log(abc);
+  } catch (error) {
+    // ignore exception
   }
 }
