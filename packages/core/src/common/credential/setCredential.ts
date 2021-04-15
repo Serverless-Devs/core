@@ -6,6 +6,7 @@ import yaml from 'js-yaml';
 import { providerCollection, checkProviderList } from './constant';
 import i18n from '../../libs/i18n';
 import getYamlContent from '../getYamlContent';
+
 const Crypto = require('crypto-js');
 
 async function handleCustom(info: any) {
@@ -94,7 +95,7 @@ async function writeData(data: any) {
         fs.appendFileSync(filePath, yaml.dump({ [accessAlias]: encrypt(info) }));
         output({ info, accessAlias });
       } catch (err) {
-        throw Error('Configuration failed');
+        throw new Error('Configuration failed');
       }
     }
   } else {
@@ -102,7 +103,7 @@ async function writeData(data: any) {
       fs.writeFileSync(filePath, yaml.dump({ [accessAlias]: encrypt(info) }));
       output({ info, accessAlias });
     } catch (err) {
-      throw Error('Configuration failed');
+      throw new Error('Configuration failed');
     }
   }
   return data;
@@ -116,7 +117,7 @@ async function getAlias() {
     if (keys.length === 0) {
       return 'default';
     }
-    let max: string = '0';
+    let max = '0';
     keys.forEach((item) => {
       const [, end] = item.split('-');
       if (end > max) {

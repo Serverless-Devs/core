@@ -11,10 +11,8 @@ import {
 import { RegistryEnum, Registry } from '../constant';
 import * as config from '../../libs/handler-set-config';
 import { downloadRequest } from '../request';
-import { Logger } from '../../logger';
 import installDependency from '../installDependency';
 
-const logger = new Logger();
 async function tryfun(f: Promise<any>) {
   try {
     return await f;
@@ -24,7 +22,7 @@ async function tryfun(f: Promise<any>) {
 }
 
 async function loadServerless(source: string, params?: any) {
-  if (!source.includes('/')) source = `devsapp/${source}`;
+  if (!source.includes('/')) return null;
   const [provider, componentName] = source.split('/');
   if (!componentName) return;
   const [name, version] = componentName.split('@');
@@ -115,7 +113,8 @@ function isComponent(result) {
   return !!result;
 }
 
-async function loadRemoteComponent(source: string, registry?: Registry, params?: any) {
+async function loadRemoteComponent(oldsource: string, registry?: Registry, params?: any) {
+  const source = oldsource.includes('/') ? oldsource : `devsapp/${oldsource}`;
   let result: any;
   // gui
   if ((process.versions as any).electron) {
@@ -148,9 +147,9 @@ async function loadRemoteComponent(source: string, registry?: Registry, params?:
     if (isComponent(result)) return result;
   }
 
-  // TODO: `下载的${source}的资源中，未找到相关组件`
-  logger.warn(`未找到${source}组件，请确定组件名或者源是否正确`);
-  return null;
+  if (!result) {
+    throw new Error(`未找到${source}组件，请确定组件名或者源是否正确`);
+  }
 }
 
 async function loadComponent(source: string, registry?: Registry, params?: any) {
