@@ -524,45 +524,52 @@ async function test() {
 
 ## modifyProps
 
-#### 用于修改当前目录下 <s.yml> 文件的 `Properties` 属性， 第一次执行该方法时，会备份<s.yml>到<s.origin.yml>
+#### 用于修改 <s.yml> 文件的 `prop` 属性， 第一次执行该方法时，会备份<s.yml>到<s.origin.yml>
 
-第一个参数接收 <s.yml> 的 service, 第二个参数 接收 Properties，其值会 merge 到 <s.yml> 的 Properties
+第一个参数接收 组件名称
+第二个参数 接收 prop，其值会 merge 到 <s.yml> 的 prop
+第三个参数 接收 <s.yml> 的路径
 
 ```typescript
 const { modifyProps } = require('@serverless-devs/core');
 
 // s.yml demo
 
-// MyFunctionDemo:
-//   Component: fc
-//   Provider: alibaba
-//   Properties:
-//     Region: cn-hangzhou
-//     Service:
-//       Name: ServerlessToolProject
-//       Description: 欢迎使用ServerlessTool
-//     Function:
-//       Name: serverless_demo_python3_http
-//       Description: 这是一个Python3-HTTP的测试案例
-//       CodeUri: ./
-//       Handler: index.handler
-//       MemorySize: 128
-//       Runtime: python3
-//       Timeout: 5
-//       Triggers:
-//         - Name: TriggerNameHttp
-//           Type: HTTP
-//           Parameters:
-//             AuthType: ANONYMOUS
-//             Methods:
-//               - GET
-//               - POST
-//               - PUT
-//             Domains:
-//               - Domain: AUTO
+// edition: 1.0.0
+// services:
+//   website:
+//     component: /Users/shihuali/workspace/website/lib/index.js
+//     access: my
+//     props:
+//       bucket: shl-website-test01
+//       src:
+//         src: ./src
+//         dist: ./build
+//         hook: npm run build
+//         index: index.html
+//         error: index.html
+//       region: cn-shanghai
+//       hosts:
+//         - host: shl2.shihuali.top
+//           https:
+//             certInfo:
+//               switch: 'on'
+//               certType: free
+//               certName: xxx
+//               serverCertificate: xxx
+//               privateKey: xxx
+//             http2: 'on'
+//             forceHttps: 'on'
+//           access:
+//             referer:
+//               refererType: blacklist
+//               allowEmpty: true
+//               referers:
+//                 - aliyun.com
+//                 - taobao.com
 
-modifyProps('MyFunctionDemo', {
-  Region: 'cn-shanghai',
+modifyProps('website', {
+  bucket: 'shl-website-test01',
 });
 ```
 
