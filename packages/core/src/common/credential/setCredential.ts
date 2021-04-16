@@ -113,7 +113,7 @@ async function getAlias() {
   const filePath = path.join(os.homedir(), '.s/access.yaml');
   if (fs.existsSync(filePath)) {
     const info = await getYamlContent(filePath);
-    const keys = Object.keys(info).filter((item) => item.startsWith('default'));
+    const keys = info ? Object.keys(info).filter((item) => item.startsWith('default')) : [];
     if (keys.length === 0) {
       return 'default';
     }
