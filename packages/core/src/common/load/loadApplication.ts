@@ -10,6 +10,7 @@ import path from 'path';
 import * as config from '../../libs/handler-set-config';
 import { downloadRequest } from '../request';
 import { spawnSync } from 'child_process';
+import getYamlContent from '../getYamlContent';
 
 async function tryfun(f: Promise<any>) {
   try {
@@ -66,10 +67,15 @@ async function loadGithub(source: string, target?: string) {
   });
   if (subDir) {
     const subDirPath = path.resolve(target, subDir);
+    const originSubDirPath = getYamlContent(path.resolve(applicationPath, subDir, 'publish.yaml'))
+      ? path.resolve(applicationPath, subDir, 'src')
+      : path.resolve(applicationPath, subDir);
     spawnSync(
-      `mv ${path.resolve(applicationPath, subDir)} ${subDirPath} && rm -rf ${applicationPath}`,
+      `rm -rf ${subDirPath} && mv ${originSubDirPath} ${subDirPath} && rm -rf ${applicationPath}`,
       [],
-      { shell: true },
+      {
+        shell: true,
+      },
     );
     return subDirPath;
   }
