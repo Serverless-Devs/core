@@ -1,10 +1,7 @@
 import { Logger as MyLogger } from '@tsed/logger';
 import chalk from 'chalk';
-import { S_CURRENT_HOME } from '../libs/common';
+import { S_ROOT_HOME } from '../libs/common';
 import minimist from 'minimist';
-import fs from 'fs';
-import yaml from 'js-yaml';
-const path = require('path');
 
 type LogColor =
   | 'black'
@@ -28,61 +25,27 @@ export interface ILogger {
   error: (...data: any[]) => any;
 }
 
-function getProjectName() {
-  function readContent(file: string) {
-    const content = yaml.safeLoad(fs.readFileSync(file, 'utf8'));
-    return Object.keys(content)[0];
-  }
-  const args = minimist(process.argv.slice(2));
-  const templte = args.t || args.template;
-  if (templte) {
-    const templteFile = path.join(process.cwd(), templte);
-    if (fs.existsSync(templteFile)) {
-      return readContent(templteFile);
-    }
-  }
-
-  const s_yaml = path.join(process.cwd(), 's.yaml');
-  if (fs.existsSync(s_yaml)) {
-    return readContent(s_yaml);
-  }
-  const s_yml = path.join(process.cwd(), 's.yml');
-  if (fs.existsSync(s_yml)) {
-    return readContent(s_yml);
-  }
-  const template_yaml = path.join(process.cwd(), 'template.yaml');
-  if (fs.existsSync(template_yaml)) {
-    return readContent(template_yaml);
-  }
-  const template_yml = path.join(process.cwd(), 'template.yml');
-  if (fs.existsSync(template_yml)) {
-    return readContent(template_yml);
-  }
-}
-
 export const logger = (name: string): ILogger => {
   const loggers = new MyLogger(name);
   const args = minimist(process.argv.slice(2));
   const debug = args.debug || process.env?.temp_params?.includes('--debug');
-  const projectName = getProjectName();
   const stdLog = loggers.appenders.set('std-log', {
     type: 'stdout',
     layout: { type: 'colored' },
     levels: (debug ? ['debug'] : []).concat(['info', 'warn', 'error', 'fatal']),
   });
 
-  projectName &&
-    stdLog.set('all-log-file', {
-      type: 'file',
-      filename: `${S_CURRENT_HOME}/logs/${projectName}.log`,
-      levels: ['trace', 'debug', 'info', 'warn', 'error', 'fatal'],
-      pattern: '.yyyy-MM-dd',
-      maxLogSize: 5,
-      layout: {
-        type: 'json',
-        separator: ',',
-      },
-    });
+  stdLog.set('all-log-file', {
+    type: 'file',
+    filename: `${S_ROOT_HOME}/logs/app.log`,
+    levels: ['trace', 'debug', 'info', 'warn', 'error', 'fatal'],
+    pattern: '.yyyy-MM-dd',
+    maxLogSize: 8388608,
+    layout: {
+      type: 'json',
+      separator: ',',
+    },
+  });
 
   // @ts-ignore
   loggers.log = (message: any, color?: LogColor) => {

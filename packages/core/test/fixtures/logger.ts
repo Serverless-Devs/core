@@ -1,63 +1,66 @@
-// import { HLogger } from '../../src';
-import { Logger } from '../../src/logger';
+import { HLogger } from '../../src';
+// import { Logger } from '../../src/logger';
 
-// class LoggerDemo {
-//   @HLogger('S-CORE') logger;
+class LoggerDemo {
+  @HLogger('S-CORE') logger;
 
-//   getDefaultLog() {
-//     this.logger.debug('abc');
-//     this.logger.info('abc');
-//     this.logger.warn('abc');
-//     this.logger.error('abc');
-//     this.logger.fatal('abc');
-//   }
+  getDefaultLog() {
+    this.logger.debug('abc');
+    this.logger.info('abc');
+    this.logger.warn('abc');
+    this.logger.error('abc');
+    this.logger.fatal('abc');
+  }
 
-//   getDefaultLogObect() {
-//     const jsonObj = { name: 'dankun', age: 20 };
-//     this.logger.error(jsonObj, { context: 'S-CORE' });
-//   }
+  getDefaultLogObect() {
+    const jsonObj = { name: 'dankun', age: 20 };
+    this.logger.error(jsonObj, { context: 'S-CORE' });
+  }
 
-//   getDefaultLogWithContext() {
-//     this.logger.info('abct', { context: 'S-CORE', logLevel: 'info' });
-//   }
+  getDefaultLogWithContext() {
+    this.logger.info('abct', { context: 'S-CORE', logLevel: 'info' });
+  }
 
-//   info() {
-//     this.logger.info('测试INFO', { context: 'S-CORE' });
-//   }
+  info() {
+    this.logger.info('测试INFO', { context: 'S-CORE' });
+  }
 
-//   error() {
-//     this.logger.error('测试ERROR', { context: 'S-CORE' });
-//   }
+  error() {
+    this.logger.error('测试ERROR', { context: 'S-CORE' });
+  }
 
-//   warn() {
-//     this.logger.warn('测试WARN', { context: 'S-CORE' });
-//   }
+  warn() {
+    this.logger.warn('测试WARN', { context: 'S-CORE' });
+  }
 
-//   debug() {
-//     this.logger.debug('测试DEBUG', { context: 'S-CORE' });
-//   }
+  debug() {
+    this.logger.debug('测试DEBUG', { context: 'S-CORE' });
+  }
 
-//   debugLevel() {
-//     this.logger.debug('测试DEBUG logLevel', { context: 'S-CORE', logLevel: 'debug' });
-//   }
+  debugLevel() {
+    this.logger.debug('测试DEBUG logLevel', { context: 'S-CORE', logLevel: 'debug' });
+  }
 
-//   log() {
-//     this.logger.log('开始执行...');
-//     this.logger.log('执行成功', 'green');
-//   }
+  log() {
+    this.logger.log('开始执行...');
+    this.logger.log('执行成功', 'green');
+  }
 
-//   getDebugMsg() {
-//     this.logger.debug('debug message');
-//   }
+  getDebugMsg() {
+    for (let index = 0; index < 10000; index++) {
+      this.logger.debug('debug message');
+      this.logger.error('error message');
+    }
+  }
 
-//   getInfoMsg() {
-//     this.logger.info('info message');
-//   }
-// }
+  getInfoMsg() {
+    this.logger.info('info message');
+  }
+}
 
-// const demo = new LoggerDemo();
+const demo = new LoggerDemo();
 // demo.log();
-// demo.getDebugMsg();
+demo.getDebugMsg();
 // demo.getInfoMsg();
 
 // Logger.info('S-CORE', 'dankun');
@@ -84,7 +87,7 @@ import { Logger } from '../../src/logger';
 //
 // console.log(LogLevelEnum[2]);
 
-Logger.info(undefined, 'abc');
+// Logger.info(undefined, 'abc');
 
-const l = new Logger();
-l.info('abcxx');
+// const l = new Logger();
+// l.info('abcxx');
