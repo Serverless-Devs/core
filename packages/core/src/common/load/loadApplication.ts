@@ -10,6 +10,10 @@ import path from 'path';
 import * as config from '../../libs/handler-set-config';
 import { downloadRequest } from '../request';
 import installDependency from '../installDependency';
+import zip from '../zip';
+import fs from 'fs-extra';
+import decompress from 'decompress';
+import { spawnSync } from 'child_process';
 
 async function tryfun(f: Promise<any>) {
   try {
@@ -38,6 +42,7 @@ async function loadServerless(source: string, target?: string) {
   const applicationPath = path.resolve(target, name);
   await downloadRequest(zipball_url, applicationPath, {
     extract: true,
+    strip: 1,
   });
   await installDependency({ cwd: applicationPath });
   return applicationPath;
@@ -45,7 +50,7 @@ async function loadServerless(source: string, target?: string) {
 
 async function loadGithub(source: string, target?: string) {
   if (!source.includes('/')) return;
-  const [user, componentName] = source.split('/');
+  const [user, componentName, subDir] = source.split('/');
   if (!componentName) return;
   const [name, version] = componentName.split('@');
   let zipball_url: string;
@@ -62,7 +67,23 @@ async function loadGithub(source: string, target?: string) {
   const applicationPath = path.resolve(target, name);
   await downloadRequest(zipball_url, applicationPath, {
     extract: true,
+    strip: 1,
   });
+  if (subDir) {
+    await zip({
+      codeUri: path.resolve(applicationPath, subDir),
+      outputFilePath: target,
+      outputFileName: `${subDir}.zip`,
+    });
+    const subDirPath = path.resolve(target, subDir);
+    await decompress(path.resolve(target, `${subDir}.zip`), subDirPath, {
+      strip: 1,
+    });
+    spawnSync(`rm -rf ${applicationPath}`, [], { shell: true });
+    fs.unlinkSync(path.resolve(target, `${subDir}.zip`));
+    await installDependency({ cwd: subDirPath });
+    return subDirPath;
+  }
   await installDependency({ cwd: applicationPath });
   return applicationPath;
 }
