@@ -9,10 +9,6 @@ import { RegistryEnum } from '../constant';
 import path from 'path';
 import * as config from '../../libs/handler-set-config';
 import { downloadRequest } from '../request';
-import installDependency from '../installDependency';
-import zip from '../zip';
-import fs from 'fs-extra';
-import decompress from 'decompress';
 import { spawnSync } from 'child_process';
 
 async function tryfun(f: Promise<any>) {
@@ -44,7 +40,6 @@ async function loadServerless(source: string, target?: string) {
     extract: true,
     strip: 1,
   });
-  await installDependency({ cwd: applicationPath });
   return applicationPath;
 }
 
@@ -70,21 +65,14 @@ async function loadGithub(source: string, target?: string) {
     strip: 1,
   });
   if (subDir) {
-    await zip({
-      codeUri: path.resolve(applicationPath, subDir),
-      outputFilePath: target,
-      outputFileName: `${subDir}.zip`,
-    });
     const subDirPath = path.resolve(target, subDir);
-    await decompress(path.resolve(target, `${subDir}.zip`), subDirPath, {
-      strip: 1,
-    });
-    spawnSync(`rm -rf ${applicationPath}`, [], { shell: true });
-    fs.unlinkSync(path.resolve(target, `${subDir}.zip`));
-    await installDependency({ cwd: subDirPath });
+    spawnSync(
+      `mv ${path.resolve(applicationPath, subDir)} ${subDirPath} && rm -rf ${applicationPath}`,
+      [],
+      { shell: true },
+    );
     return subDirPath;
   }
-  await installDependency({ cwd: applicationPath });
   return applicationPath;
 }
 
@@ -103,7 +91,6 @@ async function loadApplicationByUrl(source: string, registry?: string, target?: 
     postfix: 'zip',
     extract: true,
   });
-  await installDependency({ cwd: applicationPath });
   return applicationPath;
 }
 
