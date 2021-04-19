@@ -1,18 +1,18 @@
-import { setCredential } from '../../src/common';
+import { getCredential } from '../../src/common';
 
-// async function get() {
-//   const c = await getCredential('my', 'AccountID', 'AccessKeyID', 'AccessKeySecret');
-//   console.log(c);
-// }
-
-// get();
-
-async function set() {
-  const c = await setCredential('AccountID', 'SecretID', 'SecretKey');
+async function get() {
+  const c = await getCredential('error', 'AccountID', 'AccessKeyID', 'AccessKeySecret');
   console.log(c);
 }
 
-set();
+get();
+
+// async function set() {
+//   const c = await setCredential('AccountID', 'SecretID', 'SecretKey');
+//   console.log(c);
+// }
+
+// set();
 
 // const info = {
 //   AccountID: 'U2FsdGVkX1+jAj7Kxp3X1lHwFSUtBoSqkpFXp/dYEB0=',

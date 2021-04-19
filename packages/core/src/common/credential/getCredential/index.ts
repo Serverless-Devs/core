@@ -6,15 +6,11 @@ const Crypto = require('crypto-js');
 
 export function decryptCredential(info: { [key: string]: any }) {
   const cloneInfo = Object.assign({}, info);
-  let error: boolean;
   Object.keys(cloneInfo).forEach((key) => {
     const bytes = Crypto.AES.decrypt(cloneInfo[key], 'SecretKey123');
-    cloneInfo[key] = bytes.toString(Crypto.enc.Utf8);
-    if (!cloneInfo[key]) {
-      error = true;
-    }
+    cloneInfo[key] = bytes.toString(Crypto.enc.Utf8) || cloneInfo[key];
   });
-  return error ? false : cloneInfo;
+  return cloneInfo;
 }
 
 /**
@@ -50,9 +46,6 @@ async function getCredential(access?: string, ...args: any[]) {
   // 找到已经创建过的密钥，直接返回密钥信息
   if (accessKeys.length > 0) {
     const formatObj = decryptCredential(accessContent[accessAlias]);
-    if (formatObj === false) {
-      throw new Error(`获取${accessAlias}密钥信息失败`);
-    }
     if (Object.prototype.hasOwnProperty.call(formatObj, 'AccountID')) {
       return {
         Alias: accessAlias,
