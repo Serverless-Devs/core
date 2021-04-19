@@ -5,7 +5,9 @@ import fs from 'fs-extra';
 
 export async function getState(id: any) {
   const stateFilePath = path.join(S_CURRENT_HOME, `${id}.json`);
-  return readJsonFile(stateFilePath);
+  if (fs.existsSync(stateFilePath)) {
+    return readJsonFile(stateFilePath);
+  }
 }
 
 export async function setState(id: any, state: any) {
