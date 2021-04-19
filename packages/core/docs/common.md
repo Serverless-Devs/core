@@ -182,12 +182,17 @@ function sleep(timer: number) {
 }
 
 async start() {
-  const vm = spinner('开始执行');
-  await sleep(1000);
-  vm.text = 'hhh';
-  vm.color = 'red';
-  await sleep(1000);
-  vm.succeed('执行成功');
+  async test() {
+    const vm = spinner('开始执行');
+    await sleep(1000);
+    try {
+      await sleep(1500);
+      vm1.succeed('执行成功.');
+    } catch(ex) {
+      vm1.fail('执行失败')
+      throw ex;
+    }
+  }
 }
 
 ```
