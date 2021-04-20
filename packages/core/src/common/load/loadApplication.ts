@@ -11,6 +11,8 @@ import * as config from '../../libs/handler-set-config';
 import { downloadRequest } from '../request';
 import { spawnSync } from 'child_process';
 import getYamlContent from '../getYamlContent';
+import fs from 'fs-extra';
+import inquirer from 'inquirer';
 
 async function tryfun(f: Promise<any>) {
   try {
@@ -46,8 +48,9 @@ async function loadServerless(source: string, target?: string) {
 
 async function loadGithub(source: string, target?: string) {
   if (!source.includes('/')) return;
-  const [user, componentName, subDir] = source.split('/');
-  if (!componentName) return;
+  const [user, componentNameSubDir] = source.split('/');
+  if (!componentNameSubDir) return;
+  const [componentName, subDir] = componentNameSubDir.split(':');
   const [name, version] = componentName.split('@');
   let zipball_url: string;
   if (version) {
@@ -61,25 +64,44 @@ async function loadGithub(source: string, target?: string) {
     zipball_url = result.zipball_url;
   }
   const applicationPath = path.resolve(target, name);
+  if (subDir) {
+    return handleSubDir({ zipball_url, target, subDir, applicationPath });
+  }
   await downloadRequest(zipball_url, applicationPath, {
     extract: true,
     strip: 1,
   });
-  if (subDir) {
-    const subDirPath = path.resolve(target, subDir);
-    const originSubDirPath = getYamlContent(path.resolve(applicationPath, subDir, 'publish.yaml'))
-      ? path.resolve(applicationPath, subDir, 'src')
-      : path.resolve(applicationPath, subDir);
-    spawnSync(
-      `rm -rf ${subDirPath} && mv ${originSubDirPath} ${subDirPath} && rm -rf ${applicationPath}`,
-      [],
-      {
-        shell: true,
-      },
-    );
-    return subDirPath;
-  }
   return applicationPath;
+}
+
+async function handleSubDir({ zipball_url, target, subDir, applicationPath }) {
+  const subDirPath = path.resolve(target, subDir);
+  if (fs.existsSync(subDirPath)) {
+    const res = await inquirer.prompt([
+      {
+        type: 'confirm',
+        name: 'confirm',
+        message: `文件 ${subDir} 已存在，是否覆盖该文件`,
+        default: true,
+      },
+    ]);
+    if (!res.confirm) return subDirPath;
+  }
+  await downloadRequest(zipball_url, applicationPath, {
+    extract: true,
+    strip: 1,
+  });
+  const originSubDirPath = getYamlContent(path.resolve(applicationPath, subDir, 'publish.yaml'))
+    ? path.resolve(applicationPath, subDir, 'src')
+    : path.resolve(applicationPath, subDir);
+  spawnSync(
+    `rm -rf ${subDirPath} && mv ${originSubDirPath} ${subDirPath} && rm -rf ${applicationPath}`,
+    [],
+    {
+      shell: true,
+    },
+  );
+  return subDirPath;
 }
 
 async function loadType(source: string, registry?: string, target?: string) {
