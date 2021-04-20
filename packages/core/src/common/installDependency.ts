@@ -23,9 +23,7 @@ async function installDependency(options?: IOptions) {
   if (existPackageJson) {
     const spin = spinner('Installing dependencies in serverless-devs core ...');
     const result = spawnSync(
-      `npm install ${
-        get(options, 'production') ? '--production' : ''
-      } --registry=https://registry.npm.taobao.org`,
+      `npm install ${get(options, 'production') ? '--production' : ''}`,
       [],
       {
         cwd,
@@ -39,10 +37,17 @@ async function installDependency(options?: IOptions) {
     );
     if (get(result, 'status') === 0) {
       spin.succeed();
-      return Promise.resolve(true);
     }
     spin.fail();
-    return Promise.reject('> Execute Error');
+    throw new Error(
+      get(
+        result,
+        'error',
+        `安装依赖的过程中发生错误，请确保 npm install ${
+          get(options, 'production') ? '--production' : ''
+        }可以正常安装`,
+      ),
+    );
   }
 }
 
