@@ -3,6 +3,7 @@ import path from 'path';
 import yaml from 'js-yaml';
 import { merge } from '../libs/utils';
 import getYamlContent from './getYamlContent';
+import { S_CURRENT_HOME } from '../libs/common';
 
 async function modifyProps(component: string, options: object, sPath: string) {
   if (!component || !sPath) {
@@ -11,8 +12,9 @@ async function modifyProps(component: string, options: object, sPath: string) {
   const index = sPath.lastIndexOf('/');
   const templte = sPath.slice(index + 1);
   const [name, end] = templte.split('.');
-  const originPath = path.resolve(sPath.slice(0, index), `${name}.origin.${end}`);
+  const originPath = path.resolve(S_CURRENT_HOME, `${name}.origin.${end}`);
   if (!fs.existsSync(originPath)) {
+    fs.ensureDirSync(S_CURRENT_HOME);
     fs.copyFileSync(sPath, originPath);
   }
   const userInfo: any = await getYamlContent(sPath);

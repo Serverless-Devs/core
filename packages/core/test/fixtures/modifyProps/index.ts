@@ -9,7 +9,7 @@ const prop = {
     index: 'index.html',
     error: 'index.html',
   },
-  region: 'cn-shanghai1',
+  region: 'cn-shanghai2',
   hosts: [
     {
       host: 'shl2.shihuali.top',
