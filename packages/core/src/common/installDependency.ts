@@ -3,7 +3,6 @@ import path from 'path';
 import get from 'lodash.get';
 import { exec, StdioOptions } from 'child_process';
 import spinner from './spinner';
-// import { installNpm } from '../libs/utils';
 
 interface IOptions {
   cwd?: string;
@@ -19,6 +18,7 @@ const npmInstall = async (
     registry?: string;
   } = {},
 ) => {
+  options.production = typeof options.production === undefined ? true : options.production;
   return new Promise((resolve, reject) => {
     const installDirectory = options.baseDir;
     const pkgJson: string = path.join(installDirectory, 'package.json');
