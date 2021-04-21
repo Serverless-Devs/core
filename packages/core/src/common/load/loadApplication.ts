@@ -23,8 +23,14 @@ async function tryfun(f: Promise<any>) {
   }
 }
 
-async function loadServerless(source: string, target?: string) {
-  if (!source.includes('/')) return;
+async function loadServerless(oldsource: string, target?: string) {
+  if (!oldsource.includes('/')) return;
+  let source = oldsource;
+  if (oldsource.includes(':')) {
+    const [a, b] = oldsource.split(':');
+    const [c] = a.split('/');
+    source = `${c}/${b}`;
+  }
   const [provider, componentName] = source.split('/');
   if (!componentName) return;
   const [name, version] = componentName.split('@');
@@ -41,11 +47,7 @@ async function loadServerless(source: string, target?: string) {
     zipball_url = result.zipball_url;
   }
   const applicationPath = path.resolve(target, name);
-  await downloadRequest(zipball_url, applicationPath, {
-    extract: true,
-    strip: 1,
-  });
-  return applicationPath;
+  return handleDecompressFile({ zipball_url, applicationPath, name });
 }
 
 async function loadGithub(source: string, target?: string) {
@@ -70,26 +72,49 @@ async function loadGithub(source: string, target?: string) {
   if (subDir) {
     return handleSubDir({ zipball_url, target, subDir, applicationPath });
   }
+  return handleDecompressFile({ zipball_url, applicationPath, name });
+}
+async function handleDecompressFile({ zipball_url, applicationPath, name }) {
+  const answer = await checkFileExists(applicationPath, name);
+  if (!answer) return applicationPath;
+  spawnSync(`rm -rf ${applicationPath}`, [], {
+    shell: true,
+  });
   await downloadRequest(zipball_url, applicationPath, {
     extract: true,
     strip: 1,
   });
+  const hasPublishYaml = getYamlContent(path.resolve(applicationPath, 'publish.yaml'));
+  if (hasPublishYaml) {
+    spawnSync(`mv ${applicationPath}/src ${applicationPath}-src && rm -rf ${applicationPath}`, [], {
+      shell: true,
+    });
+    fs.renameSync(`${applicationPath}-src`, applicationPath);
+  }
   return applicationPath;
 }
-
-async function handleSubDir({ zipball_url, target, subDir, applicationPath }) {
-  const subDirPath = path.resolve(target, subDir);
-  if (fs.existsSync(subDirPath)) {
+async function checkFileExists(filePath: string, fileName: string) {
+  if (fs.existsSync(filePath)) {
     const res = await inquirer.prompt([
       {
         type: 'confirm',
         name: 'confirm',
-        message: `文件 ${subDir} 已存在，是否覆盖该文件`,
+        message: `文件 ${fileName} 已存在，是否覆盖该文件`,
         default: true,
       },
     ]);
-    if (!res.confirm) return subDirPath;
+    return res.confirm;
   }
+  // 不存在文件，返回true表示需要覆盖
+  return true;
+}
+async function handleSubDir({ zipball_url, target, subDir, applicationPath }) {
+  const subDirPath = path.resolve(target, subDir);
+  const answer = await checkFileExists(subDirPath, subDir);
+  if (!answer) return subDirPath;
+  spawnSync(`rm -rf ${subDirPath}`, [], {
+    shell: true,
+  });
   await downloadRequest(zipball_url, applicationPath, {
     extract: true,
     strip: 1,
@@ -97,13 +122,9 @@ async function handleSubDir({ zipball_url, target, subDir, applicationPath }) {
   const originSubDirPath = getYamlContent(path.resolve(applicationPath, subDir, 'publish.yaml'))
     ? path.resolve(applicationPath, subDir, 'src')
     : path.resolve(applicationPath, subDir);
-  spawnSync(
-    `rm -rf ${subDirPath} && mv ${originSubDirPath} ${subDirPath} && rm -rf ${applicationPath}`,
-    [],
-    {
-      shell: true,
-    },
-  );
+  spawnSync(`mv ${originSubDirPath} ${subDirPath} && rm -rf ${applicationPath}`, [], {
+    shell: true,
+  });
   return subDirPath;
 }
 
@@ -125,15 +146,15 @@ async function loadApplicationByUrl(source: string, registry?: string, target?: 
   return applicationPath;
 }
 
-async function loadApplication(source: string, registry?: string, target?: string) {
+async function loadApplication(oldsource: string, registry?: string, target?: string) {
   const targetPath = target || S_CURRENT;
   if (registry) {
     if (registry !== RegistryEnum.github && registry !== RegistryEnum.serverless) {
       // 支持 自定义
-      return await loadApplicationByUrl(source, registry, targetPath);
+      return await loadApplicationByUrl(oldsource, registry, targetPath);
     }
   }
-
+  const source = oldsource.includes('/') ? oldsource : `devsapp/${oldsource}`;
   let appPath: string;
   // gui
   if ((process.versions as any).electron) {
