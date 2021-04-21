@@ -29,6 +29,21 @@ request(url, {
 
 ```
 
+- 如果希望不抛出错误信息，可通过 `ignoreError` 参数设置为 `true` 即可
+
+```typescript
+const { request } = require('@serverless-devs/core');
+
+request(url, {
+  method: 'post'
+  body: {
+    key: 'value',
+  },
+  // ignoreError: true
+});
+
+```
+
 ```typescript
 const { request } = require('@serverless-devs/core');
 
