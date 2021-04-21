@@ -18,7 +18,6 @@ const npmInstall = async (
     registry?: string;
   } = {},
 ) => {
-  options.production = typeof options.production === undefined ? true : options.production;
   return new Promise((resolve, reject) => {
     const installDirectory = options.baseDir;
     const pkgJson: string = path.join(installDirectory, 'package.json');
@@ -26,7 +25,6 @@ const npmInstall = async (
       fs.writeFileSync(pkgJson, '{}');
     }
     const spin = spinner('Dependencies installing...');
-    spin.start();
     const registry = options.registry ? ` --registry=${options.registry}` : '';
     exec(
       `${process.env.NPM_CLIENT || 'npm'} install ${
@@ -52,7 +50,7 @@ async function installDependency(options?: IOptions) {
   const cwd = get(options, 'cwd', process.cwd());
   await npmInstall({
     baseDir: cwd,
-    production: options.production,
+    production: get(options, 'production', true),
   });
 }
 

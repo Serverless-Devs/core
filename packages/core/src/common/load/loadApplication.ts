@@ -14,6 +14,7 @@ import fs from 'fs-extra';
 import inquirer from 'inquirer';
 import get from 'lodash.get';
 import rimraf from 'rimraf';
+import installDependency from '../installDependency';
 
 async function tryfun(f: Promise<any>) {
   try {
@@ -88,8 +89,24 @@ async function handleDecompressFile({ zipball_url, applicationPath, name }) {
     rimraf.sync(applicationPath);
     fs.renameSync(`${applicationPath}-src`, applicationPath);
   }
+  await needInstallDependency(applicationPath);
   return applicationPath;
 }
+
+async function needInstallDependency(cwd: string) {
+  const res = await inquirer.prompt([
+    {
+      type: 'confirm',
+      name: 'confirm',
+      message: 'Do you want to install dependencies automatically?',
+      default: true,
+    },
+  ]);
+  if (res.confirm) {
+    await tryfun(installDependency({ cwd, production: false }));
+  }
+}
+
 async function checkFileExists(filePath: string, fileName: string) {
   if (fs.existsSync(filePath)) {
     const res = await inquirer.prompt([
@@ -120,6 +137,7 @@ async function handleSubDir({ zipball_url, target, subDir, applicationPath }) {
 
   fs.moveSync(originSubDirPath, subDirPath);
   rimraf.sync(applicationPath);
+  await needInstallDependency(subDirPath);
   return subDirPath;
 }
 
