@@ -39,7 +39,7 @@ export async function request(url: string, options?: RequestOptions): Promise<an
     ...rest
   } = options || {};
   const { loading, success, error } = hint;
-  const logger = new Logger();
+  const logger = new Logger('S_CORE');
   let vm = null;
   let result = null;
   const errorMessage = (code: string | number, message: string) =>

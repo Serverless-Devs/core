@@ -1,4 +1,5 @@
 import { request } from './request';
+import { Logger } from '../logger/index';
 
 export interface IReportComponent {
   uid: string;
@@ -17,6 +18,6 @@ export async function reportComponent(componentName: string, options: IReportCom
       },
     });
   } catch (error) {
-    // ignore exception
+    Logger.debug('S_CORE', error);
   }
 }
