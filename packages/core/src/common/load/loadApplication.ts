@@ -9,11 +9,11 @@ import { RegistryEnum } from '../constant';
 import path from 'path';
 import * as config from '../../libs/handler-set-config';
 import { downloadRequest } from '../request';
-import { spawnSync } from 'child_process';
 import getYamlContent from '../getYamlContent';
 import fs from 'fs-extra';
 import inquirer from 'inquirer';
 import get from 'lodash.get';
+import rimraf from 'rimraf';
 
 async function tryfun(f: Promise<any>) {
   try {
@@ -77,18 +77,15 @@ async function loadGithub(source: string, target?: string) {
 async function handleDecompressFile({ zipball_url, applicationPath, name }) {
   const answer = await checkFileExists(applicationPath, name);
   if (!answer) return applicationPath;
-  spawnSync(`rm -rf ${applicationPath}`, [], {
-    shell: true,
-  });
+  rimraf.sync(applicationPath);
   await downloadRequest(zipball_url, applicationPath, {
     extract: true,
     strip: 1,
   });
   const hasPublishYaml = getYamlContent(path.resolve(applicationPath, 'publish.yaml'));
   if (hasPublishYaml) {
-    spawnSync(`mv ${applicationPath}/src ${applicationPath}-src && rm -rf ${applicationPath}`, [], {
-      shell: true,
-    });
+    fs.moveSync(`${applicationPath}/src`, `${applicationPath}-src`);
+    rimraf.sync(applicationPath);
     fs.renameSync(`${applicationPath}-src`, applicationPath);
   }
   return applicationPath;
@@ -112,9 +109,7 @@ async function handleSubDir({ zipball_url, target, subDir, applicationPath }) {
   const subDirPath = path.resolve(target, subDir);
   const answer = await checkFileExists(subDirPath, subDir);
   if (!answer) return subDirPath;
-  spawnSync(`rm -rf ${subDirPath}`, [], {
-    shell: true,
-  });
+  rimraf.sync(subDirPath);
   await downloadRequest(zipball_url, applicationPath, {
     extract: true,
     strip: 1,
@@ -122,9 +117,9 @@ async function handleSubDir({ zipball_url, target, subDir, applicationPath }) {
   const originSubDirPath = getYamlContent(path.resolve(applicationPath, subDir, 'publish.yaml'))
     ? path.resolve(applicationPath, subDir, 'src')
     : path.resolve(applicationPath, subDir);
-  spawnSync(`mv ${originSubDirPath} ${subDirPath} && rm -rf ${applicationPath}`, [], {
-    shell: true,
-  });
+
+  fs.moveSync(originSubDirPath, subDirPath);
+  rimraf.sync(applicationPath);
   return subDirPath;
 }
 

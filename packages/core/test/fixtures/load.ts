@@ -28,7 +28,7 @@ async function test() {
   // devsapp/website-example:website-base
   // devsapp/midway-hook-react
   // devsapp/midway-hook-example:midway-hook-react
-  const fc = await loadApplication('start-malagu');
+  const fc = await loadApplication('devsapp/start-malagu');
 
   console.log(fc);
 }
