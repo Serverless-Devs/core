@@ -50,17 +50,23 @@ export const buildComponentInstance = async (componentPath: string, params?: any
 };
 
 export const getGithubReleases = async (user: string, name: string) => {
-  return await request(`${RegistryEnum.github}/${user}/${name}/releases`);
+  return await request(`${RegistryEnum.github}/${user}/${name}/releases`, { ignoreError: true });
 };
 
 export const getGithubReleasesLatest = async (user: string, name: string) => {
-  return await request(`${RegistryEnum.github}/${user}/${name}/releases/latest`);
+  return await request(`${RegistryEnum.github}/${user}/${name}/releases/latest`, {
+    ignoreError: true,
+  });
 };
 
 export const getServerlessReleases = async (provider: string, name: string) => {
-  return await request(`${RegistryEnum.serverless}/${provider}/${name}/releases`);
+  return await request(`${RegistryEnum.serverless}/${provider}/${name}/releases`, {
+    ignoreError: true,
+  });
 };
 
 export const getServerlessReleasesLatest = async (provider: string, name: string) => {
-  return await request(`${RegistryEnum.serverless}/${provider}/${name}/releases/latest`);
+  return await request(`${RegistryEnum.serverless}/${provider}/${name}/releases/latest`, {
+    ignoreError: true,
+  });
 };

@@ -12,6 +12,7 @@ import { RegistryEnum, Registry } from '../constant';
 import * as config from '../../libs/handler-set-config';
 import { downloadRequest } from '../request';
 import installDependency from '../installDependency';
+import get from 'lodash.get';
 
 async function tryfun(f: Promise<any>) {
   try {
@@ -30,6 +31,7 @@ async function loadServerless(source: string, params?: any) {
   let componentPath: string;
   if (version) {
     const result = await tryfun(getServerlessReleases(provider, name));
+    if (!result) return;
     const findObj = result.find((item) => item.tag_name === version);
     if (!findObj) return;
     zipball_url = findObj.zipball_url;
@@ -41,7 +43,7 @@ async function loadServerless(source: string, params?: any) {
     );
   } else {
     const result = await tryfun(getServerlessReleasesLatest(provider, name));
-    if (!result.zipball_url) return;
+    if (!get(result, 'zipball_url')) return;
     zipball_url = result.zipball_url;
     componentPath = path.resolve(
       S_ROOT_HOME_COMPONENT,
@@ -72,13 +74,14 @@ async function loadGithub(source: string, params?: any) {
   let componentPath: string;
   if (version) {
     const result = await tryfun(getGithubReleases(user, name));
+    if (!result) return;
     const findObj = result.find((item) => item.tag_name === version);
     if (!findObj) return;
     zipball_url = findObj.zipball_url;
     componentPath = path.resolve(S_ROOT_HOME_COMPONENT, 'github.com', user, componentName);
   } else {
     const result = await tryfun(getGithubReleasesLatest(user, name));
-    if (!result.zipball_url) return;
+    if (!get(result, 'zipball_url')) return;
     zipball_url = result.zipball_url;
     componentPath = path.resolve(
       S_ROOT_HOME_COMPONENT,

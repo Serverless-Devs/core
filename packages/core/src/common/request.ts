@@ -20,6 +20,7 @@ interface RequestOptions {
   body?: object;
   params?: object;
   hint?: HintOptions;
+  ignoreError?: boolean;
   [key: string]: any;
 }
 
@@ -28,8 +29,15 @@ export interface DownloadOptions extends MyDownloadOptions {
 }
 
 export async function request(url: string, options?: RequestOptions): Promise<any> {
-  const { method = 'get', params, body: bodyFromOptions, hint = {}, json = true, ...rest } =
-    options || {};
+  const {
+    method = 'get',
+    params,
+    body: bodyFromOptions,
+    hint = {},
+    json = true,
+    ignoreError = false,
+    ...rest
+  } = options || {};
   const { loading, success, error } = hint;
   const logger = new Logger();
   let vm = null;
@@ -51,18 +59,24 @@ export async function request(url: string, options?: RequestOptions): Promise<an
     loading && vm.stop();
   } catch (e) {
     loading && vm.stop();
-    spinner(e.message).fail();
-    throw new Error(errorMessage(e.statusCode, e.message));
+    if (!ignoreError) {
+      spinner(e.message).fail();
+      throw new Error(errorMessage(e.statusCode, e.message));
+    }
   }
 
   const { statusCode, body }: { statusCode: number; body: any } = result;
 
   if (statusCode !== 200) {
     error && spinner(error).fail();
-    throw new Error(errorMessage(statusCode, i18n.__('System exception')));
+    if (!ignoreError) {
+      throw new Error(errorMessage(statusCode, i18n.__('System exception')));
+    }
   } else if (body.Error) {
     error && spinner(error).fail();
-    throw new Error(errorMessage(body.Error.Code, body.Error.Message));
+    if (!ignoreError) {
+      throw new Error(errorMessage(body.Error.Code, body.Error.Message));
+    }
   }
 
   success && spinner(success).succeed();

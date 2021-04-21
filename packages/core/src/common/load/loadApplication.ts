@@ -13,6 +13,7 @@ import { spawnSync } from 'child_process';
 import getYamlContent from '../getYamlContent';
 import fs from 'fs-extra';
 import inquirer from 'inquirer';
+import get from 'lodash.get';
 
 async function tryfun(f: Promise<any>) {
   try {
@@ -30,12 +31,13 @@ async function loadServerless(source: string, target?: string) {
   let zipball_url: string;
   if (version) {
     const result = await tryfun(getServerlessReleases(provider, name));
+    if (!result) return;
     const findObj = result.find((item) => item.tag_name === version);
     if (!findObj) return;
     zipball_url = findObj.zipball_url;
   } else {
     const result = await tryfun(getServerlessReleasesLatest(provider, name));
-    if (!result.zipball_url) return;
+    if (!get(result, 'zipball_url')) return;
     zipball_url = result.zipball_url;
   }
   const applicationPath = path.resolve(target, name);
@@ -55,12 +57,13 @@ async function loadGithub(source: string, target?: string) {
   let zipball_url: string;
   if (version) {
     const result = await tryfun(getGithubReleases(user, name));
+    if (!result) return;
     const findObj = result.find((item) => item.tag_name === version);
     if (!findObj) return;
     zipball_url = findObj.zipball_url;
   } else {
     const result = await tryfun(getGithubReleasesLatest(user, name));
-    if (!result.zipball_url) return;
+    if (!get(result, 'zipball_url')) return;
     zipball_url = result.zipball_url;
   }
   const applicationPath = path.resolve(target, name);

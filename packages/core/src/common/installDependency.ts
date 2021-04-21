@@ -36,7 +36,7 @@ async function installDependency(options?: IOptions) {
       },
     );
     if (get(result, 'status') === 0) {
-      spin.succeed();
+      return spin.succeed();
     }
     spin.fail();
     throw new Error(

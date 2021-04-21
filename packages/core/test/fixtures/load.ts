@@ -1,4 +1,4 @@
-import { loadApplication } from '../../src/common';
+import { loadComponent } from '../../src/common';
 
 async function test() {
   // const fc = await loadComponent(
@@ -23,7 +23,8 @@ async function test() {
   //   'https://download.registry.serverlessfans.cn/init/alibaba-node.js12-http',
   // );
 
-  const fc = await loadApplication('devsapp/website-example:website-base');
+  // const fc = await loadApplication('devsapp/website-example:website-base');
+  const fc = await loadComponent('devsapp/fc-deploy');
   console.log(fc);
 }
 
