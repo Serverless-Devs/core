@@ -6,6 +6,7 @@ module.exports = {
     jest: true,
   },
   rules: {
+    "no-console": 0,
     "@typescript/no-require-imports": 0
   }
 };
