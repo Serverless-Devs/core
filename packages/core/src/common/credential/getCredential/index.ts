@@ -2,6 +2,9 @@ import inquirer from 'inquirer';
 import getAccess from './getAccess';
 import setCredential from '../setCredential';
 import get from 'lodash.get';
+import os from 'os';
+import path from 'path';
+import getYamlContent from '../../getYamlContent';
 const Crypto = require('crypto-js');
 
 export function decryptCredential(info: { [key: string]: any }) {
@@ -61,14 +64,21 @@ async function getCredential(access?: string, ...args: any[]) {
       ...formatObj,
     };
   }
+  const userInfo = await getYamlContent(path.join(os.homedir(), '.s/access.yaml'));
 
-  const choices = [
+  let choices = Object.keys(userInfo).map((item) => ({
+    name: item,
+    value: item,
+  }));
+  choices = [
     {
-      name: `未找到${accessAlias}的相关信息，选择此选项退出`,
+      name: `${accessAlias} is not found, select this option to exit`,
       value: 'over',
     },
-    { name: 'Create a new account', value: 'create' },
-  ];
+  ]
+    .concat(choices)
+    .concat([{ name: 'Create a new account', value: 'create' }]);
+
   const { access: selectAccess } = await inquirer.prompt([
     {
       type: 'list',
@@ -77,9 +87,11 @@ async function getCredential(access?: string, ...args: any[]) {
       choices,
     },
   ]);
+  if (selectAccess === 'over') return;
   if (selectAccess === 'create') {
     return setCredential(...args);
   }
+  return userInfo[selectAccess];
 }
 
 export default getCredential;

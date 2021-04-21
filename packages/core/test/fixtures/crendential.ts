@@ -1,7 +1,7 @@
 import { getCredential } from '../../src/common';
 
 async function get() {
-  const c = await getCredential('error', 'AccountID', 'AccessKeyID', 'AccessKeySecret');
+  const c = await getCredential('error1', 'AccountID', 'AccessKeyID', 'AccessKeySecret');
   console.log(c);
 }
 
