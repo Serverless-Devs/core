@@ -117,10 +117,8 @@ class ReportDemo {
  * 3.支持本地调试，可传本地组件的当前路径
  *
  * registry 参数说明，值为 'http://registry.serverlessfans.cn/simple' 或者 'https://api.github.com/repos'
- * 优先读取方法传入的参数 registry，如果找不到，然后读取 ~/.s/components/set-config.yml 文件里的 registry，如果找不到
- * cli case: 读取 github 源
- * gui case: 先读取 serverless hub 源，如果找不到在读取 github 源
- *
+ * 优先读取方法传入的参数 registry，如果找不到，然后读取 ~/.s/components/set-config.yml 文件里的 registry
+ * 如果找不到，优先读取 serverless hub 源，如果找不到，最后读取 github 源
  * params 参数说明，方法内部在require组件的时候会new一次，params会在new的时候透传给组件
  *
  * /
@@ -159,9 +157,8 @@ loadComponent('/Users/shihuali/.s/components/serverlessfans.com/alibaba/fc@0.1.2
  * 3.自定义源 为 `<应用名>`， 会下载指定资源
  *
  * registry 参数说明
- * 优先读取方法传入的参数 registry，如果找不到，然后读取 ~/.s/components/set-config.yml 文件里的 registry，如果找不到
- * cli case: 先读取 github 源，如果找不到在读取 serverless hub 源
- * gui case: 先读取 serverless hub 源，如果找不到在读取 github 源
+ * 优先读取方法传入的参数 registry，如果找不到，然后读取 ~/.s/components/set-config.yml 文件里的 registry，
+ * 如果找不到，优先读取 serverless hub 源，如果找不到，最后读取 github 源
  * 1.serverless hub 源 为：http://registry.serverlessfans.cn/simple
  * 2.github 源为：https://api.github.com/repos
  * 3.自定义源

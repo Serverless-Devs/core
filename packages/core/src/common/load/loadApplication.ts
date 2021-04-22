@@ -172,32 +172,21 @@ async function loadApplication(source: string, registry?: string, target?: strin
     }
   }
   let appPath: string;
-  // gui
-  if ((process.versions as any).electron) {
-    if (registry) {
-      appPath = await loadType(source, registry, targetPath);
-      if (appPath) return appPath;
-    }
-    if (config.getConfig('registry')) {
-      appPath = await loadType(source, config.getConfig('registry'), targetPath);
-      if (appPath) return appPath;
-    }
-    appPath = await loadServerless(source, targetPath);
+  if (registry) {
+    appPath = await loadType(source, registry, targetPath);
     if (appPath) return appPath;
-    return await loadGithub(source, targetPath);
-  } else {
-    // cli
-    if (registry) {
-      appPath = await loadType(source, registry, targetPath);
-      if (appPath) return appPath;
-    }
-    if (config.getConfig('registry')) {
-      appPath = await loadType(source, config.getConfig('registry'), targetPath);
-      if (appPath) return appPath;
-    }
-    appPath = await loadGithub(source, targetPath);
+  }
+  if (config.getConfig('registry')) {
+    appPath = await loadType(source, config.getConfig('registry'), targetPath);
     if (appPath) return appPath;
-    return await loadServerless(source, targetPath);
+  }
+  appPath = await loadServerless(source, targetPath);
+  if (appPath) return appPath;
+  appPath = await loadGithub(source, targetPath);
+  if (appPath) return appPath;
+
+  if (!appPath) {
+    throw new Error(`未找到${source}应用，请确定应用名或者源是否正确`);
   }
 }
 

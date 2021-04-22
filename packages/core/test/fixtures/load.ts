@@ -1,4 +1,4 @@
-import { loadApplication } from '../../src/common';
+import { loadComponent } from '../../src/common';
 
 async function test() {
   // const fc = await loadComponent(
@@ -28,7 +28,7 @@ async function test() {
   // devsapp/website-example:website-base
   // devsapp/midway-hook-react
   // devsapp/midway-hook-example:midway-hook-react
-  const fc = await loadApplication('devsapp/start-malagu');
+  const fc = await loadComponent('devsapp/fc-deploy');
 
   console.log(fc);
 }

@@ -118,36 +118,19 @@ function isComponent(result) {
 
 async function loadRemoteComponent(source: string, registry?: Registry, params?: any) {
   let result: any;
-  // gui
-  if ((process.versions as any).electron) {
-    if (registry) {
-      result = await loadType(source, registry, params);
-      if (isComponent(result)) return result;
-    }
-    if (config.getConfig('registry')) {
-      result = await loadType(source, config.getConfig('registry'), params);
-      if (isComponent(result)) return result;
-    }
-    result = await loadServerless(source, params);
-    if (isComponent(result)) return result;
-
-    result = await loadGithub(source, params);
-    if (isComponent(result)) return result;
-  } else {
-    // cli
-    if (registry) {
-      result = await loadType(source, registry, params);
-      if (isComponent(result)) return result;
-    }
-    if (config.getConfig('registry')) {
-      result = await loadType(source, config.getConfig('registry'), params);
-      if (isComponent(result)) return result;
-    }
-    result = await loadGithub(source, params);
-    if (isComponent(result)) return result;
-    result = await loadServerless(source, params);
+  if (registry) {
+    result = await loadType(source, registry, params);
     if (isComponent(result)) return result;
   }
+  if (config.getConfig('registry')) {
+    result = await loadType(source, config.getConfig('registry'), params);
+    if (isComponent(result)) return result;
+  }
+  result = await loadServerless(source, params);
+  if (isComponent(result)) return result;
+
+  result = await loadGithub(source, params);
+  if (isComponent(result)) return result;
 
   if (!result) {
     throw new Error(`未找到${source}组件，请确定组件名或者源是否正确`);
