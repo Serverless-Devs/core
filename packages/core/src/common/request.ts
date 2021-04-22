@@ -85,7 +85,7 @@ export async function request(url: string, options?: RequestOptions): Promise<an
 
 export async function downloadRequest(url: string, dest: string, options?: DownloadOptions) {
   const { extract, postfix, strip, ...rest } = options || {};
-  const logger = new Logger();
+  const logger = new Logger('S_CORE');
   const spin = spinner('prepare downloading');
   let len: number;
   if (url.startsWith(RegistryEnum.serverless)) {

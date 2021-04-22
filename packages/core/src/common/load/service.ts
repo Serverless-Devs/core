@@ -17,10 +17,8 @@ export const buildComponentInstance = async (componentPath: string, params?: any
     // 其次检查 tsconfig.json 文件下的 outDir
     if (!index) {
       const tsconfigPath = path.resolve(componentPath, 'tsconfig.json');
-      if (fs.existsSync(tsconfigPath)) {
-        const tsconfigInfo: any = readJsonFile(tsconfigPath);
-        index = get(tsconfigInfo, 'compilerOptions.outDir');
-      }
+      const tsconfigInfo = readJsonFile(tsconfigPath);
+      index = get(tsconfigInfo, 'compilerOptions.outDir');
     }
 
     // 其次寻找 src/index.js
