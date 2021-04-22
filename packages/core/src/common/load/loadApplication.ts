@@ -83,11 +83,12 @@ async function handleDecompressFile({ zipball_url, applicationPath, name }) {
     extract: true,
     strip: 1,
   });
-  const hasPublishYaml = getYamlContent(path.resolve(applicationPath, 'publish.yaml'));
+  const hasPublishYaml = await getYamlContent(path.resolve(applicationPath, 'publish.yaml'));
   if (hasPublishYaml) {
-    fs.moveSync(`${applicationPath}/src`, `${applicationPath}-src`);
+    const temporaryPath = `${applicationPath}${new Date().getTime()}`;
+    fs.moveSync(`${applicationPath}/src`, temporaryPath);
     rimraf.sync(applicationPath);
-    fs.renameSync(`${applicationPath}-src`, applicationPath);
+    fs.renameSync(temporaryPath, applicationPath);
   }
   await needInstallDependency(applicationPath);
   return applicationPath;
@@ -98,7 +99,7 @@ async function needInstallDependency(cwd: string) {
     {
       type: 'confirm',
       name: 'confirm',
-      message: 'Do you want to install dependencies automatically?',
+      message: 'Do you want to install dependencies?',
       default: true,
     },
   ]);
@@ -127,16 +128,19 @@ async function handleSubDir({ zipball_url, target, subDir, applicationPath }) {
   const answer = await checkFileExists(subDirPath, subDir);
   if (!answer) return subDirPath;
   rimraf.sync(subDirPath);
-  await downloadRequest(zipball_url, applicationPath, {
+  const temporaryPath = `${applicationPath}${new Date().getTime()}`;
+  await downloadRequest(zipball_url, temporaryPath, {
     extract: true,
     strip: 1,
   });
-  const originSubDirPath = getYamlContent(path.resolve(applicationPath, subDir, 'publish.yaml'))
-    ? path.resolve(applicationPath, subDir, 'src')
-    : path.resolve(applicationPath, subDir);
+  const originSubDirPath = (await getYamlContent(
+    path.resolve(temporaryPath, subDir, 'publish.yaml'),
+  ))
+    ? path.resolve(temporaryPath, subDir, 'src')
+    : path.resolve(temporaryPath, subDir);
 
   fs.moveSync(originSubDirPath, subDirPath);
-  rimraf.sync(applicationPath);
+  rimraf.sync(temporaryPath);
   await needInstallDependency(subDirPath);
   return subDirPath;
 }

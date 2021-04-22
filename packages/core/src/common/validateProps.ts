@@ -260,11 +260,11 @@ async function getLocalPublish(component: string) {
   const arr = component.split('/');
   const parentDirectory = arr.slice(0, arr.length - 2).join('/');
   let result: any;
-  result = getYamlContent(`${parentDirectory}/publish.yaml`);
+  result = await getYamlContent(`${parentDirectory}/publish.yaml`);
   if (result) return result;
 
   const sameLevelDirectory = arr.slice(0, arr.length - 1).join('/');
-  result = getYamlContent(`${sameLevelDirectory}/publish.yaml`);
+  result = await getYamlContent(`${sameLevelDirectory}/publish.yaml`);
   if (result) return result;
   throw new Error(
     `未找到publish.yaml或者publish.yml文件，寻找${component}的同级目录或者上级目录下的publish.yaml或者publish.yaml文件， 同级目录优先级大于上级目录`,
