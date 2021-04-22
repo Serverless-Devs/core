@@ -159,15 +159,14 @@ async function loadApplicationByUrl(source: string, registry?: string, target?: 
   return applicationPath;
 }
 
-async function loadApplication(oldsource: string, registry?: string, target?: string) {
+async function loadApplication(source: string, registry?: string, target?: string) {
   const targetPath = target || S_CURRENT;
   if (registry) {
     if (registry !== RegistryEnum.github && registry !== RegistryEnum.serverless) {
       // 支持 自定义
-      return await loadApplicationByUrl(oldsource, registry, targetPath);
+      return await loadApplicationByUrl(source, registry, targetPath);
     }
   }
-  const source = oldsource.includes('/') ? oldsource : `devsapp/${oldsource}`;
   let appPath: string;
   // gui
   if ((process.versions as any).electron) {

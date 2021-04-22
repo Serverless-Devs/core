@@ -116,8 +116,7 @@ function isComponent(result) {
   return !!result;
 }
 
-async function loadRemoteComponent(oldsource: string, registry?: Registry, params?: any) {
-  const source = oldsource.includes('/') ? oldsource : `devsapp/${oldsource}`;
+async function loadRemoteComponent(source: string, registry?: Registry, params?: any) {
   let result: any;
   // gui
   if ((process.versions as any).electron) {
