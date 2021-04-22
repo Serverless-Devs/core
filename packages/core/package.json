@@ -1,6 +1,6 @@
 {
   "name": "@serverless-devs/core",
-  "version": "0.0.71-beta.2",
+  "version": "0.0.72",
   "description": "Serverless Devs Tool Core Component",
   "keywords": [
     "Serverless",
