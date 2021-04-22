@@ -23,8 +23,7 @@ async function tryfun(f: Promise<any>) {
 }
 
 async function loadServerless(source: string, params?: any) {
-  if (!source.includes('/')) return null;
-  const [provider, componentName] = source.split('/');
+  const [provider, componentName] = source.includes('/') ? source.split('/') : ['.', source];
   if (!componentName) return;
   const [name, version] = componentName.split('@');
   let zipball_url: string;

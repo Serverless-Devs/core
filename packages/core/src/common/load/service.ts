@@ -60,13 +60,19 @@ export const getGithubReleasesLatest = async (user: string, name: string) => {
 };
 
 export const getServerlessReleases = async (provider: string, name: string) => {
-  return await request(`${RegistryEnum.serverless}/${provider}/${name}/releases`, {
+  const url =
+    provider === '.'
+      ? `${RegistryEnum.serverless}/${name}/releases`
+      : `${RegistryEnum.serverless}/${provider}/${name}/releases`;
+  return await request(url, {
     ignoreError: true,
   });
 };
 
 export const getServerlessReleasesLatest = async (provider: string, name: string) => {
-  return await request(`${RegistryEnum.serverless}/${provider}/${name}/releases/latest`, {
-    ignoreError: true,
-  });
+  const url =
+    provider === '.'
+      ? `${RegistryEnum.serverless}/${name}/releases/latest`
+      : `${RegistryEnum.serverless}/${provider}/${name}/releases/latest`;
+  return await request(url);
 };

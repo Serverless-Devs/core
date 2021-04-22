@@ -28,6 +28,9 @@ async function test() {
   // devsapp/website-example:website-base
   // devsapp/midway-hook-react
   // devsapp/midway-hook-example:midway-hook-react
+  // website-base
+  // devsapp/website-base
+  // devsapp/website-example:website-base
   const fc = await loadComponent('devsapp/fc-deploy');
 
   console.log(fc);

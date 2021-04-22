@@ -24,14 +24,20 @@ async function tryfun(f: Promise<any>) {
   }
 }
 
+function isGitSource(source: string) {
+  return source.includes('/') && source.includes(':');
+}
+
 async function loadServerless(oldsource: string, target?: string) {
-  if (!oldsource.includes('/')) return;
-  let source = oldsource;
-  if (oldsource.includes(':')) {
+  let source: string;
+  if (isGitSource(oldsource)) {
     const [a, b] = oldsource.split(':');
     const [c] = a.split('/');
     source = `${c}/${b}`;
+  } else {
+    source = oldsource.includes('/') ? oldsource : `./${oldsource}`;
   }
+
   const [provider, componentName] = source.split('/');
   if (!componentName) return;
   const [name, version] = componentName.split('@');
