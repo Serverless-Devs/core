@@ -13,3 +13,5 @@ export { default as validateProps } from './validateProps';
 export { default as modifyProps } from './modifyProps';
 export { default as installDependency } from './installDependency';
 export { default as getYamlContent } from './getYamlContent';
+export { default as chalk } from 'chalk';
+export { default as colors } from 'chalk';

@@ -1,7 +1,7 @@
 import download, { DownloadOptions as MyDownloadOptions } from 'download';
 import got from 'got';
 import { ProgressService, ProgressType } from '@serverless-devs/s-progress-bar';
-import { green } from 'colors';
+import { green } from 'chalk';
 import spinner from './spinner';
 import decompress from 'decompress';
 import fs from 'fs-extra';

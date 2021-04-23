@@ -1,6 +1,6 @@
 {
   "name": "@serverless-devs/s-progress-bar",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Serverless Devs Tool Core Component",
   "keywords": [
     "Serverless",
@@ -33,7 +33,7 @@
     "progress": "^2.0.3"
   },
   "peerDependencies": {
-    "colors": "^1.4.0"
+    "chalk": "^4.1.0"
   },
   "devDependencies": {
     "@types/progress": "^2.0.3"

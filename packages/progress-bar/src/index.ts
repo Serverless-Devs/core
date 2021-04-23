@@ -1,6 +1,6 @@
 import * as ProgressBar from 'progress';
 
-const { green, white } = require('colors');
+const { green, white } = require('chalk');
 
 export enum ProgressType {
   Bar, Loading

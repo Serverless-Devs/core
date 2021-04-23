@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 import archiver from 'archiver';
 import get from 'lodash.get';
-import { green } from 'colors';
+import { green } from 'chalk';
 import { ProgressService, ProgressType } from '@serverless-devs/s-progress-bar';
 import path from 'path';
 import ignore from 'ignore';
