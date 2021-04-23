@@ -47,8 +47,10 @@ class LoggerDemo {
   }
 
   getDebugMsg() {
-    for (let index = 0; index < 10000; index++) {
+    for (let index = 0; index < 10; index++) {
       this.logger.debug('debug message');
+      this.logger.warn('warn message');
+      this.logger.info('info message');
       this.logger.error('error message');
     }
   }

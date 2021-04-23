@@ -35,12 +35,21 @@ export const logger = (name: string): ILogger => {
     levels: (debug ? ['debug'] : []).concat(['info', 'warn', 'error', 'fatal']),
   });
 
-  stdLog.set('all-log-file', {
+  stdLog.set('app-file', {
     type: 'file',
     filename: `${S_ROOT_HOME}/logs/app.log`,
-    levels: ['trace', 'debug', 'info', 'warn', 'error', 'fatal'],
+    levels: ['trace', 'info', 'warn', 'error', 'fatal'],
     pattern: '.yyyy-MM-dd',
-    maxLogSize: 8388608,
+    layout: {
+      type: 'json',
+      separator: ',',
+    },
+  });
+  stdLog.set('app-debug-file', {
+    type: 'file',
+    filename: `${S_ROOT_HOME}/logs/app-debug.log`,
+    levels: ['debug'],
+    pattern: '.yyyy-MM-dd',
     layout: {
       type: 'json',
       separator: ',',
