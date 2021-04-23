@@ -1,6 +1,6 @@
 {
   "name": "@serverless-devs/core",
-  "version": "0.0.76",
+  "version": "0.0.77",
   "description": "Serverless Devs Tool Core Component",
   "keywords": [
     "Serverless",
@@ -34,7 +34,7 @@
   },
   "main": "./lib/index.js",
   "dependencies": {
-    "@serverless-devs/s-progress-bar": "0.0.5",
+    "@serverless-devs/s-progress-bar": "^0.0.8",
     "@tsed/logger": "^5.5.5",
     "archiver": "^5.2.0",
     "chalk": "^4.1.0",

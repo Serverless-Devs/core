@@ -1,9 +1,12 @@
-import * as ProgressBar from 'progress';
+import * as MyProgressBar from 'progress';
 
 const { green, white } = require('chalk');
 
+const ProgressBar = MyProgressBar.default ? MyProgressBar.default : MyProgressBar;
+
 export enum ProgressType {
-  Bar, Loading
+  Bar,
+  Loading,
 }
 
 export interface ProgressBarOptions {
@@ -58,7 +61,9 @@ export interface ProgressBarOptions {
   callback?: Function;
 }
 
-const DEFAULT_BAR_FORMAT = `downloading ${green(':loading')} ((:bar)) :current/:total(Bytes) :percent :etas`;
+const DEFAULT_BAR_FORMAT = `downloading ${green(
+  ':loading',
+)} ((:bar)) :current/:total(Bytes) :percent :etas`;
 const DEFAULT_LOADING_FORMAT = `${green(':loading')} ((:bar))`;
 
 export class ProgressService {
@@ -71,7 +76,11 @@ export class ProgressService {
    * @param format, format of progress bar
    * @param options, options of progress bar, with type Loading, just set {width:50, total:100}
    */
-  constructor(protected readonly type: ProgressType, protected readonly options: ProgressBarOptions, format?: string) {
+  constructor(
+    protected readonly type: ProgressType,
+    protected readonly options: ProgressBarOptions,
+    format?: string,
+  ) {
     const opts = ProgressService.initProgressBarOptions(type, options);
     const fmt = ProgressService.initFormat(type, format);
     this.progressType = type;
@@ -85,9 +94,12 @@ export class ProgressService {
     const oldTick = pb.tick;
     // @ts-ignore
     pb.tick = (len, tokens) => {
-      const newTokens = Object.assign({
-        loading: loadingChars[parseInt(String(Math.random() * 5))],
-      }, tokens);
+      const newTokens = Object.assign(
+        {
+          loading: loadingChars[parseInt(String(Math.random() * 5))],
+        },
+        tokens,
+      );
       // console.log(newTokens);
       oldTick.call(pb, len, newTokens);
     };
@@ -105,7 +117,10 @@ export class ProgressService {
     return format;
   }
 
-  private static initProgressBarOptions(type: ProgressType, options: ProgressBarOptions): ProgressBarOptions {
+  private static initProgressBarOptions(
+    type: ProgressType,
+    options: ProgressBarOptions,
+  ): ProgressBarOptions {
     if (!options.width) {
       options.width = 30;
     }
