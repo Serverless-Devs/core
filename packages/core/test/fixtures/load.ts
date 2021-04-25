@@ -1,4 +1,4 @@
-import { loadComponent } from '../../src/common';
+import { loadApplication } from '../../src/common';
 
 async function test() {
   // const fc = await loadComponent(
@@ -31,7 +31,7 @@ async function test() {
   // website-base
   // devsapp/website-base
   // devsapp/website-example:website-base
-  const fc = await loadComponent('devsapp/fc-deploy');
+  const fc = await loadApplication('devsapp/website-base');
 
   console.log(fc);
 }

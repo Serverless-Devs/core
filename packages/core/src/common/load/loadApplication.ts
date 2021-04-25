@@ -15,6 +15,7 @@ import inquirer from 'inquirer';
 import get from 'lodash.get';
 import rimraf from 'rimraf';
 import installDependency from '../installDependency';
+import { readJsonFile } from '../../libs/utils';
 
 async function tryfun(f: Promise<any>) {
   try {
@@ -101,6 +102,9 @@ async function handleDecompressFile({ zipball_url, applicationPath, name }) {
 }
 
 async function needInstallDependency(cwd: string) {
+  const packageInfo: any = readJsonFile(path.resolve(cwd, 'package.json'));
+  if (!packageInfo) return;
+
   const res = await inquirer.prompt([
     {
       type: 'confirm',
