@@ -66,10 +66,13 @@ async function getCredential(access?: string, ...args: any[]) {
   }
   const userInfo = await getYamlContent(path.join(os.homedir(), '.s/access.yaml'));
 
-  let choices = Object.keys(userInfo).map((item) => ({
-    name: item,
-    value: item,
-  }));
+  let choices = [];
+  if (userInfo) {
+    choices = Object.keys(userInfo).map((item) => ({
+      name: item,
+      value: item,
+    }));
+  }
   choices = [
     {
       name: `${accessAlias} is not found, select this option to exit`,
