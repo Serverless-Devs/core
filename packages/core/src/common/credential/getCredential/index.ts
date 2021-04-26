@@ -94,7 +94,10 @@ async function getCredential(access?: string, ...args: any[]) {
   if (selectAccess === 'create') {
     return setCredential(...args);
   }
-  return userInfo[selectAccess];
+  return {
+    Alias: selectAccess,
+    ...userInfo[selectAccess],
+  };
 }
 
 export default getCredential;
