@@ -1,6 +1,6 @@
 {
   "name": "@serverless-devs/s-progress-bar",
-  "version": "0.0.8",
+  "version": "0.0.20",
   "description": "Serverless Devs Tool Core Component",
   "keywords": [
     "Serverless",
@@ -13,6 +13,7 @@
   },
   "license": "MIT",
   "repository": {
+
     "type": "git",
     "url": "https://github.com/Serverless-Devs/s-core"
   },
