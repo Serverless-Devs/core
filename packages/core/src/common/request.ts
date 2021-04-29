@@ -39,7 +39,7 @@ export async function request(url: string, options?: RequestOptions): Promise<an
     ...rest
   } = options || {};
   const { loading, success, error } = hint;
-  const logger = new Logger('S_CORE');
+  const logger = new Logger('S-CORE');
   let vm = null;
   let result = null;
   const errorMessage = (code: string | number, message: string) =>
@@ -85,7 +85,7 @@ export async function request(url: string, options?: RequestOptions): Promise<an
 
 export async function downloadRequest(url: string, dest: string, options?: DownloadOptions) {
   const { extract, postfix, strip, ...rest } = options || {};
-  const logger = new Logger('S_CORE');
+  const logger = new Logger('S-CORE');
   const spin = spinner('prepare downloading');
   let len: number;
   if (url.startsWith(RegistryEnum.serverless)) {

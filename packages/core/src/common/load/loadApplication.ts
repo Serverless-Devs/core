@@ -103,7 +103,7 @@ async function handleDecompressFile({ zipball_url, applicationPath, name }) {
 
 async function needInstallDependency(cwd: string) {
   const packageInfo: any = readJsonFile(path.resolve(cwd, 'package.json'));
-  if (!packageInfo) return;
+  if (!packageInfo || !get(packageInfo, 'autoInstall', true)) return;
 
   const res = await inquirer.prompt([
     {

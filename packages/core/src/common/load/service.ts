@@ -4,6 +4,7 @@ import path from 'path';
 import fs from 'fs-extra';
 import get from 'lodash.get';
 import { RegistryEnum } from '../constant';
+import { Logger } from '../../logger';
 
 export const buildComponentInstance = async (componentPath: string, params?: any) => {
   let index: string;
@@ -11,9 +12,7 @@ export const buildComponentInstance = async (componentPath: string, params?: any
   if (fsStat.isDirectory()) {
     const packageInfo: any = readJsonFile(path.resolve(componentPath, 'package.json'));
     // 首先寻找 package.json 文件下的 main
-    if (packageInfo.main) {
-      index = packageInfo.main;
-    }
+    index = get(packageInfo, 'main');
     // 其次检查 tsconfig.json 文件下的 outDir
     if (!index) {
       const tsconfigPath = path.resolve(componentPath, 'tsconfig.json');
@@ -36,7 +35,15 @@ export const buildComponentInstance = async (componentPath: string, params?: any
         index = './index.js';
       }
     }
+    if (!index) {
+      Logger.debug(
+        'S-CORE',
+        'require不到组件, 请检查组件入口文件的设置是否设正确, 在当前目录下 首先寻找 package.json 文件下的 main, 其次寻找 tsconfig.json 文件下的 compilerOptions.outDir, 其次寻找 src/index.js, 最后寻找 index.js',
+      );
+      return;
+    }
   }
+
   const requirePath = fsStat.isFile() ? componentPath : path.resolve(componentPath, index);
   const baseChildComponent = await require(requirePath);
 

@@ -18,6 +18,6 @@ export async function reportComponent(componentName: string, options: IReportCom
       },
     });
   } catch (error) {
-    Logger.debug('S_CORE', error);
+    Logger.debug('S-CORE', error);
   }
 }

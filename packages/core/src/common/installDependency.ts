@@ -3,6 +3,7 @@ import path from 'path';
 import get from 'lodash.get';
 import { exec, StdioOptions } from 'child_process';
 import spinner from './spinner';
+import { readJsonFile } from '../libs/utils';
 
 interface IOptions {
   cwd?: string;
@@ -48,6 +49,9 @@ const npmInstall = async (
 
 async function installDependency(options?: IOptions) {
   const cwd = get(options, 'cwd', process.cwd());
+  const packageInfo: any = readJsonFile(path.resolve(cwd, 'package.json'));
+  if (!packageInfo || !get(packageInfo, 'autoInstall', true)) return;
+
   await npmInstall({
     baseDir: cwd,
     production: get(options, 'production', true),

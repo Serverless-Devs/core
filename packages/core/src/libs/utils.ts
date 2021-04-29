@@ -58,7 +58,7 @@ export const map = (object, callback): Array<{ [key: string]: any }> => {
 export const uuid = uid;
 
 export function readJsonFile(filePath: string) {
-  const logger = new Logger('S_CORE');
+  const logger = new Logger('S-CORE');
   if (fs.existsSync(filePath)) {
     const data = fs.readFileSync(filePath, 'utf8');
     return JSON.parse(data);

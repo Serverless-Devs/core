@@ -1,4 +1,4 @@
-import { loadApplication } from '../../src/common';
+import { loadComponent } from '../../src/common';
 
 async function test() {
   // const fc = await loadComponent(
@@ -31,7 +31,9 @@ async function test() {
   // website-base
   // devsapp/website-base
   // devsapp/website-example:website-base
-  const fc = await loadApplication('devsapp/website-base');
+  // const fc = await loadApplication('devsapp/website-base');
+  const fc = await loadComponent('xsahxl/xsahxl.github.io@0.0.1');
+  // const fc = await loadComponent('fun');
 
   console.log(fc);
 }
