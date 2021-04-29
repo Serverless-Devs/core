@@ -4,7 +4,6 @@ import path from 'path';
 import fs from 'fs-extra';
 import get from 'lodash.get';
 import { RegistryEnum } from '../constant';
-import { Logger } from '../../logger';
 
 export const buildComponentInstance = async (componentPath: string, params?: any) => {
   let index: string;
@@ -36,11 +35,9 @@ export const buildComponentInstance = async (componentPath: string, params?: any
       }
     }
     if (!index) {
-      Logger.debug(
-        'S-CORE',
+      throw new Error(
         'require不到组件, 请检查组件入口文件的设置是否设正确, 在当前目录下 首先寻找 package.json 文件下的 main, 其次寻找 tsconfig.json 文件下的 compilerOptions.outDir, 其次寻找 src/index.js, 最后寻找 index.js',
       );
-      return;
     }
   }
 
