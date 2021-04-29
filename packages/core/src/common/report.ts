@@ -1,6 +1,8 @@
 import { request } from './request';
 import { Logger } from '../logger/index';
 
+const logger = new Logger('S-CORE');
+
 export interface IReportComponent {
   uid: string;
   command: string;
@@ -18,6 +20,6 @@ export async function reportComponent(componentName: string, options: IReportCom
       },
     });
   } catch (error) {
-    Logger.debug('S-CORE', error);
+    logger.debug(error);
   }
 }
