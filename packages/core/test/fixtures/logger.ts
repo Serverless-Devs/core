@@ -1,5 +1,5 @@
 import { HLogger } from '../../src';
-// import { Logger } from '../../src/logger';
+import { Logger } from '../../src/logger';
 
 class LoggerDemo {
   @HLogger('S-CORE') logger;
@@ -47,12 +47,7 @@ class LoggerDemo {
   }
 
   getDebugMsg() {
-    for (let index = 0; index < 10; index++) {
-      this.logger.debug('debug message');
-      this.logger.warn('warn message');
-      this.logger.info('info message');
-      this.logger.error('error message');
-    }
+    this.logger.debug('debug message');
   }
 
   getInfoMsg() {
@@ -89,7 +84,7 @@ demo.getDebugMsg();
 //
 // console.log(LogLevelEnum[2]);
 
-// Logger.info(undefined, 'abc');
+Logger.debug('xx', 'abc');
 
-// const l = new Logger();
-// l.info('abcxx');
+const l = new Logger();
+l.debug('abcxx');

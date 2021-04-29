@@ -1,4 +1,4 @@
-import { Logger as MyLogger } from '@tsed/logger';
+import { Logger as MyLogger, $log } from '@tsed/logger';
 import chalk from 'chalk';
 import { S_ROOT_HOME } from '../libs/common';
 import minimist from 'minimist';
@@ -66,54 +66,52 @@ export const logger = (name: string): ILogger => {
 
 export class Logger {
   context: string;
+  Loggers: ILogger;
   constructor(context?: string) {
     this.context = context;
+    this.Loggers = logger(context);
   }
   static log(message: any, color?: LogColor) {
     return process.stdout.write(`${color ? chalk[color](message) : message}\n`);
   }
 
   static debug(name: string, data) {
-    const Loggers = logger(name);
-    Loggers.debug(data);
+    $log.name = name;
+    $log.debug(data);
   }
 
   static info(name: string, data) {
-    const Loggers = logger(name);
-    Loggers.info(data);
+    $log.name = name;
+    $log.info(data);
   }
 
   static warn(name: string, data) {
-    const Loggers = logger(name);
-    Loggers.warn(data);
+    $log.name = name;
+    $log.warn(data);
   }
 
   static error(name: string, data) {
-    const Loggers = logger(name);
-    Loggers.error(data);
+    $log.name = name;
+    $log.error(data);
   }
   log(message: any, color?: LogColor) {
     return process.stdout.write(`${color ? chalk[color](message) : message}\n`);
   }
 
   debug(data) {
-    const Loggers = logger(this.context);
-    Loggers.debug(data);
+    this.Loggers.debug(data);
   }
 
   info(data) {
-    const Loggers = logger(this.context);
-    Loggers.info(data);
+    this.Loggers.info(data);
   }
 
   warn(data) {
-    const Loggers = logger(this.context);
-    Loggers.warn(data);
+    this.Loggers.warn(data);
   }
 
   error(data) {
-    const Loggers = logger(this.context);
-    Loggers.error(data);
+    this.Loggers.error(data);
   }
 }
 
