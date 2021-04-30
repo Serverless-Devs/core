@@ -17,6 +17,13 @@ import rimraf from 'rimraf';
 import installDependency from '../installDependency';
 import { readJsonFile } from '../../libs/utils';
 
+interface IParams {
+  source: string;
+  registry?: string;
+  target?: string;
+  name?: string;
+}
+
 async function tryfun(f: Promise<any>) {
   try {
     return await f;
@@ -28,15 +35,14 @@ async function tryfun(f: Promise<any>) {
 function isGitSource(source: string) {
   return source.includes('/') && source.includes(':');
 }
-
-async function loadServerless(oldsource: string, target?: string) {
+async function loadServerless(params: IParams) {
   let source: string;
-  if (isGitSource(oldsource)) {
-    const [a, b] = oldsource.split(':');
+  if (isGitSource(params.source)) {
+    const [a, b] = params.source.split(':');
     const [c] = a.split('/');
     source = `${c}/${b}`;
   } else {
-    source = oldsource.includes('/') ? oldsource : `./${oldsource}`;
+    source = params.source.includes('/') ? params.source : `./${params.source}`;
   }
 
   const [provider, componentName] = source.split('/');
@@ -54,13 +60,14 @@ async function loadServerless(oldsource: string, target?: string) {
     if (!get(result, 'zipball_url')) return;
     zipball_url = result.zipball_url;
   }
-  const applicationPath = path.resolve(target, name);
-  return handleDecompressFile({ zipball_url, applicationPath, name });
+  // 优先设置函数参数接收的name，如果没有在设置 source 里的 name
+  const applicationPath = path.resolve(params.target, params.name || name);
+  return handleDecompressFile({ zipball_url, applicationPath, name: params.name || name });
 }
 
-async function loadGithub(source: string, target?: string) {
-  if (!source.includes('/')) return;
-  const [user, componentNameSubDir] = source.split('/');
+async function loadGithub(params: IParams) {
+  if (!params.source.includes('/')) return;
+  const [user, componentNameSubDir] = params.source.split('/');
   if (!componentNameSubDir) return;
   const [componentName, subDir] = componentNameSubDir.split(':');
   const [name, version] = componentName.split('@');
@@ -76,11 +83,11 @@ async function loadGithub(source: string, target?: string) {
     if (!get(result, 'zipball_url')) return;
     zipball_url = result.zipball_url;
   }
-  const applicationPath = path.resolve(target, name);
+  const applicationPath = path.resolve(params.target, params.name || name);
   if (subDir) {
-    return handleSubDir({ zipball_url, target, subDir, applicationPath });
+    return handleSubDir({ zipball_url, target: params.target, subDir, applicationPath });
   }
-  return handleDecompressFile({ zipball_url, applicationPath, name });
+  return handleDecompressFile({ zipball_url, applicationPath, name: params.name || name });
 }
 async function handleDecompressFile({ zipball_url, applicationPath, name }) {
   const answer = await checkFileExists(applicationPath, name);
@@ -155,16 +162,16 @@ async function handleSubDir({ zipball_url, target, subDir, applicationPath }) {
   return subDirPath;
 }
 
-async function loadType(source: string, registry?: string, target?: string) {
-  if (registry === RegistryEnum.serverless) {
-    return await loadServerless(source, target);
+async function loadType(params: IParams) {
+  if (params.registry === RegistryEnum.serverless) {
+    return await loadServerless(params);
   }
-  if (registry === RegistryEnum.github) {
-    return await loadGithub(source, target);
+  if (params.registry === RegistryEnum.github) {
+    return await loadGithub(params);
   }
 }
 
-async function loadApplicationByUrl(source: string, registry?: string, target?: string) {
+async function loadApplicationByUrl({ source, registry, target }: IParams) {
   const applicationPath = path.resolve(target, source);
   await downloadRequest(registry, applicationPath, {
     postfix: 'zip',
@@ -173,26 +180,46 @@ async function loadApplicationByUrl(source: string, registry?: string, target?: 
   return applicationPath;
 }
 
-async function loadApplication(source: string, registry?: string, target?: string) {
-  const targetPath = target || S_CURRENT;
+async function loadApplication(source: string, registry?: string, target?: string): Promise<string>;
+async function loadApplication(params: IParams): Promise<string>;
+async function loadApplication(
+  oldsource: string | IParams,
+  oldregistry?: string,
+  oldtarget?: string,
+) {
+  let source: any;
+  let registry: string;
+  let target: string;
+  let name: string;
+  if (typeof oldsource === 'string') {
+    source = oldsource;
+    registry = oldregistry;
+    target = oldtarget || S_CURRENT;
+  } else {
+    source = oldsource.source;
+    registry = oldsource.registry;
+    target = oldsource.target || S_CURRENT;
+    name = oldsource.name;
+  }
+
   if (registry) {
     if (registry !== RegistryEnum.github && registry !== RegistryEnum.serverless) {
       // 支持 自定义
-      return await loadApplicationByUrl(source, registry, targetPath);
+      return await loadApplicationByUrl({ source, registry, target });
     }
   }
   let appPath: string;
   if (registry) {
-    appPath = await loadType(source, registry, targetPath);
+    appPath = await loadType({ source, registry, target, name });
     if (appPath) return appPath;
   }
   if (config.getConfig('registry')) {
-    appPath = await loadType(source, config.getConfig('registry'), targetPath);
+    appPath = await loadType({ source, registry: config.getConfig('registry'), target, name });
     if (appPath) return appPath;
   }
-  appPath = await loadServerless(source, targetPath);
+  appPath = await loadServerless({ source, target, name });
   if (appPath) return appPath;
-  appPath = await loadGithub(source, targetPath);
+  appPath = await loadGithub({ source, target, name });
   if (appPath) return appPath;
 
   if (!appPath) {
