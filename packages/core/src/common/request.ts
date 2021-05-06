@@ -86,7 +86,7 @@ export async function downloadRequest(url: string, dest: string, options?: Downl
   const { extract, postfix, strip, ...rest } = options || {};
   const spin = spinner('prepare downloading');
   let len: number;
-  if (url.startsWith(RegistryEnum.serverless)) {
+  if (url.startsWith(RegistryEnum.serverless) || url.startsWith(RegistryEnum.serverlessOld)) {
     try {
       const { headers } = await got(url, { method: 'HEAD' });
       len = parseInt(headers['content-length'], 10);

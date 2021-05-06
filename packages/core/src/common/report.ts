@@ -11,7 +11,7 @@ export interface IReportComponent {
 
 export async function reportComponent(componentName: string, options: IReportComponent) {
   try {
-    await request('https://registry.serverlessfans.cn/report/component', {
+    await request('https://registry.devsapp.cn/report/component', {
       method: 'post',
       form: true,
       body: {

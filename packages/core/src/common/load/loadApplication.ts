@@ -163,7 +163,7 @@ async function handleSubDir({ zipball_url, target, subDir, applicationPath }) {
 }
 
 async function loadType(params: IParams) {
-  if (params.registry === RegistryEnum.serverless) {
+  if (params.registry === RegistryEnum.serverless || params.registry === RegistryEnum.serverlessOld) {
     return await loadServerless(params);
   }
   if (params.registry === RegistryEnum.github) {

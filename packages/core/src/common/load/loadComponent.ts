@@ -34,19 +34,14 @@ async function loadServerless(source: string, params?: any) {
     const findObj = result.find((item) => item.tag_name === version);
     if (!findObj) return;
     zipball_url = findObj.zipball_url;
-    componentPath = path.resolve(
-      S_ROOT_HOME_COMPONENT,
-      'serverlessfans.cn',
-      provider,
-      componentName,
-    );
+    componentPath = path.resolve(S_ROOT_HOME_COMPONENT, 'devsapp.cn', provider, componentName);
   } else {
     const result = await tryfun(getServerlessReleasesLatest(provider, name));
     if (!get(result, 'zipball_url')) return;
     zipball_url = result.zipball_url;
     componentPath = path.resolve(
       S_ROOT_HOME_COMPONENT,
-      'serverlessfans.cn',
+      'devsapp.cn',
       provider,
       `${componentName}@${result.tag_name}`,
     );
@@ -102,7 +97,7 @@ async function loadGithub(source: string, params?: any) {
 }
 
 async function loadType(source: string, registry?: Registry, params?: any) {
-  if (registry === RegistryEnum.serverless) {
+  if (registry === RegistryEnum.serverless || registry === RegistryEnum.serverlessOld) {
     return await loadServerless(source, params);
   }
   if (registry === RegistryEnum.github) {
@@ -143,7 +138,11 @@ async function loadComponent(source: string, registry?: Registry, params?: any) 
   }
   // js里引用下, 判断 registry 值是否 合法
   if (registry) {
-    if (registry !== RegistryEnum.github && registry !== RegistryEnum.serverless) {
+    if (
+      registry !== RegistryEnum.github &&
+      registry !== RegistryEnum.serverless &&
+      registry !== RegistryEnum.serverlessOld
+    ) {
       throw new Error(
         `请检查registry的值，需设置为[${RegistryEnum.github}, ${RegistryEnum.serverless}]`,
       );

@@ -1,6 +1,7 @@
-export type Registry = 'http://registry.serverlessfans.cn/simple' | 'https://api.github.com/repos';
+export type Registry = 'http://registry.devsapp.cn/simple' | 'https://api.github.com/repos' | 'http://registry.serverlessfans.cn/simple';
 
 export enum RegistryEnum {
   github = 'https://api.github.com/repos',
-  serverless = 'http://registry.serverlessfans.cn/simple',
+  serverlessOld = 'http://registry.serverlessfans.cn/simple',
+  serverless = 'http://registry.devsapp.cn/simple',
 }

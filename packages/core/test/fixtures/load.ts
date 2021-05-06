@@ -20,7 +20,7 @@ async function test() {
 
   // const fc = await loadApplication(
   //   'vue',
-  //   'https://download.registry.serverlessfans.cn/init/alibaba-node.js12-http',
+  //   'https://download.registry.devsapp.cn/init/alibaba-node.js12-http',
   // );
 
   // const fc = await loadApplication('devsapp/website-example:website-base');
