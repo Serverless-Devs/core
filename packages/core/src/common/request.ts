@@ -1,4 +1,4 @@
-import download, { DownloadOptions as MyDownloadOptions } from 'download';
+import download from 'download';
 import got from 'got';
 import { ProgressService, ProgressType } from '@serverless-devs/s-progress-bar';
 import { green } from 'chalk';
@@ -24,7 +24,44 @@ interface RequestOptions {
   [key: string]: any;
 }
 
-export interface DownloadOptions extends MyDownloadOptions {
+export interface IDownloadOptions {
+  /**
+   * If set to true, try extracting the file using decompress.
+   */
+  extract?: boolean;
+  /**
+   * Name of the saved file.
+   */
+  filename?: string;
+  /**
+   * Proxy endpoint
+   */
+  proxy?: string;
+  /**
+   * Request Headers
+   */
+  headers?: {
+    [name: string]: string;
+  };
+  /**
+   * Filter out files before extracting
+   */
+  filter?: any;
+  /**
+   * Map files before extracting
+   */
+  map?: any;
+  /**
+   * Array of plugins to use.
+   * Default: [decompressTar(), decompressTarbz2(), decompressTargz(), decompressUnzip()]
+   */
+  plugins?: any[];
+  /**
+   * Remove leading directory components from extracted files.
+   * Default: 0
+   */
+  strip?: number;
+  body?: string | Buffer;
   postfix?: string;
 }
 
@@ -82,7 +119,7 @@ export async function request(url: string, options?: RequestOptions): Promise<an
   return body.Response || body;
 }
 
-export async function downloadRequest(url: string, dest: string, options?: DownloadOptions) {
+export async function downloadRequest(url: string, dest: string, options?: IDownloadOptions) {
   const { extract, postfix, strip, ...rest } = options || {};
   const spin = spinner('prepare downloading');
   let len: number;

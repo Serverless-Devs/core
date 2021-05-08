@@ -24,15 +24,15 @@ export interface ILogger {
   warn: (...data: any[]) => any;
   error: (...data: any[]) => any;
 }
+const args = minimist(process.argv.slice(2));
+const enableDebug = args.debug || process.env?.temp_params?.includes('--debug');
 
 export const logger = (name: string): ILogger => {
   const loggers = new MyLogger(name);
-  const args = minimist(process.argv.slice(2));
-  const debug = args.debug || process.env?.temp_params?.includes('--debug');
   const stdLog = loggers.appenders.set('std-log', {
     type: 'stdout',
     layout: { type: 'colored' },
-    levels: (debug ? ['debug'] : []).concat(['info', 'warn', 'error', 'fatal']),
+    levels: (enableDebug ? ['debug'] : []).concat(['info', 'warn', 'error', 'fatal']),
   });
 
   stdLog.set('app-file', {
@@ -76,8 +76,10 @@ export class Logger {
   }
 
   static debug(name: string, data) {
-    $log.name = name;
-    $log.debug(data);
+    if (enableDebug) {
+      $log.name = name;
+      $log.debug(data);
+    }
   }
 
   static info(name: string, data) {
