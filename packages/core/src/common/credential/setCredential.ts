@@ -176,4 +176,16 @@ async function setCredential(...args: any[]) {
   };
 }
 
+/**
+ * @param args 接收设置密钥的key
+ */
+export async function setKnownCredential(info, accessAlias) {
+  const aliasName = accessAlias || await getAlias()
+  await writeData({ info, accessAlias: aliasName});
+  return {
+    Alias: aliasName,
+    ...info,
+  };
+}
+
 export default setCredential;

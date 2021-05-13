@@ -1,2 +1,2 @@
 export { default as getCredential, decryptCredential } from './getCredential';
-export { default as setCredential } from './setCredential';
+export { default as setCredential, setKnownCredential } from './setCredential';
