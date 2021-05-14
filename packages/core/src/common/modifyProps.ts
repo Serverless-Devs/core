@@ -1,32 +1,25 @@
 import fs from 'fs-extra';
 import path from 'path';
 import yaml from 'js-yaml';
-import { S_CURRENT } from '../libs/common';
 import { merge } from '../libs/utils';
-import minimist from 'minimist';
 import getYamlContent from './getYamlContent';
+import { S_CURRENT_HOME } from '../libs/common';
 
-async function modifyProps(component: string, options: object) {
-  const args = minimist(process.argv.slice(2));
-  let templte = args.t || args.template;
-  if (!templte) {
-    if (fs.existsSync(path.resolve(S_CURRENT, 's.yaml'))) {
-      templte = 's.yaml';
-    }
-    if (fs.existsSync(path.resolve(S_CURRENT, 's.yml'))) {
-      templte = 's.yml';
-    }
+async function modifyProps(component: string, options: object, sPath: string) {
+  if (!component || !sPath) {
+    throw new Error('modifyProps方法缺少必填字段');
   }
-  if (!templte) return;
+  const index = sPath.lastIndexOf('/');
+  const templte = sPath.slice(index + 1);
   const [name, end] = templte.split('.');
-  const originPath = path.resolve(S_CURRENT, `${name}.origin.${end}`);
-  const filePath = path.resolve(S_CURRENT, templte);
+  const originPath = path.resolve(S_CURRENT_HOME, `${name}.origin.${end}`);
   if (!fs.existsSync(originPath)) {
-    fs.copyFileSync(filePath, originPath);
+    fs.ensureDirSync(S_CURRENT_HOME);
+    fs.copyFileSync(sPath, originPath);
   }
-  const userInfo: any = await getYamlContent(filePath);
+  const userInfo: any = await getYamlContent(sPath);
   userInfo.services[component].props = merge(userInfo.services[component].props, options);
-  fs.writeFileSync(filePath, yaml.dump(userInfo));
+  fs.writeFileSync(sPath, yaml.dump(userInfo));
 }
 
 export default modifyProps;

@@ -11,10 +11,9 @@ import {
 import { RegistryEnum, Registry } from '../constant';
 import * as config from '../../libs/handler-set-config';
 import { downloadRequest } from '../request';
-import { Logger } from '../../logger';
 import installDependency from '../installDependency';
+import get from 'lodash.get';
 
-const logger = new Logger();
 async function tryfun(f: Promise<any>) {
   try {
     return await f;
@@ -24,30 +23,25 @@ async function tryfun(f: Promise<any>) {
 }
 
 async function loadServerless(source: string, params?: any) {
-  if (!source.includes('/')) source = `devsapp/${source}`;
-  const [provider, componentName] = source.split('/');
+  const [provider, componentName] = source.includes('/') ? source.split('/') : ['.', source];
   if (!componentName) return;
   const [name, version] = componentName.split('@');
   let zipball_url: string;
   let componentPath: string;
   if (version) {
     const result = await tryfun(getServerlessReleases(provider, name));
+    if (!result) return;
     const findObj = result.find((item) => item.tag_name === version);
     if (!findObj) return;
     zipball_url = findObj.zipball_url;
-    componentPath = path.resolve(
-      S_ROOT_HOME_COMPONENT,
-      'serverlessfans.cn',
-      provider,
-      componentName,
-    );
+    componentPath = path.resolve(S_ROOT_HOME_COMPONENT, 'devsapp.cn', provider, componentName);
   } else {
     const result = await tryfun(getServerlessReleasesLatest(provider, name));
-    if (!result.zipball_url) return;
+    if (!get(result, 'zipball_url')) return;
     zipball_url = result.zipball_url;
     componentPath = path.resolve(
       S_ROOT_HOME_COMPONENT,
-      'serverlessfans.cn',
+      'devsapp.cn',
       provider,
       `${componentName}@${result.tag_name}`,
     );
@@ -74,13 +68,14 @@ async function loadGithub(source: string, params?: any) {
   let componentPath: string;
   if (version) {
     const result = await tryfun(getGithubReleases(user, name));
+    if (!result) return;
     const findObj = result.find((item) => item.tag_name === version);
     if (!findObj) return;
     zipball_url = findObj.zipball_url;
     componentPath = path.resolve(S_ROOT_HOME_COMPONENT, 'github.com', user, componentName);
   } else {
     const result = await tryfun(getGithubReleasesLatest(user, name));
-    if (!result.zipball_url) return;
+    if (!get(result, 'zipball_url')) return;
     zipball_url = result.zipball_url;
     componentPath = path.resolve(
       S_ROOT_HOME_COMPONENT,
@@ -102,7 +97,7 @@ async function loadGithub(source: string, params?: any) {
 }
 
 async function loadType(source: string, registry?: Registry, params?: any) {
-  if (registry === RegistryEnum.serverless) {
+  if (registry === RegistryEnum.serverless || registry === RegistryEnum.serverlessOld) {
     return await loadServerless(source, params);
   }
   if (registry === RegistryEnum.github) {
@@ -117,44 +112,23 @@ function isComponent(result) {
 
 async function loadRemoteComponent(source: string, registry?: Registry, params?: any) {
   let result: any;
-  // gui
-  if ((process.versions as any).electron) {
-    if (registry) {
-      result = await loadType(source, registry, params);
-      if (isComponent(result)) return result;
-    }
-    if (config.getConfig('registry')) {
-      result = await loadType(source, config.getConfig('registry'), params);
-      if (isComponent(result)) return result;
-    }
-    result = await loadServerless(source, params);
-    if (isComponent(result)) return result;
-
-    result = await loadGithub(source, params);
-    if (isComponent(result)) return result;
-  } else {
-    // cli
-    console.log(232323);
-    if (registry) {
-      result = await loadType(source, registry, params);
-      if (isComponent(result)) return result;
-    }
-    console.log(232323222);
-    if (config.getConfig('registry')) {
-      result = await loadType(source, config.getConfig('registry'), params);
-      if (isComponent(result)) return result;
-    }
-    console.log(2222);
-    result = await loadGithub(source, params);
-    if (isComponent(result)) return result;
-    console.log(2222211111);
-    result = await loadServerless(source, params);
+  if (registry) {
+    result = await loadType(source, registry, params);
     if (isComponent(result)) return result;
   }
+  if (config.getConfig('registry')) {
+    result = await loadType(source, config.getConfig('registry'), params);
+    if (isComponent(result)) return result;
+  }
+  result = await loadServerless(source, params);
+  if (isComponent(result)) return result;
 
-  // TODO: `下载的${source}的资源中，未找到相关组件`
-  logger.warn(`未找到${source}组件，请确定组件名或者源是否正确`);
-  return null;
+  result = await loadGithub(source, params);
+  if (isComponent(result)) return result;
+
+  if (!result) {
+    throw new Error(`未找到${source}组件，请确定组件名或者源是否正确`);
+  }
 }
 
 async function loadComponent(source: string, registry?: Registry, params?: any) {
@@ -164,7 +138,11 @@ async function loadComponent(source: string, registry?: Registry, params?: any) 
   }
   // js里引用下, 判断 registry 值是否 合法
   if (registry) {
-    if (registry !== RegistryEnum.github && registry !== RegistryEnum.serverless) {
+    if (
+      registry !== RegistryEnum.github &&
+      registry !== RegistryEnum.serverless &&
+      registry !== RegistryEnum.serverlessOld
+    ) {
       throw new Error(
         `请检查registry的值，需设置为[${RegistryEnum.github}, ${RegistryEnum.serverless}]`,
       );

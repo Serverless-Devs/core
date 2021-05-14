@@ -11,7 +11,7 @@ services:
         hook: npm run build
         index: index.html
         error: index.html
-      region: cn-shanghai2
+      region: cn-shanghai1
       hosts:
         - host: shl2.shihuali.top
           https:

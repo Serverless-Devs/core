@@ -20,5 +20,6 @@
 	"Add key-value pairs": "Add key-value pairs",
 	"End of adding key-value pairs": "End of adding key-value pairs",
 	"Please enter key": "Please enter key",
-	"Please enter value": "Please enter value"
+	"Please enter value": "Please enter value",
+	"The current file does not exist": "The current file does not exist"
 }

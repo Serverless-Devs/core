@@ -1,7 +1,7 @@
-import download, { DownloadOptions as MyDownloadOptions } from 'download';
+import download from 'download';
 import got from 'got';
 import { ProgressService, ProgressType } from '@serverless-devs/s-progress-bar';
-import { green } from 'colors';
+import { green } from 'chalk';
 import spinner from './spinner';
 import decompress from 'decompress';
 import fs from 'fs-extra';
@@ -9,7 +9,7 @@ import path from 'path';
 import i18n from '../libs/i18n';
 import { RegistryEnum } from './constant';
 import { Logger } from '../logger';
-
+const logger = new Logger('S-CORE');
 interface HintOptions {
   loading?: string;
   success?: string;
@@ -20,18 +20,62 @@ interface RequestOptions {
   body?: object;
   params?: object;
   hint?: HintOptions;
+  ignoreError?: boolean;
   [key: string]: any;
 }
 
-export interface DownloadOptions extends MyDownloadOptions {
+export interface IDownloadOptions {
+  /**
+   * If set to true, try extracting the file using decompress.
+   */
+  extract?: boolean;
+  /**
+   * Name of the saved file.
+   */
+  filename?: string;
+  /**
+   * Proxy endpoint
+   */
+  proxy?: string;
+  /**
+   * Request Headers
+   */
+  headers?: {
+    [name: string]: string;
+  };
+  /**
+   * Filter out files before extracting
+   */
+  filter?: any;
+  /**
+   * Map files before extracting
+   */
+  map?: any;
+  /**
+   * Array of plugins to use.
+   * Default: [decompressTar(), decompressTarbz2(), decompressTargz(), decompressUnzip()]
+   */
+  plugins?: any[];
+  /**
+   * Remove leading directory components from extracted files.
+   * Default: 0
+   */
+  strip?: number;
+  body?: string | Buffer;
   postfix?: string;
 }
 
 export async function request(url: string, options?: RequestOptions): Promise<any> {
-  const { method = 'get', params, body: bodyFromOptions, hint = {}, json = true, ...rest } =
-    options || {};
+  const {
+    method = 'get',
+    params,
+    body: bodyFromOptions,
+    hint = {},
+    json = true,
+    ignoreError = false,
+    ...rest
+  } = options || {};
   const { loading, success, error } = hint;
-  const logger = new Logger();
   let vm = null;
   let result = null;
   const errorMessage = (code: string | number, message: string) =>
@@ -51,30 +95,35 @@ export async function request(url: string, options?: RequestOptions): Promise<an
     loading && vm.stop();
   } catch (e) {
     loading && vm.stop();
-    spinner(e.message).fail();
-    throw new Error(errorMessage(e.statusCode, e.message));
+    if (!ignoreError) {
+      spinner(e.message).fail();
+      throw new Error(errorMessage(e.statusCode, e.message));
+    }
   }
 
   const { statusCode, body }: { statusCode: number; body: any } = result;
 
   if (statusCode !== 200) {
     error && spinner(error).fail();
-    throw new Error(errorMessage(statusCode, i18n.__('System exception')));
+    if (!ignoreError) {
+      throw new Error(errorMessage(statusCode, i18n.__('System exception')));
+    }
   } else if (body.Error) {
     error && spinner(error).fail();
-    throw new Error(errorMessage(body.Error.Code, body.Error.Message));
+    if (!ignoreError) {
+      throw new Error(errorMessage(body.Error.Code, body.Error.Message));
+    }
   }
 
   success && spinner(success).succeed();
   return body.Response || body;
 }
 
-export async function downloadRequest(url: string, dest: string, options?: DownloadOptions) {
+export async function downloadRequest(url: string, dest: string, options?: IDownloadOptions) {
   const { extract, postfix, strip, ...rest } = options || {};
-  const logger = new Logger();
   const spin = spinner('prepare downloading');
   let len: number;
-  if (url.startsWith(RegistryEnum.serverless)) {
+  if (url.startsWith(RegistryEnum.serverless) || url.startsWith(RegistryEnum.serverlessOld)) {
     try {
       const { headers } = await got(url, { method: 'HEAD' });
       len = parseInt(headers['content-length'], 10);

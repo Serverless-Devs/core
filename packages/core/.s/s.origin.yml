@@ -1,38 +1,32 @@
 edition: 1.0.0
 services:
   website:
-    component: /Users/shihuali/workspace/website/lib/index.js # 指向项目路径
+    component: /Users/shihuali/workspace/website/lib/index.js
     access: my
     props:
       bucket: shl-website-test01
       src:
-        src: './src'
-        dist: './build'
+        src: ./src
+        dist: ./build
         hook: npm run build
         index: index.html
         error: index.html
-      region: cn-hangzhou
+      region: cn-shanghai2
       hosts:
         - host: shl2.shihuali.top
           https:
             certInfo:
-              switch: on
+              switch: 'on'
               certType: free
               certName: xxx
               serverCertificate: xxx
               privateKey: xxx
-            http2: on
-            forceHttps: on
+            http2: 'on'
+            forceHttps: 'on'
           access:
             referer:
               refererType: blacklist
-              allowEmpty: true 
-              referers: 
-                - 'aliyun.com'
-                - 'taobao.com'
-
-
-
-      # cors:
-      #   allowedOrigin: '*'
-      #   allowedMethod: ['GET']
+              allowEmpty: true
+              referers:
+                - aliyun.com
+                - taobao.com

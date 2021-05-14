@@ -4,7 +4,8 @@
 
 import { uid } from 'uid/secure';
 import * as fs from 'fs-extra';
-import i18n from './i18n';
+import { Logger } from '../logger';
+const logger = new Logger('S-CORE');
 
 export const merge = require('lodash.merge');
 
@@ -62,7 +63,7 @@ export function readJsonFile(filePath: string) {
     const data = fs.readFileSync(filePath, 'utf8');
     return JSON.parse(data);
   } else {
-    throw new Error(i18n.__('The current file does not exist'));
+    logger.debug(`readJsonFile: the file ${filePath} does not exist`);
   }
 }
 

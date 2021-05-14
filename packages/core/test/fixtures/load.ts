@@ -1,4 +1,4 @@
-import { loadComponent } from '../../src/common';
+import { loadApplication } from '../../src/common';
 
 async function test() {
   // const fc = await loadComponent(
@@ -20,10 +20,21 @@ async function test() {
 
   // const fc = await loadApplication(
   //   'vue',
-  //   'https://download.registry.serverlessfans.cn/init/alibaba-node.js12-http',
+  //   'https://download.registry.devsapp.cn/init/alibaba-node.js12-http',
   // );
 
-  const fc = await loadComponent('devsapp/nas');
+  // const fc = await loadApplication('devsapp/website-example:website-base');
+  // devsapp/start-malagu
+  // devsapp/website-example:website-base
+  // devsapp/midway-hook-react
+  // devsapp/midway-hook-example:midway-hook-react
+  // website-base
+  // devsapp/website-base
+  // devsapp/website-example:website-base
+  const fc = await loadApplication({ source: 'devsapp/start-malagu' });
+  // const fc = await loadComponent('xsahxl/xsahxl.github.io@0.0.1');
+  // const fc = await loadComponent('devsapp/springboot');
+
   console.log(fc);
 }
 

@@ -11,16 +11,12 @@ export const buildComponentInstance = async (componentPath: string, params?: any
   if (fsStat.isDirectory()) {
     const packageInfo: any = readJsonFile(path.resolve(componentPath, 'package.json'));
     // 首先寻找 package.json 文件下的 main
-    if (packageInfo.main) {
-      index = packageInfo.main;
-    }
+    index = get(packageInfo, 'main');
     // 其次检查 tsconfig.json 文件下的 outDir
     if (!index) {
       const tsconfigPath = path.resolve(componentPath, 'tsconfig.json');
-      if (fs.existsSync(tsconfigPath)) {
-        const tsconfigInfo: any = readJsonFile(tsconfigPath);
-        index = get(tsconfigInfo, 'compilerOptions.outDir');
-      }
+      const tsconfigInfo = readJsonFile(tsconfigPath);
+      index = get(tsconfigInfo, 'compilerOptions.outDir');
     }
 
     // 其次寻找 src/index.js
@@ -38,7 +34,13 @@ export const buildComponentInstance = async (componentPath: string, params?: any
         index = './index.js';
       }
     }
+    if (!index) {
+      throw new Error(
+        'require不到组件, 请检查组件入口文件的设置是否设正确, 在当前目录下 首先寻找 package.json 文件下的 main, 其次寻找 tsconfig.json 文件下的 compilerOptions.outDir, 其次寻找 src/index.js, 最后寻找 index.js',
+      );
+    }
   }
+
   const requirePath = fsStat.isFile() ? componentPath : path.resolve(componentPath, index);
   const baseChildComponent = await require(requirePath);
 
@@ -50,17 +52,29 @@ export const buildComponentInstance = async (componentPath: string, params?: any
 };
 
 export const getGithubReleases = async (user: string, name: string) => {
-  return await request(`${RegistryEnum.github}/${user}/${name}/releases`);
+  return await request(`${RegistryEnum.github}/${user}/${name}/releases`, { ignoreError: true });
 };
 
 export const getGithubReleasesLatest = async (user: string, name: string) => {
-  return await request(`${RegistryEnum.github}/${user}/${name}/releases/latest`);
+  return await request(`${RegistryEnum.github}/${user}/${name}/releases/latest`, {
+    ignoreError: true,
+  });
 };
 
 export const getServerlessReleases = async (provider: string, name: string) => {
-  return await request(`${RegistryEnum.serverless}/${provider}/${name}/releases`);
+  const url =
+    provider === '.'
+      ? `${RegistryEnum.serverless}/${name}/releases`
+      : `${RegistryEnum.serverless}/${provider}/${name}/releases`;
+  return await request(url, {
+    ignoreError: true,
+  });
 };
 
 export const getServerlessReleasesLatest = async (provider: string, name: string) => {
-  return await request(`${RegistryEnum.serverless}/${provider}/${name}/releases/latest`);
+  const url =
+    provider === '.'
+      ? `${RegistryEnum.serverless}/${name}/releases/latest`
+      : `${RegistryEnum.serverless}/${provider}/${name}/releases/latest`;
+  return await request(url);
 };

@@ -18,10 +18,10 @@ import { request } from '../../src/common';
 // test();
 
 async function test() {
-  const result = await request(
-    'https://api.github.com/repos/Serverless-Devs/Serverless-Devs/releases/latest',
-  );
+  const result = await request('https://api.github.com/repos/devsapp/fc-deploy/releases/latest');
   console.log(result.zipball_url);
 }
 
-test();
+setInterval(() => {
+  test();
+}, 500);

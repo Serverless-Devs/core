@@ -6,6 +6,9 @@ module.exports = {
     jest: true,
   },
   rules: {
-    "@typescript/no-require-imports": 0
-  }
+    'no-console': 0,
+    '@typescript/no-require-imports': 0,
+    'no-redeclare': 'off',
+    '@typescript-eslint/no-redeclare': ['error'],
+  },
 };

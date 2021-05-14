@@ -20,7 +20,7 @@ class LoggerDemo {
 
 2. 类使用方式
 
-- logger demo
+- 推荐使用 new Logger()方式
 
 ```typescript
 const { Logger } = require('@serverless-devs/core');
@@ -30,7 +30,7 @@ function loggerDemo() {
 }
 ```
 
-或者
+- Logger.info 等方法目前只做兼容，不会写入文件日志
 
 ```typescript
 const { Logger } = require('@serverless-devs/core');

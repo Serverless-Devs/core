@@ -29,6 +29,21 @@ request(url, {
 
 ```
 
+- 如果希望不抛出错误信息，可通过 `ignoreError` 参数设置为 `true` 即可
+
+```typescript
+const { request } = require('@serverless-devs/core');
+
+request(url, {
+  method: 'post'
+  body: {
+    key: 'value',
+  },
+  // ignoreError: true
+});
+
+```
+
 ```typescript
 const { request } = require('@serverless-devs/core');
 
@@ -72,7 +87,7 @@ downloadRequest(url, outDir, { extract: true, strip: 1 });
 #### 组件上报
 
 ```typescript
-const { report, HLogger, ILogger } = require('@serverless-devs/core');
+const { reportComponent, HLogger, ILogger } = require('@serverless-devs/core');
 
 class ReportDemo {
   @HLogger('S-CORE') logger: ILogger;
@@ -101,11 +116,9 @@ class ReportDemo {
  * 2.github 源为 `<org名>/<项目名称>` 会下载最新版本，`<org名>/<项目名称>@<项目发布的版本号>` 会下载指定版本
  * 3.支持本地调试，可传本地组件的当前路径
  *
- * registry 参数说明，值为 'http://registry.serverlessfans.cn/simple' 或者 'https://api.github.com/repos'
- * 优先读取方法传入的参数 registry，如果找不到，然后读取 ~/.s/components/set-config.yml 文件里的 registry，如果找不到
- * cli case: 读取 github 源
- * gui case: 先读取 serverless hub 源，如果找不到在读取 github 源
- *
+ * registry 参数说明，值为 'http://registry.devsapp.cn/simple' 或者 'https://api.github.com/repos'
+ * 优先读取方法传入的参数 registry，如果找不到，然后读取 ~/.s/components/set-config.yml 文件里的 registry
+ * 如果找不到，优先读取 serverless hub 源，如果找不到，最后读取 github 源
  * params 参数说明，方法内部在require组件的时候会new一次，params会在new的时候透传给组件
  *
  * /
@@ -144,10 +157,9 @@ loadComponent('/Users/shihuali/.s/components/serverlessfans.com/alibaba/fc@0.1.2
  * 3.自定义源 为 `<应用名>`， 会下载指定资源
  *
  * registry 参数说明
- * 优先读取方法传入的参数 registry，如果找不到，然后读取 ~/.s/components/set-config.yml 文件里的 registry，如果找不到
- * cli case: 先读取 github 源，如果找不到在读取 serverless hub 源
- * gui case: 先读取 serverless hub 源，如果找不到在读取 github 源
- * 1.serverless hub 源 为：http://registry.serverlessfans.cn/simple
+ * 优先读取方法传入的参数 registry，如果找不到，然后读取 ~/.s/components/set-config.yml 文件里的 registry，
+ * 如果找不到，优先读取 serverless hub 源，如果找不到，最后读取 github 源
+ * 1.serverless hub 源 为：http://registry.devsapp.cn/simple
  * 2.github 源为：https://api.github.com/repos
  * 3.自定义源
  *
@@ -182,12 +194,17 @@ function sleep(timer: number) {
 }
 
 async start() {
-  const vm = spinner('开始执行');
-  await sleep(1000);
-  vm.text = 'hhh';
-  vm.color = 'red';
-  await sleep(1000);
-  vm.succeed('执行成功');
+  async test() {
+    const vm = spinner('开始执行');
+    await sleep(1000);
+    try {
+      await sleep(1500);
+      vm1.succeed('执行成功.');
+    } catch(ex) {
+      vm1.fail('执行失败')
+      throw ex;
+    }
+  }
 }
 
 ```
@@ -524,45 +541,52 @@ async function test() {
 
 ## modifyProps
 
-#### 用于修改当前目录下 <s.yml> 文件的 `Properties` 属性， 第一次执行该方法时，会备份<s.yml>到<s.origin.yml>
+#### 用于修改 <s.yml> 文件的 `prop` 属性， 第一次执行该方法时，会备份<s.yml>到<s.origin.yml>
 
-第一个参数接收 <s.yml> 的 service, 第二个参数 接收 Properties，其值会 merge 到 <s.yml> 的 Properties
+第一个参数接收 组件名称
+第二个参数 接收 prop，其值会 merge 到 <s.yml> 的 prop
+第三个参数 接收 <s.yml> 的路径
 
 ```typescript
 const { modifyProps } = require('@serverless-devs/core');
 
 // s.yml demo
 
-// MyFunctionDemo:
-//   Component: fc
-//   Provider: alibaba
-//   Properties:
-//     Region: cn-hangzhou
-//     Service:
-//       Name: ServerlessToolProject
-//       Description: 欢迎使用ServerlessTool
-//     Function:
-//       Name: serverless_demo_python3_http
-//       Description: 这是一个Python3-HTTP的测试案例
-//       CodeUri: ./
-//       Handler: index.handler
-//       MemorySize: 128
-//       Runtime: python3
-//       Timeout: 5
-//       Triggers:
-//         - Name: TriggerNameHttp
-//           Type: HTTP
-//           Parameters:
-//             AuthType: ANONYMOUS
-//             Methods:
-//               - GET
-//               - POST
-//               - PUT
-//             Domains:
-//               - Domain: AUTO
+// edition: 1.0.0
+// services:
+//   website:
+//     component: /Users/shihuali/workspace/website/lib/index.js
+//     access: my
+//     props:
+//       bucket: shl-website-test01
+//       src:
+//         src: ./src
+//         dist: ./build
+//         hook: npm run build
+//         index: index.html
+//         error: index.html
+//       region: cn-shanghai
+//       hosts:
+//         - host: shl2.shihuali.top
+//           https:
+//             certInfo:
+//               switch: 'on'
+//               certType: free
+//               certName: xxx
+//               serverCertificate: xxx
+//               privateKey: xxx
+//             http2: 'on'
+//             forceHttps: 'on'
+//           access:
+//             referer:
+//               refererType: blacklist
+//               allowEmpty: true
+//               referers:
+//                 - aliyun.com
+//                 - taobao.com
 
-modifyProps('MyFunctionDemo', {
-  Region: 'cn-shanghai',
+modifyProps('website', {
+  bucket: 'shl-website-test01',
 });
 ```
 

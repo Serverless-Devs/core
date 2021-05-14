@@ -6,18 +6,21 @@ import yaml from 'js-yaml';
 import { providerCollection, checkProviderList } from './constant';
 import i18n from '../../libs/i18n';
 import getYamlContent from '../getYamlContent';
+
 const Crypto = require('crypto-js');
 
 async function handleCustom(info: any) {
-  const option = {
-    type: 'list',
-    name: 'name',
-    message: 'Please select a type:',
-    choices: [
-      { name: i18n.__('Add key-value pairs'), value: 'add' },
-      { name: i18n.__('End of adding key-value pairs'), value: 'over' },
-    ],
-  };
+  const option = [
+    {
+      type: 'list',
+      name: 'name',
+      message: 'Please select a type:',
+      choices: [
+        { name: i18n.__('Add key-value pairs'), value: 'add' },
+        { name: i18n.__('End of adding key-value pairs'), value: 'over' },
+      ],
+    },
+  ];
   const { name } = await inquirer.prompt(option);
   if (name === 'add') {
     const { key, value } = await inquirer.prompt([
@@ -63,16 +66,18 @@ async function writeData(data: any) {
   if (content) {
     const providerAliasKeys = Object.keys(content);
     if (providerAliasKeys.includes(accessAlias)) {
-      const option = {
-        type: 'list',
-        name: 'name',
-        message: 'Alias already exists. Please select a type:',
-        choices: [
-          { name: 'overwrite', value: 'overwrite' },
-          { name: 'rename', value: 'rename' },
-          { name: 'exit', value: 'exit' },
-        ],
-      };
+      const option = [
+        {
+          type: 'list',
+          name: 'name',
+          message: 'Alias already exists. Please select a type:',
+          choices: [
+            { name: 'overwrite', value: 'overwrite' },
+            { name: 'rename', value: 'rename' },
+            { name: 'exit', value: 'exit' },
+          ],
+        },
+      ];
       const { name } = await inquirer.prompt(option);
       if (name === 'overwrite') {
         content[accessAlias] = encrypt(info);
@@ -80,12 +85,14 @@ async function writeData(data: any) {
         output({ info, accessAlias });
       }
       if (name === 'rename') {
-        const accessAliasObj = {
-          type: 'input',
-          message: 'Please create alias for key pair. If not, please enter to skip',
-          name: 'aliasName',
-          default: await getAlias(),
-        };
+        const accessAliasObj = [
+          {
+            type: 'input',
+            message: 'Please create alias for key pair. If not, please enter to skip',
+            name: 'aliasName',
+            default: await getAlias(),
+          },
+        ];
         const { aliasName } = await inquirer.prompt(accessAliasObj);
         return await writeData({ info, accessAlias: aliasName });
       }
@@ -94,7 +101,7 @@ async function writeData(data: any) {
         fs.appendFileSync(filePath, yaml.dump({ [accessAlias]: encrypt(info) }));
         output({ info, accessAlias });
       } catch (err) {
-        throw Error('Configuration failed');
+        throw new Error('Configuration failed');
       }
     }
   } else {
@@ -102,7 +109,7 @@ async function writeData(data: any) {
       fs.writeFileSync(filePath, yaml.dump({ [accessAlias]: encrypt(info) }));
       output({ info, accessAlias });
     } catch (err) {
-      throw Error('Configuration failed');
+      throw new Error('Configuration failed');
     }
   }
   return data;
@@ -112,11 +119,11 @@ async function getAlias() {
   const filePath = path.join(os.homedir(), '.s/access.yaml');
   if (fs.existsSync(filePath)) {
     const info = await getYamlContent(filePath);
-    const keys = Object.keys(info).filter((item) => item.includes('default'));
+    const keys = info ? Object.keys(info).filter((item) => item.startsWith('default')) : [];
     if (keys.length === 0) {
       return 'default';
     }
-    let max: string = '0';
+    let max = '0';
     keys.forEach((item) => {
       const [, end] = item.split('-');
       if (end > max) {
@@ -150,7 +157,7 @@ async function setCredential(...args: any[]) {
   };
   if (selectedProvider === 'custom') {
     await handleCustom((info = {}));
-    const res = await inquirer.prompt(accessAliasObj);
+    const res = await inquirer.prompt([accessAliasObj]);
     accessAlias = res.aliasName;
   } else {
     const argsPrompt = args.map((item) => ({
