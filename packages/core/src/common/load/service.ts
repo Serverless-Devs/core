@@ -48,7 +48,7 @@ export const buildComponentInstance = async (componentPath: string, params?: any
     ? baseChildComponent.default
     : baseChildComponent;
   const componentInstance = new ChildComponent(params);
-  if (!componentInstance) {
+  if (componentInstance) {
     componentInstance.__path = componentPath;
   }
   return componentInstance;
