@@ -9,6 +9,9 @@ export async function getState(id: any) {
 }
 
 export async function setState(id: any, state: any) {
+  if (!fs.existsSync(S_CURRENT_HOME)) {
+    fs.mkdirSync(S_CURRENT_HOME);
+  }
   const stateFilePath = path.join(S_CURRENT_HOME, `${id}.json`);
   if (!fs.existsSync(stateFilePath)) {
     fs.openSync(stateFilePath, 'w');
