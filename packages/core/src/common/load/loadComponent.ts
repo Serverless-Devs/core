@@ -13,6 +13,7 @@ import * as config from '../../libs/handler-set-config';
 import { downloadRequest } from '../request';
 import installDependency from '../installDependency';
 import get from 'lodash.get';
+import { downLoadDesCore, updateDesCore } from './loadDevsCore';
 
 async function tryfun(f: Promise<any>) {
   try {
@@ -53,6 +54,7 @@ async function loadServerless(source: string, params?: any) {
       extract: true,
       strip: 1,
     });
+    await downLoadDesCore(componentPath);
     await installDependency({ cwd: componentPath, production: true });
     fs.writeFileSync(lockPath, zipball_url);
   }
@@ -90,6 +92,7 @@ async function loadGithub(source: string, params?: any) {
       extract: true,
       strip: 1,
     });
+    await downLoadDesCore(componentPath);
     await installDependency({ cwd: componentPath, production: true });
     fs.writeFileSync(lockPath, zipball_url);
   }
@@ -133,6 +136,7 @@ async function loadRemoteComponent(source: string, registry?: Registry, params?:
 
 async function loadComponent(source: string, registry?: Registry, params?: any) {
   // 本地调试
+  updateDesCore()
   if (fs.existsSync(source)) {
     return await buildComponentInstance(source, params);
   }

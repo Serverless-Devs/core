@@ -201,7 +201,6 @@ async function loadApplication(
     target = oldsource.target || S_CURRENT;
     name = oldsource.name;
   }
-
   if (registry) {
     if (registry !== RegistryEnum.github && registry !== RegistryEnum.serverless) {
       // 支持 自定义
