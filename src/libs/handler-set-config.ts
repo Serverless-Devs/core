@@ -41,7 +41,7 @@ export async function handlerProfileFile(parame: ProfileParame) {
       await fs.mkdirSync(configDir);
     }
   } else {
-    profile = yaml.safeLoad(fs.readFileSync(profPath, 'utf8')) || {};
+    profile = yaml.load(fs.readFileSync(profPath, 'utf8')) || {};
   }
 
   // 如果仅是读取，则拿到配置信息直接退出
@@ -66,7 +66,7 @@ function getProfileFile(): Profile {
   if (!fs.existsSync(profileFilePath)) {
     return {};
   }
-  return yaml.safeLoad(fs.readFileSync(profileFilePath, 'utf8')) || {};
+  return yaml.load(fs.readFileSync(profileFilePath, 'utf8')) || {};
 }
 
 function getDefaultProfilePath(): string {
