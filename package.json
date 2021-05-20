@@ -1,6 +1,6 @@
 {
   "name": "@serverless-devs/core",
-  "version": "0.0.95",
+  "version": "0.0.96",
   "description": "Serverless Devs Tool Core Component",
   "keywords": [
     "Serverless",
@@ -48,7 +48,7 @@
     "i18n": "^0.13.2",
     "ignore": "^5.1.8",
     "inquirer": "^7.3.3",
-    "js-yaml": "^3.14.0",
+    "js-yaml": "^4.1.0",
     "lodash.get": "^4.4.2",
     "lodash.merge": "^4.6.2",
     "minimist": "^1.2.5",
