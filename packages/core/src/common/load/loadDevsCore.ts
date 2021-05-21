@@ -1,67 +1,57 @@
 import fs from 'fs-extra';
 import path from 'path';
 import get from 'lodash.get';
-import compressing from 'compressing';
 import { execSync } from 'child_process';
 import { S_ROOT_HOME } from '../../libs/common';
 import { downloadRequest } from '../request';
+import { readJsonFile } from '../../libs/utils';
+import installDependency from '../installDependency';
+import rimraf from 'rimraf';
 
 const cachePath = path.join(S_ROOT_HOME, 'cache');
 const corePath = path.join(cachePath, 'core');
-const packagePath = path.join(corePath, 'package');
 
-function removedevscore(componentPath){
-    const package_json_path = path.join(componentPath, 'package.json');
-    const oldData = fs.readFileSync(package_json_path, 'utf8');
-    const newData = oldData.replace(/"@serverless-devs\/core": "^0.0.*",/g, '');
-    fs.writeFileSync(package_json_path, newData)
+export function removeDevsCore(componentPath) {
+  const node_module_core = path.join(componentPath, '/node_modules/@serverless-devs/core');
+  if (fs.existsSync(node_module_core)) {
+    rimraf.sync(node_module_core);
+  }
+  const packagePath = path.join(componentPath, 'package.json');
+  const packageInfo = readJsonFile(packagePath);
+  if (get(packageInfo, ['dependencies', '@serverless-devs/core'])) {
+    delete packageInfo.dependencies['@serverless-devs/core'];
+  }
+  fs.writeFileSync(packagePath, JSON.stringify(packageInfo, null, 2));
 }
-function getflieName(url = ''){
-    const urlArr = url.split('/');
-    return get(urlArr, `[${urlArr.length-1}]`, 'core.zip');
+
+function getCoreInfo() {
+  let version: any = execSync('npm view @serverless-devs/core version');
+  version = version.toString().replace(/\n/g, '');
+
+  return {
+    url: `https://registry.npmjs.org/@serverless-devs/core/-/core-${version}.tgz`,
+    version,
+  };
 }
-function getCoreInfo(){
-    const result = execSync('npm view @serverless-devs/core --json');
-    const resultInfo = JSON.parse(result.toString())
-    const url = resultInfo.dist.tarball;
-    const fileName = getflieName(url);
-    return {
-        url,
-        fileName
-    }
-}
+
 export async function downLoadDesCore(componentPath) {
-    const {url, fileName} = getCoreInfo();
-    const dest = path.join(cachePath,fileName);
-    const node_modules_path = path.join(packagePath, 'node_modules');
+  const { url, version } = getCoreInfo();
+  const lockPath = path.resolve(corePath, '.s.lock');
+  let needLoad: boolean;
+  if (fs.existsSync(lockPath)) {
+    needLoad = version !== readJsonFile(lockPath).version;
+    needLoad && rimraf.sync(corePath);
+  } else {
+    needLoad = true;
+  }
+  if (needLoad) {
     if (!fs.existsSync(cachePath)) {
-        fs.mkdirSync(cachePath);
+      fs.mkdirSync(cachePath);
     }
-    if (!fs.existsSync(corePath)){
-        await downloadRequest(url, cachePath, { extract: false, strip: 1 });
-        await compressing.tgz.uncompress(dest, corePath);
-
-    }
-    if(!fs.existsSync(node_modules_path) && fs.existsSync(packagePath)){
-        execSync('npm link', {cwd: packagePath});
-    }
-    if(fs.existsSync(node_modules_path)){
-        removedevscore(componentPath);
-        execSync(`npm link ${packagePath}`, {cwd: componentPath});
-    }
+    await downloadRequest(url, corePath, { extract: true, strip: 1 });
+    await installDependency({ cwd: corePath });
+    execSync('npm link', { cwd: corePath });
+    fs.writeFileSync(lockPath, JSON.stringify({ version }, null, 2));
+  }
+  execSync(`npm link ${corePath}`, { cwd: componentPath });
 }
-
-export async function updateDesCore(){
-    const {fileName, url} = getCoreInfo();
-    const newDest = path.join(cachePath, fileName);
-    if (!fs.existsSync(newDest)) {
-        //await fs.remove() todo 删除之前的tgz压缩包
-        const node_modules_path = path.join(packagePath, 'node_modules');
-        await downloadRequest(url, cachePath, { extract: false, strip: 1 });
-        await compressing.tgz.uncompress(newDest, corePath);
-        if(!fs.existsSync(node_modules_path) && fs.existsSync(packagePath)){
-            execSync('npm link', {cwd: packagePath});
-        }
-    }
-}
-
