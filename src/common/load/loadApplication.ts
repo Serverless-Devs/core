@@ -111,6 +111,9 @@ async function handleDecompressFile({ zipball_url, applicationPath, name }) {
 async function needInstallDependency(cwd: string) {
   const packageInfo: any = readJsonFile(path.resolve(cwd, 'package.json'));
   if (!packageInfo || !get(packageInfo, 'autoInstall', true)) return;
+  if (process.env.skipPrompt) {
+    return await tryfun(installDependency({ cwd, production: false }));
+  }
 
   const res = await inquirer.prompt([
     {
@@ -126,6 +129,7 @@ async function needInstallDependency(cwd: string) {
 }
 
 async function checkFileExists(filePath: string, fileName: string) {
+  if (process.env.skipPrompt) return true;
   if (fs.existsSync(filePath)) {
     const res = await inquirer.prompt([
       {
@@ -163,7 +167,10 @@ async function handleSubDir({ zipball_url, target, subDir, applicationPath }) {
 }
 
 async function loadType(params: IParams) {
-  if (params.registry === RegistryEnum.serverless || params.registry === RegistryEnum.serverlessOld) {
+  if (
+    params.registry === RegistryEnum.serverless ||
+    params.registry === RegistryEnum.serverlessOld
+  ) {
     return await loadServerless(params);
   }
   if (params.registry === RegistryEnum.github) {

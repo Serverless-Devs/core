@@ -1,5 +1,5 @@
 // @ts-ignore
-import { loadComponent } from '../../src/common';
+import { loadApplication } from '../../src/common';
 
 async function test() {
   // const fc = await loadComponent(
@@ -35,7 +35,8 @@ async function test() {
   // const fc = await loadApplication({ source: 'devsapp/start-malagu' });
   // const fc = await loadComponent('xsahxl/xsahxl.github.io@0.0.1');
   // const fc = await loadComponent('devsapp/springboot');
-  const fc = await loadComponent('devsapp/domain@0.0.8');
+  process.env.skipPrompt = 'true';
+  const fc = await loadApplication('devsapp/start-malagu');
   console.log(fc);
 }
 
