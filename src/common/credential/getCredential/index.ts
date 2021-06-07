@@ -25,7 +25,7 @@ async function getCredential(access?: string, ...args: any[]) {
   if (access) {
     accessAlias = access;
   } else {
-    console.log('使用默认的default密钥信息');
+    // console.log('使用默认的default密钥信息');
     accessAlias = 'default';
   }
 
