@@ -8,22 +8,26 @@ function commandParse(
   opts?: object,
 ): { rawData?: string; data: object } {
   // @ts-ignore
-  const argsStr = inputs?.args || inputs?.Args;
-  if (!argsStr) {
-    return { rawData: argsStr, data: undefined };
+  let argsData = inputs?.argsObj || inputs?.ArgsObj || inputs?.args || inputs?.Args;
+  if (!argsData) {
+    return { rawData: argsData, data: undefined };
   }
   let newArgv
-  try {
-    const tempResult = child_process.execSync(`${process.argv[0]} ${path.join(__dirname, '../../src/common/utils', 'args.js')} ${argsStr}`)
-    const tempOutput = tempResult.toString()
-    const tempArgv = tempOutput.substring(0, tempOutput.length - 1)
-    newArgv = tempArgv.split(/--serverless-devs--core--parse--/g)
-  }catch (e){
-    newArgv = argsStr.split(/[\s]+/g)
+  if (typeof argsData == 'object'){
+    newArgv = argsData
+  }else{
+    try {
+      const tempResult = child_process.execSync(`${process.argv[0]} ${path.join(__dirname, '../../src/common/utils', 'args.js')} ${argsStr}`)
+      const tempOutput = tempResult.toString()
+      const tempArgv = tempOutput.substring(0, tempOutput.length - 1)
+      newArgv = minimist(tempArgv.split(/--serverless-devs--core--parse--/g), opts || {})
+    }catch (e){
+      newArgv = minimist(argsData.split(/[\s]+/g), opts || {})
+    }
   }
   return {
-    rawData: argsStr,
-    data: minimist(newArgv, opts || {}),
+    rawData: argsData,
+    data: newArgv
   };
 }
 

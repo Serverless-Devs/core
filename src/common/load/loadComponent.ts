@@ -36,6 +36,7 @@ async function loadServerless(source: string, params?: any) {
     if (!findObj) return;
     zipball_url = findObj.zipball_url;
     componentPath = path.resolve(S_ROOT_HOME_COMPONENT, 'devsapp.cn', provider, componentName);
+
   } else {
     const result = await tryfun(getServerlessReleasesLatest(provider, name));
     if (!get(result, 'zipball_url')) return;
@@ -47,7 +48,6 @@ async function loadServerless(source: string, params?: any) {
       `${componentName}@${result.tag_name}`,
     );
   }
-
   const lockPath = path.resolve(componentPath, '.s.lock');
   if (!fs.existsSync(lockPath)) {
     await downloadRequest(zipball_url, componentPath, {
@@ -131,13 +131,13 @@ async function loadRemoteComponent(source: string, registry?: Registry, params?:
   }
   result = await loadServerless(source, params);
   if (isComponent(result)) return result;
-
   result = await loadGithub(source, params);
   if (isComponent(result)) return result;
 
   if (!result) {
     throw new Error(`未找到${source}组件，请确定组件名或者源是否正确`);
   }
+
 }
 
 async function loadComponent(source: string, registry?: Registry, params?: any) {
