@@ -14,7 +14,7 @@ function commandParse(
   }
   let newArgv
   if (typeof argsData == 'object'){
-    newArgv = argsData
+    newArgv = minimist(argsData, opts || {})
   }else{
     try {
       const tempResult = child_process.execSync(`${process.argv[0]} ${path.join(__dirname, '../../src/common/utils', 'args.js')} ${argsData}`)
