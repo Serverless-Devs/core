@@ -35,26 +35,30 @@ export const logger = (name: string): ILogger => {
     levels: (enableDebug ? ['debug'] : []).concat(['info', 'warn', 'error', 'fatal']),
   });
 
-  stdLog.set('app-file', {
-    type: 'file',
-    filename: `${S_ROOT_HOME}/logs/app.log`,
-    levels: ['trace', 'info', 'warn', 'error', 'fatal'],
-    pattern: '.yyyy-MM-dd',
-    layout: {
-      type: 'json',
-      separator: ',',
-    },
-  });
-  stdLog.set('app-debug-file', {
-    type: 'file',
-    filename: `${S_ROOT_HOME}/logs/app-debug.log`,
-    levels: ['debug'],
-    pattern: '.yyyy-MM-dd',
-    layout: {
-      type: 'json',
-      separator: ',',
-    },
-  });
+  try{
+    stdLog.set('app-file', {
+      type: 'file',
+      filename: `${S_ROOT_HOME}/logs/app.log`,
+      levels: ['trace', 'info', 'warn', 'error', 'fatal'],
+      pattern: '.yyyy-MM-dd',
+      layout: {
+        type: 'json',
+        separator: ',',
+      },
+    });
+    stdLog.set('app-debug-file', {
+      type: 'file',
+      filename: `${S_ROOT_HOME}/logs/app-debug.log`,
+      levels: ['debug'],
+      pattern: '.yyyy-MM-dd',
+      layout: {
+        type: 'json',
+        separator: ',',
+      },
+    });
+  }catch (e){
+
+  }
 
   // @ts-ignore
   loggers.log = (message: any, color?: LogColor) => {
