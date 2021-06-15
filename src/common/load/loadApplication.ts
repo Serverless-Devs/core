@@ -135,7 +135,7 @@ async function checkFileExists(filePath: string, fileName: string) {
       {
         type: 'confirm',
         name: 'confirm',
-        message: `文件 ${fileName} 已存在，是否覆盖该文件`,
+        message: `File ${fileName} already exists, override this file ?`,
         default: true,
       },
     ]);
@@ -230,7 +230,7 @@ async function loadApplication(
   if (appPath) return appPath;
 
   if (!appPath) {
-    throw new Error(`未找到${source}应用，请确定应用名或者源是否正确`);
+    throw new Error(`No ${source} app found, please make sure the app name or source is correct`);
   }
 }
 
