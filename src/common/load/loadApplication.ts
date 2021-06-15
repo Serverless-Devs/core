@@ -32,19 +32,8 @@ async function tryfun(f: Promise<any>) {
   }
 }
 
-function isGitSource(source: string) {
-  return source.includes('/') && source.includes(':');
-}
 async function loadServerless(params: IParams) {
-  let source: string;
-  if (isGitSource(params.source)) {
-    const [a, b] = params.source.split(':');
-    const [c] = a.split('/');
-    source = `${c}/${b}`;
-  } else {
-    source = params.source.includes('/') ? params.source : `./${params.source}`;
-  }
-
+  const source = params.source.includes('/') ? params.source : `./${params.source}`;
   const [provider, componentName] = source.split('/');
   if (!componentName) return;
   const [name, version] = componentName.split('@');
@@ -67,9 +56,7 @@ async function loadServerless(params: IParams) {
 
 async function loadGithub(params: IParams) {
   if (!params.source.includes('/')) return;
-  const [user, componentNameSubDir] = params.source.split('/');
-  if (!componentNameSubDir) return;
-  const [componentName, subDir] = componentNameSubDir.split(':');
+  const [user, componentName] = params.source.split('/');
   const [name, version] = componentName.split('@');
   let zipball_url: string;
   if (version) {
@@ -84,25 +71,22 @@ async function loadGithub(params: IParams) {
     zipball_url = result.zipball_url;
   }
   const applicationPath = path.resolve(params.target, params.name || name);
-  if (subDir) {
-    return handleSubDir({ zipball_url, target: params.target, subDir, applicationPath });
-  }
   return handleDecompressFile({ zipball_url, applicationPath, name: params.name || name });
 }
 async function handleDecompressFile({ zipball_url, applicationPath, name }) {
   const answer = await checkFileExists(applicationPath, name);
   if (!answer) return applicationPath;
-  rimraf.sync(applicationPath);
-  await downloadRequest(zipball_url, applicationPath, {
+  const temporaryPath = `${applicationPath}${new Date().getTime()}`;
+  await downloadRequest(zipball_url, temporaryPath, {
     extract: true,
     strip: 1,
   });
-  const hasPublishYaml = await getYamlContent(path.resolve(applicationPath, 'publish.yaml'));
+  const hasPublishYaml = await getYamlContent(path.resolve(temporaryPath, 'publish.yaml'));
   if (hasPublishYaml) {
-    const temporaryPath = `${applicationPath}${new Date().getTime()}`;
-    fs.moveSync(`${applicationPath}/src`, temporaryPath);
-    rimraf.sync(applicationPath);
-    fs.renameSync(temporaryPath, applicationPath);
+    fs.copySync(`${temporaryPath}/src`, applicationPath);
+    rimraf.sync(temporaryPath);
+  } else {
+    fs.moveSync(`${temporaryPath}`, applicationPath);
   }
   await needInstallDependency(applicationPath);
   return applicationPath;
@@ -135,7 +119,7 @@ async function checkFileExists(filePath: string, fileName: string) {
       {
         type: 'confirm',
         name: 'confirm',
-        message: `文件 ${fileName} 已存在，是否覆盖该文件`,
+        message: `文件 ${fileName} 已存在，是否覆盖该文件？`,
         default: true,
       },
     ]);
@@ -143,27 +127,6 @@ async function checkFileExists(filePath: string, fileName: string) {
   }
   // 不存在文件，返回true表示需要覆盖
   return true;
-}
-async function handleSubDir({ zipball_url, target, subDir, applicationPath }) {
-  const subDirPath = path.resolve(target, subDir);
-  const answer = await checkFileExists(subDirPath, subDir);
-  if (!answer) return subDirPath;
-  rimraf.sync(subDirPath);
-  const temporaryPath = `${applicationPath}${new Date().getTime()}`;
-  await downloadRequest(zipball_url, temporaryPath, {
-    extract: true,
-    strip: 1,
-  });
-  const originSubDirPath = (await getYamlContent(
-    path.resolve(temporaryPath, subDir, 'publish.yaml'),
-  ))
-    ? path.resolve(temporaryPath, subDir, 'src')
-    : path.resolve(temporaryPath, subDir);
-
-  fs.moveSync(originSubDirPath, subDirPath);
-  rimraf.sync(temporaryPath);
-  await needInstallDependency(subDirPath);
-  return subDirPath;
 }
 
 async function loadType(params: IParams) {
