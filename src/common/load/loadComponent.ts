@@ -135,7 +135,7 @@ async function loadRemoteComponent(source: string, registry?: Registry, params?:
   if (isComponent(result)) return result;
 
   if (!result) {
-    throw new Error(`未找到${source}组件，请确定组件名或者源是否正确`);
+    throw new Error(`The ${source} component was not found. Please make sure the component name or source is correct`);
   }
 
 }
@@ -153,7 +153,7 @@ async function loadComponent(source: string, registry?: Registry, params?: any) 
       registry !== RegistryEnum.serverlessOld
     ) {
       throw new Error(
-        `请检查registry的值，需设置为[${RegistryEnum.github}, ${RegistryEnum.serverless}]`,
+        `Please check the value of registry and set it to [${RegistryEnum.github}, ${RegistryEnum.serverless}]`,
       );
     }
   }
