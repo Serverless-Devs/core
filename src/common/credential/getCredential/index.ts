@@ -5,7 +5,9 @@ import get from 'lodash.get';
 import os from 'os';
 import path from 'path';
 import getYamlContent from '../../getYamlContent';
+import { Logger } from '../../../logger';
 const Crypto = require('crypto-js');
+const logger = new Logger('S-CORE');
 
 export function decryptCredential(info: { [key: string]: any }) {
   const cloneInfo = Object.assign({}, info);
@@ -64,7 +66,9 @@ async function getCredential(access?: string, ...args: any[]) {
 
   // 找到已经创建过的密钥，直接返回密钥信息
   if (accessKeys.length > 0) {
-    return formatValue(accessContent, accessAlias);
+    const result = formatValue(accessContent, accessAlias);
+    logger.debug(`密钥信息: ${JSON.stringify(result, null, 2)}`);
+    return result;
   }
   const userInfo = await getYamlContent(path.join(os.homedir(), '.s/access.yaml'));
 
@@ -96,7 +100,9 @@ async function getCredential(access?: string, ...args: any[]) {
   if (selectAccess === 'create') {
     return setCredential(...args);
   }
-  return formatValue(userInfo, selectAccess);
+  const result = formatValue(userInfo, selectAccess);
+  logger.debug(`密钥信息: ${JSON.stringify(result, null, 2)}`);
+  return result;
 }
 
 export default getCredential;
