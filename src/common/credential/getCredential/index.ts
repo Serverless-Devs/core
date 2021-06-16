@@ -16,6 +16,22 @@ export function decryptCredential(info: { [key: string]: any }) {
   return cloneInfo;
 }
 
+function formatValue(content: any, alias: string) {
+  const formatObj = decryptCredential(content[alias]);
+  if (Object.prototype.hasOwnProperty.call(formatObj, 'AccountID')) {
+    return {
+      Alias: alias,
+      ...formatObj,
+      AccountID:
+        typeof formatObj.AccountID === 'string' ? formatObj.AccountID : String(formatObj.AccountID),
+    };
+  }
+  return {
+    Alias: alias,
+    ...formatObj,
+  };
+}
+
 /**
  * @param access 可选参数，密钥的别名
  * @param args 可选参数，接收设置密钥的key，如果不传新建密钥的时候，方法内部提供了设置密钥的相关模版
@@ -48,21 +64,7 @@ async function getCredential(access?: string, ...args: any[]) {
 
   // 找到已经创建过的密钥，直接返回密钥信息
   if (accessKeys.length > 0) {
-    const formatObj = decryptCredential(accessContent[accessAlias]);
-    if (Object.prototype.hasOwnProperty.call(formatObj, 'AccountID')) {
-      return {
-        Alias: accessAlias,
-        ...formatObj,
-        AccountID:
-          typeof formatObj.AccountID === 'string'
-            ? formatObj.AccountID
-            : String(formatObj.AccountID),
-      };
-    }
-    return {
-      Alias: accessAlias,
-      ...formatObj,
-    };
+    return formatValue(accessContent, accessAlias);
   }
   const userInfo = await getYamlContent(path.join(os.homedir(), '.s/access.yaml'));
 
@@ -94,10 +96,7 @@ async function getCredential(access?: string, ...args: any[]) {
   if (selectAccess === 'create') {
     return setCredential(...args);
   }
-  return {
-    Alias: selectAccess,
-    ...userInfo[selectAccess],
-  };
+  return formatValue(userInfo, selectAccess);
 }
 
 export default getCredential;
