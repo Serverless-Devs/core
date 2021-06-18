@@ -126,7 +126,7 @@ async function getAlias() {
     let max = '0';
     keys.forEach((item) => {
       const [, end] = item.split('-');
-      if (end > max) {
+      if (!isNaN(parseInt(end)) && end > max) {
         max = end;
       }
     });
