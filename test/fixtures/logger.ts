@@ -4,15 +4,15 @@ import { Logger } from '../../src/logger';
 const input = {
   Credentials: {
     Alias: 'default',
-    AccountID: '1694024725952210',
-    AccessKeyID: 'LTAI4FztYLSCBjpgZMtMjtrY',
-    AccessKeySecret: 'OcoGWYshV2moQUUv6PPs9pHFbYevTL',
+    AccountID: '16940247251212952210',
+    AccessKeyID: 'LTAI4FztxxxgZMtMjtrY',
+    AccessKeySecret: 'LTAI4FztxxxgZMtMjtrY',
   },
   credentials: {
     Alias: 'default',
-    AccountID: '1694024725952210',
-    AccessKeyID: 'LTAI4FztYLSCBjpgZMtMjtrY',
-    AccessKeySecret: 'OcoGWYshV2moQUUv6PPs9pHFbYevTL',
+    AccountID: '169402472sds5952210',
+    AccessKeyID: 'LTAI4FztxxxgZMtMjtrY',
+    AccessKeySecret: 'LTAI4FztxxxgZMtMjtrY',
   },
   appName: 'appName',
   Path: {
