@@ -1,11 +1,33 @@
-import { HLogger } from '../../src';
+import { HLogger, getCredential } from '../../src';
 import { Logger } from '../../src/logger';
+
+const input = {
+  Credentials: {
+    Alias: 'default',
+    AccountID: '1694024725952210',
+    AccessKeyID: 'LTAI4FztYLSCBjpgZMtMjtrY',
+    AccessKeySecret: 'OcoGWYshV2moQUUv6PPs9pHFbYevTL',
+  },
+  credentials: {
+    Alias: 'default',
+    AccountID: '1694024725952210',
+    AccessKeyID: 'LTAI4FztYLSCBjpgZMtMjtrY',
+    AccessKeySecret: 'OcoGWYshV2moQUUv6PPs9pHFbYevTL',
+  },
+  appName: 'appName',
+  Path: {
+    ConfigPath: '/Users/shihuali/workspace/jamstack-api/example/s.yaml',
+  },
+};
 
 class LoggerDemo {
   @HLogger('S-CORE') logger;
 
-  getDefaultLog() {
-    this.logger.debug('abc');
+  async getDefaultLog() {
+    await getCredential('default');
+
+    this.logger.debug(`logger1密钥信息: ${JSON.stringify(input, null, 2)}`);
+    this.logger.debug(JSON.stringify(input, null, 2), 'xxx');
     this.logger.info('abc');
     this.logger.warn('abc');
     this.logger.error('abc');
@@ -56,8 +78,8 @@ class LoggerDemo {
 }
 
 const demo = new LoggerDemo();
-// demo.log();
-demo.getDebugMsg();
+demo.log();
+// demo.getDefaultLog();
 // demo.getInfoMsg();
 
 // Logger.info('S-CORE', 'dankun');
@@ -84,7 +106,7 @@ demo.getDebugMsg();
 //
 // console.log(LogLevelEnum[2]);
 
-Logger.debug('xx', 'abc');
+Logger.debug('xx', `logger密钥信息: ${JSON.stringify(input, null, 2)}`);
 
 const l = new Logger();
-l.debug('abcxx');
+l.debug(`logger密钥信息: ${JSON.stringify(input, null, 2)}`);

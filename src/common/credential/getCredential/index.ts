@@ -5,7 +5,9 @@ import get from 'lodash.get';
 import os from 'os';
 import path from 'path';
 import getYamlContent from '../../getYamlContent';
+import { Logger } from '../../../logger';
 const Crypto = require('crypto-js');
+const logger = new Logger('S-CORE');
 
 export function decryptCredential(info: { [key: string]: any }) {
   const cloneInfo = Object.assign({}, info);
@@ -14,6 +16,22 @@ export function decryptCredential(info: { [key: string]: any }) {
     cloneInfo[key] = bytes.toString(Crypto.enc.Utf8) || cloneInfo[key];
   });
   return cloneInfo;
+}
+
+function formatValue(content: any, alias: string) {
+  const formatObj = decryptCredential(content[alias]);
+  if (Object.prototype.hasOwnProperty.call(formatObj, 'AccountID')) {
+    return {
+      Alias: alias,
+      ...formatObj,
+      AccountID:
+        typeof formatObj.AccountID === 'string' ? formatObj.AccountID : String(formatObj.AccountID),
+    };
+  }
+  return {
+    Alias: alias,
+    ...formatObj,
+  };
 }
 
 /**
@@ -48,21 +66,9 @@ async function getCredential(access?: string, ...args: any[]) {
 
   // 找到已经创建过的密钥，直接返回密钥信息
   if (accessKeys.length > 0) {
-    const formatObj = decryptCredential(accessContent[accessAlias]);
-    if (Object.prototype.hasOwnProperty.call(formatObj, 'AccountID')) {
-      return {
-        Alias: accessAlias,
-        ...formatObj,
-        AccountID:
-          typeof formatObj.AccountID === 'string'
-            ? formatObj.AccountID
-            : String(formatObj.AccountID),
-      };
-    }
-    return {
-      Alias: accessAlias,
-      ...formatObj,
-    };
+    const result = formatValue(accessContent, accessAlias);
+    logger.debug(`密钥信息: ${JSON.stringify(result, null, 2)}`);
+    return result;
   }
   const userInfo = await getYamlContent(path.join(os.homedir(), '.s/access.yaml'));
 
@@ -94,10 +100,9 @@ async function getCredential(access?: string, ...args: any[]) {
   if (selectAccess === 'create') {
     return setCredential(...args);
   }
-  return {
-    Alias: selectAccess,
-    ...userInfo[selectAccess],
-  };
+  const result = formatValue(userInfo, selectAccess);
+  logger.debug(`密钥信息: ${JSON.stringify(result, null, 2)}`);
+  return result;
 }
 
 export default getCredential;
