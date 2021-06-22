@@ -82,6 +82,16 @@ async function handleDecompressFile({ zipball_url, applicationPath, name }) {
     strip: 1,
   });
   const hasPublishYaml = await getYamlContent(path.resolve(temporaryPath, 'publish.yaml'));
+  // preInit
+  try{
+    const baseChildComponent = await require(path.join(temporaryPath, 'hook'));
+    const tempObj = {
+      "tempPath": temporaryPath,
+      "targetPath": applicationPath
+    }
+    await baseChildComponent.preInit(tempObj)
+    process.env[`${applicationPath}-post-init`] = JSON.stringify(tempObj)
+  }catch (e){}
   if (hasPublishYaml) {
     fs.copySync(`${temporaryPath}/src`, applicationPath);
     rimraf.sync(temporaryPath);
