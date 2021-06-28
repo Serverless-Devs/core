@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 import path from 'path';
 import get from 'lodash.get';
-import { execSync } from 'child_process';
+import { exec, execSync } from 'child_process';
 import { S_ROOT_HOME } from '../../libs/common';
 import { downloadRequest } from '../request';
 import { readJsonFile } from '../../libs/utils';
@@ -10,6 +10,7 @@ import rimraf from 'rimraf';
 
 const cachePath = path.join(S_ROOT_HOME, 'cache');
 const corePath = path.join(cachePath, 'core');
+const lockPath = path.resolve(cachePath, '.s-core.lock');
 
 export function removeDevsCore(componentPath) {
   const node_module_core = path.join(componentPath, '/node_modules/@serverless-devs/core');
@@ -24,22 +25,25 @@ export function removeDevsCore(componentPath) {
   fs.writeFileSync(packagePath, JSON.stringify(packageInfo, null, 2));
 }
 
-function getCoreInfo() {
-  let version: any = execSync('npm view @serverless-devs/core version');
-  version = version.toString().replace(/\n/g, '');
-
-  return {
-    url: `https://registry.npmjs.org/@serverless-devs/core/-/core-${version}.tgz`,
-    version,
-  };
+function getCoreVersion() {
+  if(!fs.existsSync(lockPath)) {
+    let version: any = execSync('npm view @serverless-devs/core version');
+    return version.toString().replace(/\n/g, '');
+  }
+  exec('npm view @serverless-devs/core version', (error, output) => {
+    const curVersion = output.toString().replace(/\n/g, '');
+    fs.writeFileSync(lockPath, JSON.stringify({ version: curVersion }, null, 2));
+  });
+  const version = readJsonFile(lockPath);
+  return get(version,'version');
 }
 
 export async function downLoadDesCore(componentPath) {
-  const { url, version } = getCoreInfo();
-  const lockPath = path.resolve(corePath, '.s.lock');
+  const version = getCoreVersion();
+  const url = `https://registry.npmjs.org/@serverless-devs/core/-/core-${version}.tgz`;
   let needLoad: boolean;
   if (fs.existsSync(lockPath)) {
-    needLoad = version !== readJsonFile(lockPath).version;
+    needLoad = version !== readJsonFile(path.resolve(corePath, 'package.json')).version;
     needLoad && rimraf.sync(corePath);
   } else {
     needLoad = true;
