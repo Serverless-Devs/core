@@ -1,6 +1,6 @@
 {
   "name": "@serverless-devs/core",
-  "version": "0.0.113",
+  "version": "0.0.117",
   "description": "Serverless Devs Tool Core Component",
   "keywords": [
     "Serverless",
@@ -26,7 +26,7 @@
     "debug": "ts-node test/fixtures/spinner.ts",
     "test": "npx jest",
     "build": "npx tsc",
-    "postbuild": "ncc build lib/index.js -o dist",
+    "postbuild": "ncc build lib/index.js -o dist && cp ./src/common/args.js ./dist && cp -r ./src/libs/i18n/locales ./dist",
     "test:cov": "jest --coverage",
     "lint": "npm run typecheck && f2elint scan -i src",
     "fix": "f2elint fix",
