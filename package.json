@@ -25,14 +25,15 @@
     "dev": "npx tsc -w -p tsconfig.json",
     "debug": "ts-node test/fixtures/spinner.ts",
     "test": "npx jest",
-    "build": "npx tsc",
-    "postbuild": "ncc build lib/index.js -o dist && cp ./src/common/args.js ./dist && cp -r ./src/libs/i18n/locales ./dist",
+    "build": "npx tsc && cp ./src/common/args.js ./lib/common",
+    "postbuild": "ncc build lib/index.js -m -o dist && cp ./src/common/args.js ./dist && cp -r ./src/libs/i18n/locales ./dist",
     "test:cov": "jest --coverage",
     "lint": "npm run typecheck && f2elint scan -i src",
     "fix": "f2elint fix",
     "pub": "npm run build && npm publish",
     "typecheck": "npx tsc -p tsconfig.json --noEmit"
   },
+  "autoInstall": false,
   "main": "./dist/index.js",
   "dependencies": {
     "@serverless-devs/s-progress-bar": "^0.0.8",

@@ -12,6 +12,7 @@ download
 *ui-spec.ts
 *slow-spec.ts
 lib
+dist
 .vscode
 .package-lock.json
 .s.lock
