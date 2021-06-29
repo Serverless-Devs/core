@@ -43,8 +43,13 @@ export async function downLoadDesCore(componentPath) {
   const url = `https://registry.npmjs.org/@serverless-devs/core/-/core-${version}.tgz`;
   let needLoad: boolean;
   if (fs.existsSync(lockPath)) {
-    needLoad = version !== readJsonFile(path.resolve(corePath, 'package.json')).version;
-    needLoad && rimraf.sync(corePath);
+    const versionJson = readJsonFile(path.resolve(corePath, 'package.json'));
+    if(!versionJson) {
+      needLoad = true;
+    } else {
+      needLoad = version !== versionJson.version;
+      needLoad && rimraf.sync(corePath);
+    }
   } else {
     needLoad = true;
   }
