@@ -26,7 +26,7 @@ export function removeDevsCore(componentPath) {
 }
 
 function getCoreVersion() {
-  if(!fs.existsSync(lockPath)) {
+  if (!fs.existsSync(lockPath)) {
     let version: any = execSync('npm view @serverless-devs/core version');
     return version.toString().replace(/\n/g, '');
   }
@@ -35,7 +35,7 @@ function getCoreVersion() {
     fs.writeFileSync(lockPath, JSON.stringify({ version: curVersion }, null, 2));
   });
   const version = readJsonFile(lockPath);
-  return get(version,'version');
+  return get(version, 'version');
 }
 
 export async function downLoadDesCore(componentPath) {
@@ -44,12 +44,8 @@ export async function downLoadDesCore(componentPath) {
   let needLoad: boolean;
   if (fs.existsSync(lockPath)) {
     const versionJson = readJsonFile(path.resolve(corePath, 'package.json'));
-    if(!versionJson) {
-      needLoad = true;
-    } else {
-      needLoad = version !== versionJson.version;
-      needLoad && rimraf.sync(corePath);
-    }
+    needLoad = versionJson ? version !== versionJson.version : true;
+    needLoad && rimraf.sync(corePath);
   } else {
     needLoad = true;
   }
