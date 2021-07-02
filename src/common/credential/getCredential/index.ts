@@ -12,8 +12,12 @@ const logger = new Logger('S-CORE');
 export function decryptCredential(info: { [key: string]: any }) {
   const cloneInfo = Object.assign({}, info);
   Object.keys(cloneInfo).forEach((key) => {
-    const bytes = Crypto.AES.decrypt(cloneInfo[key], 'SecretKey123');
-    cloneInfo[key] = bytes.toString(Crypto.enc.Utf8) || cloneInfo[key];
+    try {
+      const bytes = Crypto.AES.decrypt(cloneInfo[key], 'SecretKey123');
+      cloneInfo[key] = bytes.toString(Crypto.enc.Utf8) || cloneInfo[key];
+    } catch (error) {
+      // ignore error
+    }
   });
   return cloneInfo;
 }
