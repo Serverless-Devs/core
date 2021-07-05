@@ -425,6 +425,9 @@ console.log('c', c);
 
 #### 用于获取文件内容， 文件存放于 ~/.s 目录下面。
 
+- 第一个参数：文件名称
+- 第二个参数：文件存放路径
+
 ```typescript
 const { getState } = require('@serverless-devs/core');
 
@@ -440,11 +443,15 @@ async function get() {
 
 #### 用于设置文件内容， 文件存放于 ~/.s 目录下面。
 
+- 第一个参数：文件名称
+- 第二个参数：文件内容
+- 第三个参数：文件存放路径
+
 ```typescript
 const { setState } = require('@serverless-devs/core');
 
 async function set() {
-  const c = await setState('state', { name: '名称', age: 18 });
+  const c = await setState('state', { name: '名称', age: 18 }, 'state_cache');
   console.log('c', c);
 }
 ```

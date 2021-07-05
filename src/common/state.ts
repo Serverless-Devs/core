@@ -3,19 +3,18 @@ import { readJsonFile, writeJsonFile } from '../libs/utils';
 import path from 'path';
 import fs from 'fs-extra';
 
-export async function getState(id: any) {
-  const stateFilePath = path.join(S_CURRENT_HOME, `${id}.json`);
+export async function getState(id: any, dirPath?: string) {
+  const temp = dirPath ? path.resolve(S_CURRENT_HOME, dirPath) : S_CURRENT_HOME;
+
+  const stateFilePath = path.join(temp, `${id}.json`);
   return readJsonFile(stateFilePath);
 }
 
-export async function setState(id: any, state: any) {
-  if (!fs.existsSync(S_CURRENT_HOME)) {
-    fs.mkdirSync(S_CURRENT_HOME);
-  }
-  const stateFilePath = path.join(S_CURRENT_HOME, `${id}.json`);
-  if (!fs.existsSync(stateFilePath)) {
-    fs.openSync(stateFilePath, 'w');
-  }
+export async function setState(id: any, state: any, dirPath?: string) {
+  fs.ensureDirSync(S_CURRENT_HOME);
+  const temp = dirPath ? path.resolve(S_CURRENT_HOME, dirPath) : S_CURRENT_HOME;
+  const stateFilePath = path.join(temp, `${id}.json`);
+  fs.ensureFileSync(stateFilePath);
   writeJsonFile(stateFilePath, state);
   return state;
 }
