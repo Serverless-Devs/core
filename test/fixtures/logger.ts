@@ -1,4 +1,4 @@
-import { HLogger, getCredential } from '../../src';
+import { HLogger } from '../../src';
 import { Logger } from '../../src/logger';
 
 const input = {
@@ -24,9 +24,7 @@ class LoggerDemo {
   @HLogger('S-CORE') logger;
 
   async getDefaultLog() {
-    await getCredential('default');
-
-    this.logger.debug(`logger1密钥信息: ${JSON.stringify(input, null, 2)}`);
+    console.log(process.argv);
     this.logger.debug(JSON.stringify(input, null, 2), 'xxx');
     this.logger.info('abc');
     this.logger.warn('abc');
@@ -78,8 +76,8 @@ class LoggerDemo {
 }
 
 const demo = new LoggerDemo();
-demo.log();
-// demo.getDefaultLog();
+// demo.log();
+demo.getDefaultLog();
 // demo.getInfoMsg();
 
 // Logger.info('S-CORE', 'dankun');

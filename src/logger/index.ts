@@ -2,6 +2,7 @@ import { Logger as MyLogger, $log } from '@tsed/logger';
 import chalk from 'chalk';
 import { S_ROOT_HOME } from '../libs/common';
 import minimist from 'minimist';
+import get from 'lodash.get';
 
 type LogColor =
   | 'black'
@@ -15,6 +16,15 @@ type LogColor =
   | 'whiteBright'
   | 'gray';
 
+function getDebugFromEnv() {
+  const temp_params = get(process, 'env.temp_params');
+  if (temp_params) {
+    const temp = temp_params.split(' ');
+    const debugList = temp.filter((item) => item === '--debug');
+    return debugList.length > 0;
+  }
+}
+
 export interface ILogger {
   // 打印
   log: (message: any, color?: LogColor) => any;
@@ -25,7 +35,7 @@ export interface ILogger {
   error: (...data: any[]) => any;
 }
 const args = minimist(process.argv.slice(2));
-const enableDebug = args.debug || process.env?.temp_params?.includes('--debug');
+const enableDebug = args.debug || getDebugFromEnv();
 
 function getSecretValue(val: string) {
   const [key, value] = val.split(': ');
