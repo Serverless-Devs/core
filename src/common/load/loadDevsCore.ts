@@ -57,5 +57,15 @@ export async function downLoadDesCore(componentPath) {
     await installDependency({ cwd: corePath });
     fs.writeFileSync(lockPath, JSON.stringify({ version }, null, 2));
   }
-  fs.ensureSymlinkSync(corePath, `${componentPath}/node_modules/@serverless-devs/core`, 'dir');
+
+  const componentCorePath = path.join(componentPath, 'node_modules', '@serverless-devs', 'core');
+  try {
+    fs.ensureSymlinkSync(corePath, componentCorePath, 'dir');
+  } catch (error) {
+    fs.copySync(path.join(corePath, 'dist'), path.join(componentCorePath, 'dist'));
+    fs.copyFileSync(
+      path.join(corePath, 'package.json'),
+      path.join(componentCorePath, 'package.json'),
+    );
+  }
 }

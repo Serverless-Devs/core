@@ -36,7 +36,7 @@ async function test() {
   // const fc = await loadComponent('xsahxl/xsahxl.github.io@0.0.1');
   // const fc = await loadComponent('devsapp/springboot');
   // process.env.skipPrompt = 'true';
-  const fc = await loadApplication('devsapp/start-malagu');
+  const fc = await loadComponent('devsapp/website');
   console.log(fc);
 }
 
