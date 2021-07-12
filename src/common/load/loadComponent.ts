@@ -23,6 +23,20 @@ async function tryfun(f: Promise<any>) {
   }
 }
 
+async function preInit({ componentPath }) {
+  try {
+    const baseChildComponent = await require(path.join(componentPath, 'hook'));
+    await baseChildComponent.preInit({ componentPath });
+  } catch (e) {}
+}
+
+async function postInit({ componentPath }) {
+  try {
+    const baseChildComponent = await require(path.join(componentPath, 'hook'));
+    await baseChildComponent.postInit({ componentPath });
+  } catch (e) {}
+}
+
 async function loadServerless(source: string, params?: any) {
   const [provider, componentName] = source.includes('/') ? source.split('/') : ['.', source];
   if (!componentName) return;
@@ -36,7 +50,6 @@ async function loadServerless(source: string, params?: any) {
     if (!findObj) return;
     zipball_url = findObj.zipball_url;
     componentPath = path.resolve(S_ROOT_HOME_COMPONENT, 'devsapp.cn', provider, componentName);
-
   } else {
     const result = await tryfun(getServerlessReleasesLatest(provider, name));
     if (!get(result, 'zipball_url')) return;
@@ -54,9 +67,11 @@ async function loadServerless(source: string, params?: any) {
       extract: true,
       strip: 1,
     });
+    await preInit({ componentPath });
     removeDevsCore(componentPath);
     await installDependency({ cwd: componentPath, production: true });
     fs.writeFileSync(lockPath, zipball_url);
+    await postInit({ componentPath });
   } else {
     removeDevsCore(componentPath);
   }
@@ -95,9 +110,11 @@ async function loadGithub(source: string, params?: any) {
       extract: true,
       strip: 1,
     });
+    await preInit({ componentPath });
     removeDevsCore(componentPath);
     await installDependency({ cwd: componentPath, production: true });
     fs.writeFileSync(lockPath, zipball_url);
+    await postInit({ componentPath });
   } else {
     removeDevsCore(componentPath);
   }
@@ -135,9 +152,10 @@ async function loadRemoteComponent(source: string, registry?: Registry, params?:
   if (isComponent(result)) return result;
 
   if (!result) {
-    throw new Error(`The ${source} component was not found. Please make sure the component name or source is correct`);
+    throw new Error(
+      `The ${source} component was not found. Please make sure the component name or source is correct`,
+    );
   }
-
 }
 
 async function loadComponent(source: string, registry?: Registry, params?: any) {
