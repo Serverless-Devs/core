@@ -6,6 +6,8 @@ import os from 'os';
 import path from 'path';
 import getYamlContent from '../../getYamlContent';
 import { Logger } from '../../../logger';
+import chalk from 'chalk';
+
 const Crypto = require('crypto-js');
 const logger = new Logger('S-CORE');
 
@@ -105,6 +107,14 @@ async function getCredential(access?: string, ...args: any[]) {
     return setCredential(...args);
   }
   const result = formatValue(userInfo, selectAccess);
+  logger.warn(
+    `\n\n${
+      os.platform() == 'win32' ? '' : '🤡'
+    }   If you don't want to select access every time, configure it in yaml：${chalk.underline.cyan(
+      'https://github.com/Serverless-Devs/Serverless-Devs/discussions/149',
+    )}\n\n`,
+  );
+
   logger.debug(`密钥信息: ${JSON.stringify(result, null, 2)}`);
   return result;
 }
