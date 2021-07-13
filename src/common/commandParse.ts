@@ -1,7 +1,5 @@
 import { IInputs, IV1Inputs } from '../interface';
 import minimist from 'minimist';
-import path from 'path'
-import child_process from 'child_process'
 
 function commandParse(
   inputs: IInputs | IV1Inputs,
