@@ -9,8 +9,7 @@ async function modifyProps(component: string, options: object, sPath: string) {
   if (!component || !sPath) {
     throw new Error('modifyProps方法缺少必填字段');
   }
-  const index = sPath.lastIndexOf('/');
-  const templte = sPath.slice(index + 1);
+  const templte = path.basename(sPath);
   const [name, end] = templte.split('.');
   const originPath = path.resolve(S_CURRENT_HOME, `${name}.origin.${end}`);
   if (!fs.existsSync(originPath)) {
