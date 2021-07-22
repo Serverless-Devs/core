@@ -81,3 +81,8 @@ export const getServerlessReleasesLatest = async (provider: string, name: string
       : `${RegistryEnum.serverless}/${provider}/${name}/releases/latest`;
   return await request(url);
 };
+
+export const getCoreVersionFromGit = async () => {
+  const res = await request('https://api.github.com/repos/Serverless-Devs/core/releases/latest');
+  return res?.tag_name;
+};

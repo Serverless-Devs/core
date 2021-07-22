@@ -5,6 +5,7 @@ import { exec, execSync } from 'child_process';
 import { S_ROOT_HOME } from '../../libs/common';
 import { downloadRequest } from '../request';
 import { readJsonFile } from '../../libs/utils';
+import { getCoreVersionFromGit } from './service';
 import installDependency from '../installDependency';
 import rimraf from 'rimraf';
 
@@ -39,7 +40,7 @@ function getCoreVersion() {
 }
 
 export async function downLoadDesCore(componentPath) {
-  const version = getCoreVersion();
+  const version = getCoreVersion() || (await getCoreVersionFromGit()) || '0.0.129';
   const url = `https://registry.npmjs.org/@serverless-devs/core/-/core-${version}.tgz`;
   let needLoad: boolean;
   if (fs.existsSync(lockPath)) {
