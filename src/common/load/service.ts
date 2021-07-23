@@ -83,6 +83,8 @@ export const getServerlessReleasesLatest = async (provider: string, name: string
 };
 
 export const getCoreVersionFromGit = async () => {
-  const res = await request('https://api.github.com/repos/Serverless-Devs/core/releases/latest');
-  return res?.tag_name;
+  try {
+    const res = await request('https://api.github.com/repos/Serverless-Devs/core/releases/latest');
+    return res?.tag_name;
+  } catch (error) {}
 };

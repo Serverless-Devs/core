@@ -26,10 +26,15 @@ export function removeDevsCore(componentPath) {
   fs.writeFileSync(packagePath, JSON.stringify(packageInfo, null, 2));
 }
 
-function getCoreVersion() {
+async function getCoreVersion() {
   if (!fs.existsSync(lockPath)) {
-    let version: any = execSync('npm view @serverless-devs/core version');
-    return version.toString().replace(/\n/g, '');
+    try {
+      let version: any = execSync('npm view @serverless-devs/core version');
+      return version.toString().replace(/\n/g, '');
+    } catch (error) {
+      const version = await getCoreVersionFromGit();
+      return version || '0.0.130';
+    }
   }
   exec('npm view @serverless-devs/core version', (error, output) => {
     const curVersion = output.toString().replace(/\n/g, '');
@@ -40,7 +45,7 @@ function getCoreVersion() {
 }
 
 export async function downLoadDesCore(componentPath) {
-  const version = getCoreVersion() || (await getCoreVersionFromGit()) || '0.0.129';
+  const version = await getCoreVersion();
   const url = `https://registry.npmjs.org/@serverless-devs/core/-/core-${version}.tgz`;
   let needLoad: boolean;
   if (fs.existsSync(lockPath)) {
