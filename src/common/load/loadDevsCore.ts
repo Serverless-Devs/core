@@ -33,7 +33,7 @@ async function getCoreVersion() {
       return version.toString().replace(/\n/g, '');
     } catch (error) {
       const version = await getCoreVersionFromGit();
-      return version || '0.0.130';
+      return version || '0.0.131';
     }
   }
   exec('npm view @serverless-devs/core version', (error, output) => {

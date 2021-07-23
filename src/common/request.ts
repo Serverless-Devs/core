@@ -152,7 +152,10 @@ export async function downloadRequest(url: string, dest: string, options?: IDown
 
     if (extract) {
       spin.start('download success');
-      const files = fs.readdirSync(dest);
+      let files = fs.readdirSync(dest);
+      if (files.length > 1) {
+        files = files.filter((item) => item.indexOf(path.basename(dest)) > -1);
+      }
       let filename = files[0];
       if (postfix && !filename.slice(filename.lastIndexOf('.')).startsWith('.')) {
         fs.rename(path.resolve(dest, filename), `${path.resolve(dest, filename)}.${postfix}`);
