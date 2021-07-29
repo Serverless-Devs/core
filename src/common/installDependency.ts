@@ -51,6 +51,8 @@ async function installDependency(options?: IOptions) {
   const cwd = get(options, 'cwd', process.cwd());
   const packageInfo: any = readJsonFile(path.resolve(cwd, 'package.json'));
   if (!packageInfo || !get(packageInfo, 'autoInstall', true)) return;
+  const nodeModulePath = path.resolve(cwd, 'node_modules');
+  if (fs.existsSync(nodeModulePath)) return;
 
   await npmInstall({
     baseDir: cwd,
