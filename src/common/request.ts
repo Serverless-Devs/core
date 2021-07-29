@@ -140,6 +140,7 @@ export async function downloadRequest(url: string, dest: string, options?: IDown
   }
   spin.text = 'start downloading';
   logger.debug(`${spin.text} ${url}`);
+  fs.emptyDirSync(dest);
   try {
     await download(url, dest, { ...rest, rejectUnauthorized: false }).on(
       'downloadProgress',
