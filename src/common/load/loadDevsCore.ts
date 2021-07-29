@@ -56,10 +56,8 @@ export async function downLoadDesCore(componentPath) {
     needLoad = true;
   }
   if (needLoad) {
-    if (!fs.existsSync(cachePath)) {
-      fs.mkdirSync(cachePath);
-    }
-    await downloadRequest(url, corePath, { extract: true, strip: 1 });
+    fs.ensureDirSync(cachePath);
+    await downloadRequest(url, corePath, { extract: true, strip: 1, emptyDir: true });
     await installDependency({ cwd: corePath });
     fs.writeFileSync(lockPath, JSON.stringify({ version }, null, 2));
   }

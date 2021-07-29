@@ -66,6 +66,7 @@ async function loadServerless(source: string, params?: any) {
     await downloadRequest(zipball_url, componentPath, {
       extract: true,
       strip: 1,
+      emptyDir: true,
     });
     await preInit({ componentPath });
     removeDevsCore(componentPath);
@@ -109,6 +110,7 @@ async function loadGithub(source: string, params?: any) {
     await downloadRequest(zipball_url, componentPath, {
       extract: true,
       strip: 1,
+      emptyDir: true,
     });
     await preInit({ componentPath });
     removeDevsCore(componentPath);

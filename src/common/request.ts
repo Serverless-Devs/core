@@ -63,6 +63,7 @@ export interface IDownloadOptions {
   strip?: number;
   body?: string | Buffer;
   postfix?: string;
+  emptyDir?: boolean;
 }
 
 export async function request(url: string, options?: RequestOptions): Promise<any> {
@@ -120,7 +121,9 @@ export async function request(url: string, options?: RequestOptions): Promise<an
 }
 
 export async function downloadRequest(url: string, dest: string, options?: IDownloadOptions) {
-  const { extract, postfix, strip, ...rest } = options || {};
+  const { extract, postfix, strip, emptyDir, ...rest } = options || {};
+  logger.debug(`download url: ${url}`);
+
   const spin = spinner('prepare downloading');
   let len: number;
   if (url.startsWith(RegistryEnum.serverless) || url.startsWith(RegistryEnum.serverlessOld)) {
@@ -139,8 +142,7 @@ export async function downloadRequest(url: string, dest: string, options?: IDown
     bar = new ProgressService(ProgressType.Loading, { total: 100 }, format);
   }
   spin.text = 'start downloading';
-  logger.debug(`${spin.text} ${url}`);
-  fs.emptyDirSync(dest);
+  emptyDir && fs.emptyDirSync(dest);
   try {
     await download(url, dest, { ...rest, rejectUnauthorized: false }).on(
       'downloadProgress',
@@ -154,9 +156,6 @@ export async function downloadRequest(url: string, dest: string, options?: IDown
     if (extract) {
       spin.start('download success');
       let files = fs.readdirSync(dest);
-      if (files.length > 1) {
-        files = files.filter((item) => item.indexOf(path.basename(dest)) > -1);
-      }
       let filename = files[0];
       if (postfix && !filename.slice(filename.lastIndexOf('.')).startsWith('.')) {
         fs.rename(path.resolve(dest, filename), `${path.resolve(dest, filename)}.${postfix}`);
