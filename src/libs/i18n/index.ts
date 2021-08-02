@@ -7,6 +7,7 @@ const i18n = new I18n();
 i18n.configure({
   locales: ['en', 'zh'],
   directory: path.join(__dirname, '/locales'),
+  directoryPermissions: '777'
 });
 
 const locale = config.getConfig('locale');
