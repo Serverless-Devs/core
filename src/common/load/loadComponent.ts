@@ -148,10 +148,18 @@ async function loadRemoteComponent(source: string, registry?: Registry, params?:
     result = await loadType(source, config.getConfig('registry'), params);
     if (isComponent(result)) return result;
   }
-  result = await loadServerless(source, params);
-  if (isComponent(result)) return result;
-  result = await loadGithub(source, params);
-  if (isComponent(result)) return result;
+  if (
+    config.getConfig('registry') !== RegistryEnum.serverless &&
+    config.getConfig('registry') !== RegistryEnum.serverlessOld
+  ) {
+    result = await loadServerless(source, params);
+    if (isComponent(result)) return result;
+  }
+
+  if (config.getConfig('registry') !== RegistryEnum.github) {
+    result = await loadGithub(source, params);
+    if (isComponent(result)) return result;
+  }
 
   if (!result) {
     throw new Error(

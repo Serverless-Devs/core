@@ -36,7 +36,7 @@ async function test() {
   // const fc = await loadComponent('xsahxl/xsahxl.github.io@0.0.1');
   // const fc = await loadComponent('devsapp/springboot');
   // process.env.skipPrompt = 'true';
-  const fc = await loadComponent('devsapp/fc-base-sdk');
+  const fc = await loadComponent('devsapp/fc-info@1.x');
   console.log(fc);
 }
 
