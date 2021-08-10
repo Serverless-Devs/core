@@ -89,7 +89,6 @@ export async function request(url: string, options?: RequestOptions): Promise<an
       method,
       [isGet ? 'query' : 'body']: isGet ? params : bodyFromOptions,
       json,
-      timeout: 1500,
       ...rest,
       rejectUnauthorized: false,
     });
