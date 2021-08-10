@@ -162,7 +162,7 @@ export async function downloadRequest(url: string, dest: string, options?: IDown
       }
       spin.text = `${filename} file unzipping...`;
       await decompress(`${dest}/${filename}`, dest, { strip });
-      // await fs.unlink(`${dest}/${filename}`);
+      await fs.unlink(`${dest}/${filename}`);
       spin.succeed(`${filename} file decompression completed`);
     } else {
       spin.start(`download success: ${url}`);
