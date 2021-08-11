@@ -156,18 +156,24 @@ export async function downloadRequest(url: string, dest: string, options?: IDown
 
     if (extract) {
       spin.start(`download success: ${url}`);
-      let files = fs.readdirSync(dest);
-      let filename = files[0];
-      if (postfix && !filename.slice(filename.lastIndexOf('.')).startsWith('.')) {
-        fs.rename(path.resolve(dest, filename), `${path.resolve(dest, filename)}.${postfix}`);
-        filename += `.${postfix}`;
+      let filename: string;
+      if (rest.filename) {
+        filename = rest.filename;
+      } else {
+        let files = fs.readdirSync(dest);
+        let filename = files[0];
+        if (postfix && !filename.slice(filename.lastIndexOf('.')).startsWith('.')) {
+          fs.rename(path.resolve(dest, filename), `${path.resolve(dest, filename)}.${postfix}`);
+          filename += `.${postfix}`;
+        }
       }
+
       spin.text = `${filename} file unzipping...`;
       await decompress(`${dest}/${filename}`, dest, { strip });
       await fs.unlink(`${dest}/${filename}`);
       spin.succeed(`${filename} file decompression completed`);
     } else {
-      spin.start(`download success: ${url}`);
+      spin.succeed(`download success: ${url}`);
     }
   } catch (error) {
     spin.stop();
