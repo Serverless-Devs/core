@@ -5,7 +5,7 @@ import { spawn } from 'child_process';
 import { S_ROOT_HOME } from '../../libs/common';
 import { downloadRequest } from '../request';
 import { readJsonFile } from '../../libs/utils';
-import { DEFAULT_CORE_VERSION } from '../cp/constant';
+import { DEFAULT_CORE_VERSION } from './cp/constant';
 import rimraf from 'rimraf';
 
 const cachePath = path.join(S_ROOT_HOME, 'cache');
@@ -26,7 +26,7 @@ async function existCore() {
   if (lockFileInfo.pending === 1) return;
   fs.writeFileSync(lockPath, JSON.stringify({ ...lockFileInfo, pending: 1 }, null, 2));
 
-  const subprocess = spawn(process.execPath, [path.resolve(__dirname, '../cp/loadcore.js')], {
+  const subprocess = spawn(process.execPath, [path.resolve(__dirname, './cp/loadcore.js')], {
     detached: true,
     stdio: 'ignore',
   });

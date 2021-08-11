@@ -26,6 +26,7 @@ async function init() {
     version = DEFAULT_CORE_VERSION;
   }
   const lockFileInfo = readJsonFile(lockPath);
+
   if (version === lockFileInfo.version) {
     return fs.writeFileSync(lockPath, JSON.stringify({ version, pending: 0 }, null, 2));
   }
