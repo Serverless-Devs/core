@@ -13,7 +13,7 @@ import * as config from '../../libs/handler-set-config';
 import { downloadRequest } from '../request';
 import installDependency from '../installDependency';
 import get from 'lodash.get';
-import { removeDevsCore, downLoadDesCore } from './loadDevsCore';
+import { removeDevsCore, downLoadDesCore } from '../../loadDevsCore';
 
 async function tryfun(f: Promise<any>) {
   try {

@@ -2,9 +2,9 @@ import fs from 'fs-extra';
 import path from 'path';
 import get from 'lodash.get';
 import { spawn } from 'child_process';
-import { S_ROOT_HOME } from '../../libs/common';
-import { downloadRequest } from '../request';
-import { readJsonFile } from '../../libs/utils';
+import { S_ROOT_HOME } from './libs/common';
+import { downloadRequest } from './common/request';
+import { readJsonFile } from './libs/utils';
 import { DEFAULT_CORE_VERSION } from './cp/constant';
 import rimraf from 'rimraf';
 

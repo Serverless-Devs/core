@@ -2,7 +2,7 @@ const { execSync } = require('child_process');
 const fs = require('fs-extra');
 const os = require('os');
 const path = require('path');
-const { downloadRequest } = require('../index');
+const { downloadRequest } = require('./index');
 const { DEFAULT_CORE_VERSION } = require('./constant');
 
 const S_ROOT_HOME = path.join(os.homedir(), '.s');
