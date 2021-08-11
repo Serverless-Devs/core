@@ -1,11 +1,11 @@
 import fs from 'fs-extra';
 import path from 'path';
 import get from 'lodash.get';
-import { execSync, spawn } from 'child_process';
+import { spawn } from 'child_process';
 import { S_ROOT_HOME } from '../../libs/common';
 import { downloadRequest } from '../request';
 import { readJsonFile } from '../../libs/utils';
-import { getCoreVersionFromGit } from './service';
+import { DEFAULT_CORE_VERSION } from '../cp/constant';
 import rimraf from 'rimraf';
 
 const cachePath = path.join(S_ROOT_HOME, 'cache');
@@ -26,25 +26,16 @@ async function existCore() {
   if (lockFileInfo.pending === 1) return;
   fs.writeFileSync(lockPath, JSON.stringify({ ...lockFileInfo, pending: 1 }, null, 2));
 
-  const subprocess = spawn(process.execPath, [path.resolve(__dirname, './loadcore.js')], {
+  const subprocess = spawn(process.execPath, [path.resolve(__dirname, '../cp/loadcore.js')], {
     detached: true,
     stdio: 'ignore',
   });
   subprocess.unref();
 }
 async function nonExistCore(componentPath: string) {
-  let version;
-  try {
-    version = execSync('npm view @serverless-devs/core version');
-    version = version.toString().replace(/\n/g, '');
-  } catch (error) {
-    const v = await getCoreVersionFromGit();
-    version = v || '0.0.131';
-  }
-
   fs.ensureDirSync(cachePath);
-  const url = `https://registry.npmjs.org/@serverless-devs/core/-/core-${version}.tgz`;
-  await downloadRequest(url, corePath, { extract: true, strip: 1, emptyDir: true });
+  const url = `https://registry.npmjs.org/@serverless-devs/core/-/core-${DEFAULT_CORE_VERSION}.tgz`;
+  await downloadRequest(url, corePath, { extract: true, strip: 1 });
   const componentCorePath = path.join(componentPath, 'node_modules', '@serverless-devs', 'core');
   rimraf.sync(componentCorePath);
   try {
@@ -56,7 +47,7 @@ async function nonExistCore(componentPath: string) {
       path.join(componentCorePath, 'package.json'),
     );
   }
-  fs.writeFileSync(lockPath, JSON.stringify({ version }, null, 2));
+  fs.writeFileSync(lockPath, JSON.stringify({ version: DEFAULT_CORE_VERSION }, null, 2));
 }
 export async function downLoadDesCore(componentPath: string) {
   if (fs.existsSync(lockPath)) {
