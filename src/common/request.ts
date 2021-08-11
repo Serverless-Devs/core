@@ -136,7 +136,10 @@ export async function downloadRequest(url: string, dest: string, options?: IDown
   if (len) {
     bar = new ProgressService(ProgressType.Bar, { total: len });
   } else {
-    const format = `${green(':loading')} ${green('downloading')} ${cyan(url)} `;
+    const formatUrl = url
+      .replace('https://registry.devsapp.cn/simple/', '')
+      .replace('https://api.github.com/repos/', '');
+    const format = `${green(':loading')} ${green('downloading')} ${cyan(formatUrl)} `;
     bar = new ProgressService(ProgressType.Loading, { total: 100 }, format);
   }
   spin.text = `start downloading: ${url}`;
