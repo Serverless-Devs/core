@@ -5,7 +5,6 @@ import { exec, execSync } from 'child_process';
 import { S_ROOT_HOME } from '../../libs/common';
 import { downloadRequest } from '../request';
 import { readJsonFile } from '../../libs/utils';
-import { getCoreVersionFromGit } from './service';
 import installDependency from '../installDependency';
 import rimraf from 'rimraf';
 
@@ -32,8 +31,7 @@ async function getCoreVersion() {
       let version: any = execSync('npm view @serverless-devs/core version');
       return version.toString().replace(/\n/g, '');
     } catch (error) {
-      const version = await getCoreVersionFromGit();
-      return version || '0.0.131';
+      return '0.0.145';
     }
   }
   exec('npm view @serverless-devs/core version', (error, output) => {
@@ -41,7 +39,7 @@ async function getCoreVersion() {
     fs.writeFileSync(lockPath, JSON.stringify({ version: curVersion }, null, 2));
   });
   const version = readJsonFile(lockPath);
-  return get(version, 'version');
+  return get(version, 'version', '0.0.145');
 }
 
 export async function downLoadDesCore(componentPath) {
