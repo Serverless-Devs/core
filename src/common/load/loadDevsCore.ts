@@ -31,7 +31,7 @@ async function getCoreVersion() {
       let version: any = execSync('npm view @serverless-devs/core version');
       return version.toString().replace(/\n/g, '');
     } catch (error) {
-      return '0.0.145';
+      return '0.0.146';
     }
   }
   exec('npm view @serverless-devs/core version', (error, output) => {
@@ -39,7 +39,7 @@ async function getCoreVersion() {
     fs.writeFileSync(lockPath, JSON.stringify({ version: curVersion }, null, 2));
   });
   const version = readJsonFile(lockPath);
-  return get(version, 'version', '0.0.145');
+  return get(version, 'version', '0.0.146');
 }
 
 export async function downLoadDesCore(componentPath) {
