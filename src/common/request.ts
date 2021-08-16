@@ -119,10 +119,18 @@ export async function request(url: string, options?: RequestOptions): Promise<an
   return body.Response || body;
 }
 
+function getDebugUrl(url: string) {
+  return url
+    .replace('https://registry.npmjs.org/', '')
+    .replace('https://registry.devsapp.cn/simple/', '')
+    .replace('https://api.github.com/repos/', '');
+}
+
 export async function downloadRequest(url: string, dest: string, options?: IDownloadOptions) {
   const { extract, postfix, strip, emptyDir, ...rest } = options || {};
+  const debugUrl = getDebugUrl(url);
+  const spin = spinner(`prepare downloading: ${debugUrl}`);
 
-  const spin = spinner(`prepare downloading: ${url}`);
   let len: number;
   if (url.startsWith(RegistryEnum.serverless) || url.startsWith(RegistryEnum.serverlessOld)) {
     try {
@@ -136,13 +144,10 @@ export async function downloadRequest(url: string, dest: string, options?: IDown
   if (len) {
     bar = new ProgressService(ProgressType.Bar, { total: len });
   } else {
-    const formatUrl = url
-      .replace('https://registry.devsapp.cn/simple/', '')
-      .replace('https://api.github.com/repos/', '');
-    const format = `${green(':loading')} ${green('downloading')} ${cyan(formatUrl)} `;
+    const format = `${green(':loading')} ${green('downloading')} ${cyan(debugUrl)} `;
     bar = new ProgressService(ProgressType.Loading, { total: 100 }, format);
   }
-  spin.text = `start downloading: ${url}`;
+  spin.text = `start downloading: ${debugUrl}`;
   emptyDir && fs.emptyDirSync(dest);
   try {
     await download(url, dest, { ...rest, rejectUnauthorized: false }).on(
