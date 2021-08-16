@@ -56,24 +56,28 @@ function secretCredentials(...data: any[]) {
     let str = iterator;
     if (iterator.includes('AccountID')) {
       const reg = /"AccountID(.*?)\n/g;
-      let arr = iterator.match(reg);
-      for (const item of arr) {
-        str = str.replace(item, getSecretValue(item));
-      }
+      const arr = iterator.match(reg);
+      if (!arr) return;
+      arr &&
+        arr.forEach((item) => {
+          str = str.replace(item, getSecretValue(item));
+        });
     }
     if (iterator.includes('AccessKeyID')) {
       const reg = /"AccessKeyID(.*?)\n/g;
-      let arr = iterator.match(reg);
-      for (const item of arr) {
-        str = str.replace(item, getSecretValue(item));
-      }
+      const arr = iterator.match(reg);
+      arr &&
+        arr.forEach((item) => {
+          str = str.replace(item, getSecretValue(item));
+        });
     }
     if (iterator.includes('AccessKeySecret')) {
       const reg = /"AccessKeySecret(.*?)\n/g;
-      let arr = iterator.match(reg);
-      for (const item of arr) {
-        str = str.replace(item, getSecretValue(item));
-      }
+      const arr = iterator.match(reg);
+      arr &&
+        arr.forEach((item) => {
+          str = str.replace(item, getSecretValue(item));
+        });
     }
     list.push(str);
   }

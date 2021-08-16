@@ -5,14 +5,14 @@ const input = {
   Credentials: {
     Alias: 'default',
     AccountID: '16940247251212952210',
-    AccessKeyID: 'LTAI4FztxxxgZMtMjtrY',
-    AccessKeySecret: 'LTAI4FztxxxgZMtMjtrY',
+    AccessKeyID: 'abcddsdsdwxxxgZMtMjtrY',
+    AccessKeySecret: 'adsdsdsdsddsdxxxgZMtMjtrY',
   },
   credentials: {
     Alias: 'default',
     AccountID: '169402472sds5952210',
-    AccessKeyID: 'LTAI4FztxxxgZMtMjtrY',
-    AccessKeySecret: 'LTAI4FztxxxgZMtMjtrY',
+    AccessKeyID: 'abcddsdsdwxxxgZMtMjtrY',
+    AccessKeySecret: 'adsdsdsdsddsdxxxgZMtMjtrY',
   },
   appName: 'appName',
   Path: {
@@ -103,8 +103,19 @@ demo.getDefaultLog();
 // }
 //
 // console.log(LogLevelEnum[2]);
+const a = {
+  name: 'ex',
+  description: 'ex',
+  runtime: 'nodejs12',
+  codeUri: './code/index.js',
+  environmentVariables: {
+    aliyun_AccessKeyId: '123',
+    aliyun_AccessKeySecret: '321',
+  },
+};
+Logger.debug('test', JSON.stringify(a, null, '  '));
 
-Logger.debug('xx', `logger密钥信息: ${JSON.stringify(input, null, 2)}`);
+// Logger.debug('xx', `logger密钥信息: ${JSON.stringify(input, null, 2)}`);
 
-const l = new Logger();
-l.debug(`logger密钥信息: ${JSON.stringify(input, null, 2)}`);
+// const l = new Logger();
+// l.debug(`logger密钥信息: ${JSON.stringify(input, null, 2)}`);
