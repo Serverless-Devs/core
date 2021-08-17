@@ -13,7 +13,7 @@ import * as config from '../../libs/handler-set-config';
 import { downloadRequest } from '../request';
 import installDependency from '../installDependency';
 import get from 'lodash.get';
-import { removeDevsCore, downLoadDesCore } from '../../loadDevsCore';
+import { downLoadDesCore } from '../../loadDevsCore';
 
 async function tryfun(f: Promise<any>) {
   try {
@@ -69,12 +69,9 @@ async function loadServerless(source: string, params?: any) {
       emptyDir: true,
     });
     await preInit({ componentPath });
-    removeDevsCore(componentPath);
     await installDependency({ cwd: componentPath, production: true });
     fs.writeFileSync(lockPath, zipball_url);
     await postInit({ componentPath });
-  } else {
-    removeDevsCore(componentPath);
   }
   await downLoadDesCore(componentPath);
   return await buildComponentInstance(componentPath, params);
@@ -113,12 +110,9 @@ async function loadGithub(source: string, params?: any) {
       emptyDir: true,
     });
     await preInit({ componentPath });
-    removeDevsCore(componentPath);
     await installDependency({ cwd: componentPath, production: true });
     fs.writeFileSync(lockPath, zipball_url);
     await postInit({ componentPath });
-  } else {
-    removeDevsCore(componentPath);
   }
   await downLoadDesCore(componentPath);
   return await buildComponentInstance(componentPath, params);
