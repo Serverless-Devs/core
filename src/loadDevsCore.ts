@@ -20,9 +20,12 @@ export async function downLoadDesCore(componentPath: string) {
 
 async function existCore(componentPath: string) {
   lns(componentPath);
+  const loadcorePath = path.resolve(__dirname, './daemon/loadcore.js');
+  if (!fs.existsSync(loadcorePath)) return;
   const lockFileInfo = readJsonFile(lockPath);
-  if (lockFileInfo.pending === 1) return;
-  fs.writeFileSync(lockPath, JSON.stringify({ ...lockFileInfo, pending: 1 }, null, 2));
+  const now = Date.now();
+  if (now - lockFileInfo.currentTimestamp < 5 * 60 * 1000) return;
+  fs.writeFileSync(lockPath, JSON.stringify({ ...lockFileInfo, currentTimestamp: now }, null, 2));
 
   const subprocess = spawn(process.execPath, [path.resolve(__dirname, './daemon/loadcore.js')], {
     detached: true,

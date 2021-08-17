@@ -26,15 +26,15 @@ async function init() {
     version = DEFAULT_CORE_VERSION;
   }
   const lockFileInfo = readJsonFile(lockPath);
-
-  if (version === lockFileInfo.version) {
-    return fs.writeFileSync(lockPath, JSON.stringify({ version, pending: 0 }, null, 2));
+  const now = Date.now();
+  if (version <= lockFileInfo.version) {
+    return fs.writeFileSync(lockPath, JSON.stringify({ version, currentTimestamp: now }, null, 2));
   }
   fs.ensureDirSync(cachePath);
   const url = `https://registry.npmjs.org/@serverless-devs/core/-/core-${version}.tgz`;
   const filename = `core_${Date.now()}.zip`;
   await downloadRequest(url, corePath, { filename, extract: true, strip: 1 });
-  fs.writeFileSync(lockPath, JSON.stringify({ version, pending: 0 }, null, 2));
+  fs.writeFileSync(lockPath, JSON.stringify({ version, currentTimestamp: now }, null, 2));
 }
 
 init();
