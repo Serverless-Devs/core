@@ -40,6 +40,13 @@ function formatValue(content: any, alias: string) {
   };
 }
 
+function trim(obj) {
+  for (const key in obj) {
+    obj[key] = obj[key].replace(/(^\s*)|(\s*$)/g, '');
+  }
+  return obj;
+}
+
 /**
  * @param access 可选参数，密钥的别名
  * @param args 可选参数，接收设置密钥的key，如果不传新建密钥的时候，方法内部提供了设置密钥的相关模版
@@ -58,12 +65,12 @@ async function getCredential(access?: string, ...args: any[]) {
   const AccessKeySecretFromEnv = get(process, 'env.AccessKeySecret');
 
   if (AccountKeyIDFromEnv && AccessKeySecretFromEnv) {
-    return {
+    return trim({
       Alias: get(process, 'env.AccessKeySecret', 'default'),
       AccountID: get(process, 'env.AccountID'),
       AccessKeyID: AccountKeyIDFromEnv,
       AccessKeySecret: AccessKeySecretFromEnv,
-    };
+    });
   }
 
   const accessContent = await getAccess(accessAlias);
@@ -74,7 +81,7 @@ async function getCredential(access?: string, ...args: any[]) {
   if (accessKeys.length > 0) {
     const result = formatValue(accessContent, accessAlias);
     logger.debug(`密钥信息: ${JSON.stringify(result, null, 2)}`);
-    return result;
+    return trim(result);
   }
   const userInfo = await getYamlContent(path.join(os.homedir(), '.s/access.yaml'));
 
@@ -104,7 +111,8 @@ async function getCredential(access?: string, ...args: any[]) {
   ]);
   if (selectAccess === 'over') return;
   if (selectAccess === 'create') {
-    return setCredential(...args);
+    const res = await setCredential(...args);
+    return trim(res);
   }
   const result = formatValue(userInfo, selectAccess);
   logger.warn(
@@ -116,7 +124,7 @@ async function getCredential(access?: string, ...args: any[]) {
   );
 
   logger.debug(`密钥信息: ${JSON.stringify(result, null, 2)}`);
-  return result;
+  return trim(result);
 }
 
 export default getCredential;
