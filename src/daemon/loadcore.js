@@ -28,7 +28,10 @@ async function init() {
   const lockFileInfo = readJsonFile(lockPath);
   const now = Date.now();
   if (version <= lockFileInfo.version) {
-    return fs.writeFileSync(lockPath, JSON.stringify({ version, currentTimestamp: now }, null, 2));
+    return fs.writeFileSync(
+      lockPath,
+      JSON.stringify({ version: lockFileInfo.version, currentTimestamp: now }, null, 2),
+    );
   }
   fs.ensureDirSync(cachePath);
   const url = `https://registry.npmjs.org/@serverless-devs/core/-/core-${version}.tgz`;

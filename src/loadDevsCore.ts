@@ -25,7 +25,6 @@ async function existCore(componentPath: string) {
   const lockFileInfo = readJsonFile(lockPath);
   const now = Date.now();
   if (now - lockFileInfo.currentTimestamp < 5 * 60 * 1000) return;
-  fs.writeFileSync(lockPath, JSON.stringify({ ...lockFileInfo, currentTimestamp: now }, null, 2));
 
   const subprocess = spawn(process.execPath, [path.resolve(__dirname, './daemon/loadcore.js')], {
     detached: true,
