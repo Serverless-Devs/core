@@ -7,6 +7,7 @@ import { readJsonFile } from './libs/utils';
 import { DEFAULT_CORE_VERSION } from './daemon/constant';
 import rimraf from 'rimraf';
 
+const TTL = 5 * 60 * 1000;
 const cachePath = path.join(S_ROOT_HOME, 'cache');
 const corePath = path.join(cachePath, 'core');
 const lockPath = path.resolve(cachePath, '.s-core.lock');
@@ -24,8 +25,8 @@ async function existCore(componentPath: string) {
   if (!fs.existsSync(loadcorePath)) return;
   const lockFileInfo = readJsonFile(lockPath);
   const now = Date.now();
-  if (now - lockFileInfo.currentTimestamp < 5 * 60 * 1000) return;
-
+  if (now - lockFileInfo.currentTimestamp < TTL) return;
+  fs.writeFileSync(lockPath, JSON.stringify({ ...lockFileInfo, currentTimestamp: now }, null, 2));
   const subprocess = spawn(process.execPath, [path.resolve(__dirname, './daemon/loadcore.js')], {
     detached: true,
     stdio: 'ignore',
@@ -42,14 +43,30 @@ async function nonExistCore(componentPath: string) {
 
 function lns(componentPath: string) {
   const componentCorePath = path.join(componentPath, 'node_modules', '@serverless-devs', 'core');
-  rimraf.sync(componentCorePath);
+  if (isSymbolicLink(componentCorePath)) return;
+  if (copyAgain(componentCorePath)) {
+    return fs.copySync(corePath, componentCorePath);
+  }
   try {
+    rimraf.sync(componentCorePath);
     fs.ensureSymlinkSync(corePath, componentCorePath, 'dir');
   } catch (error) {
-    fs.copySync(path.join(corePath, 'dist'), path.join(componentCorePath, 'dist'));
-    fs.copyFileSync(
-      path.join(corePath, 'package.json'),
-      path.join(componentCorePath, 'package.json'),
-    );
+    fs.copySync(corePath, componentCorePath);
   }
+}
+
+function isSymbolicLink(p: string) {
+  if (fs.existsSync(p)) {
+    return fs.lstatSync(p).isSymbolicLink();
+  }
+}
+
+function copyAgain(p: string) {
+  const packagePath = path.join(corePath, 'package.json');
+  const packageInfo = readJsonFile(packagePath);
+  const componentPackagePath = path.join(p, 'package.json');
+  const componentPackageInfo = readJsonFile(componentPackagePath);
+  return (
+    componentPackageInfo && packageInfo && componentPackageInfo.version !== packageInfo.version
+  );
 }
