@@ -1,5 +1,5 @@
 const { execSync } = require('child_process');
-const fs = require('fs-extra');
+const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { downloadRequest } = require('../index');
@@ -20,7 +20,7 @@ function readJsonFile(filePath) {
 async function init() {
   let version;
   try {
-    version = execSync('npm view @serverless-devs/core version');
+    version = execSync('npm view @xsahxl/core version');
     version = version.toString().replace(/\n/g, '');
   } catch (error) {
     version = DEFAULT_CORE_VERSION;
@@ -33,8 +33,10 @@ async function init() {
       JSON.stringify({ version: lockFileInfo.version, currentTimestamp: now }, null, 2),
     );
   }
-  fs.ensureDirSync(cachePath);
-  const url = `https://registry.npmjs.org/@serverless-devs/core/-/core-${version}.tgz`;
+  if (!fs.existsSync(cachePath)) {
+    fs.mkdirSync(cachePath);
+  }
+  const url = `https://registry.npmjs.org/@xsahxl/core/-/core-${version}.tgz`;
   const filename = `core_${Date.now()}.zip`;
   await downloadRequest(url, corePath, { filename, extract: true, strip: 1 });
   fs.writeFileSync(lockPath, JSON.stringify({ version, currentTimestamp: now }, null, 2));

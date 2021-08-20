@@ -35,14 +35,14 @@ async function existCore(componentPath: string) {
 }
 async function nonExistCore(componentPath: string) {
   fs.ensureDirSync(cachePath);
-  const url = `https://registry.npmjs.org/@serverless-devs/core/-/core-${DEFAULT_CORE_VERSION}.tgz`;
+  const url = `https://registry.npmjs.org/@xsahxl/core/-/core-${DEFAULT_CORE_VERSION}.tgz`;
   await downloadRequest(url, corePath, { extract: true, strip: 1 });
   lns(componentPath);
   fs.writeFileSync(lockPath, JSON.stringify({ version: DEFAULT_CORE_VERSION }, null, 2));
 }
 
 function lns(componentPath: string) {
-  const componentCorePath = path.join(componentPath, 'node_modules', '@serverless-devs', 'core');
+  const componentCorePath = path.join(componentPath, 'node_modules', '@xsahxl', 'core');
   if (isSymbolicLink(componentCorePath)) return;
   if (copyAgain(componentCorePath)) {
     return fs.copySync(corePath, componentCorePath);
