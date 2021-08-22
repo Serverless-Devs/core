@@ -23,7 +23,10 @@ jobs:
           pip install requests
       - name: NPM install
         run: |
-          npm install --production
+          npm install
+      - name: Build
+        run: |
+          npm run build
       - name: Add publish file
         run: |
           wget https://serverless-registry.oss-cn-hangzhou.aliyuncs.com/publish-file/python3/hub-publish.py
