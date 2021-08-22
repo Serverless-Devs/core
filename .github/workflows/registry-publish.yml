@@ -23,7 +23,7 @@ jobs:
           pip install requests
       - name: NPM install
         run: |
-          npm install --production
+          npm install
       - name: Build
         run: |
           npm run build
