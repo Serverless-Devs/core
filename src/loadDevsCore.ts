@@ -42,7 +42,7 @@ async function nonExistCore(componentPath: string) {
 }
 
 function lns(componentPath: string) {
-  const componentCorePath = path.join(componentPath, 'node_modules', '@xsahxl', 'core');
+  const componentCorePath = path.join(componentPath, 'node_modules', '@serverless-devs', 'core');
   if (isSymbolicLink(componentCorePath)) return;
   if (copyAgain(componentCorePath)) {
     return fs.copySync(corePath, componentCorePath);
