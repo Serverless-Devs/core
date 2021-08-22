@@ -172,7 +172,7 @@ export async function downloadRequest(url: string, dest: string, options?: IDown
       await fs.unlink(`${dest}/${filename}`);
       spin.succeed(`${filename} file decompression completed`);
     } else {
-      spin.start(`download success: ${url}`);
+      spin.succeed(`download success: ${url}`);
     }
   } catch (error) {
     spin.stop();

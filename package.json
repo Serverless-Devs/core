@@ -27,7 +27,7 @@
     "test": "npx jest",
     "prebuild": "rimraf lib && rimraf dist",
     "build": "npx tsc && cp ./src/common/args.js ./lib/common && cp -r ./src/libs/i18n/locales ./lib/libs/i18n",
-    "postbuild": "ncc build lib/index.js -m -o dist && cp ./src/common/args.js ./dist && cp -r ./src/libs/i18n/locales ./dist",
+    "postbuild": "ncc build lib/index.js -m -o dist && cp ./src/common/args.js ./dist && rimraf dist/locales1",
     "test:cov": "jest --coverage",
     "lint": "npm run typecheck && f2elint scan -i src",
     "fix": "f2elint fix",
