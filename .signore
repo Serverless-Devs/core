@@ -1,4 +1,10 @@
 node_modules
+lib
+docs
+src
+jest.config.ts
+jest.setup.ts
+lerna.json
 .s
 tsconfig.json
 tsconfig.base.json

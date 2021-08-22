@@ -2,7 +2,7 @@ const { execSync } = require('child_process');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const { downloadRequest } = require('../index');
+const { downloadRequest, request } = require('../index');
 const { DEFAULT_CORE_VERSION } = require('./constant');
 
 const S_ROOT_HOME = path.join(os.homedir(), '.s');
@@ -20,8 +20,8 @@ function readJsonFile(filePath) {
 async function init() {
   let version;
   try {
-    version = execSync('npm view @xsahxl/core version');
-    version = version.toString().replace(/\n/g, '');
+    const result = await request('https://registry.devsapp.cn/simple/devsapp/core/releases/latest');
+    version = result.tag_name;
   } catch (error) {
     version = DEFAULT_CORE_VERSION;
   }
@@ -36,7 +36,7 @@ async function init() {
   if (!fs.existsSync(cachePath)) {
     fs.mkdirSync(cachePath);
   }
-  const url = `https://registry.npmjs.org/@xsahxl/core/-/core-${version}.tgz`;
+  const url = `https://registry.devsapp.cn/simple/devsapp/core/zipball/${version}`;
   const filename = `core_${Date.now()}.zip`;
   await downloadRequest(url, corePath, { filename, extract: true, strip: 1 });
   fs.writeFileSync(lockPath, JSON.stringify({ version, currentTimestamp: now }, null, 2));
