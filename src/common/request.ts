@@ -62,7 +62,6 @@ export interface IDownloadOptions {
   strip?: number;
   body?: string | Buffer;
   postfix?: string;
-  emptyDir?: boolean;
 }
 
 export async function request(url: string, options?: RequestOptions): Promise<any> {
@@ -127,10 +126,9 @@ function getDebugUrl(url: string) {
 }
 
 export async function downloadRequest(url: string, dest: string, options?: IDownloadOptions) {
-  const { extract, postfix, strip, emptyDir, ...rest } = options || {};
+  const { extract, postfix, strip, ...rest } = options || {};
   const debugUrl = getDebugUrl(url);
   const spin = spinner(`prepare downloading: ${debugUrl}`);
-
   let len: number;
   if (url.startsWith(RegistryEnum.serverless) || url.startsWith(RegistryEnum.serverlessOld)) {
     try {
@@ -148,7 +146,6 @@ export async function downloadRequest(url: string, dest: string, options?: IDown
     bar = new ProgressService(ProgressType.Loading, { total: 100 }, format);
   }
   spin.text = `start downloading: ${debugUrl}`;
-  emptyDir && fs.emptyDirSync(dest);
   try {
     await download(url, dest, { ...rest, rejectUnauthorized: false }).on(
       'downloadProgress',
@@ -160,7 +157,7 @@ export async function downloadRequest(url: string, dest: string, options?: IDown
     bar.terminate();
 
     if (extract) {
-      spin.start(`download success: ${url}`);
+      spin.start(`download success: ${debugUrl}`);
       let filename: string;
       if (rest.filename) {
         filename = rest.filename;
@@ -178,7 +175,7 @@ export async function downloadRequest(url: string, dest: string, options?: IDown
       await fs.unlink(`${dest}/${filename}`);
       spin.succeed(`${filename} file decompression completed`);
     } else {
-      spin.succeed(`download success: ${url}`);
+      spin.succeed(`download success: ${debugUrl}`);
     }
   } catch (error) {
     spin.stop();
