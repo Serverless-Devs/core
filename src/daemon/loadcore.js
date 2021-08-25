@@ -1,4 +1,3 @@
-const { execSync } = require('child_process');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
@@ -37,7 +36,7 @@ async function init() {
     fs.mkdirSync(cachePath);
   }
   const url = `https://registry.devsapp.cn/simple/devsapp/core/zipball/${version}`;
-  const filename = `core_${Date.now()}.zip`;
+  const filename = `core@${version}.zip`;
   await downloadRequest(url, corePath, { filename, extract: true, strip: 1 });
   fs.writeFileSync(lockPath, JSON.stringify({ version, currentTimestamp: now }, null, 2));
 }

@@ -13,7 +13,8 @@ import * as config from '../../libs/handler-set-config';
 import { downloadRequest } from '../request';
 import installDependency from '../installDependency';
 import get from 'lodash.get';
-import { downLoadDesCore } from '../../loadDevsCore';
+import { downLoadDesCore } from './loadDevsCore';
+import execDaemon from '../../execDaemon';
 
 async function tryfun(f: Promise<any>) {
   try {
@@ -71,6 +72,12 @@ async function loadServerlessWithNoVersion({ provider, name, componentName }) {
   const componentPath = path.join(S_ROOT_HOME_COMPONENT, 'devsapp.cn', provider, componentName);
   const lockPath = path.resolve(componentPath, '.s.lock');
   if (fs.existsSync(lockPath)) {
+    execDaemon('loadComponent.js', {
+      componentPath,
+      provider,
+      name,
+      lockPath,
+    });
     return componentPath;
   }
   const result = await tryfun(getServerlessReleasesLatest(provider, name));
