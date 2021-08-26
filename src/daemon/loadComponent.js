@@ -9,11 +9,6 @@ function readJsonFile(filePath) {
   }
 }
 
-const RegistryEnum = {
-  github: 'https://api.github.com/repos',
-  serverless: 'https://registry.devsapp.cn/simple',
-};
-
 async function tryfun(f) {
   try {
     return await f;
@@ -22,18 +17,17 @@ async function tryfun(f) {
   }
 }
 
-const getServerlessReleasesLatest = async (provider, name) => {
+const getReleasesLatest = async ({ provider, name, registry }) => {
   const url =
     provider === '.'
-      ? `${RegistryEnum.serverless}/${name}/releases/latest`
-      : `${RegistryEnum.serverless}/${provider}/${name}/releases/latest`;
+      ? `${registry}/${name}/releases/latest`
+      : `${registry}/${provider}/${name}/releases/latest`;
   return await request(url);
 };
 
 async function init() {
-  console.log(process.env, 'env');
-  const { provider, name, componentPath, lockPath } = process.env;
-  const result = await tryfun(getServerlessReleasesLatest(provider, name));
+  const { provider, name, componentPath, lockPath, registry } = process.env;
+  const result = await tryfun(getReleasesLatest({ provider, name, registry }));
   if (!result) return;
   const { zipball_url, tag_name } = result;
   const lockFileInfo = readJsonFile(lockPath);

@@ -30,7 +30,8 @@ async function existCore(componentPath: string) {
 async function nonExistCore(componentPath: string) {
   fs.ensureDirSync(cachePath);
   const url = `https://registry.devsapp.cn/simple/devsapp/core/zipball/${DEFAULT_CORE_VERSION}`;
-  await downloadRequest(url, corePath, { extract: true, strip: 1 });
+  const filename = `core@${DEFAULT_CORE_VERSION}.zip`;
+  await downloadRequest(url, corePath, { filename, extract: true, strip: 1 });
   lns(componentPath);
   fs.writeFileSync(lockPath, JSON.stringify({ version: DEFAULT_CORE_VERSION }, null, 2));
 }
