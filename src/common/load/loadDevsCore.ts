@@ -7,7 +7,6 @@ import { DEFAULT_CORE_VERSION } from '../../daemon/constant';
 import execDaemon from '../../execDaemon';
 import rimraf from 'rimraf';
 
-const TTL = 5 * 60 * 1000;
 const cachePath = path.join(S_ROOT_HOME, 'cache');
 const corePath = path.join(cachePath, 'core');
 const lockPath = path.resolve(cachePath, '.s-core.lock');
@@ -21,11 +20,7 @@ export async function downLoadDesCore(componentPath: string) {
 
 async function existCore(componentPath: string) {
   lns(componentPath);
-  const lockFileInfo = readJsonFile(lockPath);
-  const now = Date.now();
-  if (now - lockFileInfo.currentTimestamp < TTL) return;
-  fs.writeFileSync(lockPath, JSON.stringify({ ...lockFileInfo, currentTimestamp: now }, null, 2));
-  execDaemon('loadcore.js');
+  execDaemon('loadcore.js', { lockPath });
 }
 async function nonExistCore(componentPath: string) {
   fs.ensureDirSync(cachePath);

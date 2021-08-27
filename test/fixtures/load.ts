@@ -1,5 +1,5 @@
 // @ts-ignore
-import { loadComponent, loadApplication } from '../../dist';
+import { loadComponent, loadApplication } from '../../lib';
 
 async function test() {
   // const fc = await loadComponent(
