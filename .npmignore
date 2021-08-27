@@ -3,3 +3,16 @@ docs
 test
 src
 lib
+jest.config.ts
+jest.setup.ts
+lerna.json
+commitlint.config.js
+f2elint.config.js
+publish.yaml
+tsconfig.json
+.github
+.editorconfig
+.eslintignore
+.prettierignore
+.prettierrc.js
+.signore

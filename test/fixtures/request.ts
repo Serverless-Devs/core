@@ -1,4 +1,4 @@
-import { request } from '../../src/common';
+import { downloadRequest } from '../../src/common';
 
 // async function test() {
 //   const result = await request('http://domain.devsapp.cn/token', {
@@ -18,10 +18,7 @@ import { request } from '../../src/common';
 // test();
 
 async function test() {
-  const result = await request('https://api.github.com/repos/devsapp/fc-deploy/releases/latest');
-  console.log(result.zipball_url);
+  await downloadRequest('https://registry.devsapp.cn/simple/devsapp/website/zipball/0.0.43', './a', {extract:true, filename:'xx.zip'});
 }
 
-setInterval(() => {
-  test();
-}, 500);
+test()

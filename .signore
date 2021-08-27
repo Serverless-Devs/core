@@ -17,6 +17,8 @@ package-lock.json
 .editorconfig
 .gitignore
 .signore
+.npmignore
+.npmrc
 
 .github
 .idea

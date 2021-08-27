@@ -1,11 +1,10 @@
 import download from 'download';
 import got from 'got';
 import { ProgressService, ProgressType } from '@serverless-devs/s-progress-bar';
-import { green, cyan } from 'chalk';
+import { green } from 'chalk';
 import spinner from './spinner';
 import decompress from 'decompress';
 import fs from 'fs-extra';
-import path from 'path';
 import { RegistryEnum } from './constant';
 import { Logger } from '../logger';
 const logger = new Logger('S-CORE');
@@ -62,7 +61,6 @@ export interface IDownloadOptions {
   strip?: number;
   body?: string | Buffer;
   postfix?: string;
-  emptyDir?: boolean;
 }
 
 export async function request(url: string, options?: RequestOptions): Promise<any> {
@@ -119,69 +117,62 @@ export async function request(url: string, options?: RequestOptions): Promise<an
   return body.Response || body;
 }
 
-function getDebugUrl(url: string) {
-  return url
-    .replace('https://registry.npmjs.org/', '')
-    .replace('https://registry.devsapp.cn/simple/', '')
-    .replace('https://api.github.com/repos/', '');
+export async function downloadRequest(url: string, dest: string, options?: IDownloadOptions) {
+  const { extract, postfix, strip, filename, ...rest } = options || {};
+  const spin = spinner(`prepare downloading: ${url}`);
+  const bar = await getProgressBar({ url, filename });
+  spin.text = `start downloading: ${url}`;
+  if (extract) {
+    return await downloadWithExtract({ url, dest, filename, strip, rest, bar, spin });
+  }
+  await downloadWithNoExtract({ url, dest, filename, rest, bar, spin });
 }
 
-export async function downloadRequest(url: string, dest: string, options?: IDownloadOptions) {
-  const { extract, postfix, strip, emptyDir, ...rest } = options || {};
-  const debugUrl = getDebugUrl(url);
-  const spin = spinner(`prepare downloading: ${debugUrl}`);
-
-  let len: number;
-  if (url.startsWith(RegistryEnum.serverless) || url.startsWith(RegistryEnum.serverlessOld)) {
-    try {
-      const { headers } = await got(url, { method: 'HEAD' });
-      len = parseInt(headers['content-length'], 10);
-    } catch (error) {
-      // ignore error
-    }
-  }
-  let bar: ProgressService;
-  if (len) {
-    bar = new ProgressService(ProgressType.Bar, { total: len });
-  } else {
-    const format = `${green(':loading')} ${green('downloading')} ${cyan(debugUrl)} `;
-    bar = new ProgressService(ProgressType.Loading, { total: 100 }, format);
-  }
-  spin.text = `start downloading: ${debugUrl}`;
-  emptyDir && fs.emptyDirSync(dest);
+async function downloadWithExtract({ url, dest, filename, strip, rest, bar, spin }) {
   try {
-    await download(url, dest, { ...rest, rejectUnauthorized: false }).on(
-      'downloadProgress',
-      (progress) => {
-        spin.stop();
-        bar.update(progress.transferred);
-      },
-    );
+    const formatFilename = filename || 'demo.zip';
+    const options = { ...rest, filename: formatFilename, rejectUnauthorized: false };
+    await download(url, dest, options).on('downloadProgress', (progress) => {
+      spin.stop();
+      bar.update(progress.transferred);
+    });
     bar.terminate();
-
-    if (extract) {
-      spin.start(`download success: ${url}`);
-      let filename: string;
-      if (rest.filename) {
-        filename = rest.filename;
-      } else {
-        let files = fs.readdirSync(dest);
-        filename = files[0];
-        if (postfix && !filename.slice(filename.lastIndexOf('.')).startsWith('.')) {
-          fs.rename(path.resolve(dest, filename), `${path.resolve(dest, filename)}.${postfix}`);
-          filename += `.${postfix}`;
-        }
-      }
-
-      spin.text = `${filename} file unzipping...`;
-      await decompress(`${dest}/${filename}`, dest, { strip });
-      await fs.unlink(`${dest}/${filename}`);
-      spin.succeed(`${filename} file decompression completed`);
-    } else {
-      spin.succeed(`download success: ${url}`);
-    }
+    spin.start(filename ? `${filename} file unzipping...` : 'file unzipping...');
+    await decompress(`${dest}/${formatFilename}`, dest, { strip });
+    await fs.unlink(`${dest}/${formatFilename}`);
+    const text = 'file decompression completed';
+    spin.succeed(filename ? `${filename} ${text}` : text);
   } catch (error) {
     spin.stop();
     throw error;
   }
+}
+
+async function downloadWithNoExtract({ url, dest, filename, rest, bar, spin }) {
+  const options = { ...rest, filename, rejectUnauthorized: false };
+  await download(url, dest, options).on('downloadProgress', (progress) => {
+    spin.stop();
+    bar.update(progress.transferred);
+  });
+  bar.terminate();
+  spin.succeed(`download success: ${url}`);
+}
+
+async function getContentLength(url: string) {
+  if (url.startsWith(RegistryEnum.serverless) || url.startsWith(RegistryEnum.serverlessOld)) {
+    try {
+      const { headers } = await got(url, { method: 'HEAD' });
+      return parseInt(headers['content-length'], 10);
+    } catch (error) {}
+  }
+}
+
+async function getProgressBar({ url, filename }) {
+  const len: number = await getContentLength(url);
+  if (len) {
+    return new ProgressService(ProgressType.Bar, { total: len });
+  }
+  const text = `${green(':loading')} ${green('downloading')} `;
+  const format = filename ? `${text}${filename} ` : text;
+  return new ProgressService(ProgressType.Loading, { total: 100 }, format);
 }

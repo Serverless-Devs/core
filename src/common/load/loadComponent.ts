@@ -13,7 +13,8 @@ import * as config from '../../libs/handler-set-config';
 import { downloadRequest } from '../request';
 import installDependency from '../installDependency';
 import get from 'lodash.get';
-import { downLoadDesCore } from '../../loadDevsCore';
+import { downLoadDesCore } from './loadDevsCore';
+import { execDaemonWithTTL } from '../../execDaemon';
 
 async function tryfun(f: Promise<any>) {
   try {
@@ -41,81 +42,120 @@ async function loadServerless(source: string, params?: any) {
   const [provider, componentName] = source.includes('/') ? source.split('/') : ['.', source];
   if (!componentName) return;
   const [name, version] = componentName.split('@');
-  let zipball_url: string;
+  const filename = provider === '.' ? `${componentName}.zip` : `${provider}_${componentName}.zip`;
   let componentPath: string;
   if (version) {
-    const result = await tryfun(getServerlessReleases(provider, name));
-    if (!result) return;
-    const findObj = result.find((item) => item.tag_name === version);
-    if (!findObj) return;
-    zipball_url = findObj.zipball_url;
-    componentPath = path.resolve(S_ROOT_HOME_COMPONENT, 'devsapp.cn', provider, componentName);
-  } else {
-    const result = await tryfun(getServerlessReleasesLatest(provider, name));
-    if (!get(result, 'zipball_url')) return;
-    zipball_url = result.zipball_url;
-    componentPath = path.resolve(
-      S_ROOT_HOME_COMPONENT,
-      'devsapp.cn',
+    componentPath = await loadServerlessWithVersion({
       provider,
-      `${componentName}@${result.tag_name}`,
-    );
-  }
-  const lockPath = path.resolve(componentPath, '.s.lock');
-  if (!fs.existsSync(lockPath)) {
-    await downloadRequest(zipball_url, componentPath, {
-      extract: true,
-      strip: 1,
-      emptyDir: true,
+      name,
+      componentName,
+      version,
+      filename,
     });
-    await preInit({ componentPath });
-    await installDependency({ cwd: componentPath, production: true });
-    fs.writeFileSync(lockPath, zipball_url);
-    await postInit({ componentPath });
   }
+  componentPath = await loadServerlessWithNoVersion({ provider, name, componentName, filename });
+  if (!componentPath) return;
   await downLoadDesCore(componentPath);
   return await buildComponentInstance(componentPath, params);
 }
 
+async function loadServerlessWithVersion({ provider, name, componentName, version, filename }) {
+  const componentPath = path.join(S_ROOT_HOME_COMPONENT, 'devsapp.cn', provider, componentName);
+  const lockPath = path.resolve(componentPath, '.s.lock');
+  if (fs.existsSync(lockPath)) {
+    return componentPath;
+  }
+  const result = await tryfun(getServerlessReleases(provider, name));
+  if (!result) return;
+  const findObj = result.find((item) => item.tag_name === version);
+  if (!findObj) return;
+  const { zipball_url } = findObj;
+  await downloadComponent({ zipball_url, filename, componentPath, lockPath, version });
+  return componentPath;
+}
+
+async function loadServerlessWithNoVersion({ provider, name, componentName, filename }) {
+  const componentPath = path.join(S_ROOT_HOME_COMPONENT, 'devsapp.cn', provider, componentName);
+  const lockPath = path.resolve(componentPath, '.s.lock');
+  if (fs.existsSync(lockPath)) {
+    execDaemonWithTTL('loadComponent.js', {
+      componentPath,
+      provider,
+      name,
+      lockPath,
+      registry: RegistryEnum.serverless,
+    });
+    return componentPath;
+  }
+  const result = await tryfun(getServerlessReleasesLatest(provider, name));
+  if (!get(result, 'zipball_url')) return;
+  const { zipball_url, tag_name } = result;
+  await downloadComponent({ zipball_url, filename, componentPath, lockPath, version: tag_name });
+  return componentPath;
+}
+
+async function downloadComponent({ zipball_url, filename, componentPath, lockPath, version }) {
+  await downloadRequest(zipball_url, componentPath, {
+    filename,
+    extract: true,
+    strip: 1,
+  });
+  await preInit({ componentPath });
+  await installDependency({ cwd: componentPath, production: true });
+  fs.writeFileSync(lockPath, JSON.stringify({ version }, null, 2));
+  await postInit({ componentPath });
+}
+
 async function loadGithub(source: string, params?: any) {
   if (!source.includes('/')) return;
-  const [user, componentName] = source.split('/');
+  const [provider, componentName] = source.split('/');
   if (!componentName) return;
   const [name, version] = componentName.split('@');
-  let zipball_url: string;
   let componentPath: string;
   if (version) {
-    const result = await tryfun(getGithubReleases(user, name));
-    if (!result) return;
-    const findObj = result.find((item) => item.tag_name === version);
-    if (!findObj) return;
-    zipball_url = findObj.zipball_url;
-    componentPath = path.resolve(S_ROOT_HOME_COMPONENT, 'github.com', user, componentName);
-  } else {
-    const result = await tryfun(getGithubReleasesLatest(user, name));
-    if (!get(result, 'zipball_url')) return;
-    zipball_url = result.zipball_url;
-    componentPath = path.resolve(
-      S_ROOT_HOME_COMPONENT,
-      'github.com',
-      user,
-      `${componentName}@${result.tag_name}`,
-    );
+    componentPath = await loadGithubWithVersion({ provider, name, componentName, version });
   }
-  const lockPath = path.resolve(componentPath, '.s.lock');
-  if (!fs.existsSync(lockPath)) {
-    await downloadRequest(zipball_url, componentPath, {
-      extract: true,
-      strip: 1,
-      emptyDir: true,
-    });
-    await preInit({ componentPath });
-    await installDependency({ cwd: componentPath, production: true });
-    fs.writeFileSync(lockPath, zipball_url);
-    await postInit({ componentPath });
-  }
+  componentPath = await loadGithubWithNoVersion({ provider, name, componentName });
+  if (!componentPath) return;
   await downLoadDesCore(componentPath);
   return await buildComponentInstance(componentPath, params);
+}
+
+async function loadGithubWithVersion({ provider, name, componentName, version }) {
+  const componentPath = path.join(S_ROOT_HOME_COMPONENT, 'github.com', provider, componentName);
+  const lockPath = path.resolve(componentPath, '.s.lock');
+  if (fs.existsSync(lockPath)) {
+    return componentPath;
+  }
+  const result = await tryfun(getGithubReleases(provider, name));
+  if (!result) return;
+  const findObj = result.find((item) => item.tag_name === version);
+  if (!findObj) return;
+  const { zipball_url } = findObj;
+  const filename = `${provider}_${componentName}.zip`;
+  await downloadComponent({ zipball_url, filename, componentPath, lockPath, version });
+  return componentPath;
+}
+
+async function loadGithubWithNoVersion({ provider, name, componentName }) {
+  const componentPath = path.join(S_ROOT_HOME_COMPONENT, 'github.com', provider, componentName);
+  const lockPath = path.resolve(componentPath, '.s.lock');
+  if (fs.existsSync(lockPath)) {
+    execDaemonWithTTL('loadComponent.js', {
+      componentPath,
+      provider,
+      name,
+      lockPath,
+      registry: RegistryEnum.github,
+    });
+    return componentPath;
+  }
+  const result = await tryfun(getGithubReleasesLatest(provider, name));
+  if (!get(result, 'zipball_url')) return;
+  const { zipball_url, tag_name } = result;
+  const filename = `${provider}_${componentName}@${tag_name}.zip`;
+  await downloadComponent({ zipball_url, filename, componentPath, lockPath, version: tag_name });
+  return componentPath;
 }
 
 async function loadType(source: string, registry?: Registry, params?: any) {
