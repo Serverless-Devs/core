@@ -48,4 +48,9 @@ async function init() {
   fs.writeFileSync(lockPath, JSON.stringify({ version: tag_name, currentTimestamp: now }, null, 2));
 }
 
-init();
+(async () => {
+  await init();
+  process.exit();
+})().catch(() => {
+  process.exit(1);
+});
