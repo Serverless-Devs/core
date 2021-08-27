@@ -2,7 +2,7 @@ import path from 'path';
 import { spawn } from 'child_process';
 import fs from 'fs-extra';
 import { readJsonFile } from './libs/utils';
-const TTL = 5 * 60 * 1000;
+const TTL = 10 * 60 * 1000;
 
 interface IConfig {
   [key: string]: any;
