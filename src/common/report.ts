@@ -1,7 +1,4 @@
-import { request } from './request';
-import { Logger } from '../logger/index';
-
-const logger = new Logger('S-CORE');
+import { execDaemon } from '../execDaemon';
 
 export interface IReportComponent {
   uid: string;
@@ -10,16 +7,8 @@ export interface IReportComponent {
 }
 
 export async function reportComponent(componentName: string, options: IReportComponent) {
-  try {
-    await request('https://registry.devsapp.cn/report/component', {
-      method: 'post',
-      form: true,
-      body: {
-        component: componentName,
-        ...options,
-      },
-    });
-  } catch (error) {
-    logger.debug(error);
-  }
+  execDaemon('reportComponent.js', {
+    componentName,
+    componentConfig: JSON.stringify(options),
+  });
 }

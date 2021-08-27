@@ -4,7 +4,7 @@ import { S_ROOT_HOME } from '../../libs/common';
 import { downloadRequest } from '../request';
 import { readJsonFile } from '../../libs/utils';
 import { DEFAULT_CORE_VERSION } from '../../daemon/constant';
-import execDaemon from '../../execDaemon';
+import { execDaemonWithTTL } from '../../execDaemon';
 import rimraf from 'rimraf';
 
 const cachePath = path.join(S_ROOT_HOME, 'cache');
@@ -20,7 +20,7 @@ export async function downLoadDesCore(componentPath: string) {
 
 async function existCore(componentPath: string) {
   lns(componentPath);
-  execDaemon('loadcore.js', { lockPath });
+  execDaemonWithTTL('loadcore.js', { lockPath });
 }
 async function nonExistCore(componentPath: string) {
   fs.ensureDirSync(cachePath);

@@ -53,6 +53,7 @@ function getSecretValue(val: string) {
 function secretCredentials(...data: any[]) {
   const list = [];
   for (const iterator of data) {
+    if (typeof iterator.includes !== 'function') return data;
     let str = iterator;
     if (iterator.includes('AccountID')) {
       const reg = /"AccountID(.*?)\n/g;
