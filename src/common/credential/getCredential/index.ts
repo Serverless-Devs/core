@@ -24,6 +24,33 @@ export function decryptCredential(info: { [key: string]: any }) {
   return cloneInfo;
 }
 
+async function getCredential(...args: any[]) {
+  const [first, second, ...rest] = args;
+  let access: string;
+  let params = [];
+  let inputs: any;
+  if (typeof first === 'object') {
+    inputs = first;
+    access = second;
+    params = rest;
+  } else {
+    access = first;
+    params = [second, ...rest];
+  }
+  const result = await getCredentialWithAccess(access, ...params);
+  transformInputs(inputs, result);
+  return result;
+}
+
+function transformInputs(inputs, result) {
+  if (!inputs || !result) return;
+  const { Alias } = result;
+  inputs.project = { ...inputs.project, access: Alias };
+  inputs.Project = { ...inputs.Project, accessAlias: Alias, AccessAlias: Alias };
+  inputs.credentials = result;
+  inputs.Credentials = result;
+}
+
 function formatValue(content: any, alias: string) {
   const formatObj = decryptCredential(content[alias]);
   if (Object.prototype.hasOwnProperty.call(formatObj, 'AccountID')) {
@@ -51,15 +78,8 @@ function trim(obj) {
  * @param access 可选参数，密钥的别名
  * @param args 可选参数，接收设置密钥的key，如果不传新建密钥的时候，方法内部提供了设置密钥的相关模版
  */
-async function getCredential(access?: string, ...args: any[]) {
-  let accessAlias: string;
-  if (access) {
-    accessAlias = access;
-  } else {
-    // console.log('使用默认的default密钥信息');
-    accessAlias = 'default';
-  }
-
+async function getCredentialWithAccess(access?: string, ...args: any[]) {
+  const accessAlias = access || 'default';
   // 从环境变量获取
   const AccountKeyIDFromEnv = get(process, 'env.AccessKeyID');
   const AccessKeySecretFromEnv = get(process, 'env.AccessKeySecret');

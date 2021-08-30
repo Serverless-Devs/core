@@ -344,7 +344,7 @@ function test() {
 
 ## getCredential
 
-#### 用于获取密钥信息，可接收（alias, ...envKeys)
+#### 用于获取密钥信息，可接收（inputs, alias, ...envKeys)
 
 - 不传任何参数的时候，会获取 `default` 密钥信息
 
@@ -363,7 +363,9 @@ async function get() {
 ```typescript
 const { getCredential } = require('@serverless-devs/core');
 async function get() {
-  const c = await getCredential('custom', 'AccountIdByCustom', 'SecretIDByCustom');
+  // 组件接收的inputs
+  const inputs = {};
+  const c = await getCredential(inputs, 'custom', 'AccountIdByCustom', 'SecretIDByCustom');
   console.log('c', c);
 }
 ```
