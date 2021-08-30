@@ -306,12 +306,6 @@ Examples
 
 ```
 
-## i18n
-
-用于国际化，具体使用请查看[文档](https://github.com/75lb/command-line-usage)
-
-- 当前语言默认读取 ~/.s/set-config.yml 文件的 locale 属性
-
 ## commandParse
 
 命令行参数解析工具，用于解析命令行参数。格式为 commandParse(Input, options)

@@ -75,7 +75,6 @@ function loggerDemo() {
 - [spinner](./docs/common.md#spinner) (状态展示)
 - [zip](./docs/common.md#zip)/[unzip](./docs/common.md#unzip) (打包/解包)
 - [help](./docs/common.md#help) 显示文档帮助信息
-- [i18n](./docs/common.md#i18n) 用于国际化
 - [commadParse](./docs/common.md#commandparse) 命令行参数解析工具，用于解析命令行参数。格式为 args(Input, options) 解析工具采用 minimist 详细使用查看
 
 - [getCredential](./docs/common.md#getCredential)/[setCredential](./docs/common.md#setCredential) 用于获取和创建密钥信息
