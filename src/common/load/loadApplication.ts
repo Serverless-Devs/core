@@ -7,7 +7,7 @@ import {
 } from './service';
 import { RegistryEnum } from '../constant';
 import path from 'path';
-import * as config from '../../libs/handler-set-config';
+import { getSetConfig } from './utils';
 import { downloadRequest } from '../request';
 import getYamlContent from '../getYamlContent';
 import fs from 'fs-extra';
@@ -83,15 +83,15 @@ async function handleDecompressFile({ zipball_url, applicationPath, name }) {
   });
   const hasPublishYaml = await getYamlContent(path.resolve(temporaryPath, 'publish.yaml'));
   // preInit
-  try{
+  try {
     const baseChildComponent = await require(path.join(temporaryPath, 'hook'));
     const tempObj = {
-      "tempPath": temporaryPath,
-      "targetPath": applicationPath
-    }
-    await baseChildComponent.preInit(tempObj)
-    process.env[`${applicationPath}-post-init`] = JSON.stringify(tempObj)
-  }catch (e){}
+      tempPath: temporaryPath,
+      targetPath: applicationPath,
+    };
+    await baseChildComponent.preInit(tempObj);
+    process.env[`${applicationPath}-post-init`] = JSON.stringify(tempObj);
+  } catch (e) {}
   if (hasPublishYaml) {
     fs.copySync(`${temporaryPath}/src`, applicationPath);
     rimraf.sync(temporaryPath);
@@ -193,8 +193,9 @@ async function loadApplication(
     appPath = await loadType({ source, registry, target, name });
     if (appPath) return appPath;
   }
-  if (config.getConfig('registry')) {
-    appPath = await loadType({ source, registry: config.getConfig('registry'), target, name });
+  const registryFromSetConfig = await getSetConfig('registry');
+  if (registryFromSetConfig) {
+    appPath = await loadType({ source, registry: registryFromSetConfig, target, name });
     if (appPath) return appPath;
   }
   appPath = await loadServerless({ source, target, name });

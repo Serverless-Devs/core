@@ -9,7 +9,7 @@ import {
   getServerlessReleasesLatest,
 } from './service';
 import { RegistryEnum, Registry } from '../constant';
-import * as config from '../../libs/handler-set-config';
+import { getSetConfig } from './utils';
 import { downloadRequest } from '../request';
 import installDependency from '../installDependency';
 import get from 'lodash.get';
@@ -178,19 +178,21 @@ async function loadRemoteComponent(source: string, registry?: Registry, params?:
     result = await loadType(source, registry, params);
     if (isComponent(result)) return result;
   }
-  if (config.getConfig('registry')) {
-    result = await loadType(source, config.getConfig('registry'), params);
+  const registryFromSetConfig = await getSetConfig('registry');
+
+  if (registryFromSetConfig) {
+    result = await loadType(source, registryFromSetConfig, params);
     if (isComponent(result)) return result;
   }
   if (
-    config.getConfig('registry') !== RegistryEnum.serverless &&
-    config.getConfig('registry') !== RegistryEnum.serverlessOld
+    registryFromSetConfig !== RegistryEnum.serverless &&
+    registryFromSetConfig !== RegistryEnum.serverlessOld
   ) {
     result = await loadServerless(source, params);
     if (isComponent(result)) return result;
   }
 
-  if (config.getConfig('registry') !== RegistryEnum.github) {
+  if (registryFromSetConfig !== RegistryEnum.github) {
     result = await loadGithub(source, params);
     if (isComponent(result)) return result;
   }

@@ -3,8 +3,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import os from 'os';
 import yaml from 'js-yaml';
-import {providerCollection, checkProviderList} from './constant';
-import i18n from '../../libs/i18n';
+import { providerCollection, checkProviderList } from './constant';
 import getYamlContent from '../getYamlContent';
 
 const Crypto = require('crypto-js');
@@ -16,22 +15,22 @@ async function handleCustom(info: any) {
       name: 'name',
       message: 'Please select a type:',
       choices: [
-        {name: i18n.__('Add key-value pairs'), value: 'add'},
-        {name: i18n.__('End of adding key-value pairs'), value: 'over'},
+        { name: 'Add key-value pairs', value: 'add' },
+        { name: 'End of adding key-value pairs', value: 'over' },
       ],
     },
   ];
-  const {name} = await inquirer.prompt(option);
+  const { name } = await inquirer.prompt(option);
   if (name === 'add') {
-    const {key, value} = await inquirer.prompt([
+    const { key, value } = await inquirer.prompt([
       {
         type: 'input',
-        message: i18n.__('Please enter key'),
+        message: 'Please enter key',
         name: 'key',
       },
       {
         type: 'input',
-        message: i18n.__('Please enter value'),
+        message: 'Please enter value',
         name: 'value',
       },
     ]);
@@ -40,7 +39,7 @@ async function handleCustom(info: any) {
   }
 }
 
-function output({info, accessAlias}) {
+function output({ info, accessAlias }) {
   console.log('');
   console.info(`    Alias: ${accessAlias}`);
   Object.keys(info).forEach((item) => {
@@ -60,7 +59,7 @@ function encrypt(info: any = {}) {
 }
 
 async function writeData(data: any) {
-  const {info, accessAlias} = data;
+  const { info, accessAlias } = data;
   const filePath = path.join(os.homedir(), '.s/access.yaml');
   const content = await getYamlContent(filePath);
   if (content) {
@@ -72,17 +71,17 @@ async function writeData(data: any) {
           name: 'name',
           message: 'Alias already exists. Please select a type:',
           choices: [
-            {name: 'overwrite', value: 'overwrite'},
-            {name: 'rename', value: 'rename'},
-            {name: 'exit', value: 'exit'},
+            { name: 'overwrite', value: 'overwrite' },
+            { name: 'rename', value: 'rename' },
+            { name: 'exit', value: 'exit' },
           ],
         },
       ];
-      const {name} = await inquirer.prompt(option);
+      const { name } = await inquirer.prompt(option);
       if (name === 'overwrite') {
         content[accessAlias] = encrypt(info);
         fs.writeFileSync(filePath, yaml.dump(content));
-        output({info, accessAlias});
+        output({ info, accessAlias });
       }
       if (name === 'rename') {
         const accessAliasObj = [
@@ -93,21 +92,21 @@ async function writeData(data: any) {
             default: await getAlias(),
           },
         ];
-        const {aliasName} = await inquirer.prompt(accessAliasObj);
-        return await writeData({info, accessAlias: aliasName});
+        const { aliasName } = await inquirer.prompt(accessAliasObj);
+        return await writeData({ info, accessAlias: aliasName });
       }
     } else {
       try {
-        fs.appendFileSync(filePath, yaml.dump({[accessAlias]: encrypt(info)}));
-        output({info, accessAlias});
+        fs.appendFileSync(filePath, yaml.dump({ [accessAlias]: encrypt(info) }));
+        output({ info, accessAlias });
       } catch (err) {
         throw new Error('Configuration failed');
       }
     }
   } else {
     try {
-      fs.writeFileSync(filePath, yaml.dump({[accessAlias]: encrypt(info)}));
-      output({info, accessAlias});
+      fs.writeFileSync(filePath, yaml.dump({ [accessAlias]: encrypt(info) }));
+      output({ info, accessAlias });
     } catch (err) {
       throw new Error('Configuration failed');
     }
@@ -147,16 +146,21 @@ async function setCredential(...args: any[]) {
     const answers: any = await inquirer.prompt(checkProviderList);
     selectedProvider = answers.provider;
   }
-  if (['alibaba', 'aws', 'azure', 'baidu', 'google', 'huawei', 'tencent'].includes(selectedProvider)) {
-    console.log(`🧭 Refer to the document for ${selectedProvider} key: `, {
-      alibaba: "http://config.devsapp.net/account/alibaba",
-      aws: "http://config.devsapp.net/account/aws",
-      azure: "http://config.devsapp.net/account/azure",
-      baidu: "http://config.devsapp.net/account/baidu",
-      google: "http://config.devsapp.net/account/gcp",
-      huawei: "http://config.devsapp.net/account/huawei",
-      tencent: "http://config.devsapp.net/account/tencent",
-    }[selectedProvider])
+  if (
+    ['alibaba', 'aws', 'azure', 'baidu', 'google', 'huawei', 'tencent'].includes(selectedProvider)
+  ) {
+    console.log(
+      `🧭 Refer to the document for ${selectedProvider} key: `,
+      {
+        alibaba: 'http://config.devsapp.net/account/alibaba',
+        aws: 'http://config.devsapp.net/account/aws',
+        azure: 'http://config.devsapp.net/account/azure',
+        baidu: 'http://config.devsapp.net/account/baidu',
+        google: 'http://config.devsapp.net/account/gcp',
+        huawei: 'http://config.devsapp.net/account/huawei',
+        tencent: 'http://config.devsapp.net/account/tencent',
+      }[selectedProvider],
+    );
   }
 
   let accessAlias: string;
@@ -187,7 +191,7 @@ async function setCredential(...args: any[]) {
       }
     });
   }
-  const {accessAlias: Alias} = await writeData({info, accessAlias});
+  const { accessAlias: Alias } = await writeData({ info, accessAlias });
   return {
     Alias,
     ...info,
@@ -198,8 +202,8 @@ async function setCredential(...args: any[]) {
  * @param args 接收设置密钥的key
  */
 export async function setKnownCredential(info, accessAlias) {
-  const aliasName = accessAlias || await getAlias()
-  await writeData({info, accessAlias: aliasName});
+  const aliasName = accessAlias || (await getAlias());
+  await writeData({ info, accessAlias: aliasName });
   return {
     Alias: aliasName,
     ...info,
