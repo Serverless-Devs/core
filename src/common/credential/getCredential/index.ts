@@ -90,6 +90,7 @@ async function getCredentialWithAccess(access?: string, ...args: any[]) {
       AccountID: get(process, 'env.AccountID'),
       AccessKeyID: AccountKeyIDFromEnv,
       AccessKeySecret: AccessKeySecretFromEnv,
+      SecurityToken: get(process, 'env.SecurityToken'),
     });
   }
 
