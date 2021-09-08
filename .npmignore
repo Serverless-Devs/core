@@ -16,3 +16,4 @@ tsconfig.json
 .prettierignore
 .prettierrc.js
 .signore
+.eslintrc.js
