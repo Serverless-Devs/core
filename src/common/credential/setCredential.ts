@@ -5,6 +5,7 @@ import os from 'os';
 import yaml from 'js-yaml';
 import { providerCollection, checkProviderList } from './constant';
 import getYamlContent from '../getYamlContent';
+import { jsonparse } from '../../libs/utils';
 
 const Crypto = require('crypto-js');
 
@@ -64,7 +65,8 @@ async function writeData(data: any) {
   const content = await getYamlContent(filePath);
   if (content) {
     const providerAliasKeys = Object.keys(content);
-    if (providerAliasKeys.includes(accessAlias)) {
+    const Temp_Params = jsonparse(process.env.Temp_Params);
+    if (providerAliasKeys.includes(accessAlias) && !Temp_Params.f) {
       const option = [
         {
           type: 'list',
@@ -97,7 +99,8 @@ async function writeData(data: any) {
       }
     } else {
       try {
-        fs.appendFileSync(filePath, yaml.dump({ [accessAlias]: encrypt(info) }));
+        content[accessAlias] = encrypt(info);
+        fs.writeFileSync(filePath, yaml.dump(content));
         output({ info, accessAlias });
       } catch (err) {
         throw new Error('Configuration failed');

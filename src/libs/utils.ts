@@ -7,6 +7,15 @@ import * as fs from 'fs-extra';
 import { Logger } from '../logger';
 const logger = new Logger('S-CORE');
 
+export const jsonparse = (value) => {
+  try {
+    const data = JSON.parse(value);
+    return typeof data === 'object' ? data : {};
+  } catch (error) {
+    return {};
+  }
+};
+
 export const merge = require('lodash.merge');
 
 export const isUndefined = (obj: any): obj is undefined => typeof obj === 'undefined';
