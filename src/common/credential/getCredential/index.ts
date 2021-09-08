@@ -69,7 +69,7 @@ function formatValue(content: any, alias: string) {
 
 function trim(obj) {
   for (const key in obj) {
-    obj[key] = obj[key].replace(/(^\s*)|(\s*$)/g, '');
+    obj[key] = obj[key] && obj[key].replace(/(^\s*)|(\s*$)/g, '');
   }
   return obj;
 }
