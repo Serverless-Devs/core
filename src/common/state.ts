@@ -3,16 +3,16 @@ import path from 'path';
 import fs from 'fs-extra';
 
 export async function getState(id: any, dirPath?: string) {
-  const spath = path.resolve(process.env.templateFile, '../.s');
-
+  const templateFile = process.env.templateFile;
+  const spath = fs.existsSync(templateFile) ? path.resolve(templateFile, '../.s') : process.cwd();
   const temp = dirPath ? path.resolve(spath, dirPath) : spath;
-
   const stateFilePath = path.join(temp, `${id}.json`);
   return readJsonFile(stateFilePath);
 }
 
 export async function setState(id: any, state: any, dirPath?: string) {
-  const spath = path.resolve(process.env.templateFile, '../.s');
+  const templateFile = process.env.templateFile;
+  const spath = fs.existsSync(templateFile) ? path.resolve(templateFile, '../.s') : process.cwd();
   fs.ensureDirSync(spath);
   const temp = dirPath ? path.resolve(spath, dirPath) : spath;
   const stateFilePath = path.join(temp, `${id}.json`);
