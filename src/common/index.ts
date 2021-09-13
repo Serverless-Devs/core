@@ -1,5 +1,5 @@
 export { request, downloadRequest } from './request';
-export { reportComponent } from './report';
+export { reportComponent } from './reportComponent';
 export { default as spinner } from './spinner';
 export { default as zip } from './zip';
 export { default as unzip } from 'decompress';
@@ -14,3 +14,4 @@ export { default as installDependency } from './installDependency';
 export { default as getYamlContent } from './getYamlContent';
 export { default as chalk } from 'chalk';
 export { default as colors } from 'chalk';
+export { default as report } from './report';

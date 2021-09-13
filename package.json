@@ -53,6 +53,7 @@
     "decompress": "^4.2.1",
     "download": "^8.0.0",
     "fs-extra": "9.0.1",
+    "getmac": "^5.20.0",
     "got": "^8.3.2",
     "husky": "^6.0.0",
     "ignore": "^5.1.8",

@@ -1,14 +1,14 @@
 import { execDaemon } from '../execDaemon';
 
-export interface IReportComponent {
-  uid: string;
-  command: string;
-  remark?: string;
+interface IConfig {
+  type: 'pv' | 'error';
 }
 
-export async function reportComponent(componentName: string, options: IReportComponent) {
-  execDaemon('reportComponent.js', {
-    componentName,
-    componentConfig: JSON.stringify(options),
+function report(config: IConfig) {
+  const { type } = config;
+  execDaemon('report.js', {
+    type,
   });
 }
+
+export default report;
