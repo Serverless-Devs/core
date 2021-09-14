@@ -1,14 +1,12 @@
 import { execDaemon } from '../execDaemon';
 
 interface IConfig {
-  type: 'pv' | 'error';
+  type: 'pv' | 'error' | 'action';
+  content?: string;
 }
 
 function report(config: IConfig) {
-  const { type } = config;
-  execDaemon('report.js', {
-    type,
-  });
+  execDaemon('report.js', config);
 }
 
 export default report;

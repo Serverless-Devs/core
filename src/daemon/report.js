@@ -1,4 +1,4 @@
-const { getMAC, request } = require('../index');
+const { getMAC, request, getYamlContent } = require('../index');
 const { execSync } = require('child_process');
 const path = require('path');
 const fs = require('fs');
@@ -6,15 +6,24 @@ const os = require('os');
 const pid = getMAC();
 
 async function init() {
-  const { type } = process.env;
+  const { type, templateFile } = process.env;
+  let { content } = process.env;
+
   const cli_version = getCliVersion();
   const core_version = getCoreVersion();
   const os = process.platform;
   const node_version = process.version;
+  const time = 1;
   const baseURL =
     'http://dankun.ccc45d9d8e32b44eeac168caa1a2deead.cn-zhangjiakou.alicontainer.com/r.png';
-  const url = `${baseURL}?type=${type}&cli_version=${cli_version}&core_version=${core_version}&os=${os}&node_version=${node_version}&pid=${pid}`;
-  await request(url, { method: 'post', json: false });
+  const url = `${baseURL}?type=${type}&cli_version=${cli_version}&core_version=${core_version}&os=${os}&node_version=${node_version}&pid=${pid}&time=${time}`;
+
+  if (type === 'error' && fs.existsSync(templateFile)) {
+    content = content ? JSON.parse(content) : {};
+    content.template = await getYamlContent(templateFile);
+    content = JSON.stringify(content);
+  }
+  await request(url, { method: 'post', json: false, form: true, body: { content } });
 }
 
 function getCoreVersion() {

@@ -1,5 +1,5 @@
 export { request, downloadRequest } from './request';
-export { reportComponent } from './reportComponent';
+export { default as reportComponent } from './reportComponent';
 export { default as spinner } from './spinner';
 export { default as zip } from './zip';
 export { default as unzip } from 'decompress';
