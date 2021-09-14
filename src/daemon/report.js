@@ -3,7 +3,7 @@ const { execSync } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
-const pid = getMAC();
+const getmac = getMAC();
 
 async function init() {
   const { type, templateFile } = process.env;
@@ -14,6 +14,7 @@ async function init() {
   const os = process.platform;
   const node_version = process.version;
   const time = 1;
+  const pid = getmac.replace(/:/g, '_');
   const baseURL =
     'http://dankun.ccc45d9d8e32b44eeac168caa1a2deead.cn-zhangjiakou.alicontainer.com/r.png';
   const url = `${baseURL}?type=${type}&cli_version=${cli_version}&core_version=${core_version}&os=${os}&node_version=${node_version}&pid=${pid}&time=${time}`;
