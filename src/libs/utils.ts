@@ -5,7 +5,14 @@
 import { uid } from 'uid/secure';
 import * as fs from 'fs-extra';
 import { Logger } from '../logger';
-const logger = new Logger('S-CORE');
+import report from '../common/report';
+
+export function handleError(error: string) {
+  report({ type: 'error', content: error });
+  throw new Error(error);
+}
+
+export const logger = new Logger('S-CORE');
 
 export const jsonparse = (value) => {
   try {

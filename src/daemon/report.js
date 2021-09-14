@@ -19,9 +19,8 @@ async function init() {
   const url = `${baseURL}?type=${type}&cli_version=${cli_version}&core_version=${core_version}&os=${os}&node_version=${node_version}&pid=${pid}&time=${time}`;
 
   if (type === 'error' && fs.existsSync(templateFile)) {
-    content = content ? JSON.parse(content) : {};
-    content.template = await getYamlContent(templateFile);
-    content = JSON.stringify(content);
+    const template = await getYamlContent(templateFile);
+    content = `${content}|${JSON.stringify(template)}`;
   }
   await request(url, { method: 'post', json: false, form: true, body: { content } });
 }

@@ -6,8 +6,8 @@ import spinner from './spinner';
 import decompress from 'decompress';
 import fs from 'fs-extra';
 import { RegistryEnum } from './constant';
-import { Logger } from '../logger';
-const logger = new Logger('S-CORE');
+import { handleError, logger } from '../libs/utils';
+
 interface HintOptions {
   loading?: string;
   success?: string;
@@ -95,7 +95,7 @@ export async function request(url: string, options?: RequestOptions): Promise<an
     loading && vm.stop();
     if (!ignoreError) {
       spinner(e.message).fail();
-      throw new Error(errorMessage(e.statusCode, e.message));
+      handleError(errorMessage(e.statusCode, e.message));
     }
   }
 
@@ -104,12 +104,12 @@ export async function request(url: string, options?: RequestOptions): Promise<an
   if (statusCode !== 200) {
     error && spinner(error).fail();
     if (!ignoreError) {
-      throw new Error(errorMessage(statusCode, 'System exception'));
+      handleError(errorMessage(statusCode, 'System exception'));
     }
   } else if (body.Error) {
     error && spinner(error).fail();
     if (!ignoreError) {
-      throw new Error(errorMessage(body.Error.Code, body.Error.Message));
+      handleError(errorMessage(body.Error.Code, body.Error.Message));
     }
   }
 
@@ -144,7 +144,7 @@ async function downloadWithExtract({ url, dest, filename, strip, rest, bar, spin
     spin.succeed(filename ? `${filename} ${text}` : text);
   } catch (error) {
     spin.stop();
-    throw error;
+    handleError(error);
   }
 }
 

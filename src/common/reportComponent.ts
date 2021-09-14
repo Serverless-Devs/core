@@ -9,10 +9,7 @@ export interface IReportComponent {
 function reportComponent(componentName: string, options: IReportComponent) {
   report({
     type: 'action',
-    content: JSON.stringify({
-      componentName,
-      componentParams: options,
-    }),
+    content: `${componentName}|${JSON.stringify(options)}`,
   });
 }
 
