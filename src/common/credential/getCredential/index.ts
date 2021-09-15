@@ -5,11 +5,10 @@ import get from 'lodash.get';
 import os from 'os';
 import path from 'path';
 import getYamlContent from '../../getYamlContent';
-import { Logger } from '../../../logger';
+import { logger } from '../../../libs/utils';
 import chalk from 'chalk';
 
 const Crypto = require('crypto-js');
-const logger = new Logger('S-CORE');
 
 export function decryptCredential(info: { [key: string]: any }) {
   const cloneInfo = Object.assign({}, info);

@@ -3,6 +3,7 @@ import chalk from 'chalk';
 import { S_ROOT_HOME } from '../libs/common';
 import minimist from 'minimist';
 import get from 'lodash.get';
+import report from '../common/report';
 
 type LogColor =
   | 'black'
@@ -184,6 +185,10 @@ export class Logger {
   }
 
   error(data) {
+    report({
+      type: 'error',
+      content: data,
+    });
     this.Loggers.error(data);
   }
 }

@@ -1,7 +1,6 @@
 import path from 'path';
 import { spawn } from 'child_process';
 import fs from 'fs-extra';
-import { readJsonFile } from './libs/utils';
 const TTL = 10 * 60 * 1000;
 
 interface IConfig {
@@ -9,6 +8,13 @@ interface IConfig {
 }
 interface IConfigWithTTL extends IConfig {
   lockPath: string;
+}
+
+function readJsonFile(filePath: string) {
+  if (fs.existsSync(filePath)) {
+    const data = fs.readFileSync(filePath, 'utf8');
+    return JSON.parse(data);
+  }
 }
 
 export function execDaemon(filename: string, config?: IConfig) {
