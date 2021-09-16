@@ -6,7 +6,7 @@ export interface IReportComponent {
   remark?: string;
 }
 
-function reportComponent(componentName: string, options: IReportComponent) {
+async function reportComponent(componentName: string, options: IReportComponent) {
   report({
     type: 'action',
     content: `${componentName}|${JSON.stringify(options)}`,
