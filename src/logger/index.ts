@@ -35,7 +35,7 @@ export interface ILogger {
   error: (...data: any[]) => any;
 }
 const args = minimist(process.argv.slice(2));
-const enableDebug = args.debug || getDebugFromEnv();
+const getEnableDebug = () => args.debug || getDebugFromEnv();
 
 function getSecretValue(val: string) {
   const [key, value] = val.split(': ');
@@ -90,7 +90,7 @@ export const logger = (name: string): ILogger => {
   const stdLog = loggers.appenders.set('std-log', {
     type: 'stdout',
     layout: { type: 'colored' },
-    levels: (enableDebug ? ['debug'] : []).concat(['info', 'warn', 'error', 'fatal']),
+    levels: (getEnableDebug() ? ['debug'] : []).concat(['info', 'warn', 'error', 'fatal']),
   });
 
   try {
@@ -146,7 +146,7 @@ export class Logger {
   }
 
   static debug(name: string, data) {
-    if (enableDebug) {
+    if (getEnableDebug()) {
       $log.name = name;
       const list = secretCredentials(data);
       $log.debug(...list);
