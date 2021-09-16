@@ -1,3 +1,7 @@
+import os from 'os';
+import path from 'path';
+const SHome = path.join(os.homedir(), '.s');
+
 export { request, downloadRequest } from './request';
 export { default as reportComponent } from './reportComponent';
 export { default as spinner } from './spinner';
@@ -14,4 +18,7 @@ export { default as installDependency } from './installDependency';
 export { default as getYamlContent } from './getYamlContent';
 export { default as chalk } from 'chalk';
 export { default as colors } from 'chalk';
+export { default as inquirer } from 'inquirer';
 export { default as report } from './report';
+export { default as fsExtra } from 'fs-extra';
+export { SHome };
