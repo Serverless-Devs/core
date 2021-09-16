@@ -1,14 +1,23 @@
 import fs from 'fs-extra';
 import path from 'path';
 import get from 'lodash.get';
-import { exec, StdioOptions } from 'child_process';
+import execa, { StdioOption } from 'execa';
 import spinner from './spinner';
 import { readJsonFile } from '../libs/utils';
 
 interface IOptions {
   cwd?: string;
   production?: boolean;
-  stdio?: StdioOptions;
+  stdio?: StdioOption;
+}
+
+function checkYarn() {
+  try {
+    execa.sync('yarn -v', { shell: true });
+    return true;
+  } catch (error) {
+    return false;
+  }
 }
 
 const npmInstall = async (
@@ -19,32 +28,28 @@ const npmInstall = async (
     registry?: string;
   } = {},
 ) => {
-  return new Promise((resolve, reject) => {
-    const installDirectory = options.baseDir;
-    const pkgJson: string = path.join(installDirectory, 'package.json');
-    if (!fs.existsSync(pkgJson)) {
-      fs.writeFileSync(pkgJson, '{}');
-    }
-    const spin = spinner('Dependencies installing...');
-    const registry = options.registry ? ` --registry=${options.registry}` : '';
-    exec(
-      `${process.env.NPM_CLIENT || 'npm'} install ${
+  const installDirectory = options.baseDir;
+  const pkgJson: string = path.join(installDirectory, 'package.json');
+  if (!fs.existsSync(pkgJson)) {
+    fs.writeFileSync(pkgJson, '{}');
+  }
+  const spin = spinner('Dependencies installing...');
+  const registry = options.registry ? ` --registry=${options.registry}` : '';
+  try {
+    const client = checkYarn() ? 'yarn' : get(process.env, 'NPM_CLIENT', 'npm');
+    execa.sync(
+      `${client} install ${
         // eslint-disable-next-line no-nested-ternary
         options.npmList ? `${options.npmList.join(' ')}` : options.production ? '--production' : ''
       }${registry}`,
-      { cwd: installDirectory },
-      (err) => {
-        spin.stop();
-        if (err) {
-          const errmsg = (err && err.message) || err;
-          console.log(` - npm install err ${errmsg}`);
-          reject(errmsg);
-        } else {
-          resolve(true);
-        }
-      },
+      { cwd: installDirectory, shell: true, stdio: 'ignore' },
     );
-  });
+    spin.stop();
+  } catch (error) {
+    spin.stop();
+    const errmsg = (error && error.message) || error;
+    console.log(` - npm install err ${errmsg}`);
+  }
 };
 
 async function installDependency(options?: IOptions) {
