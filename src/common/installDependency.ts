@@ -2,9 +2,9 @@ import fs from 'fs-extra';
 import path from 'path';
 import get from 'lodash.get';
 import execa, { StdioOption } from 'execa';
+import report from './report';
 import spinner from './spinner';
 import { readJsonFile } from '../libs/utils';
-import report from './report';
 
 interface IOptions {
   cwd?: string;
@@ -14,7 +14,7 @@ interface IOptions {
 
 function checkYarn() {
   try {
-    execa.sync('yarn -v', { shell: true });
+    execa.sync('yarn', ['-v']);
     return true;
   } catch (error) {
     return false;
@@ -27,30 +27,36 @@ const npmInstall = async (
     baseDir?: string;
     production?: boolean;
     registry?: string;
+    showLoading?: boolean;
   } = {},
 ) => {
-  const installDirectory = options.baseDir;
-  const pkgJson: string = path.join(installDirectory, 'package.json');
+  const { showLoading, baseDir, npmList, production } = options;
+  const pkgJson: string = path.join(baseDir, 'package.json');
   if (!fs.existsSync(pkgJson)) {
     fs.writeFileSync(pkgJson, '{}');
   }
-  const spin = spinner('Dependencies installing...');
+  let spin;
+  if (showLoading) {
+    spin = spinner('Dependencies installing...');
+  }
   const registry = options.registry ? ` --registry=${options.registry}` : '';
   try {
     const client = checkYarn() ? 'yarn' : get(process.env, 'NPM_CLIENT', 'npm');
     execa.sync(
       `${client} install ${
         // eslint-disable-next-line no-nested-ternary
-        options.npmList ? `${options.npmList.join(' ')}` : options.production ? '--production' : ''
+        npmList ? `${npmList.join(' ')}` : production ? '--production' : ''
       }${registry}`,
-      { cwd: installDirectory, shell: true, stdio: 'ignore' },
+      { cwd: baseDir, shell: true, stdio: 'ignore' },
     );
-    spin.stop();
   } catch (error) {
-    spin.stop();
     report({ type: 'networkError', content: error });
     const errmsg = (error && error.message) || error;
     console.log(` - npm install err ${errmsg}`);
+  } finally {
+    if (showLoading) {
+      spin.stop();
+    }
   }
 };
 
@@ -63,6 +69,7 @@ async function installDependency(options?: IOptions) {
 
   await npmInstall({
     baseDir: cwd,
+    showLoading: get(options, 'showLoading', true),
     production: get(options, 'production', true),
   });
 }
