@@ -15,3 +15,4 @@ export { default as getYamlContent } from './getYamlContent';
 export { default as chalk } from 'chalk';
 export { default as colors } from 'chalk';
 export { default as report } from './report';
+export { default as fsExtra } from 'fs-extra';

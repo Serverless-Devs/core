@@ -17,24 +17,30 @@ const npmInstall = async (
     baseDir?: string;
     production?: boolean;
     registry?: string;
+    showLoading?: boolean;
   } = {},
 ) => {
   return new Promise((resolve, reject) => {
-    const installDirectory = options.baseDir;
-    const pkgJson: string = path.join(installDirectory, 'package.json');
+    const { showLoading, baseDir, npmList, production } = options;
+    const pkgJson: string = path.join(baseDir, 'package.json');
     if (!fs.existsSync(pkgJson)) {
       fs.writeFileSync(pkgJson, '{}');
     }
-    const spin = spinner('Dependencies installing...');
+    let spin;
+    if (showLoading) {
+      spin = spinner('Dependencies installing...');
+    }
     const registry = options.registry ? ` --registry=${options.registry}` : '';
     exec(
       `${process.env.NPM_CLIENT || 'npm'} install ${
         // eslint-disable-next-line no-nested-ternary
-        options.npmList ? `${options.npmList.join(' ')}` : options.production ? '--production' : ''
+        npmList ? `${npmList.join(' ')}` : production ? '--production' : ''
       }${registry}`,
-      { cwd: installDirectory },
+      { cwd: baseDir },
       (err) => {
-        spin.stop();
+        if (showLoading) {
+          spin.stop();
+        }
         if (err) {
           const errmsg = (err && err.message) || err;
           console.log(` - npm install err ${errmsg}`);
@@ -56,6 +62,7 @@ async function installDependency(options?: IOptions) {
 
   await npmInstall({
     baseDir: cwd,
+    showLoading: get(options, 'showLoading') === false ? false : true,
     production: get(options, 'production', true),
   });
 }
