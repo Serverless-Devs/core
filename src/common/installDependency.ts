@@ -4,6 +4,7 @@ import get from 'lodash.get';
 import execa, { StdioOption } from 'execa';
 import spinner from './spinner';
 import { readJsonFile } from '../libs/utils';
+import report from './report';
 
 interface IOptions {
   cwd?: string;
@@ -47,6 +48,7 @@ const npmInstall = async (
     spin.stop();
   } catch (error) {
     spin.stop();
+    report({ type: 'networkError', content: error });
     const errmsg = (error && error.message) || error;
     console.log(` - npm install err ${errmsg}`);
   }
