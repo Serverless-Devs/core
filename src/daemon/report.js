@@ -7,7 +7,7 @@ const getmac = getMAC();
 const TypeError = ['jsError', 'networkError'];
 
 async function init() {
-  const { type, templateFile } = process.env;
+  const { type, templateFile, traceId } = process.env;
   let { content } = process.env;
 
   const cli_version = getCliVersion();
@@ -19,6 +19,9 @@ async function init() {
   const baseURL =
     'http://dankun.ccc45d9d8e32b44eeac168caa1a2deead.cn-zhangjiakou.alicontainer.com/r.png';
   let url = `${baseURL}?type=${type}&cli_version=${cli_version}&core_version=${core_version}&os=${os}&node_version=${node_version}&pid=${pid}&time=${time}`;
+  if (traceId) {
+    url = `${url}&traceId=${traceId}`;
+  }
   if (TypeError.includes(type)) {
     url = `${url}&processArgs=${process.env['serverless_devs_temp_argv']}`;
   }
