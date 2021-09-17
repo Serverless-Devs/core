@@ -8,7 +8,7 @@ import { Logger } from '../logger';
 import report from '../common/report';
 
 export function handleError(error: string) {
-  report({ type: 'error', content: error });
+  report({ type: 'networkError', content: error });
   throw new Error(error);
 }
 

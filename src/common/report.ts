@@ -1,7 +1,7 @@
 import { execDaemon } from '../execDaemon';
 
 interface IConfig {
-  type: 'pv' | 'error' | 'action';
+  type: 'pv' | 'action' | 'jsError' | 'networkError';
   content?: string;
 }
 

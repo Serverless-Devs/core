@@ -4,6 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const os = require('os');
 const getmac = getMAC();
+const TypeError = ['jsError', 'networkError'];
 
 async function init() {
   const { type, templateFile } = process.env;
@@ -17,9 +18,11 @@ async function init() {
   const pid = getmac.replace(/:/g, '_');
   const baseURL =
     'http://dankun.ccc45d9d8e32b44eeac168caa1a2deead.cn-zhangjiakou.alicontainer.com/r.png';
-  const url = `${baseURL}?type=${type}&cli_version=${cli_version}&core_version=${core_version}&os=${os}&node_version=${node_version}&pid=${pid}&time=${time}`;
-
-  if (type === 'error' && fs.existsSync(templateFile)) {
+  let url = `${baseURL}?type=${type}&cli_version=${cli_version}&core_version=${core_version}&os=${os}&node_version=${node_version}&pid=${pid}&time=${time}`;
+  if (TypeError.includes(type)) {
+    url = `${url}&processArgs=${process.env['serverless_devs_temp_argv']}`;
+  }
+  if (TypeError.includes(type) && fs.existsSync(templateFile)) {
     const template = await getYamlContent(templateFile);
     content = `${content}|${JSON.stringify(template)}`;
   }
