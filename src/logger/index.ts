@@ -3,6 +3,11 @@ import chalk from 'chalk';
 import { S_ROOT_HOME } from '../libs/common';
 import minimist from 'minimist';
 import get from 'lodash.get';
+const prettyoutput = require("prettyoutput");
+import ansiEscapes from 'ansi-escapes';
+
+// CLI Colors
+const white = (str) => str;
 
 type LogColor =
   | 'black'
@@ -185,6 +190,30 @@ export class Logger {
 
   error(data) {
     this.Loggers.error(data);
+  }
+
+  output(outputs, indent = 0) {
+    // Clear any existing content
+    process.stdout.write(ansiEscapes.eraseDown);
+    process.stdout.write(
+      white(
+        prettyoutput(
+          outputs,
+          {
+            colors: {
+              keys: 'bold',
+              dash: null,
+              number: null,
+              string: null,
+              true: null,
+              false: null,
+            },
+            maxDepth: 10,
+          },
+          indent,
+        ),
+      ),
+    );
   }
 }
 
