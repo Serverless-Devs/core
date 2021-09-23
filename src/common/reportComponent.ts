@@ -14,7 +14,7 @@ async function reportComponent(componentName: string, options: IReportComponent)
   });
   report({
     type: 'action',
-    content: `${componentName}|${JSON.stringify(options)}`,
+    content: `${componentName}||${JSON.stringify(options)}`,
   });
 }
 

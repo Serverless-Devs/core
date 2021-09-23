@@ -19,19 +19,27 @@ async function init() {
   if (traceId) {
     url = `${url}&traceId=${traceId}`;
   }
-  if (TypeError.includes(type)) {
-    url = `${url}&processArgs=${process.env['serverless_devs_temp_argv']}`;
+  if (getCommand()) {
+    url = `${url}&command=${getCommand()}`;
   }
   if (TypeError.includes(type) && fs.existsSync(templateFile)) {
     const template = await getYamlContent(templateFile);
-    content = `${content}|${JSON.stringify(template)}`;
+    content = `${content}||${JSON.stringify(template)}`;
   }
-  await request(url, { method: 'post', json: false, form: true, body: { content } });
+  await request(url, { method: 'post', json: false, body: content });
 }
 
 function getCoreVersion() {
   const corePath = path.join(os.homedir(), '.s', 'cache', 'core', 'package.json');
   return fs.existsSync(corePath) ? require(corePath).version : 'unknown';
+}
+
+function getCommand() {
+  try {
+    const serverless_devs_temp_argv = JSON.parse(process.env['serverless_devs_temp_argv']);
+    const command = serverless_devs_temp_argv.slice(2);
+    return command ? `s ${command.join(' ')}` : undefined;
+  } catch (error) {}
 }
 
 (async () => {
