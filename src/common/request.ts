@@ -144,7 +144,12 @@ async function downloadWithExtract({ url, dest, filename, strip, rest, bar, spin
     spin.succeed(filename ? `${filename} ${text}` : text);
   } catch (error) {
     spin.stop();
-    handleError(error);
+    reportError({
+      requestUrl: url,
+      statusCode: error.statusCode,
+      errorMsg: error.message,
+    });
+    throw error;
   }
 }
 
