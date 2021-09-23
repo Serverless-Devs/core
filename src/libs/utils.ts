@@ -5,12 +5,6 @@
 import { uid } from 'uid/secure';
 import * as fs from 'fs-extra';
 import { Logger } from '../logger';
-import report from '../common/report';
-
-export function handleError(error: string) {
-  report({ type: 'error', content: error });
-  throw new Error(error);
-}
 
 export const logger = new Logger('S-CORE');
 

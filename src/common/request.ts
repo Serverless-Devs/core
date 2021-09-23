@@ -6,7 +6,8 @@ import spinner from './spinner';
 import decompress from 'decompress';
 import fs from 'fs-extra';
 import { RegistryEnum } from './constant';
-import { handleError, logger } from '../libs/utils';
+import { logger } from '../libs/utils';
+import report from '../common/report';
 
 interface HintOptions {
   loading?: string;
@@ -20,6 +21,19 @@ interface RequestOptions {
   hint?: HintOptions;
   ignoreError?: boolean;
   [key: string]: any;
+}
+
+interface IErrorConfig {
+  requestUrl: string;
+  statusCode: string | number;
+  errorMsg: string;
+}
+
+export function reportError(config: IErrorConfig) {
+  report({
+    type: 'networkError',
+    content: `${config.requestUrl}||${config.statusCode}||${config.errorMsg}`,
+  });
 }
 
 export interface IDownloadOptions {
@@ -95,7 +109,12 @@ export async function request(url: string, options?: RequestOptions): Promise<an
     loading && vm.stop();
     if (!ignoreError) {
       spinner(e.message).fail();
-      handleError(errorMessage(e.statusCode, e.message));
+      reportError({
+        requestUrl: url,
+        statusCode: e.statusCode,
+        errorMsg: e.message,
+      });
+      throw new Error(errorMessage(e.statusCode, e.message));
     }
   }
 
@@ -104,12 +123,22 @@ export async function request(url: string, options?: RequestOptions): Promise<an
   if (statusCode !== 200) {
     error && spinner(error).fail();
     if (!ignoreError) {
-      handleError(errorMessage(statusCode, 'System exception'));
+      reportError({
+        requestUrl: url,
+        statusCode,
+        errorMsg: 'System exception',
+      });
+      throw new Error(errorMessage(statusCode, 'System exception'));
     }
   } else if (body.Error) {
     error && spinner(error).fail();
     if (!ignoreError) {
-      handleError(errorMessage(body.Error.Code, body.Error.Message));
+      reportError({
+        requestUrl: url,
+        statusCode: body.Error.Code,
+        errorMsg: body.Error.Message,
+      });
+      throw new Error(errorMessage(body.Error.Code, body.Error.Message));
     }
   }
 
