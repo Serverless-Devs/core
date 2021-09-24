@@ -34,7 +34,7 @@ async function getCredential(...args: any[]) {
     params = rest;
   } else {
     access = first;
-    params = [second, ...rest];
+    params = second ? [second, ...rest] : [];
   }
   const result = await getCredentialWithAccess(access, ...params);
   transformInputs(inputs, result);
