@@ -1,1 +1,1 @@
-export { Logger as HLogger } from './logger';
+export { HLogger } from './logger';

@@ -1,5 +1,6 @@
+// @ts-nocheck
 import { HLogger } from '../../src';
-import { Logger } from '../../src/logger';
+import { Logger, ILogger } from '../../src/logger';
 
 const input = {
   Credentials: {
@@ -21,15 +22,15 @@ const input = {
 };
 
 class LoggerDemo {
-  @HLogger('S-CORE') logger;
+  @HLogger('S-CORE')logger: ILogger;
 
   async getDefaultLog() {
-    console.log(process.argv);
-    this.logger.debug(JSON.stringify(input, null, 2), 'xxx');
-    this.logger.info('abc');
-    this.logger.warn('abc');
-    this.logger.error('abc');
-    this.logger.fatal('abc');
+    // this.logger.debug(JSON.stringify(input, null, 2), 'xxx');
+    this.logger.log('some log message ')
+    this.logger.info('S-CORE', 'info message')
+    this.logger.warn('S-CORE', 'warn message')
+    this.logger.error('S-CORE', 'error message')
+    this.logger.debug('S-CORE', 'debug message')
   }
 
   getDefaultLogObect() {
@@ -103,19 +104,31 @@ demo.getDefaultLog();
 // }
 //
 // console.log(LogLevelEnum[2]);
-const a = {
-  name: 'ex',
-  description: 'ex',
-  runtime: 'nodejs12',
-  codeUri: './code/index.js',
-  environmentVariables: {
-    aliyun_AccessKeyId: '123',
-    aliyun_AccessKeySecret: '321',
-  },
-};
-Logger.debug('test', JSON.stringify(a, null, '  '));
+// const a = {
+//   name: 'ex',
+//   description: 'ex',
+//   runtime: 'nodejs12',
+//   codeUri: './code/index.js',
+//   environmentVariables: {
+//     aliyun_AccessKeyId: '123',
+//     aliyun_AccessKeySecret: '321',
+//   },
+// };
+// Logger.info('test', JSON.stringify(a, null, '  '));
 
 // Logger.debug('xx', `logger密钥信息: ${JSON.stringify(input, null, 2)}`);
 
 // const l = new Logger();
 // l.debug(`logger密钥信息: ${JSON.stringify(input, null, 2)}`);
+
+// Logger.log('some log message ')
+// Logger.info('S-CORE', 'info message')
+// Logger.warn('S-CORE', 'warn message')
+// Logger.error('S-CORE', 'error message')
+// Logger.debug('S-CORE', 'debug message')
+// const logger = new Logger('S-CORE')
+// logger.log('some log message ')
+// logger.info('S-CORE', 'info message')
+// logger.warn('S-CORE', 'warn message')
+// logger.error('S-CORE', 'error message')
+// logger.debug('S-CORE', 'debug message')
