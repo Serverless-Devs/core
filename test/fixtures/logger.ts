@@ -5,15 +5,15 @@ import { Logger, ILogger } from '../../src/logger';
 const input = {
   Credentials: {
     Alias: 'default',
-    AccountID: '16940247251212952210',
-    AccessKeyID: 'abcddsdsdwxxxgZMtMjtrY',
-    AccessKeySecret: 'adsdsdsdsddsdxxxgZMtMjtrY',
+    AccountID: '1234567890123456',
+    AccessKeyID: 'abcdefghijklmnopqrstuvwx',
+    AccessKeySecret: 'abcdefghijklmnopqrstuvwxyzabcd',
   },
   credentials: {
     Alias: 'default',
-    AccountID: '169402472sds5952210',
-    AccessKeyID: 'abcddsdsdwxxxgZMtMjtrY',
-    AccessKeySecret: 'adsdsdsdsddsdxxxgZMtMjtrY',
+    AccountID: '1234567890123456',
+    AccessKeyID: 'abcdefghijklmnopqrstuvwx',
+    AccessKeySecret: 'abcdefghijklmnopqrstuvwxyzabcd',
   },
   appName: 'appName',
   Path: {
@@ -22,15 +22,15 @@ const input = {
 };
 
 class LoggerDemo {
-  @HLogger('S-CORE')logger: ILogger;
+  @HLogger('S-CORE') logger: ILogger;
 
   async getDefaultLog() {
-    // this.logger.debug(JSON.stringify(input, null, 2), 'xxx');
+    this.logger.debug(JSON.stringify(input));
     this.logger.log('some log message ')
-    this.logger.info('S-CORE', 'info message')
-    this.logger.warn('S-CORE', 'warn message')
-    this.logger.error('S-CORE', 'error message')
-    this.logger.debug('S-CORE', 'debug message')
+    this.logger.info('info message')
+    this.logger.warn('warn message')
+    this.logger.error('error message')
+    this.logger.debug('debug message')
   }
 
   getDefaultLogObect() {

@@ -41,53 +41,35 @@ export interface ILogger {
 const args = minimist(process.argv.slice(2));
 const getEnableDebug = () => args.debug || getDebugFromEnv();
 
-// function getSecretValue(val: string) {
-//   const [key, value] = val.split(': ');
-//   const valueLength = value.length;
-//   if (valueLength < 6) return val;
+function searchStr(data: string, str: string) {
+  const arr = [];
+  let index = data.indexOf(str);
+  while (index > -1) {
+    arr.push(index);
+    index = data.indexOf(str, index + 1);
+  }
+  return arr;
+}
 
-//   let formatVal = value.slice(0, 4);
-//   for (let i = 0; i < valueLength - 10; i++) {
-//     formatVal += '*';
-//   }
-//   formatVal += value.slice(valueLength - 6, valueLength);
-//   return `${key}: ${formatVal}`;
-// }
-
-// function secretCredentials(...data: any[]) {
-//   const list = [];
-//   for (const iterator of data) {
-//     if (typeof iterator.includes !== 'function') return data;
-//     let str = iterator;
-//     if (iterator.includes('AccountID')) {
-//       const reg = /"AccountID(.*?)\n/g;
-//       const arr = iterator.match(reg);
-//       if (!arr) return;
-//       arr &&
-//         arr.forEach((item) => {
-//           str = str.replace(item, getSecretValue(item));
-//         });
-//     }
-//     if (iterator.includes('AccessKeyID')) {
-//       const reg = /"AccessKeyID(.*?)\n/g;
-//       const arr = iterator.match(reg);
-//       arr &&
-//         arr.forEach((item) => {
-//           str = str.replace(item, getSecretValue(item));
-//         });
-//     }
-//     if (iterator.includes('AccessKeySecret')) {
-//       const reg = /"AccessKeySecret(.*?)\n/g;
-//       const arr = iterator.match(reg);
-//       arr &&
-//         arr.forEach((item) => {
-//           str = str.replace(item, getSecretValue(item));
-//         });
-//     }
-//     list.push(str);
-//   }
-//   return list;
-// }
+function formatDebugData(data: string) {
+  try {
+    const AccountIDs = searchStr(data, 'AccountID');
+    AccountIDs.forEach((index) => {
+      data = data.slice(0, index + 16) + '*'.repeat(10) + data.slice(index + 16 + 10);
+    });
+    const AccessKeyIDs = searchStr(data, 'AccessKeyID');
+    AccessKeyIDs.forEach((index) => {
+      data = data.slice(0, index + 18) + '*'.repeat(18) + data.slice(index + 18 + 18);
+    });
+    const AccessKeySecrets = searchStr(data, 'AccessKeySecret');
+    AccessKeySecrets.forEach((index) => {
+      data = data.slice(0, index + 22) + '*'.repeat(24) + data.slice(index + 22 + 24);
+    });
+    return data;
+  } catch (error) {
+    return data;
+  }
+}
 
 export class Logger {
   context: string;
@@ -121,6 +103,7 @@ export class Logger {
 
   debug(data) {
     if (getEnableDebug()) {
+      data = formatDebugData(data);
       console.log(`${chalk.blue(`[DEBUG] [${this.context}] - `)}${data}`);
     }
   }
