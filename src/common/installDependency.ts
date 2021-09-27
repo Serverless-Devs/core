@@ -50,7 +50,7 @@ const npmInstall = async (
       { cwd: baseDir, shell: true, stdio: 'ignore' },
     );
   } catch (error) {
-    report({ type: 'networkError', content: error });
+    report({ type: 'networkError', content: error.stack });
     const errmsg = (error && error.message) || error;
     console.log(` - npm install err ${errmsg}`);
   } finally {
