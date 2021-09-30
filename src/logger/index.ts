@@ -1,4 +1,4 @@
-import chalk from 'chalk';
+import chalk, { Chalk } from 'chalk';
 import minimist from 'minimist';
 import get from 'lodash.get';
 const prettyoutput = require('prettyoutput');
@@ -71,55 +71,55 @@ function formatDebugData(data: string) {
   }
 }
 
+const gray = chalk.hex('#8c8d91');
+const red = chalk.hex('#fd5750');
+
+function format(out: Chalk, context: string, data) {
+  console.log(`${gray(`${context}: `)}${out ? out(data) : data}`);
+}
+
 export class Logger {
   context: string;
-  constructor(context?: string) {
+  constructor(context: string) {
     this.context = context;
   }
+
   static log(message: any, color?: LogColor) {
     return process.stdout.write(`${color ? chalk[color](message) : message}\n`);
   }
-
   static debug(name: string, data) {
     if (getEnableDebug()) {
-      console.log(`${chalk.blue(`[DEBUG] [${name}] - `)}${data}`);
+      data = formatDebugData(data);
+      format(gray, name, data);
     }
   }
-
   static info(name: string, data) {
-    console.log(`${chalk.green(`[INFO ] [${name}] - `)}${data}`);
+    format(null, name, data);
   }
-
   static warn(name: string, data) {
-    console.log(`${chalk.yellow(`[WARN ] [${name}] - `)}${data}`);
+    format(chalk.yellow, name, data);
   }
-
   static error(name: string, data) {
-    console.log(`${chalk.red(`[ERROR] [${name}] - `)}${data}`);
+    format(red, name, data);
   }
   log(message: any, color?: LogColor) {
     return process.stdout.write(`${color ? chalk[color](message) : message}\n`);
   }
-
   debug(data) {
     if (getEnableDebug()) {
       data = formatDebugData(data);
-      console.log(`${chalk.blue(`[DEBUG] [${this.context}] - `)}${data}`);
+      format(gray, this.context, data);
     }
   }
-
   info(data) {
-    console.log(`${chalk.green(`[INFO ] [${this.context}] - `)}${data}`);
+    format(null, this.context, data);
   }
-
   warn(data) {
-    console.log(`${chalk.yellow(`[WARN ] [${this.context}] - `)}${data}`);
+    format(chalk.yellow, this.context, data);
   }
-
   error(data) {
-    console.log(`${chalk.red(`[ERROR] [${this.context}] - `)}${data}`);
+    format(red, this.context, data);
   }
-
   output(outputs, indent = 0) {
     // Clear any existing content
     process.stdout.write(ansiEscapes.eraseDown);
