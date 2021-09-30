@@ -4,13 +4,8 @@ import get from 'lodash.get';
 import execa, { StdioOption } from 'execa';
 import report from './report';
 import spinner from './spinner';
-import { readJsonFile } from '../libs/utils';
-
-interface IOptions {
-  cwd?: string;
-  production?: boolean;
-  stdio?: StdioOption;
-}
+import { setState, getState } from './state';
+import Crypto from 'crypto-js';
 
 function checkYarn() {
   try {
@@ -28,13 +23,10 @@ const npmInstall = async (
     production?: boolean;
     registry?: string;
     showLoading?: boolean;
+    stdio?: StdioOption;
   } = {},
 ) => {
   const { showLoading, baseDir, npmList, production } = options;
-  const pkgJson: string = path.join(baseDir, 'package.json');
-  if (!fs.existsSync(pkgJson)) {
-    fs.writeFileSync(pkgJson, '{}');
-  }
   let spin;
   if (showLoading) {
     spin = spinner('Dependencies installing...');
@@ -47,7 +39,7 @@ const npmInstall = async (
         // eslint-disable-next-line no-nested-ternary
         npmList ? `${npmList.join(' ')}` : production ? '--production' : ''
       }${registry}`,
-      { cwd: baseDir, shell: true, stdio: 'ignore' },
+      { cwd: baseDir, shell: true, stdio: get(options, 'stdio', 'ignore') },
     );
   } catch (error) {
     report({ type: 'networkError', content: error.stack });
@@ -60,18 +52,53 @@ const npmInstall = async (
   }
 };
 
-async function installDependency(options?: IOptions) {
-  const cwd = get(options, 'cwd', process.cwd());
-  const packageInfo: any = readJsonFile(path.resolve(cwd, 'package.json'));
-  if (!packageInfo || !get(packageInfo, 'autoInstall', true)) return;
-  const nodeModulePath = path.resolve(cwd, 'node_modules');
-  if (fs.existsSync(nodeModulePath)) return;
+interface IOptions {
+  cwd?: string;
+  production?: boolean;
+  stdio?: StdioOption;
+  showLoading?: boolean;
+  graceInstall?: boolean;
+}
 
+async function installDependency(options: IOptions = {}) {
+  const {
+    cwd = process.cwd(),
+    showLoading = true,
+    production = true,
+    stdio,
+    graceInstall = false,
+  } = options;
+  const packagePath = path.join(cwd, 'package.json');
+  if (!fs.existsSync(packagePath)) return;
+  const packageInfo = require(packagePath);
+  if (packageInfo.autoInstall === false) return;
+  // 优雅安装
+  if (graceInstall) {
+    const nonInstall = await graceInstallDependency({ cwd, packageInfo, production });
+    if (nonInstall) return;
+  } else {
+    const nodeModulePath = path.join(cwd, 'node_modules');
+    if (fs.existsSync(nodeModulePath)) return;
+  }
   await npmInstall({
     baseDir: cwd,
-    showLoading: get(options, 'showLoading', true),
-    production: get(options, 'production', true),
+    showLoading,
+    production,
+    stdio,
   });
+}
+
+async function graceInstallDependency({ cwd, packageInfo, production }) {
+  const filename = `grace-install-dependency-for-${get(packageInfo, 'name', 'package')}`;
+  const sPath = path.join(cwd, '.s');
+  const encryptedContent = production ? get(packageInfo, 'dependencies', {}) : packageInfo;
+  const md5 = Crypto.MD5(JSON.stringify(encryptedContent)).toString();
+  const data = await getState(filename, sPath);
+  if (get(data, 'md5') === md5) {
+    return true;
+  }
+  await setState(filename, { md5 }, sPath);
+  return false;
 }
 
 export default installDependency;
