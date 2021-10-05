@@ -152,7 +152,11 @@ async function loadGithubWithNoVersion({ provider, name, componentName }) {
   }
   const result = await tryfun(getGithubReleasesLatest(provider, name));
   if (!get(result, 'zipball_url')) return;
-  const { zipball_url, tag_name } = result;
+  let { zipball_url, tag_name } = result;
+  // dev的tag有问题的，github下载地址重置
+  if(zipball_url.lastIndexOf('/dev') > 0) {
+    zipball_url = zipball_url.replace(/^https:\/\/api.github.com/, 'https://github.com').replace('repos/', '').replace(/\/dev$/,'/refs/tags/dev')
+  }
   const filename = `${provider}_${componentName}@${tag_name}.zip`;
   await downloadComponent({ zipball_url, filename, componentPath, lockPath, version: tag_name });
   return componentPath;
