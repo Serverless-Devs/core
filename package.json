@@ -1,6 +1,6 @@
 {
   "name": "@serverless-devs/core",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Serverless Devs Tool Core Component",
   "keywords": [
     "Serverless",
@@ -9,7 +9,7 @@
   ],
   "publishConfig": {
     "access": "public",
-    "registry": "http://registry.npmjs.org"
+    "registry": "https://registry.npmjs.org"
   },
   "license": "MIT",
   "repository": {
