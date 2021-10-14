@@ -1,17 +1,25 @@
-import { Logger } from '../logger';
+import { logger } from '../logger';
 
-export const HLogger = (context: string) => (target: any, key: string) => {
-  let _val = new Logger(context);
+export const Logger = (context: string) => (target: any, key: string) => {
+  // @ts-ignore
+  let _val = this[key] || logger(context);
+
   const getter = function () {
     return _val;
   };
+
   const setter = function (newVal) {
     _val = newVal;
   };
-  Object.defineProperty(target, key, {
-    get: getter,
-    set: setter,
-    enumerable: true,
-    configurable: true,
-  });
+
+  // @ts-ignore
+  if (delete this[key]) {
+    Object.defineProperty(target, key, {
+      get: getter,
+      set: setter,
+      enumerable: true,
+      configurable: true,
+    });
+  }
 };
+

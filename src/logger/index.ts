@@ -1,7 +1,9 @@
-import chalk, { Chalk } from 'chalk';
+import { Logger as MyLogger, $log } from '@tsed/logger';
+import chalk from 'chalk';
+import { S_ROOT_HOME } from '../libs/common';
 import minimist from 'minimist';
 import get from 'lodash.get';
-const prettyoutput = require('prettyoutput');
+const prettyoutput = require("prettyoutput");
 import ansiEscapes from 'ansi-escapes';
 
 // CLI Colors
@@ -37,89 +39,159 @@ export interface ILogger {
   warn: (...data: any[]) => any;
   error: (...data: any[]) => any;
 }
-
 const args = minimist(process.argv.slice(2));
 const getEnableDebug = () => args.debug || getDebugFromEnv();
 
-function searchStr(data: string, str: string) {
-  const arr = [];
-  let index = data.indexOf(str);
-  while (index > -1) {
-    arr.push(index);
-    index = data.indexOf(str, index + 1);
+function getSecretValue(val: string) {
+  const [key, value] = val.split(': ');
+  const valueLength = value.length;
+  if (valueLength < 6) return val;
+
+  let formatVal = value.slice(0, 4);
+  for (let i = 0; i < valueLength - 10; i++) {
+    formatVal += '*';
   }
-  return arr;
+  formatVal += value.slice(valueLength - 6, valueLength);
+  return `${key}: ${formatVal}`;
 }
 
-function formatDebugData(data: string) {
+function secretCredentials(...data: any[]) {
+  const list = [];
+  for (const iterator of data) {
+    if (typeof iterator.includes !== 'function') return data;
+    let str = iterator;
+    if (iterator.includes('AccountID')) {
+      const reg = /"AccountID(.*?)\n/g;
+      const arr = iterator.match(reg);
+      if (!arr) return;
+      arr &&
+        arr.forEach((item) => {
+          str = str.replace(item, getSecretValue(item));
+        });
+    }
+    if (iterator.includes('AccessKeyID')) {
+      const reg = /"AccessKeyID(.*?)\n/g;
+      const arr = iterator.match(reg);
+      arr &&
+        arr.forEach((item) => {
+          str = str.replace(item, getSecretValue(item));
+        });
+    }
+    if (iterator.includes('AccessKeySecret')) {
+      const reg = /"AccessKeySecret(.*?)\n/g;
+      const arr = iterator.match(reg);
+      arr &&
+        arr.forEach((item) => {
+          str = str.replace(item, getSecretValue(item));
+        });
+    }
+    list.push(str);
+  }
+  return list;
+}
+
+export const logger = (name: string): ILogger => {
+  const loggers = new MyLogger(name);
+  const stdLog = loggers.appenders.set('std-log', {
+    type: 'stdout',
+    layout: { type: 'colored' },
+    levels: (getEnableDebug() ? ['debug'] : []).concat(['info', 'warn', 'error', 'fatal']),
+  });
+
   try {
-    const AccountIDs = searchStr(data, 'AccountID');
-    AccountIDs.forEach((index) => {
-      data = data.slice(0, index + 16) + '*'.repeat(10) + data.slice(index + 16 + 10);
+    stdLog.set('app-file', {
+      type: 'file',
+      filename: `${S_ROOT_HOME}/logs/app.log`,
+      levels: ['trace', 'info', 'warn', 'error', 'fatal'],
+      pattern: '.yyyy-MM-dd',
+      layout: {
+        type: 'json',
+        separator: ',',
+      },
     });
-    const AccessKeyIDs = searchStr(data, 'AccessKeyID');
-    AccessKeyIDs.forEach((index) => {
-      data = data.slice(0, index + 18) + '*'.repeat(18) + data.slice(index + 18 + 18);
+    stdLog.set('app-debug-file', {
+      type: 'file',
+      filename: `${S_ROOT_HOME}/logs/app-debug.log`,
+      levels: ['debug'],
+      pattern: '.yyyy-MM-dd',
+      layout: {
+        type: 'json',
+        separator: ',',
+      },
     });
-    const AccessKeySecrets = searchStr(data, 'AccessKeySecret');
-    AccessKeySecrets.forEach((index) => {
-      data = data.slice(0, index + 22) + '*'.repeat(24) + data.slice(index + 22 + 24);
-    });
-    return data;
-  } catch (error) {
-    return data;
-  }
-}
+  } catch (e) {}
 
-const gray = chalk.hex('#8c8d91');
-const red = chalk.hex('#fd5750');
+  // @ts-ignore
+  loggers.log = (message: any, color?: LogColor) => {
+    return process.stdout.write(`${color ? chalk[color](message) : message}\n`);
+  };
 
-function format(out: Chalk, context: string, data) {
-  console.log(`${gray(`${context}: `)}${out ? out(data) : data}`);
-}
+  // @ts-ignore
+  loggers.mydebug = loggers.debug;
+  loggers.debug = (...data: any[]): MyLogger => {
+    const list = secretCredentials(...data);
+    // @ts-ignore
+    loggers.mydebug(...list);
+    return loggers;
+  };
+
+  // @ts-ignore
+  return loggers;
+};
 
 export class Logger {
   context: string;
-  constructor(context: string) {
+  Loggers: ILogger;
+  constructor(context?: string) {
     this.context = context;
+    this.Loggers = logger(context);
   }
-
   static log(message: any, color?: LogColor) {
     return process.stdout.write(`${color ? chalk[color](message) : message}\n`);
   }
+
   static debug(name: string, data) {
     if (getEnableDebug()) {
-      data = formatDebugData(data);
-      format(gray, name, data);
+      $log.name = name;
+      const list = secretCredentials(data);
+      $log.debug(...list);
     }
   }
+
   static info(name: string, data) {
-    format(null, name, data);
+    $log.name = name;
+    $log.info(data);
   }
+
   static warn(name: string, data) {
-    format(chalk.yellow, name, data);
+    $log.name = name;
+    $log.warn(data);
   }
+
   static error(name: string, data) {
-    format(red, name, data);
+    $log.name = name;
+    $log.error(data);
   }
   log(message: any, color?: LogColor) {
     return process.stdout.write(`${color ? chalk[color](message) : message}\n`);
   }
+
   debug(data) {
-    if (getEnableDebug()) {
-      data = formatDebugData(data);
-      format(gray, this.context, data);
-    }
+    this.Loggers.debug(data);
   }
+
   info(data) {
-    format(null, this.context, data);
+    this.Loggers.info(data);
   }
+
   warn(data) {
-    format(chalk.yellow, this.context, data);
+    this.Loggers.warn(data);
   }
+
   error(data) {
-    format(red, this.context, data);
+    this.Loggers.error(data);
   }
+
   output(outputs, indent = 0) {
     // Clear any existing content
     process.stdout.write(ansiEscapes.eraseDown);
@@ -144,3 +216,5 @@ export class Logger {
     );
   }
 }
+
+// refer https://logger.tsed.io/getting-started.html#installation

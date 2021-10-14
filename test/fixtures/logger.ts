@@ -1,19 +1,18 @@
-// @ts-nocheck
 import { HLogger } from '../../src';
-import { Logger, ILogger } from '../../src/logger';
+import { Logger } from '../../src/logger';
 
 const input = {
   Credentials: {
     Alias: 'default',
-    AccountID: '1234567890123456',
-    AccessKeyID: 'abcdefghijklmnopqrstuvwx',
-    AccessKeySecret: 'abcdefghijklmnopqrstuvwxyzabcd',
+    AccountID: '16940247251212952210',
+    AccessKeyID: 'abcddsdsdwxxxgZMtMjtrY',
+    AccessKeySecret: 'adsdsdsdsddsdxxxgZMtMjtrY',
   },
   credentials: {
     Alias: 'default',
-    AccountID: '1234567890123456',
-    AccessKeyID: 'abcdefghijklmnopqrstuvwx',
-    AccessKeySecret: 'abcdefghijklmnopqrstuvwxyzabcd',
+    AccountID: '169402472sds5952210',
+    AccessKeyID: 'abcddsdsdwxxxgZMtMjtrY',
+    AccessKeySecret: 'adsdsdsdsddsdxxxgZMtMjtrY',
   },
   appName: 'appName',
   Path: {
@@ -22,15 +21,15 @@ const input = {
 };
 
 class LoggerDemo {
-  @HLogger('S-CORE') logger: ILogger;
+  @HLogger('S-CORE') logger;
 
   async getDefaultLog() {
-    this.logger.debug(JSON.stringify(input));
-    this.logger.log('some log message ')
-    this.logger.info('info message')
-    this.logger.warn('warn message')
-    this.logger.error('error message')
-    this.logger.debug('debug message')
+    console.log(process.argv);
+    this.logger.debug(JSON.stringify(input, null, 2), 'xxx');
+    this.logger.info('abc');
+    this.logger.warn('abc');
+    this.logger.error('abc');
+    this.logger.fatal('abc');
   }
 
   getDefaultLogObect() {
@@ -104,31 +103,19 @@ demo.getDefaultLog();
 // }
 //
 // console.log(LogLevelEnum[2]);
-// const a = {
-//   name: 'ex',
-//   description: 'ex',
-//   runtime: 'nodejs12',
-//   codeUri: './code/index.js',
-//   environmentVariables: {
-//     aliyun_AccessKeyId: '123',
-//     aliyun_AccessKeySecret: '321',
-//   },
-// };
-// Logger.info('test', JSON.stringify(a, null, '  '));
+const a = {
+  name: 'ex',
+  description: 'ex',
+  runtime: 'nodejs12',
+  codeUri: './code/index.js',
+  environmentVariables: {
+    aliyun_AccessKeyId: '123',
+    aliyun_AccessKeySecret: '321',
+  },
+};
+Logger.debug('test', JSON.stringify(a, null, '  '));
 
 // Logger.debug('xx', `logger密钥信息: ${JSON.stringify(input, null, 2)}`);
 
 // const l = new Logger();
 // l.debug(`logger密钥信息: ${JSON.stringify(input, null, 2)}`);
-
-Logger.log('some log message ')
-Logger.info('S-CORE', 'info message')
-Logger.warn('S-CORE', 'warn message')
-Logger.error('S-CORE', 'error message')
-Logger.debug('S-CORE', 'debug message')
-const logger = new Logger('S-CORE')
-logger.log('some log message ')
-logger.info('S-CORE', 'info message')
-logger.warn('S-CORE', 'warn message')
-logger.error('S-CORE', 'error message')
-logger.debug('S-CORE', 'debug message')
