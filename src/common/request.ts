@@ -195,9 +195,14 @@ async function downloadWithNoExtract({ url, dest, filename, rest, bar, spin }) {
 async function getContentLength(url: string) {
   if (url.startsWith(RegistryEnum.serverless) || url.startsWith(RegistryEnum.serverlessOld)) {
     try {
-      const { headers } = await got(url, { method: 'HEAD' });
+      const { headers } = await got(url, {
+        method: 'HEAD',
+        timeout: { request: 5000 },
+      });
       return parseInt(headers['content-length'], 10);
-    } catch (error) {}
+    } catch (error) {
+      return 0;
+    }
   }
 }
 
