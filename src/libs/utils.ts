@@ -5,6 +5,7 @@
 import { uid } from 'uid/secure';
 import * as fs from 'fs-extra';
 import { Logger } from '../logger';
+import report from '../common/report';
 
 export const logger = new Logger('S-CORE');
 
@@ -71,7 +72,14 @@ export const uuid = uid;
 export function readJsonFile(filePath: string) {
   if (fs.existsSync(filePath)) {
     const data = fs.readFileSync(filePath, 'utf8');
-    return JSON.parse(data);
+    try {
+      return JSON.parse(data);
+    } catch (error) {
+      report({
+        type: 'jsError',
+        content: error.stack,
+      });
+    }
   } else {
     logger.debug(`readJsonFile: the file ${filePath} does not exist`);
   }
