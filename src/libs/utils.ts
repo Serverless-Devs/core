@@ -86,3 +86,14 @@ export function sleep(timer: number) {
     setTimeout(() => resolve(true), timer);
   });
 }
+
+export function isCICDEnv() {
+  for (const key in process.env) {
+    if (key.startsWith('CLOUDSHELL')) return true;
+    if (key.startsWith('PIPELINE')) return true;
+    if (key.startsWith('GITHUB')) return true;
+    if (key.startsWith('GITLAB')) return true;
+    if (key.startsWith('JENKINS')) return true;
+  }
+  return false;
+}
