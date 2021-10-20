@@ -198,7 +198,7 @@ async function getContentLength(url: string) {
     try {
       const { headers } = await got(url, {
         method: 'HEAD',
-        timeout: { request: 5000 },
+        timeout: 5000,
       });
       return parseInt(headers['content-length'], 10);
     } catch (error) {
