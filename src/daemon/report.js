@@ -26,7 +26,7 @@ async function init() {
     const template = await getYamlContent(templateFile);
     content = `${content}||${JSON.stringify(template)}`;
   }
-  await request(url, { method: 'post', json: false, body: content });
+  await request(url, { method: 'post', json: false, body: content, timeout: 3000 });
 }
 
 function getCoreVersion() {
