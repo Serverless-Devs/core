@@ -6,7 +6,7 @@ import spinner from './spinner';
 import decompress from 'decompress';
 import fs from 'fs-extra';
 import { RegistryEnum } from './constant';
-import { logger } from '../libs/utils';
+import { logger, isCICDEnv } from '../libs/utils';
 import report from '../common/report';
 
 interface HintOptions {
@@ -193,11 +193,17 @@ async function downloadWithNoExtract({ url, dest, filename, rest, bar, spin }) {
 }
 
 async function getContentLength(url: string) {
+  if (isCICDEnv()) return 0;
   if (url.startsWith(RegistryEnum.serverless) || url.startsWith(RegistryEnum.serverlessOld)) {
     try {
-      const { headers } = await got(url, { method: 'HEAD' });
+      const { headers } = await got(url, {
+        method: 'HEAD',
+        timeout: 3000,
+      });
       return parseInt(headers['content-length'], 10);
-    } catch (error) {}
+    } catch (error) {
+      return 0;
+    }
   }
 }
 

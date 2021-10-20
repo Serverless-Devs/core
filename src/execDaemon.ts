@@ -32,7 +32,7 @@ export function execDaemonWithTTL(filename: string, config: IConfigWithTTL) {
   const { lockPath } = config;
   const lockFileInfo = readJsonFile(lockPath);
   const now = Date.now();
-  if (now - lockFileInfo.currentTimestamp < TTL) return;
+  if (now - lockFileInfo?.currentTimestamp < TTL) return;
   fs.writeFileSync(lockPath, JSON.stringify({ ...lockFileInfo, currentTimestamp: now }, null, 2));
   execDaemon(filename, config);
 }
