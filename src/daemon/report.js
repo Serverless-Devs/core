@@ -1,4 +1,4 @@
-const { getMAC, request, getYamlContent } = require('../index');
+const { getMAC, request, getYamlContent, isDocker } = require('../index');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
@@ -9,13 +9,13 @@ async function init() {
   const { type, templateFile, traceId, CLI_VERSION } = process.env;
   let { content } = process.env;
   const core_version = getCoreVersion();
-  const os = process.platform;
+  const os = getCicdEnv() || process.platform;
   const node_version = process.version;
   const time = 1;
   const pid = getmac.replace(/:/g, '_');
   const baseURL =
     'http://dankun.ccc45d9d8e32b44eeac168caa1a2deead.cn-zhangjiakou.alicontainer.com/r.png';
-  let url = `${baseURL}?type=${type}&cli_version=${CLI_VERSION}&core_version=${core_version}&os=${os}&node_version=${node_version}&pid=${pid}&time=${time}`;
+  let url = `${baseURL}?type=${type}&cli_version=${CLI_VERSION}&core_version=${core_version}&os=${os}&node_version=${node_version}&pid=${pid}&time=${time}&isDocker=${isDocker()}`;
   if (traceId) {
     url = `${url}&traceId=${traceId}`;
   }
@@ -27,6 +27,16 @@ async function init() {
     content = `${content}||${JSON.stringify(template)}`;
   }
   await request(url, { method: 'post', json: false, body: content, timeout: 3000 });
+}
+
+function getCicdEnv() {
+  for (const key in process.env) {
+    if (key.startsWith('CLOUDSHELL')) return 'aliyun_ecs';
+    if (key.startsWith('PIPELINE')) return 'yunxiao';
+    if (key.startsWith('GITHUB')) return 'github';
+    if (key.startsWith('GITLAB')) return 'gitlab';
+    if (key.startsWith('JENKINS')) return 'jenkins';
+  }
 }
 
 function getCoreVersion() {

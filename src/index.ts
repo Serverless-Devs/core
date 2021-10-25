@@ -15,3 +15,4 @@ export { default as jsyaml } from 'js-yaml';
 export { default as minimist } from 'minimist';
 export { default as rimraf } from 'rimraf';
 export { default as Crypto } from 'crypto-js';
+export { default as isDocker } from 'is-docker';
