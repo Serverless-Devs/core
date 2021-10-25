@@ -1,12 +1,9 @@
 import download from 'download';
 import got from 'got';
-import { ProgressService, ProgressType } from '@serverless-devs/s-progress-bar';
-import { green } from 'chalk';
 import spinner from './spinner';
 import decompress from 'decompress';
 import fs from 'fs-extra';
-import { RegistryEnum } from './constant';
-import { logger, isCICDEnv } from '../libs/utils';
+import { logger } from '../libs/utils';
 import report from '../common/report';
 import rimraf from 'rimraf';
 import path from 'path';
@@ -150,25 +147,19 @@ export async function request(url: string, options?: RequestOptions): Promise<an
 
 export async function downloadRequest(url: string, dest: string, options?: IDownloadOptions) {
   const { extract, postfix, strip, filename, ...rest } = options || {};
-  const spin = spinner(`prepare downloading: ${url}`);
-  const bar = await getProgressBar({ url, filename });
-  spin.text = `start downloading: ${url}`;
+  const spin = spinner(`start downloading: ${url}`);
   if (extract) {
-    return await downloadWithExtract({ url, dest, filename, strip, rest, bar, spin });
+    return await downloadWithExtract({ url, dest, filename, strip, rest, spin });
   }
-  await downloadWithNoExtract({ url, dest, filename, rest, bar, spin });
+  await downloadWithNoExtract({ url, dest, filename, rest, spin });
 }
 
-async function downloadWithExtract({ url, dest, filename, strip, rest, bar, spin }) {
+async function downloadWithExtract({ url, dest, filename, strip, rest, spin }) {
   try {
     const formatFilename = filename || 'demo.zip';
     const options = { ...rest, filename: formatFilename, rejectUnauthorized: false };
-    await download(url, dest, options).on('downloadProgress', (progress) => {
-      spin.stop();
-      bar.update(progress.transferred);
-    });
-    bar.terminate();
-    spin.start(filename ? `${filename} file unzipping...` : 'file unzipping...');
+    await download(url, dest, options);
+    spin.text = filename ? `${filename} file unzipping...` : 'file unzipping...';
     rimraf.sync(path.resolve(dest, '.git'));
     await decompress(`${dest}/${formatFilename}`, dest, { strip });
     await fs.unlink(`${dest}/${formatFilename}`);
@@ -185,37 +176,8 @@ async function downloadWithExtract({ url, dest, filename, strip, rest, bar, spin
   }
 }
 
-async function downloadWithNoExtract({ url, dest, filename, rest, bar, spin }) {
+async function downloadWithNoExtract({ url, dest, filename, rest, spin }) {
   const options = { ...rest, filename, rejectUnauthorized: false };
-  await download(url, dest, options).on('downloadProgress', (progress) => {
-    spin.stop();
-    bar.update(progress.transferred);
-  });
-  bar.terminate();
+  await download(url, dest, options);
   spin.succeed(`download success: ${url}`);
-}
-
-async function getContentLength(url: string) {
-  if (isCICDEnv()) return 0;
-  if (url.startsWith(RegistryEnum.serverless) || url.startsWith(RegistryEnum.serverlessOld)) {
-    try {
-      const { headers } = await got(url, {
-        method: 'HEAD',
-        timeout: 3000,
-      });
-      return parseInt(headers['content-length'], 10);
-    } catch (error) {
-      return 0;
-    }
-  }
-}
-
-async function getProgressBar({ url, filename }) {
-  const len: number = await getContentLength(url);
-  if (len) {
-    return new ProgressService(ProgressType.Bar, { total: len });
-  }
-  const text = `${green(':loading')} ${green('downloading')} `;
-  const format = filename ? `${text}${filename} ` : text;
-  return new ProgressService(ProgressType.Loading, { total: 100 }, format);
 }
