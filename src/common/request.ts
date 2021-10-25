@@ -8,6 +8,8 @@ import fs from 'fs-extra';
 import { RegistryEnum } from './constant';
 import { logger, isCICDEnv } from '../libs/utils';
 import report from '../common/report';
+import rimraf from 'rimraf';
+import path from 'path';
 
 interface HintOptions {
   loading?: string;
@@ -167,6 +169,7 @@ async function downloadWithExtract({ url, dest, filename, strip, rest, bar, spin
     });
     bar.terminate();
     spin.start(filename ? `${filename} file unzipping...` : 'file unzipping...');
+    rimraf.sync(path.resolve(dest, '.git'));
     await decompress(`${dest}/${formatFilename}`, dest, { strip });
     await fs.unlink(`${dest}/${formatFilename}`);
     const text = 'file decompression completed';
