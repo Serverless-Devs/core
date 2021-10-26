@@ -2,7 +2,6 @@ import download from 'download';
 import got from 'got';
 import spinner from './spinner';
 import decompress from 'decompress';
-import fs from 'fs-extra';
 import { logger } from '../libs/utils';
 import report from '../common/report';
 import rimraf from 'rimraf';
@@ -162,7 +161,7 @@ async function downloadWithExtract({ url, dest, filename, strip, rest, spin }) {
     spin.text = filename ? `${filename} file unzipping...` : 'file unzipping...';
     rimraf.sync(path.resolve(dest, '.git'));
     await decompress(`${dest}/${formatFilename}`, dest, { strip });
-    await fs.unlink(`${dest}/${formatFilename}`);
+    rimraf.sync(`${dest}/${formatFilename}`);
     const text = 'file decompression completed';
     spin.succeed(filename ? `${filename} ${text}` : text);
   } catch (error) {
