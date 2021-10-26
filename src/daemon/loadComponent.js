@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { downloadRequest, request, installDependency } = require('../index');
+const { downloadRequest, request, installDependency, semver } = require('../index');
 
 function readJsonFile(filePath) {
   if (fs.existsSync(filePath)) {
@@ -32,7 +32,7 @@ async function init() {
   const { zipball_url, tag_name } = result;
   const lockFileInfo = readJsonFile(lockPath);
   const now = Date.now();
-  if (tag_name <= lockFileInfo.version) {
+  if (semver.lte(tag_name, lockFileInfo.version)) {
     return fs.writeFileSync(
       lockPath,
       JSON.stringify({ version: lockFileInfo.version, currentTimestamp: now }, null, 2),
