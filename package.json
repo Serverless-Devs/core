@@ -28,7 +28,7 @@
     "prebuild": "rimraf lib && rimraf dist",
     "build": "npx tsc && cp -r ./src/daemon ./lib",
     "postbuild": "npm run esbuild && cp -r ./src/daemon ./dist",
-    "esbuild": "esbuild lib/index.js --bundle --log-level=error --minify --platform=node --format=cjs --target=es2020 --external:electron --outfile=dist/index.js",
+    "esbuild": "esbuild lib/index.js --bundle --log-level=error --minify --platform=node --format=cjs --target=node10.4 --external:electron --outfile=dist/index.js",
     "test:cov": "jest --coverage",
     "lint": "npm run typecheck && f2elint scan -i src",
     "fix": "f2elint fix",
