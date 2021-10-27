@@ -2,7 +2,6 @@ import fs from 'fs-extra';
 import path from 'path';
 import { S_ROOT_HOME } from '../../libs/common';
 import { downloadRequest } from '../request';
-import { readJsonFile } from '../../libs/utils';
 import { DEFAULT_CORE_VERSION } from '../../daemon/constant';
 import { execDaemonWithTTL } from '../../execDaemon';
 import rimraf from 'rimraf';
@@ -32,31 +31,16 @@ async function nonExistCore(componentPath: string) {
 }
 
 function lns(componentPath: string) {
-  const componentCorePath = path.join(componentPath, 'node_modules', '@serverless-devs', 'core');
+  const serverlessDevsPath = path.join(componentPath, 'node_modules', '@serverless-devs');
+  const componentCorePath = path.join(serverlessDevsPath, 'core');
   if (isSymbolicLink(componentCorePath)) return;
-  if (copyAgain(componentCorePath)) {
-    return fs.copySync(corePath, componentCorePath);
-  }
-  try {
-    rimraf.sync(componentCorePath);
-    fs.ensureSymlinkSync(corePath, componentCorePath, 'dir');
-  } catch (error) {
-    fs.copySync(corePath, componentCorePath);
-  }
+  rimraf.sync(componentCorePath);
+  fs.ensureDirSync(serverlessDevsPath);
+  fs.symlinkSync(corePath, componentCorePath, 'junction');
 }
 
 function isSymbolicLink(p: string) {
   if (fs.existsSync(p)) {
     return fs.lstatSync(p).isSymbolicLink();
   }
-}
-
-function copyAgain(p: string) {
-  const packagePath = path.join(corePath, 'package.json');
-  const packageInfo = readJsonFile(packagePath);
-  const componentPackagePath = path.join(p, 'package.json');
-  const componentPackageInfo = readJsonFile(componentPackagePath);
-  return (
-    componentPackageInfo && packageInfo && componentPackageInfo.version !== packageInfo.version
-  );
 }
