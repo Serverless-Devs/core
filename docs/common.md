@@ -1,3 +1,5 @@
+# Common 通用相关文档
+
 ## request
 
 #### HTTP 请求， 用于统一网络请求，支持 loading 效果

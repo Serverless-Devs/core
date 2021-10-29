@@ -1,11 +1,20 @@
-# Logger
+# Logger 日志相关文档
 
-## 使用
+- [基础使用](#基础使用)
+    - [decorator 使用方式](#decorator-使用方式)
+    - [类使用方式](#类使用方式)
+    - [效果展示](#效果展示)
+- [进阶使用](#进阶使用)
+    - [上下文：context]()
+    - [日志级别：levels]()
+    - [log方法]()
 
-1. decorator 使用方式(推荐)
+## 基础使用
+
+### decorator 使用方式
 
 ```typescript
-const { Component, IComponent } = require('@serverless-devs/core');
+const { HLogger, ILogger } = require('@serverless-devs/core');
 
 class LoggerDemo {
   @HLogger('S-CORE') logger: ILogger;
@@ -16,35 +25,39 @@ class LoggerDemo {
 }
 ```
 
-![Demo](https://img.alicdn.com/imgextra/i1/O1CN01CJ2He61oBEeuhhYLK_!!6000000005186-1-tps-1312-73.gif)
+### 类使用方式
 
-2. 类使用方式
+以`logger`能力为例，类使用方式的案例代码可以有两种方法。
 
-- 推荐使用 new Logger()方式
+- 方法1：推荐使用 new Logger()方式
+    ```typescript
+    const { Logger } = require('@serverless-devs/core');
+    function loggerDemo() {
+      const logger = new Logger('S-CORE');
+      logger.info('abc');
+    }
+    ```
+- 方法2：Logger.info 等方法目前只做兼容，不会写入文件日志
+    ```typescript
+    const { Logger } = require('@serverless-devs/core');
+    
+    function loggerDemo() {
+      Logger.info('S-CORE', 'abc');
+    }
+    ```
 
-```typescript
-const { Logger } = require('@serverless-devs/core');
-function loggerDemo() {
-  const logger = new Logger('S-CORE');
-  logger.info('abc');
-}
-```
 
-- Logger.info 等方法目前只做兼容，不会写入文件日志
+### 效果展示
 
-```typescript
-const { Logger } = require('@serverless-devs/core');
+无论是上面的哪种使用方法，最终的效果如下：
 
-function loggerDemo() {
-  Logger.info('S-CORE', 'abc');
-}
-```
+![Demo](https://example-static.oss-cn-beijing.aliyuncs.com/github-static/render1635502865479.gif)
 
-![Demo](https://img.alicdn.com/imgextra/i4/O1CN01rMXgGM1wJx7iIBckd_!!6000000006288-1-tps-1215-142.gif)
+## 进阶使用
 
-## context
+### 上下文：context
 
-用在 log 日志中，代表现在处于哪种环境变量中。
+用在 `log` 日志中，代表现在处于哪种环境变量中。
 
 ```typescript
 const { HLogger, Logger, ILogger } = require('@serverless-devs/core');
@@ -64,11 +77,14 @@ logger.info('abc');
 Logger.info('S-CORE', 'abc');
 ```
 
-![Demo](https://img.alicdn.com/imgextra/i2/O1CN01TSrTX01YZ1NAB8B56_!!6000000003072-2-tps-1376-102.png)
+### 日志级别：levels
 
-## levels
+在 Serverless Devs Core Logger 中，levels 包括了 `debug`, `info`, `warn`, `error` 等级别。 其中： 
 
-#### levels 包含 debug | info | warn | error, 默认输出 info | warn | error 级别的 log
+- `info`, `warn`, `error` 三个级别的日志会被默认输出
+- `debug` 级别日志需要通过`--debug`进行输出
+
+案例代码：
 
 ```typescript
 const { HLogger, ILogger } = require('@serverless-devs/core');
@@ -84,14 +100,18 @@ class LoggerDemo {
 }
 ```
 
-![demo](https://img.alicdn.com/imgextra/i4/O1CN01sMzK2j1Pl5GUqUBaq_!!6000000001880-1-tps-1215-263.gif)
+默认输出：
 
-## 通过 --debug 开启 debug
+![demo](https://example-static.oss-cn-beijing.aliyuncs.com/github-static/render1635505382944.gif)
 
-![demo](https://img.alicdn.com/imgextra/i4/O1CN01ntQCWI1kySld8wzgJ_!!6000000004752-1-tps-1215-285.gif)
-可以看到把 debug 日志打印出来了
+通过 `--debug` 输出 `debug` 级别的日志：
 
-## log
+![demo](https://example-static.oss-cn-beijing.aliyuncs.com/github-static/render1635505572575.gif)
+
+
+### log方法
+
+Serverless Devs Core Logger 提供了类似 `console.log()` 一样的方法：`log()`，通过方法，可以将内容打印到输出流，并且可以配置不同的颜色，例如：
 
 ```typescript
 const { HLogger, Logger, ILogger } = require('@serverless-devs/core');
@@ -100,12 +120,12 @@ class LoggerDemo {
   @HLogger('S-CORE') logger: ILogger;
 
   log() {
-    this.logger.log('开始执行..,', 'yellow');
-    this.logger.log('执行成功', 'green');
+    this.logger.log('黄色打印', 'yellow');
+    this.logger.log('绿色打印', 'green');
   }
 }
 ```
 
-![Demo](https://img.alicdn.com/imgextra/i3/O1CN01uL8Q5T218ZM3Anfn4_!!6000000006940-2-tps-974-98.png)
+运行效果：
 
-打印到输出流，类似 console.log 效果。可以配置不同颜色显示
+![Demo](https://example-static.oss-cn-beijing.aliyuncs.com/github-static/render1635506017315.gif)
