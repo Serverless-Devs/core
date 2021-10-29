@@ -1,30 +1,37 @@
-# s-core 使用文档
+<div align=center> <img src="https://images.devsapp.cn/devs-github/logo.jpg" width="100%"/> </div>
+<br>
+<p align="center">
+  <a href="https://www.npmjs.com/package/@serverless-devs/s">
+    <img src="https://img.shields.io/npm/v/@serverless-devs/core" alt="npm version">
+  </a>
+  <a href="https://www.npmjs.com/package/@serverless-devs/s">
+    <img src="https://img.shields.io/npm/dy/@serverless-devs/core" alt="npm download">
+  </a>
+  <a href="https://nodejs.org/en/">
+    <img src="https://img.shields.io/badge/node-%3E%3D%2010.8.0-brightgreen" alt="node.js version">
+  </a>
+  <a href="https://github.com/Serverless-Devs/Serverless-Devs/blob/master/LICENSE">
+    <img src="https://img.shields.io/badge/License-MIT-green" alt="license">
+  </a>
+</p>
 
-s-core 是 Serverless-Devs 的一个官方组件，通过该组件您可以轻松处理一些有趣的事情：
+Serverless Devs Core 是 Serverless Devs 的官方组件。由于该组件默认支持了包括组件加载、日志输出、组件参数转换、状态上报等在内的通用 Serverless Package 开发能力，所以，通过该组件可以帮助 Serverless Package 开发者快速实现 Serverless Devs 的组件开发。
 
-- 组件加载
-- 应用加载
-- 组件参数转换
-- 日志输出
-- HTTP 请求,文件下载
-- 状态上报
-- 打包压缩
-- 获取密钥信息
-- 密钥解密
-- 数据校验以及修改
-- 安装依赖
+# 快速安装
 
-## 安装
+组件开发者需要先进行 Node.js(>=10.8.0) 与 NPM 包管理工具的安装，然后通过`npm`指令即可完成`@serverless-devs/core`的安装，例如：
 
 ```
 npm i @serverless-devs/core -S
 ```
 
-## 整体使用方法
+# 使用方法
 
-1. decorator 使用方式(推荐)
+Serverless Devs Core 提供了[decorator 使用方式](#decorator-使用方式)和[类使用方式](#类使用方式)等两种使用方法。其中[decorator 使用方式](#decorator-使用方式)是官方所推荐和鼓励的使用方法。
 
-- logger demo
+## decorator 使用方式
+
+以`logger`能力为例，decorator 使用方式的案例代码为：
 
 ```typescript
 const { HLogger, ILogger } = require('@serverless-devs/core');
@@ -38,33 +45,36 @@ class LoggerDemo {
 }
 ```
 
-![Demo](https://img.alicdn.com/imgextra/i4/O1CN01rMXgGM1wJx7iIBckd_!!6000000006288-1-tps-1215-142.gif)
-
-2. 类使用方式
-
-- logger demo
-
-```typescript
-const { Logger } = require('@serverless-devs/core');
-function loggerDemo() {
-  const logger = new Logger('S-CORE');
-  logger.info('abc');
-}
-```
-
-或者
-
-```typescript
-const { Logger } = require('@serverless-devs/core');
-
-function loggerDemo() {
-  Logger.info('S-CORE', 'abc');
-}
-```
+最终效果：
 
 ![Demo](https://img.alicdn.com/imgextra/i4/O1CN01rMXgGM1wJx7iIBckd_!!6000000006288-1-tps-1215-142.gif)
 
-## 详细文档
+## 类使用方式
+
+以`logger`能力为例，类使用方式的案例代码可以有两种方法。
+
+- 方法1：
+    ```typescript
+    const { Logger } = require('@serverless-devs/core');
+    function loggerDemo() {
+      const logger = new Logger('S-CORE');
+      logger.info('abc');
+    }
+    ```
+- 方法2：
+    ```typescript
+    const { Logger } = require('@serverless-devs/core');
+    
+    function loggerDemo() {
+      Logger.info('S-CORE', 'abc');
+    }
+    ```
+  
+最终效果：
+
+![Demo](https://img.alicdn.com/imgextra/i4/O1CN01rMXgGM1wJx7iIBckd_!!6000000006288-1-tps-1215-142.gif)
+
+# 接口目录
 
 #### [common](./docs/common.md)
 
@@ -76,22 +86,38 @@ function loggerDemo() {
 - [zip](./docs/common.md#zip)/[unzip](./docs/common.md#unzip) (打包/解包)
 - [help](./docs/common.md#help) 显示文档帮助信息
 - [commadParse](./docs/common.md#commandparse) 命令行参数解析工具，用于解析命令行参数。格式为 args(Input, options) 解析工具采用 minimist 详细使用查看
-
 - [getCredential](./docs/common.md#getCredential)/[setCredential](./docs/common.md#setCredential) 用于获取和创建密钥信息
-
 - [decryptCredential](./docs/common.md#decryptCredential) 用于解密密钥信息
-
 - [getState](./docs/common.md#getState)/[setState](./docs/common.md#setState) 用于获取和设置文件内容
-
 - [validateProps](./docs/common.md#validateProps) 用于检验 `input` 的 `Properties` 属性格式是否正确
-
 - [modifyProps](./docs/common.md#modifyProps) 用于修改当前目录下 <s.yml> 文件的 `Properties` 属性
-
 - [installDependency](./docs/common.md#installDependency) 用于安装依赖
-
 - [getYamlContent](./docs/common.md#getYamlContent) 用于获取文件内容，兼容 yaml 和 yml 文件
 
 #### [logger](./docs/logger.md)
 
 - [log](./docs/logger.md#log) 打印到终端, 具备显示不同颜色的能力
 - [debug/info/warn/error](./docs/logger.md#levels) 打印到本地文件以及终端中
+
+
+# 项目贡献
+
+我们非常希望您可以和我们一起贡献这个项目。贡献内容包括不限于代码的维护、应用/组件的贡献、文档的完善等，更多详情可以参考[ 🏆 贡献指南](./CONTRIBUTING.md)。
+
+# 开源许可
+
+Serverless Devs 遵循 [MIT License](./LICENSE) 开源许可。
+
+位于`node_modules`和外部目录中的所有文件都是本软件使用的外部维护库，具有自己的许可证；我们建议您阅读它们，因为它们的条款可能与[MIT License](./LICENSE)的条款不同。
+
+# 交流社区
+
+您如果有关于错误的反馈或者未来的期待，您可以在 [Issues](https://github.com/Serverless-Devs/core/issues) 中进行反馈和交流。如果您想要加入我们的讨论组或者了解 Serverless Devs Core 的最新动态，您可以通过以下渠道进行：
+
+<p align="center">
+
+| <img src="https://serverless-article-picture.oss-cn-hangzhou.aliyuncs.com/1635407298906_20211028074819117230.png" width="200px" > | <img src="https://serverless-article-picture.oss-cn-hangzhou.aliyuncs.com/1635407044136_20211028074404326599.png" width="200px" > | <img src="https://serverless-article-picture.oss-cn-hangzhou.aliyuncs.com/1635407252200_20211028074732517533.png" width="200px" > |
+|--- | --- | --- |
+| <center>关注微信公众号：`serverless`</center> | <center>联系微信小助手：`xiaojiangwh`</center> | <center>加入钉钉交流群：`33947367`</center> | 
+
+</p>
