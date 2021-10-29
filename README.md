@@ -15,7 +15,19 @@
   </a>
 </p>
 
-Serverless Devs Core 是 Serverless Devs 的官方组件。由于该组件默认支持了包括组件加载、日志输出、组件参数转换、状态上报等在内的通用 Serverless Package 开发能力，所以，通过该组件可以帮助 Serverless Package 开发者快速实现 Serverless Devs 的组件开发。
+Serverless Devs Core 是 Serverless Devs 的官方组件。由于该组件默认支持了包括[组件加载](./docs/common.md#loadComponent)、[日志输出](./docs/logger.md)、[组件参数转换](./docs/common.md#commandparse)、[状态上报](./docs/common.md#report)等在内的通用 Serverless Package 开发能力，所以，通过该组件可以帮助 Serverless Package 开发者快速实现 Serverless Devs 的组件开发。
+
+
+- [快速安装](#快速安装)
+- [使用方法](#使用方法)
+    - [decorator 使用方式](#decorator-使用方式)
+    - [类使用方式](#类使用方式)
+    - [效果展示](#效果展示)
+- [接口目录](#接口目录)
+- [项目贡献](#项目贡献)
+- [开源许可](#开源许可)
+- [交流社区](#交流社区)
+
 
 # 快速安装
 
