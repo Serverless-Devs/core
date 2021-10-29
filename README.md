@@ -29,9 +29,9 @@ npm i @serverless-devs/core -S
 
 Serverless Devs Core 提供了[decorator 使用方式](#decorator-使用方式)和[类使用方式](#类使用方式)等两种使用方法。其中[decorator 使用方式](#decorator-使用方式)是官方所推荐和鼓励的使用方法。
 
-## decorator 使用方式
-
 以`logger`能力为例，decorator 使用方式的案例代码为：
+
+## decorator 使用方式
 
 ```typescript
 const { HLogger, ILogger } = require('@serverless-devs/core');
@@ -44,10 +44,6 @@ class LoggerDemo {
   }
 }
 ```
-
-最终效果：
-
-![Demo](https://img.alicdn.com/imgextra/i4/O1CN01rMXgGM1wJx7iIBckd_!!6000000006288-1-tps-1215-142.gif)
 
 ## 类使用方式
 
@@ -69,10 +65,14 @@ class LoggerDemo {
       Logger.info('S-CORE', 'abc');
     }
     ```
-  
-最终效果：
 
-![Demo](https://img.alicdn.com/imgextra/i4/O1CN01rMXgGM1wJx7iIBckd_!!6000000006288-1-tps-1215-142.gif)
+
+## 效果展示
+
+无论是上面的哪种使用方法，最终的效果如下：
+
+![Demo](https://example-static.oss-cn-beijing.aliyuncs.com/github-static/render1635502865479.gif)
+
 
 # 接口目录
 
