@@ -1,50 +1,68 @@
 # Common 通用相关文档
 
+- [request](#request)：HTTP 请求
+- [downloadRequest](#downloadRequest)：统一下载的方法
+- [report](#report)：组件的部分数据上报
+- [loadComponent](#loadComponent)：加载组件
+- [loadApplication](#loadApplication)：加载应用
+- [spinner](#spinner)：状态展示
+- [zip](#zip)：压缩文件
+- [unzip](#unzip)：解压文件
+- [help](#help)：显示文档帮助信息
+- [commandParse](#commandParse)：命令行参数解析工具
+- [getCredential](#getCredential)：获取密钥信息
+- [setCredential](#setCredential)：设置密钥信息
+- [decryptCredential](#decryptCredential)：解密密钥信息
+- [getState](#getCredential)：获取状态内容
+- [setState](#getCredential)：设置状态内容
+- [validateProps](#getCredential)：检查 `yaml` 格式是否正确
+- [modifyProps](#modifyProps)：修改 `s.yml` 文件的 `prop` 属性
+- [installDependency](#installDependency)：安装依赖
+- [getYamlContent](#getYamlContent)：获取文件内容
+
 ## request
 
-#### HTTP 请求， 用于统一网络请求，支持 loading 效果
+`request`接口，用于 HTTP 请求，用于统一网络请求，支持 `loading` 效果
 
-- get, `method` 默认 `get` 请求, 通过 `params` 传递参数
+- GET: 通过 `params` 传递参数，示例代码：
+    ```typescript
+    const { request } = require('@serverless-devs/core');
+    
+    request(url, {
+      params: {
+        key: 'value',
+      },
+    });
+    ```
+- POST: 通过 `body` 传递参数， 默认 `json` 数据，如果需要传递 `form-data`，可设置参数 `form` 为 `true` 即可，示例代码：
+    ```typescript
+    const { request } = require('@serverless-devs/core');
+    
+    request(url, {
+      method: 'post',
+      body: {
+        key: 'value',
+      },
+      // form: true
+    });
+    
+    ```
+
+在使用该接口时，如果出现了`error`，系统会默认抛出错误；如果希望不抛出错误信息，可设置参数 `ignoreError` 为 `true` 即可，示例代码：
 
 ```typescript
 const { request } = require('@serverless-devs/core');
 
 request(url, {
-  params: {
-    key: 'value',
-  },
-});
-```
-
-- post，通过 `body` 传递参数， 默认 json 数据，如果需要传递 form-data，可传递参数 form 为 true 即可
-
-```typescript
-const { request } = require('@serverless-devs/core');
-
-request(url, {
-  method: 'post'
+  method: 'post',
   body: {
     key: 'value',
   },
-  // form: true
+  ignoreError: true
 });
-
 ```
 
-- 如果希望不抛出错误信息，可通过 `ignoreError` 参数设置为 `true` 即可
-
-```typescript
-const { request } = require('@serverless-devs/core');
-
-request(url, {
-  method: 'post'
-  body: {
-    key: 'value',
-  },
-  // ignoreError: true
-});
-
-```
+在使用该接口时，如果需要增加网络请求时的加载效果，可以增加`hint`参数：
 
 ```typescript
 const { request } = require('@serverless-devs/core');
@@ -64,11 +82,15 @@ function test_request_hint() {
 }
 ```
 
-![Demo](https://img.alicdn.com/imgextra/i1/O1CN01KZM5eM22LDuoZY3ZB_!!6000000007103-1-tps-1312-73.gif)
+运行效果：
+
+![Demo](https://example-static.oss-cn-beijing.aliyuncs.com/github-static/render1635566096381.gif)
 
 ## downloadRequest
 
-#### 用于统一下载的方法，会自动带上下载进度条
+`downloadRequest`接口，用于统一下载的方法，该方法会默认带有下载进度条。
+
+示例代码：
 
 ```typescript
 /**
@@ -82,11 +104,11 @@ function test_request_hint() {
 downloadRequest(url, outDir, { extract: true, strip: 1 });
 ```
 
-![Demo](https://img.alicdn.com/imgextra/i1/O1CN01LukqOH1bJr6l77VGk_!!6000000003445-1-tps-1312-200.gif)
-
 ## report
 
-#### 组件上报
+`report`接口，用于组件的部分数据上报。
+
+示例代码：
 
 ```typescript
 const { reportComponent, HLogger, ILogger } = require('@serverless-devs/core');
@@ -106,85 +128,75 @@ class ReportDemo {
 
 ## loadComponent
 
-#### `loadComponent` 方法是 `load` 方法的`别名`，用于加载组件，组件会下载到 ~/.s/components 目录下面。
+`loadComponent`接口是 `load` 方法的`别名`，用于加载组件，加载后的组件会下载到 `~/.s/components` 目录下面
 
-- loadComponent(source: string, registry?: Registry, params: any)
+- 使用方法1：基础使用方法，`loadComponent(source: string, registry?: Registry, params: any)`
+    ```typescript
+    /**
+     * source 传参数格式说明
+     * 1.serverless hub 源为 `<org名>/<组件名>` 会下载最新版本，`<org名>/<组件名>@<组件版本号>` 会下载指定版本
+     * serverless hub官方的org名默认为devsapp，
+     * 2.github 源为 `<org名>/<项目名称>` 会下载最新版本，`<org名>/<项目名称>@<项目发布的版本号>` 会下载指定版本
+     * 3.支持本地调试，可传本地组件的当前路径
+     *
+     * registry 参数说明，值为 'http://registry.devsapp.cn/simple' 或者 'https://api.github.com/repos'
+     * 优先读取方法传入的参数 registry，如果找不到，然后读取 ~/.s/components/set-config.yml 文件里的 registry
+     * 如果找不到，优先读取 serverless hub 源，如果找不到，最后读取 github 源
+     * params 参数说明，方法内部在require组件的时候会new一次，params会在new的时候透传给组件
+     *
+     */
 
-```typescript
-/**
- * source 传参数格式说明
- * 1.serverless hub 源为 `<org名>/<组件名>` 会下载最新版本，`<org名>/<组件名>@<组件版本号>` 会下载指定版本
- * serverless hub官方的org名默认为devsapp，
- * 2.github 源为 `<org名>/<项目名称>` 会下载最新版本，`<org名>/<项目名称>@<项目发布的版本号>` 会下载指定版本
- * 3.支持本地调试，可传本地组件的当前路径
- *
- * registry 参数说明，值为 'http://registry.devsapp.cn/simple' 或者 'https://api.github.com/repos'
- * 优先读取方法传入的参数 registry，如果找不到，然后读取 ~/.s/components/set-config.yml 文件里的 registry
- * 如果找不到，优先读取 serverless hub 源，如果找不到，最后读取 github 源
- * params 参数说明，方法内部在require组件的时候会new一次，params会在new的时候透传给组件
- *
- * /
-```
-
-```typescript
-const { loadComponent } = require('@serverless-devs/core');
-loadComponent('devsapp/fc-deploy');
-```
-
-- 支持下载特定版本的组件
-
-```typescript
-const { loadComponent } = require('@serverless-devs/core');
-loadComponent('devsapp/fc-deploy@0.1.2');
-```
-
-- 支持加载本地组件
-
-```typescript
-const { loadComponent } = require('@serverless-devs/core');
-loadComponent('/Users/shihuali/.s/components/serverlessfans.com/alibaba/fc@0.1.2');
-```
+    const { loadComponent } = require('@serverless-devs/core');
+    loadComponent('devsapp/fc-deploy');
+    ```
+- 使用方法2：下载特定版本的组件
+    ```typescript
+    const { loadComponent } = require('@serverless-devs/core');
+    loadComponent('devsapp/fc-deploy@0.1.2');
+    ```
+- 使用方法3：加载本地组件
+    ```typescript
+    const { loadComponent } = require('@serverless-devs/core');
+    loadComponent('/Users/shihuali/.s/components/serverlessfans.com/alibaba/fc@0.1.2');
+    ```
 
 ## loadApplication
 
-#### 用于加载应用，支持下载到指定目录，如果不指定，则默认会下载到当前目录
+与`loadComponent`接口类似，只不过`loadApplication`接口是对应用进行加载，支持下载到指定目录，如果不指定，则默认会下载到当前目录。
 
-- loadApplication(source: string, registry?: string, target?:string)
-
-```typescript
-/**
- * source 传参数格式说明
- * 1.serverless hub 源为 `<应用名>` 会下载最新版本，`<应用名>@<应用版本号>` 会下载指定版本
- * 2.github 源为 `<用户名>/<项目名称>` 会下载最新版本，`<用户名>/<项目名称>@<项目发布的版本号>` 会下载指定版本
- * 3.自定义源 为 `<应用名>`， 会下载指定资源
- *
- * registry 参数说明
- * 优先读取方法传入的参数 registry，如果找不到，然后读取 ~/.s/components/set-config.yml 文件里的 registry，
- * 如果找不到，优先读取 serverless hub 源，如果找不到，最后读取 github 源
- * 1.serverless hub 源 为：http://registry.devsapp.cn/simple
- * 2.github 源为：https://api.github.com/repos
- * 3.自定义源
- *
- * target 参数，下载资源的存放路径
- * /
-```
-
-```typescript
-const { loadComponent } = require('@serverless-devs/core');
-loadApplication('Serverless-Devs/Serverless-Devs');
-// loadApplication('Serverless-Devs/Serverless-Devs', 'https://api.github.com/repos');
-```
-
-- 支持下载特定版本的应用
-
-```typescript
-const { loadComponent } = require('@serverless-devs/core');
-loadApplication('Serverless-Devs/Serverless-Devs@1.1.13');
-```
+- 使用方法1：基础使用方法，`loadApplication(source: string, registry?: string, target?:string)`
+    ```typescript
+    /**
+     * source 传参数格式说明
+     * 1.serverless hub 源为 `<应用名>` 会下载最新版本，`<应用名>@<应用版本号>` 会下载指定版本
+     * 2.github 源为 `<用户名>/<项目名称>` 会下载最新版本，`<用户名>/<项目名称>@<项目发布的版本号>` 会下载指定版本
+     * 3.自定义源 为 `<应用名>`， 会下载指定资源
+     *
+     * registry 参数说明
+     * 优先读取方法传入的参数 registry，如果找不到，然后读取 ~/.s/components/set-config.yml 文件里的 registry，
+     * 如果找不到，优先读取 serverless hub 源，如果找不到，最后读取 github 源
+     * 1.serverless hub 源 为：http://registry.devsapp.cn/simple
+     * 2.github 源为：https://api.github.com/repos
+     * 3.自定义源
+     *
+     * target 参数，下载资源的存放路径
+     */
+    
+    const { loadComponent } = require('@serverless-devs/core');
+    loadApplication('Serverless-Devs/Serverless-Devs');
+    // loadApplication('Serverless-Devs/Serverless-Devs', 'https://api.github.com/repos');
+    ```
+- 使用方法2：下载特定版本的应用
+    ```typescript
+    const { loadComponent } = require('@serverless-devs/core');
+    loadApplication('Serverless-Devs/Serverless-Devs@1.1.13');
+    ```
 
 ## spinner
 
-#### 状态展示
+`spinner`接口，用于状态展示。
+
+示例代码：
 
 ```typescript
 const { spinner } = require('@serverless-devs/core');
@@ -208,14 +220,13 @@ async start() {
     }
   }
 }
-
 ```
-
-![Demo](https://img.alicdn.com/imgextra/i2/O1CN01L81nr81ZfimlgCPpp_!!6000000003222-1-tps-1312-73.gif)
 
 ## zip
 
-#### 用于压缩文件
+`zip`接口，用于压缩文件。
+
+示例代码：
 
 ```typescript
 /**
@@ -228,15 +239,16 @@ async start() {
 zip({ codeUri, include, exclude, outputFileName, outputFilePath });
 ```
 
-![Demo](https://img.alicdn.com/imgextra/i1/O1CN01YOb4ij1dRImEsBk1i_!!6000000003732-1-tps-1312-103.gif)
-
 ## unzip
 
-#### 用于解压文件，具体使用请查看[文档](https://github.com/kevva/decompress)
+`unzip`接口，用于解压文件，具体使用请查看[文档](https://github.com/kevva/decompress)
+
 
 ## help
 
-显示文档帮助信息，具体使用请查看[文档](https://github.com/75lb/command-line-usage)
+`help`接口，用于显示文档帮助信息，具体使用请查看[文档](https://github.com/75lb/command-line-usage)
+
+示例代码：
 
 ```typescript
 const { help } = require('@serverless-devs/core');
@@ -285,9 +297,7 @@ function test() {
 }
 ```
 
-![Demo](https://img.alicdn.com/imgextra/i2/O1CN0105D6t51lUWUKlSt3g_!!6000000004822-1-tps-1312-326.gif)
-
-输出数据
+效果展示：
 
 ```
 
@@ -310,8 +320,11 @@ Examples
 
 ## commandParse
 
-命令行参数解析工具，用于解析命令行参数。格式为 commandParse(Input, options)
-解析工具采用 [minimist](https://github.com/substack/minimist) 详细使用查看[文档](https://github.com/substack/minimist)
+`commandParse`接口，是命令行参数解析工具，用于解析命令行参数。格式为 `commandParse(Input, options)`
+
+解析工具采用 [minimist](https://github.com/substack/minimist) ，详细使用查看[文档](https://github.com/substack/minimist)
+
+示例代码：
 
 ```typescript
 const { commandParse } = require('@serverless-devs/core');
@@ -324,9 +337,7 @@ function test() {
 }
 ```
 
-![Demo](https://img.alicdn.com/imgextra/i1/O1CN01dsAaDX1ayKUcjHVcU_!!6000000003398-1-tps-1312-273.gif)
-
-输出数据
+效果展示：
 
 ```js
 {
@@ -346,65 +357,55 @@ function test() {
 
 ## getCredential
 
-#### 用于获取密钥信息，可接收（inputs, alias, ...envKeys)
+`getCredential`接口，用于获取密钥信息，可接收`(inputs, alias, ...envKeys)`
 
-- 不传任何参数的时候，会获取 `default` 密钥信息
-
-```typescript
-const { getCredential } = require('@serverless-devs/core');
-async function get() {
-  const c = await getCredential();
-  console.log('c', c);
-}
-```
-
-![demo](https://img.alicdn.com/imgextra/i3/O1CN016HGrtn1fZCrBDZWHb_!!6000000004020-1-tps-1215-319.gif)
-
-- 传参数
-
-```typescript
-const { getCredential } = require('@serverless-devs/core');
-async function get() {
-  // 组件接收的inputs
-  const inputs = {};
-  const c = await getCredential(inputs, 'custom', 'AccountIdByCustom', 'SecretIDByCustom');
-  console.log('c', c);
-}
-```
-
-![demo](https://img.alicdn.com/imgextra/i1/O1CN01fBzz3W1ljBAyz0wfc_!!6000000004854-1-tps-1215-702.gif)
-
+- 使用方法1：不传任何参数的时候，会获取 `default` 密钥信息
+    ```typescript
+    const { getCredential } = require('@serverless-devs/core');
+    async function get() {
+      const c = await getCredential();
+      console.log('c', c);
+    }
+    ```
+- 使用方法2：传参数，获取指定的密钥信息
+    ```typescript
+    const { getCredential } = require('@serverless-devs/core');
+    async function get() {
+      // 组件接收的inputs
+      const inputs = {};
+      const c = await getCredential(inputs, 'custom', 'AccountIdByCustom', 'SecretIDByCustom');
+      console.log('c', c);
+    }
+    ```
 ## setCredential
 
-#### 用于设置密钥信息, 可接收（...envKeys)
+`setCredential`接口，用于设置密钥信息, 可接收`(...envKeys)`
 
-- 不传任何参数的时候，会提供 模版[alibaba/aws/azure/baidu/google/huawei/tencent/custom] 来 创建密钥信息
-
-```typescript
-const { setCredential } = require('@serverless-devs/core');
-
-async function set() {
-  const c = await setCredential();
-  console.log('c', c);
-}
-```
-
-![demo](https://img.alicdn.com/imgextra/i2/O1CN01D1CUb01NlsjX7Rtvq_!!6000000001611-1-tps-1215-459.gif)
-
-- 传参数
-
-```typescript
-const { setCredential } = require('@serverless-devs/core');
-
-async function set() {
-  const c = await setCredential('AccountIdByCustom', 'SecretIDByCustom');
-  console.log('c', c);
-}
-```
-
-![demo](https://gw.alicdn.com/imgextra/i2/O1CN01w8fORm1sYN8lWmGsb_!!6000000005778-1-tps-1215-459.gif)
-
+- 使用方法1：不传任何参数的时候，会提供模版[alibaba/aws/azure/baidu/google/huawei/tencent/custom](https://github.com/Serverless-Devs/Serverless-Devs/tree/master/docs/zh/command/config.md
+) 来创建密钥信息；
+    ```typescript
+    const { setCredential } = require('@serverless-devs/core');
+    
+    async function set() {
+      const c = await setCredential();
+      console.log('c', c);
+    }
+    ```
+- 使用方法2：传参数，根据指定内容创建密钥信息；
+    ```typescript
+    const { setCredential } = require('@serverless-devs/core');
+    
+    async function set() {
+      const c = await setCredential('AccountIdByCustom', 'SecretIDByCustom');
+      console.log('c', c);
+    }
+    ```
+  
 ## decryptCredential
+
+`decryptCredential`接口，用于解密密钥信息，由于 Serverless Devs 为了进大可能地保证用户密钥等敏感信息的配置安全，所以在对密钥信息进行存储时，进行了加密存储，通过该方法可以进行解密。
+
+示例代码：
 
 ```typescript
 const { decryptCredential } = require('@serverless-devs/core');
@@ -417,14 +418,15 @@ const c = decryptCredential({
 console.log('c', c);
 ```
 
-#### 用于解密密钥信息
-
 ## getState
 
-#### 用于获取文件内容， 文件存放于 ~/.s 目录下面。
+`getState`接口，用于获取状态内容， 文件存放于 `~/.s` 目录下面。
 
-- 第一个参数：文件名称
-- 第二个参数：文件存放路径
+该接口共有三个参数：
+- 第一个参数：状态名称
+- 第二个参数：状态存放路径
+
+示例代码：
 
 ```typescript
 const { getState } = require('@serverless-devs/core');
@@ -435,15 +437,16 @@ async function get() {
 }
 ```
 
-![demo](https://img.alicdn.com/imgextra/i4/O1CN01pXFJUZ1IVKKVKhvny_!!6000000000898-1-tps-1215-97.gif)
-
 ## setState
 
-#### 用于设置文件内容， 文件存放于 ~/.s 目录下面。
+`setState`接口，用于设置状态内容， 文件存放于 `~/.s` 目录下面。
 
-- 第一个参数：文件名称
-- 第二个参数：文件内容
-- 第三个参数：文件存放路径
+该接口共有三个参数：
+- 第一个参数: 状态名称
+- 第二个参数: 状态内容
+- 第三个参数: 状态存放路径
+
+示例代码：
 
 ```typescript
 const { setState } = require('@serverless-devs/core');
@@ -454,141 +457,52 @@ async function set() {
 }
 ```
 
-![demo](https://img.alicdn.com/imgextra/i4/O1CN01pXFJUZ1IVKKVKhvny_!!6000000000898-1-tps-1215-97.gif)
-
 ## validateProps
 
-#### 用于检查 input 的 yaml 格式是否正确，通过返回 null，不通过返回 错误信息
+`validateProps`接口，用于检查 `yaml` 格式是否正确，可以直接传入 Serverless Devs 工具的 `inputs` 参数即可，通过返回 `null`，不通过返回错误信息。
+
+示例代码：
 
 ```typescript
 const { validateProps } = require('@serverless-devs/core');
-const input = {
-  Provider: 'alibaba',
-  Component: 'fc',
-  Properties: {
-    Region: 'cn-hangzhou',
-    Service: {
-      Name: 'ServerlessToolProject',
-      Log: {
-        LogStore: 'loghub中的logstore名称',
-        Project: 'loghub中的project名称',
-      },
-      Nas: [
-        {
-          label: 'xx',
-          value: 'xx',
-        },
-        {
-          label: '',
-          value: 'xx',
-        },
-      ],
-    },
-  },
-};
-
-// publish.yaml Properties demo
-// Properties:
-//   Region:
-//     Required: true
-//     Type:
-//     - Enum:
-//       - cn-hangzhou
-//       - cn-shanghai
-//   Service:
-//     Required: false
-//     Type:
-//     - Struct:
-//         Name:
-//           Required: true
-//           Type:
-//           - String
-//         Log:
-//           Required: true
-//           Type:
-//           - Enum[简单配置/Simple configuration]:
-//             - Auto
-//           - Struct[详细配置/Detailed configuration]:
-//               LogStore:
-//                 Required: true
-//                 Description:
-//                   zh: loghub中的logstore名称
-//                   en: Logstore name in loghub
-//                 Type:
-//                 - String
-//               Project:
-//                 Required: true
-//                 Description:
-//                   zh: loghub中的project名称
-//                   en: Project name in loghub
-//                 Type:
-//                 - String
-//         Nas:
-//           Required: true
-//           Type:
-//           - List:
-//               label:
-//                 Required: true
-//                 Type:
-//                 - String
-//               value:
-//                 Required: true
-//                 Type:
-//                 - String
-
+const inputs = {};
 async function test() {
-  const errors = await validateProps(input);
+  const errors = await validateProps(inputs);
   console.log('errors', errors);
 }
 ```
 
-![demo](https://img.alicdn.com/imgextra/i1/O1CN01vMID0V1UvE7SfqloB_!!6000000002579-1-tps-1215-697.gif)
-
 ## modifyProps
 
-#### 用于修改 <s.yml> 文件的 `prop` 属性， 第一次执行该方法时，会备份<s.yml>到<s.origin.yml>
+`modifyProps`接口，用于修改 `s.yml` 文件的 `prop` 属性。
 
-第一个参数接收 组件名称
-第二个参数 接收 prop，其值会 merge 到 <s.yml> 的 prop
-第三个参数 接收 <s.yml> 的路径
+> 第一次执行该方法时，会备份`s.yml`到`s.origin.yml`
+
+该接口共有三个参数：
+- 第一个参数: 应用中的服务名
+- 第二个参数: 对应服务的 `prop`，其值会 merge 到 `s.yml` 的 `prop`
+- 第三个参数: `s.yml` 的路径
+
+例如，某应用的`s.yaml`为：
+
+```yaml
+edition: 1.0.0
+services:
+  website:
+    component: /Users/shihuali/workspace/website/lib/index.js
+    access: my
+    props:
+      bucket: shl-website-test01
+      src:
+        src: ./src
+        dist: ./build
+        hook: npm run build
+```
+
+此时可以指定`website`服务，进行处理：
 
 ```typescript
 const { modifyProps } = require('@serverless-devs/core');
-
-// s.yml demo
-
-// edition: 1.0.0
-// services:
-//   website:
-//     component: /Users/shihuali/workspace/website/lib/index.js
-//     access: my
-//     props:
-//       bucket: shl-website-test01
-//       src:
-//         src: ./src
-//         dist: ./build
-//         hook: npm run build
-//         index: index.html
-//         error: index.html
-//       region: cn-shanghai
-//       hosts:
-//         - host: shl2.shihuali.top
-//           https:
-//             certInfo:
-//               switch: 'on'
-//               certType: free
-//               certName: xxx
-//               serverCertificate: xxx
-//               privateKey: xxx
-//             http2: 'on'
-//             forceHttps: 'on'
-//           access:
-//             referer:
-//               refererType: blacklist
-//               allowEmpty: true
-//               referers:
-//                 - aliyun.com
-//                 - taobao.com
 
 modifyProps('website', {
   bucket: 'shl-website-test01',
@@ -597,7 +511,9 @@ modifyProps('website', {
 
 ## installDependency
 
-#### 用于安装依赖
+`installDependency`接口，主要用于安装依赖。
+
+示例代码：
 
 ```typescript
 const { installDependency } = require('@serverless-devs/core');
@@ -607,7 +523,9 @@ installDependency({ cwd: process.cwd(), stdio: 'inherit', production: true });
 
 ## getYamlContent
 
-#### 用于获取文件内容，兼容 yaml 和 yml 文件
+`getYamlContent`接口，用于获取文件内容，兼容 `yaml` 和 `yml` 文件。
+
+示例代码：
 
 ```typescript
 const { getYamlContent } = require('@serverless-devs/core');
