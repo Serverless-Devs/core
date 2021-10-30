@@ -104,6 +104,7 @@ class LoggerDemo {
     - [modifyProps](./common.md#modifyProps) : 修改 `s.yml` 文件的 `Properties` 属性
     - [installDependency](./common.md#installDependency) : 安装依赖
     - [getYamlContent](./common.md#getYamlContent) : 用于获取文件内容
+    - [....](./common.md) : 更多内容可以参考[common通用接口文档](./common.md)
 - [logger](./logger.md): 日志相关接口
     - [log](./logger.md#log) : 打印到终端(具备显示不同颜色的能力)
     - [debug/info/warn/error](./logger.md#levels) : 打印到本地文件以及终端中
