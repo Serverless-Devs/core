@@ -77,7 +77,7 @@ export function readJsonFile(filePath: string) {
     } catch (error) {
       report({
         type: 'jsError',
-        content: error.stack,
+        content: `${error.message}||${error.stack}`,
       });
     }
   } else {
