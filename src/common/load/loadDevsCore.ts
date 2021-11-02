@@ -8,7 +8,7 @@ import rimraf from 'rimraf';
 
 const cachePath = path.join(S_ROOT_HOME, 'cache');
 const corePath = path.join(cachePath, 'core');
-const lockPath = path.resolve(cachePath, '.s-core.lock');
+const lockPath = path.resolve(corePath, '.s.lock');
 
 export async function downLoadDesCore(componentPath: string) {
   if (fs.existsSync(lockPath)) {
