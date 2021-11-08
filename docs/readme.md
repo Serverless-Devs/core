@@ -15,7 +15,7 @@
   </a>
 </p>
 
-Serverless Devs Core 是 Serverless Devs 的官方组件。由于该组件默认支持了包括[组件加载](./docs/common.md#loadComponent)、[日志输出](./docs/logger.md)、[组件参数转换](./docs/common.md#commandparse)、[状态上报](./docs/common.md#report)等在内的通用 Serverless Package 开发能力，所以，通过该组件可以帮助 Serverless Package 开发者快速实现 Serverless Devs 的组件开发。
+Serverless Devs Core 是 Serverless Devs 的官方组件。由于该组件默认支持了包括[组件加载](./common.md#loadComponent)、[日志输出](./logger.md)、[组件参数转换](./common.md#commandparse)、[状态上报](./common.md#report)等在内的通用 Serverless Package 开发能力，所以，通过该组件可以帮助 Serverless Package 开发者快速实现 Serverless Devs 的组件开发。
 
 
 - [快速安装](#快速安装)
@@ -88,26 +88,26 @@ class LoggerDemo {
 
 # 接口目录
 
-- [common](./docs/common.md): 通用接口
-    - [request](./docs/common.md#request)/[downloadRequest](./docs/common.md#downloadrequest): HTTP 请求
-    - [report](./docs/common.md#report) : 组件上报/错误上报
-    - [loadComponent](./docs/common.md#loadComponent) : 组件加载
-    - [loadApplication](./docs/common.md#loadApplication) : 应用加载
-    - [spinner](./docs/common.md#spinner) : 状态展示
-    - [zip](./docs/common.md#zip)/[unzip](./docs/common.md#unzip) : 打包/解包
-    - [help](./docs/common.md#help): 显示文档帮助信息
-    - [commadParse](./docs/common.md#commandparse) : 命令行参数解析工具
-    - [getCredential](./docs/common.md#getCredential)/[setCredential](./docs/common.md#setCredential) : 获取/创建密钥信息
-    - [decryptCredential](./docs/common.md#decryptCredential) : 用于解密密钥信息
-    - [getState](./docs/common.md#getState)/[setState](./docs/common.md#setState) : 获取/设置状态信息
-    - [validateProps](./docs/common.md#validateProps) : 检验 `inputs` 的 `Properties` 属性格式
-    - [modifyProps](./docs/common.md#modifyProps) : 修改 `s.yml` 文件的 `Properties` 属性
-    - [installDependency](./docs/common.md#installDependency) : 安装依赖
-    - [getYamlContent](./docs/common.md#getYamlContent) : 用于获取文件内容
-    - [....](./docs/common.md) : 更多内容可以参考[common通用接口文档](./docs/common.md)
-- [logger](./docs/logger.md): 日志相关接口
-    - [log](./docs/logger.md#log) : 打印到终端(具备显示不同颜色的能力)
-    - [debug/info/warn/error](./docs/logger.md#levels) : 打印到本地文件以及终端中
+- [common](./common.md): 通用接口
+    - [request](./common.md#request)/[downloadRequest](./common.md#downloadrequest): HTTP 请求
+    - [report](./common.md#report) : 组件上报/错误上报
+    - [loadComponent](./common.md#loadComponent) : 组件加载
+    - [loadApplication](./common.md#loadApplication) : 应用加载
+    - [spinner](./common.md#spinner) : 状态展示
+    - [zip](./common.md#zip)/[unzip](./common.md#unzip) : 打包/解包
+    - [help](./common.md#help): 显示文档帮助信息
+    - [commadParse](./common.md#commandparse) : 命令行参数解析工具
+    - [getCredential](./common.md#getCredential)/[setCredential](./common.md#setCredential) : 获取/创建密钥信息
+    - [decryptCredential](./common.md#decryptCredential) : 用于解密密钥信息
+    - [getState](./common.md#getState)/[setState](./common.md#setState) : 获取/设置状态信息
+    - [validateProps](./common.md#validateProps) : 检验 `inputs` 的 `Properties` 属性格式
+    - [modifyProps](./common.md#modifyProps) : 修改 `s.yml` 文件的 `Properties` 属性
+    - [installDependency](./common.md#installDependency) : 安装依赖
+    - [getYamlContent](./common.md#getYamlContent) : 用于获取文件内容
+    - [....](./common.md) : 更多内容可以参考[common通用接口文档](./common.md)
+- [logger](./logger.md): 日志相关接口
+    - [log](./logger.md#log) : 打印到终端(具备显示不同颜色的能力)
+    - [debug/info/warn/error](./logger.md#levels) : 打印到本地文件以及终端中
 
 
 # 项目贡献
