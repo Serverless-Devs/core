@@ -162,6 +162,7 @@ export class Logger {
 
   async task(title: string, list: ITaskOptions[]) {
     const plist = [];
+    const startTime = Date.now();
     for (const item of list) {
       if (item.title && item.task) {
         if (getEnableDebug()) {
@@ -189,11 +190,15 @@ export class Logger {
         }
       }
     }
+    const endTime = Date.now();
+
+    const time = Math.round((endTime - startTime) / 1000);
+
     if (plist.every((obj) => obj)) {
-      ora().succeed(`${title} succeed`);
+      ora().succeed(`${title} succeed (${time}s)`);
       return true;
     } else {
-      ora().fail(`${title} fail`);
+      ora().fail(`${title} fail (${time}s)`);
       return false;
     }
   }
