@@ -1,11 +1,10 @@
 import inquirer from 'inquirer';
 import fs from 'fs-extra';
 import path from 'path';
-import os from 'os';
 import yaml from 'js-yaml';
 import { providerCollection, checkProviderList } from './constant';
 import getYamlContent from '../getYamlContent';
-import { jsonparse } from '../../libs/utils';
+import { jsonparse, getRootHome } from '../../libs';
 
 const Crypto = require('crypto-js');
 
@@ -61,7 +60,7 @@ function encrypt(info: any = {}) {
 
 async function writeData(data: any) {
   const { info, accessAlias } = data;
-  const filePath = path.join(os.homedir(), '.s/access.yaml');
+  const filePath = path.join(getRootHome(), 'access.yaml');
   const content = await getYamlContent(filePath);
   if (content) {
     const providerAliasKeys = Object.keys(content);
@@ -118,7 +117,7 @@ async function writeData(data: any) {
 }
 
 async function getAlias() {
-  const filePath = path.join(os.homedir(), '.s/access.yaml');
+  const filePath = path.join(getRootHome(), 'access.yaml');
   if (fs.existsSync(filePath)) {
     const info = await getYamlContent(filePath);
     const keys = info ? Object.keys(info).filter((item) => item.startsWith('default')) : [];

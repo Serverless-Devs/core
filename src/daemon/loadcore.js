@@ -1,11 +1,9 @@
 const fs = require('fs');
-const os = require('os');
 const path = require('path');
-const { downloadRequest, request, semver } = require('../index');
+const { downloadRequest, request, semver, getRootHome } = require('../index');
 const { DEFAULT_CORE_VERSION } = require('./constant');
 
-const S_ROOT_HOME = path.join(os.homedir(), '.s');
-const cachePath = path.join(S_ROOT_HOME, 'cache');
+const cachePath = path.join(getRootHome(), 'cache');
 const corePath = path.join(cachePath, 'core');
 const lockPath = path.resolve(corePath, '.s.lock');
 

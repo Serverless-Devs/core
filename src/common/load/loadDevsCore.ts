@@ -1,12 +1,12 @@
 import fs from 'fs-extra';
 import path from 'path';
-import { S_ROOT_HOME } from '../../libs/common';
+import { getRootHome } from '../../libs/common';
 import { downloadRequest } from '../request';
 import { DEFAULT_CORE_VERSION } from '../../daemon/constant';
 import { execDaemonWithTTL } from '../../execDaemon';
 import rimraf from 'rimraf';
 
-const cachePath = path.join(S_ROOT_HOME, 'cache');
+const cachePath = path.join(getRootHome(), 'cache');
 const corePath = path.join(cachePath, 'core');
 const lockPath = path.resolve(corePath, '.s.lock');
 

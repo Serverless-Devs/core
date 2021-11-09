@@ -1,10 +1,10 @@
 import fs from 'fs-extra';
-import os from 'os';
 import path from 'path';
 import getYamlContent from '../../getYamlContent';
+import { getRootHome } from '../../../libs';
 
 export default async function getAccess(accessAlias: string) {
-  const globalPath = path.join(os.homedir(), '.s/access.yaml');
+  const globalPath = path.join(getRootHome(), 'access.yaml');
   if (!fs.existsSync(`${globalPath}`)) {
     fs.writeFileSync(globalPath, '');
   }
