@@ -4,7 +4,7 @@ import path from 'path';
 import { getRootHome } from '../libs/common';
 
 interface IConfig {
-  type: 'pv' | 'action' | 'jsError' | 'networkError' | 'initTemplate';
+  type: 'pv' | 'action' | 'jsError' | 'networkError' | 'initTemplate' | 'installError';
   content?: string;
   traceId?: string;
 }
