@@ -6,7 +6,7 @@ Provider:
   - 华为云
   - 百度云
   - AWS
-Version: 0.1.10
+Version: 0.1.11
 Description: Serverless Devs 核心组件
 HomePage: https://github.com/Serverless-Devs/core
 Tags: #标签详情
