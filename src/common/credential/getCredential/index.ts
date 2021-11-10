@@ -5,7 +5,7 @@ import get from 'lodash.get';
 import os from 'os';
 import path from 'path';
 import getYamlContent from '../../getYamlContent';
-import { logger } from '../../../libs/utils';
+import { logger, getRootHome } from '../../../libs';
 import chalk from 'chalk';
 
 const Crypto = require('crypto-js');
@@ -103,7 +103,7 @@ async function getCredentialWithAccess(access?: string, ...args: any[]) {
     logger.debug(`密钥信息: ${JSON.stringify(result, null, 2)}`);
     return trim(result);
   }
-  const userInfo = await getYamlContent(path.join(os.homedir(), '.s/access.yaml'));
+  const userInfo = await getYamlContent(path.join(getRootHome(), 'access.yaml'));
 
   let choices = [];
   if (userInfo) {

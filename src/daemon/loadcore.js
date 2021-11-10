@@ -1,13 +1,11 @@
 const fs = require('fs');
-const os = require('os');
 const path = require('path');
-const { downloadRequest, request } = require('../index');
+const { downloadRequest, request, semver, getRootHome } = require('../index');
 const { DEFAULT_CORE_VERSION } = require('./constant');
 
-const S_ROOT_HOME = path.join(os.homedir(), '.s');
-const cachePath = path.join(S_ROOT_HOME, 'cache');
+const cachePath = path.join(getRootHome(), 'cache');
 const corePath = path.join(cachePath, 'core');
-const lockPath = path.resolve(cachePath, '.s-core.lock');
+const lockPath = path.resolve(corePath, '.s.lock');
 
 function readJsonFile(filePath) {
   if (fs.existsSync(filePath)) {
@@ -26,7 +24,7 @@ async function init() {
   }
   const lockFileInfo = readJsonFile(lockPath);
   const now = Date.now();
-  if (version <= lockFileInfo.version) {
+  if (semver.lte(version, lockFileInfo.version)) {
     return fs.writeFileSync(
       lockPath,
       JSON.stringify({ version: lockFileInfo.version, currentTimestamp: now }, null, 2),

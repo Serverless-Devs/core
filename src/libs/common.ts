@@ -2,16 +2,33 @@
  * @description 业务通用代码
  */
 
-const os = require('os');
-const path = require('path');
+import os from 'os';
+import path from 'path';
 
 // s工具的家目录
-export const S_ROOT_HOME = path.join(os.homedir(), '.s');
+
+export function getCicdEnv() {
+  for (const key in process.env) {
+    if (key.startsWith('CLOUDSHELL')) return 'aliyun_ecs';
+    if (key.startsWith('PIPELINE')) return 'yunxiao';
+    if (key.startsWith('GITHUB')) return 'github';
+    if (key.startsWith('GITLAB')) return 'gitlab';
+    if (key.startsWith('JENKINS')) return 'jenkins';
+  }
+}
+
+export function getRootHome() {
+  const { S_ROOT_HOME } = process.env;
+  if (S_ROOT_HOME) return S_ROOT_HOME;
+  const env = getCicdEnv();
+  if (env === 'yunxiao') return path.join(os.homedir(), '.cache', '.s');
+  return path.join(os.homedir(), '.s');
+}
 
 export const S_CURRENT_HOME = path.join(process.cwd(), '.s');
 
 export const S_CURRENT = path.join(process.cwd(), './');
 
-export const S_ROOT_HOME_ACCESS = path.join(S_ROOT_HOME, 'access.yaml');
+export const S_ROOT_HOME_ACCESS = path.join(getRootHome(), 'access.yaml');
 
-export const S_ROOT_HOME_COMPONENT = path.join(S_ROOT_HOME, 'components');
+export const S_ROOT_HOME_COMPONENT = path.join(getRootHome(), 'components');

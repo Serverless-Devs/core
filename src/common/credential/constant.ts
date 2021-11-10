@@ -153,7 +153,7 @@ export const checkProviderList: any[] = [
   {
     type: 'list',
     name: 'provider',
-    message: 'Please select a template:',
+    message: 'Please select a provider:',
     choices: [
       { name: 'Alibaba Cloud (alibaba)', value: 'alibaba' },
       { name: 'AWS (aws)', value: 'aws' },
@@ -162,7 +162,7 @@ export const checkProviderList: any[] = [
       { name: 'Google Cloud (google)', value: 'google' },
       { name: 'Huawei Cloud (huawei)', value: 'huawei' },
       { name: 'Tencent Cloud (tencent)', value: 'tencent' },
-      { name: 'Custom (custom)', value: 'custom' },
+      { name: 'Custom (others)', value: 'custom' },
     ],
   },
 ];

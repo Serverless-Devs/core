@@ -1,6 +1,6 @@
 import fs from 'fs-extra';
 import { loadComponent } from './load';
-import { S_ROOT_HOME } from '../libs/common';
+import { getRootHome } from '../libs/common';
 import getYamlContent from './getYamlContent';
 
 function getKeys(obj: object) {
@@ -275,9 +275,9 @@ async function getPublish(Component: string, Provider: string) {
   let publishYamlPath: string;
   if (Component.includes('@')) {
     const [name, version] = Component.split('@');
-    publishYamlPath = `${S_ROOT_HOME}/components/${name}-${Provider}@${version}`;
+    publishYamlPath = `${getRootHome()}/components/${name}-${Provider}@${version}`;
   } else {
-    let files = fs.readdirSync(`${S_ROOT_HOME}/components`);
+    let files = fs.readdirSync(`${getRootHome()}/components`);
     files = files.filter((item) => item.includes(`${Component}-${Provider}`));
     let maxVersion = files[0];
     files.forEach((item) => {
@@ -285,7 +285,7 @@ async function getPublish(Component: string, Provider: string) {
         maxVersion = item;
       }
     });
-    publishYamlPath = `${S_ROOT_HOME}/components/${maxVersion}`;
+    publishYamlPath = `${getRootHome()}/components/${maxVersion}`;
   }
   const result = getYamlContent(`${publishYamlPath}/publish.yaml`);
   if (result) return;

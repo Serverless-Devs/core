@@ -1,7 +1,6 @@
-const { getMAC, request, getYamlContent, isDocker } = require('../index');
+const { getMAC, request, getYamlContent, isDocker, getCicdEnv, getRootHome } = require('../index');
 const path = require('path');
 const fs = require('fs');
-const os = require('os');
 const getmac = getMAC();
 const TypeError = ['jsError', 'networkError'];
 
@@ -29,18 +28,8 @@ async function init() {
   await request(url, { method: 'post', json: false, body: content, timeout: 3000 });
 }
 
-function getCicdEnv() {
-  for (const key in process.env) {
-    if (key.startsWith('CLOUDSHELL')) return 'aliyun_ecs';
-    if (key.startsWith('PIPELINE')) return 'yunxiao';
-    if (key.startsWith('GITHUB')) return 'github';
-    if (key.startsWith('GITLAB')) return 'gitlab';
-    if (key.startsWith('JENKINS')) return 'jenkins';
-  }
-}
-
 function getCoreVersion() {
-  const corePath = path.join(os.homedir(), '.s', 'cache', 'core', 'package.json');
+  const corePath = path.join(getRootHome(), 'cache', 'core', 'package.json');
   return fs.existsSync(corePath) ? require(corePath).version : 'unknown';
 }
 
