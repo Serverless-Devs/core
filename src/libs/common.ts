@@ -18,10 +18,6 @@ export function getCicdEnv() {
 }
 
 export function getRootHome() {
-  const { S_ROOT_HOME } = process.env;
-  if (S_ROOT_HOME) return S_ROOT_HOME;
-  const env = getCicdEnv();
-  if (env === 'yunxiao') return path.join(os.homedir(), '.cache', '.s');
   return path.join(os.homedir(), '.s');
 }
 
