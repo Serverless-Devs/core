@@ -1,6 +1,6 @@
 {
   "name": "@serverless-devs/core",
-  "version": "0.1.12",
+  "version": "0.1.13-beta.1",
   "description": "Serverless Devs Tool Core Component",
   "keywords": [
     "Serverless",
@@ -33,7 +33,8 @@
     "lint": "npm run typecheck && f2elint scan -i src",
     "fix": "f2elint fix",
     "pub": "npm run build && npm publish",
-    "typecheck": "npx tsc -p tsconfig.json --noEmit"
+    "typecheck": "npx tsc -p tsconfig.json --noEmit",
+    "beta": "npm publish --tag=beta"
   },
   "autoInstall": false,
   "main": "./dist/index.js",

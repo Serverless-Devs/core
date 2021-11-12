@@ -80,7 +80,7 @@ export const getCliVersion = (defaultValue?: string) => {
   return CLI_VERSION || defaultValue;
 };
 
-export const isBetaS = getCliVersion('0.0.0').includes('alpha');
+export const isBetaS = getCliVersion('0.0.0').includes('beta');
 
 export const S_CURRENT_HOME = path.join(process.cwd(), '.s');
 
