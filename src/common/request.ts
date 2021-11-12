@@ -160,7 +160,16 @@ async function downloadWithExtract({ url, dest, filename, strip, rest, spin }) {
     await download(url, dest, options);
     spin.text = filename ? `${filename} file unzipping...` : 'file unzipping...';
     rimraf.sync(path.resolve(dest, '.git'));
-    await decompress(`${dest}/${formatFilename}`, dest, { strip });
+    try {
+      await decompress(`${dest}/${formatFilename}`, dest, { strip });
+    } catch (error) {
+      await decompress(`${dest}/${formatFilename}`, dest, { strip });
+      reportError({
+        requestUrl: url,
+        statusCode: error.statusCode,
+        errorMsg: error.message,
+      });
+    }
     rimraf.sync(`${dest}/${formatFilename}`);
     const text = 'file decompression completed';
     spin.succeed(filename ? `${filename} ${text}` : text);
