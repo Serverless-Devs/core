@@ -1,6 +1,6 @@
 import fs from 'fs-extra';
 import path from 'path';
-import { getRootHome } from '../../libs/common';
+import { getRootHome, isBetaS } from '../../libs/common';
 import { downloadRequest } from '../request';
 import { DEFAULT_CORE_VERSION } from '../../daemon/constant';
 import { execDaemonWithTTL } from '../../execDaemon';
@@ -23,11 +23,12 @@ async function existCore(componentPath: string) {
 }
 async function nonExistCore(componentPath: string) {
   fs.ensureDirSync(cachePath);
-  const url = `https://registry.devsapp.cn/simple/devsapp/core/zipball/${DEFAULT_CORE_VERSION}`;
-  const filename = `core@${DEFAULT_CORE_VERSION}.zip`;
+  const version = isBetaS ? 'dev' : DEFAULT_CORE_VERSION;
+  const url = `https://registry.devsapp.cn/simple/devsapp/core/zipball/${version}`;
+  const filename = `core@${version}.zip`;
   await downloadRequest(url, corePath, { filename, extract: true, strip: 1 });
   lns(componentPath);
-  fs.writeFileSync(lockPath, JSON.stringify({ version: DEFAULT_CORE_VERSION }, null, 2));
+  fs.writeFileSync(lockPath, JSON.stringify({ version }, null, 2));
 }
 
 function lns(componentPath: string) {

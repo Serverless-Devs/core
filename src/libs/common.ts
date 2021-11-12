@@ -68,13 +68,19 @@ export function getRootHome() {
     return data.workspace ? formatWorkspacePath(data.workspace) : shomedir;
   }
   // 不存在 ～/.s/config/s.json
-  const { CLI_VERSION } = process.env;
-  if (semver.gt(CLI_VERSION, '2.0.92')) {
+  if (semver.gt(getCliVersion('0.0.0'), '2.0.92')) {
     const env = getCicdEnv();
     if (env === 'yunxiao') return path.join(USER_HOME, '.cache', '.s');
   }
   return shomedir;
 }
+
+export const getCliVersion = (defaultValue?: string) => {
+  const { CLI_VERSION } = process.env;
+  return CLI_VERSION || defaultValue;
+};
+
+export const isBetaS = getCliVersion('0.0.0').includes('alpha');
 
 export const S_CURRENT_HOME = path.join(process.cwd(), '.s');
 
