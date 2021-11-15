@@ -12,6 +12,7 @@ const lockPath = path.resolve(corePath, '.s.lock');
 
 export async function downLoadDesCore(componentPath: string) {
   if (fs.existsSync(lockPath)) {
+    if (isBetaS) return;
     return await existCore(componentPath);
   }
   await nonExistCore(componentPath);

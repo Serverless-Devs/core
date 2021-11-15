@@ -1,6 +1,6 @@
 import fs from 'fs-extra';
 import path from 'path';
-import { S_ROOT_HOME_COMPONENT } from '../../libs/common';
+import { getSComponentPath } from '../../libs/common';
 import {
   buildComponentInstance,
   getGithubReleases,
@@ -60,7 +60,7 @@ async function loadServerless(source: string, params?: any) {
 }
 
 async function loadServerlessWithVersion({ provider, name, componentName, version, filename }) {
-  const componentPath = path.join(S_ROOT_HOME_COMPONENT, 'devsapp.cn', provider, componentName);
+  const componentPath = path.join(getSComponentPath(), 'devsapp.cn', provider, componentName);
   const lockPath = path.resolve(componentPath, '.s.lock');
   if (fs.existsSync(lockPath)) {
     return componentPath;
@@ -75,7 +75,7 @@ async function loadServerlessWithVersion({ provider, name, componentName, versio
 }
 
 async function loadServerlessWithNoVersion({ provider, name, componentName, filename }) {
-  const componentPath = path.join(S_ROOT_HOME_COMPONENT, 'devsapp.cn', provider, componentName);
+  const componentPath = path.join(getSComponentPath(), 'devsapp.cn', provider, componentName);
   const lockPath = path.resolve(componentPath, '.s.lock');
   if (fs.existsSync(lockPath)) {
     execDaemonWithTTL('loadComponent.js', {
@@ -122,7 +122,7 @@ async function loadGithub(source: string, params?: any) {
 }
 
 async function loadGithubWithVersion({ provider, name, componentName, version }) {
-  const componentPath = path.join(S_ROOT_HOME_COMPONENT, 'github.com', provider, componentName);
+  const componentPath = path.join(getSComponentPath(), 'github.com', provider, componentName);
   const lockPath = path.resolve(componentPath, '.s.lock');
   if (fs.existsSync(lockPath)) {
     return componentPath;
@@ -138,7 +138,7 @@ async function loadGithubWithVersion({ provider, name, componentName, version })
 }
 
 async function loadGithubWithNoVersion({ provider, name, componentName }) {
-  const componentPath = path.join(S_ROOT_HOME_COMPONENT, 'github.com', provider, componentName);
+  const componentPath = path.join(getSComponentPath(), 'github.com', provider, componentName);
   const lockPath = path.resolve(componentPath, '.s.lock');
   if (fs.existsSync(lockPath)) {
     execDaemonWithTTL('loadComponent.js', {
@@ -154,8 +154,11 @@ async function loadGithubWithNoVersion({ provider, name, componentName }) {
   if (!get(result, 'zipball_url')) return;
   let { zipball_url, tag_name } = result;
   // dev的tag有问题的，github下载地址重置
-  if(zipball_url.lastIndexOf('/dev') > 0) {
-    zipball_url = zipball_url.replace(/^https:\/\/api.github.com/, 'https://github.com').replace('repos/', '').replace(/\/dev$/,'/refs/tags/dev')
+  if (zipball_url.lastIndexOf('/dev') > 0) {
+    zipball_url = zipball_url
+      .replace(/^https:\/\/api.github.com/, 'https://github.com')
+      .replace('repos/', '')
+      .replace(/\/dev$/, '/refs/tags/dev');
   }
   const filename = `${provider}_${componentName}@${tag_name}.zip`;
   await downloadComponent({ zipball_url, filename, componentPath, lockPath, version: tag_name });

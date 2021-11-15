@@ -60,6 +60,11 @@ export function setConfig(key: string, value: any) {
   }
 }
 
+export const getCliVersion = (defaultValue?: string) => {
+  const { CLI_VERSION } = process.env;
+  return CLI_VERSION || defaultValue;
+};
+
 export function getRootHome() {
   const shomedir = path.join(USER_HOME, '.s');
   const sJsonPath = path.join(shomedir, 'config', 's.json');
@@ -75,17 +80,10 @@ export function getRootHome() {
   return shomedir;
 }
 
-export const getCliVersion = (defaultValue?: string) => {
-  const { CLI_VERSION } = process.env;
-  return CLI_VERSION || defaultValue;
-};
-
 export const isBetaS = getCliVersion('0.0.0').includes('beta');
 
 export const S_CURRENT_HOME = path.join(process.cwd(), '.s');
 
 export const S_CURRENT = path.join(process.cwd(), './');
 
-export const S_ROOT_HOME_ACCESS = path.join(getRootHome(), 'access.yaml');
-
-export const S_ROOT_HOME_COMPONENT = path.join(getRootHome(), 'components');
+export const getSComponentPath = () => path.join(getRootHome(), 'components');
