@@ -12,7 +12,6 @@ const lockPath = path.resolve(corePath, '.s.lock');
 
 export async function downLoadDesCore(componentPath: string) {
   if (fs.existsSync(lockPath)) {
-    if (isBetaS) return;
     return await existCore(componentPath);
   }
   await nonExistCore(componentPath);
@@ -20,6 +19,7 @@ export async function downLoadDesCore(componentPath: string) {
 
 async function existCore(componentPath: string) {
   lns(componentPath);
+  if (isBetaS) return;
   execDaemonWithTTL('loadcore.js', { lockPath });
 }
 async function nonExistCore(componentPath: string) {
