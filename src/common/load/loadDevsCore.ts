@@ -19,12 +19,12 @@ export async function downLoadDesCore(componentPath: string) {
 
 async function existCore(componentPath: string) {
   lns(componentPath);
-  if (isBetaS) return;
+  if (isBetaS()) return;
   execDaemonWithTTL('loadcore.js', { lockPath });
 }
 async function nonExistCore(componentPath: string) {
   fs.ensureDirSync(cachePath);
-  const version = isBetaS ? 'dev' : DEFAULT_CORE_VERSION;
+  const version = isBetaS() ? 'dev' : DEFAULT_CORE_VERSION;
   const url = `https://registry.devsapp.cn/simple/devsapp/core/zipball/${version}`;
   const filename = `core@${version}.zip`;
   await downloadRequest(url, corePath, { filename, extract: true, strip: 1 });

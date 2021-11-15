@@ -80,7 +80,7 @@ export function getRootHome() {
   return shomedir;
 }
 
-export const isBetaS = getCliVersion('0.0.0').includes('beta');
+export const isBetaS = () => getCliVersion('0.0.0').includes('beta');
 
 export const S_CURRENT_HOME = path.join(process.cwd(), '.s');
 
