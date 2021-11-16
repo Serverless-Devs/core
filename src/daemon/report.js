@@ -1,4 +1,12 @@
-const { getMAC, request, getYamlContent, isDocker, getCicdEnv, getRootHome } = require('../index');
+const {
+  getMAC,
+  request,
+  getYamlContent,
+  isDocker,
+  getCicdEnv,
+  getRootHome,
+  ip,
+} = require('../index');
 const path = require('path');
 const fs = require('fs');
 const getmac = getMAC();
@@ -14,7 +22,7 @@ async function init() {
   const pid = getmac.replace(/:/g, '_');
   const baseURL =
     'http://dankun.ccc45d9d8e32b44eeac168caa1a2deead.cn-zhangjiakou.alicontainer.com/r.png';
-  let url = `${baseURL}?type=${type}&cli_version=${CLI_VERSION}&core_version=${core_version}&os=${os}&node_version=${node_version}&pid=${pid}&time=${time}&isDocker=${isDocker()}`;
+  let url = `${baseURL}?type=${type}&cli_version=${CLI_VERSION}&core_version=${core_version}&os=${os}&node_version=${node_version}&pid=${pid}&time=${time}&isDocker=${isDocker()}&ip=${ip.address()}`;
   if (traceId) {
     url = `${url}&traceId=${traceId}`;
   }

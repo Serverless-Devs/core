@@ -5,7 +5,8 @@ import get from 'lodash.get';
 import os from 'os';
 import path from 'path';
 import getYamlContent from '../../getYamlContent';
-import { logger, getRootHome } from '../../../libs';
+import { logger } from '../../../libs/utils';
+import { getRootHome } from '../../../libs/common';
 import chalk from 'chalk';
 
 const Crypto = require('crypto-js');
@@ -100,7 +101,7 @@ async function getCredentialWithAccess(access?: string, ...args: any[]) {
   // 找到已经创建过的密钥，直接返回密钥信息
   if (accessKeys.length > 0) {
     const result = formatValue(accessContent, accessAlias);
-    logger.debug(`密钥信息: ${JSON.stringify(result, null, 2)}`);
+    logger.debug(`access information: ${JSON.stringify(result, null, 2)}`);
     return trim(result);
   }
   const userInfo = await getYamlContent(path.join(getRootHome(), 'access.yaml'));
@@ -143,7 +144,7 @@ async function getCredentialWithAccess(access?: string, ...args: any[]) {
     )}\n\n`,
   );
 
-  logger.debug(`密钥信息: ${JSON.stringify(result, null, 2)}`);
+  logger.debug(`access information: ${JSON.stringify(result, null, 2)}`);
   return trim(result);
 }
 

@@ -4,7 +4,8 @@ import path from 'path';
 import yaml from 'js-yaml';
 import { providerCollection, checkProviderList } from './constant';
 import getYamlContent from '../getYamlContent';
-import { jsonparse, getRootHome } from '../../libs';
+import { jsonparse } from '../../libs/utils';
+import { getRootHome } from '../../libs/common';
 
 const Crypto = require('crypto-js');
 

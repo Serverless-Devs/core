@@ -50,6 +50,6 @@
 
 import {downloadRequest} from '../../src';
 
-downloadRequest('https://registry.devsapp.cn/simple/devsapp/fc-info/zipball/0.0.14', './a',{filename:'fc-info.zip',
+downloadRequest('https://registry.devsapp.cn/simple/devsapp/image-prediction-app/zipball/0.0.6', '/Users/shihuali/workspace/core/test/fixtures/a',{
 extract: true,
 strip: 1,})
