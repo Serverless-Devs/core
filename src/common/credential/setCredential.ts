@@ -62,11 +62,7 @@ function encrypt(info: any = {}) {
 async function writeData(data: any) {
   const { info, accessAlias } = data;
   const filePath = path.join(getRootHome(), 'access.yaml');
-  console.log(filePath, 'filePath');
-
   const content = await getYamlContent(filePath);
-  console.log(content, 'content');
-
   if (content) {
     const providerAliasKeys = Object.keys(content);
     const Temp_Params = jsonparse(process.env.Temp_Params);
@@ -112,8 +108,6 @@ async function writeData(data: any) {
     }
   } else {
     try {
-      console.log(encrypt(info), 'encrypt(info)');
-      console.log(yaml.dump({ [accessAlias]: encrypt(info) }));
       fs.ensureFileSync(filePath);
       fs.writeFileSync(filePath, yaml.dump({ [accessAlias]: encrypt(info) }));
       output({ info, accessAlias });
@@ -213,8 +207,6 @@ async function setCredential(...args: any[]) {
  */
 export async function setKnownCredential(info, accessAlias) {
   const aliasName = accessAlias || (await getAlias());
-  console.log(JSON.stringify({ info, accessAlias: aliasName }, null, 2));
-
   await writeData({ info, accessAlias: aliasName });
   return {
     Alias: aliasName,
