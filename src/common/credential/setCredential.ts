@@ -62,7 +62,11 @@ function encrypt(info: any = {}) {
 async function writeData(data: any) {
   const { info, accessAlias } = data;
   const filePath = path.join(getRootHome(), 'access.yaml');
+  console.log(filePath, 'filePath');
+
   const content = await getYamlContent(filePath);
+  console.log(content, 'content');
+
   if (content) {
     const providerAliasKeys = Object.keys(content);
     const Temp_Params = jsonparse(process.env.Temp_Params);
