@@ -1,16 +1,12 @@
-import { reportComponent } from '../../src/common';
-import { HLogger, ILogger } from '../../src';
+import { reportComponent } from '../../lib';
 
 class ReportDemo {
-  @HLogger('S-CORE') logger: ILogger;
-
   async component() {
     await reportComponent('website', {
       command: 'deploy',
       uid: '123435',
       remark: 'test',
     });
-    this.logger.info('错误上报');
   }
 }
 
