@@ -113,10 +113,9 @@ async function writeData(data: any) {
   } else {
     try {
       console.log(encrypt(info), 'encrypt(info)');
-
+      console.log(yaml.dump({ [accessAlias]: encrypt(info) }));
+      fs.ensureFileSync(filePath);
       fs.writeFileSync(filePath, yaml.dump({ [accessAlias]: encrypt(info) }));
-      console.log('start output');
-
       output({ info, accessAlias });
     } catch (err) {
       throw new Error('Configuration failed');
