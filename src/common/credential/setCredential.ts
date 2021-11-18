@@ -108,6 +108,7 @@ async function writeData(data: any) {
     }
   } else {
     try {
+      fs.ensureFileSync(filePath);
       fs.writeFileSync(filePath, yaml.dump({ [accessAlias]: encrypt(info) }));
       output({ info, accessAlias });
     } catch (err) {
