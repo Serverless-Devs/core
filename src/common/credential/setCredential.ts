@@ -1,11 +1,11 @@
 import inquirer from 'inquirer';
 import fs from 'fs-extra';
 import path from 'path';
-import os from 'os';
 import yaml from 'js-yaml';
 import { providerCollection, checkProviderList } from './constant';
 import getYamlContent from '../getYamlContent';
 import { jsonparse } from '../../libs/utils';
+import { getRootHome } from '../../libs/common';
 
 const Crypto = require('crypto-js');
 
@@ -61,11 +61,12 @@ function encrypt(info: any = {}) {
 
 async function writeData(data: any) {
   const { info, accessAlias } = data;
-  const filePath = path.join(os.homedir(), '.s/access.yaml');
+  const filePath = path.join(getRootHome(), 'access.yaml');
   console.log(filePath, 'filePath');
 
   const content = await getYamlContent(filePath);
   console.log(content, 'content');
+
   if (content) {
     const providerAliasKeys = Object.keys(content);
     const Temp_Params = jsonparse(process.env.Temp_Params);
@@ -111,7 +112,11 @@ async function writeData(data: any) {
     }
   } else {
     try {
+      console.log(encrypt(info), 'encrypt(info)');
+
       fs.writeFileSync(filePath, yaml.dump({ [accessAlias]: encrypt(info) }));
+      console.log('start output');
+
       output({ info, accessAlias });
     } catch (err) {
       throw new Error('Configuration failed');
@@ -121,7 +126,7 @@ async function writeData(data: any) {
 }
 
 async function getAlias() {
-  const filePath = path.join(os.homedir(), '.s/access.yaml');
+  const filePath = path.join(getRootHome(), 'access.yaml');
   if (fs.existsSync(filePath)) {
     const info = await getYamlContent(filePath);
     const keys = info ? Object.keys(info).filter((item) => item.startsWith('default')) : [];
