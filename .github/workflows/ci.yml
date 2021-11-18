@@ -30,4 +30,4 @@ jobs:
           key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
       - name: Install Dependencies
         run: npm install
-      - run: ts-node test/fixtures/crendential.ts
+      - run: npx ts-node test/fixtures/crendential.ts

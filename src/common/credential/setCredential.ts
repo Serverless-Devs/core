@@ -206,6 +206,8 @@ async function setCredential(...args: any[]) {
  */
 export async function setKnownCredential(info, accessAlias) {
   const aliasName = accessAlias || (await getAlias());
+  console.log(JSON.stringify({ info, accessAlias: aliasName }, null, 2));
+
   await writeData({ info, accessAlias: aliasName });
   return {
     Alias: aliasName,
