@@ -109,7 +109,7 @@ export async function request(url: string, options?: RequestOptions): Promise<an
       spinner(e.message).fail();
       reportError({
         requestUrl: url,
-        statusCode: e.statusCode,
+        statusCode: e.code,
         errorMsg: e.message,
       });
       throw new Error(errorMessage(e.statusCode, e.message));
@@ -166,7 +166,7 @@ async function downloadWithExtract({ url, dest, filename, strip, rest, spin }) {
       await decompress(`${dest}/${formatFilename}`, dest, { strip });
       reportError({
         requestUrl: url,
-        statusCode: error.statusCode,
+        statusCode: error.code,
         errorMsg: error.message,
       });
     }
@@ -177,7 +177,7 @@ async function downloadWithExtract({ url, dest, filename, strip, rest, spin }) {
     spin.stop();
     reportError({
       requestUrl: url,
-      statusCode: error.statusCode,
+      statusCode: error.code,
       errorMsg: error.message,
     });
     throw error;

@@ -19,3 +19,4 @@ export { default as Crypto } from 'crypto-js';
 export { default as isDocker } from 'is-docker';
 export { default as semver } from 'semver';
 export { default as ip } from 'ip';
+export { default as ansiEscapes } from 'ansi-escapes';
