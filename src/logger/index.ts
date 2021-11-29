@@ -164,7 +164,7 @@ export class Logger {
   }
 
   async task(title: string, list: ITaskOptions[]) {
-    const formatList = list.filter((item) => Boolean(item.enabled));
+    const formatList = list.filter((item) => item.enabled !== false);
     if (formatList.length === 0) return true;
     const plist = [];
     const startTime = Date.now();
