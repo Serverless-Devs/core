@@ -14,9 +14,9 @@ function sleep(timer: number) {
       title: 'Checking git status',
       task: async()=>{
         await sleep(1000)
-        logger.spinner.stop()
+        logger.spinner?.stop()
         logger.log('debug message')
-        logger.spinner.start()
+        logger.spinner?.start()
         await sleep(3000)
       },
     },

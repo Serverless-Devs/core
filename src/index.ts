@@ -20,3 +20,6 @@ export { default as isDocker } from 'is-docker';
 export { default as semver } from 'semver';
 export { default as ip } from 'ip';
 export { default as ansiEscapes } from 'ansi-escapes';
+export { default as ignore } from 'ignore';
+export { default as archiver } from 'archiver';
+

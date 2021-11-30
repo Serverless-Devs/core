@@ -206,12 +206,10 @@ export class Logger {
     };
 
     if (plist.every((obj) => obj.valid)) {
-      if (endTime - startTime < 5) return true;
-      ora().succeed(getOraMsg());
-      return true;
+      endTime - startTime > 5 && ora().succeed(getOraMsg());
     } else {
       ora().fail(getOraMsg());
-      return false;
+      process.exit(1);
     }
   }
 }
