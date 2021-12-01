@@ -38,7 +38,11 @@ function lns(componentPath: string) {
   if (isSymbolicLink(componentCorePath)) return;
   rimraf.sync(componentCorePath);
   fs.ensureDirSync(serverlessDevsPath);
-  fs.symlinkSync(corePath, componentCorePath, 'junction');
+  try {
+    fs.symlinkSync(corePath, componentCorePath, 'junction');
+  } catch (error) {
+    fs.copySync(corePath, componentCorePath);
+  }
 }
 
 function isSymbolicLink(p: string) {
@@ -46,3 +50,6 @@ function isSymbolicLink(p: string) {
     return fs.lstatSync(p).isSymbolicLink();
   }
 }
+
+
+lns('/Users/shihuali/.s/components/devsapp.cn/devsapp/fc-base-sdk@dev')
