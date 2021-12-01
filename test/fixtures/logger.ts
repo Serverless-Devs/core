@@ -1,4 +1,6 @@
 import { Logger } from '../../src/logger';
+import inquirer from 'inquirer';
+
 function sleep(timer: number) {
   return new Promise((resolve) => {
     setTimeout(() => resolve(true), timer);
@@ -23,7 +25,14 @@ function sleep(timer: number) {
     {
       title: 'Checking remote history',
       task: async()=>{
-        await sleep(1000)
+        logger.spinner?.stop()
+        await inquirer.prompt([{
+          type:'confirm',
+          message: 'are you sure?',
+          name: 'name'
+        }])
+        logger.spinner?.start()
+        await sleep(5000)
       },
     },
     {
