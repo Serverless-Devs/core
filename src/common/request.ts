@@ -1,11 +1,10 @@
-import download from 'download';
 import got, { Method } from 'got';
 import spinner, { Ora } from './spinner';
-import decompress from 'decompress';
 import { logger } from '../libs/utils';
 import report from '../common/report';
-import rimraf from 'rimraf';
 import path from 'path';
+import stripDirs from 'strip-dirs';
+import AdmZip from 'adm-zip';
 interface HintOptions {
   loading?: string;
   success?: string;
@@ -39,6 +38,30 @@ export interface IDownloadOptions {
   strip?: number;
 }
 
+const isResponseOk = (response) => {
+  const { statusCode } = response;
+  const limitStatusCode = response.request.options.followRedirect ? 299 : 399;
+
+  return (statusCode >= 200 && statusCode <= limitStatusCode) || statusCode === 304;
+};
+
+const instance = got.extend({
+  https: {
+    rejectUnauthorized: false,
+  },
+  hooks: {
+    afterResponse: [
+      (response) => {
+        if (isResponseOk(response)) {
+          response.request.destroy();
+        }
+
+        return response;
+      },
+    ],
+  },
+});
+
 export async function request(url: string, options: RequestOptions = {}): Promise<any> {
   const errorMessage = (code: string | number, message: string) =>
     `Url:${url}\n,params: ${JSON.stringify(options)}\n,ErrorMessage:${message}\n, Code: ${code}`;
@@ -48,6 +71,8 @@ export async function request(url: string, options: RequestOptions = {}): Promis
     body: bodyFromOptions,
     hint = {},
     ignoreError = false,
+    json,
+    form,
     ...rest
   } = options;
   const { loading, success, error } = hint;
@@ -57,16 +82,23 @@ export async function request(url: string, options: RequestOptions = {}): Promis
   }
   const isGet = method.toUpperCase() === 'GET';
 
+  const configs: any = {
+    method,
+    ...rest,
+  };
+  if (isGet) {
+    configs.searchParams = params;
+  } else if (json) {
+    configs.json = bodyFromOptions;
+  } else if (form) {
+    configs.form = bodyFromOptions;
+  } else {
+    configs.body = bodyFromOptions;
+  }
+
   try {
     logger.debug(`URL: ${url}`);
-    const result: any = await got(url, {
-      method,
-      [isGet ? 'query' : 'body']: isGet ? params : bodyFromOptions,
-      ...rest,
-      https: {
-        rejectUnauthorized: false,
-      },
-    }).json();
+    const result: any = await instance(url, configs).json();
     spin?.stop();
     success && spinner(success).succeed();
     return result.Response || result;
@@ -84,35 +116,39 @@ export async function request(url: string, options: RequestOptions = {}): Promis
   }
 }
 
-export async function downloadRequest(url: string, dest: string, options: IDownloadOptions = {}) {
+export async function downloadRequest(
+  url: string,
+  dest: string,
+  options: IDownloadOptions = {},
+): Promise<void> {
   const { extract, strip, filename } = options;
   const spin = spinner(`start downloading: ${url}`);
-  if (extract) {
-    return await downloadWithExtract({ url, dest, filename, strip, spin });
-  }
-  await downloadWithNoExtract({ url, dest, filename, spin });
-}
-
-async function downloadWithExtract({ url, dest, filename, strip, spin }) {
   try {
-    const formatFilename = filename || 'demo.zip';
-    const options = { filename: formatFilename, rejectUnauthorized: false };
-    await download(url, dest, options);
-    spin.text = filename ? `${filename} file unzipping...` : 'file unzipping...';
-    rimraf.sync(path.resolve(dest, '.git'));
-    try {
-      await decompress(`${dest}/${formatFilename}`, dest, { strip });
-    } catch (error) {
-      await decompress(`${dest}/${formatFilename}`, dest, { strip });
-      reportError({
-        requestUrl: url,
-        statusCode: error.code,
-        errorMsg: error.message,
-      });
+    const res = await instance(url);
+    // 是否需要解压
+    if (!extract) {
+      spin.succeed(`download success: ${url}`);
+      return;
     }
-    rimraf.sync(`${dest}/${formatFilename}`);
-    const text = 'file decompression completed';
-    spin.succeed(filename ? `${filename} ${text}` : text);
+    spin.text = filename ? `${filename} file unzipping...` : 'file unzipping...';
+    const zip = new AdmZip(res.rawBody);
+
+    // 是否提取目录层级
+    if (!strip) {
+      zip.extractAllTo(dest, true);
+      spin.succeed(
+        filename ? `${filename} file decompression completed` : 'file decompression completed',
+      );
+      return;
+    }
+    const zipEntries = zip.getEntries();
+    for (const iterator of zipEntries) {
+      const filepath = path.join(dest, stripDirs(iterator.entryName, strip));
+      zip.extractEntryTo(iterator.entryName, path.dirname(filepath), false, true);
+    }
+    spin.succeed(
+      filename ? `${filename} file decompression completed` : 'file decompression completed',
+    );
   } catch (error) {
     spin.stop();
     reportError({
@@ -120,12 +156,5 @@ async function downloadWithExtract({ url, dest, filename, strip, spin }) {
       statusCode: error.code,
       errorMsg: error.message,
     });
-    throw error;
   }
-}
-
-async function downloadWithNoExtract({ url, dest, filename, spin }) {
-  const options = { filename, rejectUnauthorized: false };
-  await download(url, dest, options);
-  spin.succeed(`download success: ${url}`);
 }
