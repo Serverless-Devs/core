@@ -2,9 +2,7 @@ import got, { Method } from 'got';
 import spinner, { Ora } from './spinner';
 import { logger } from '../libs/utils';
 import report from '../common/report';
-import path from 'path';
-import stripDirs from 'strip-dirs';
-import AdmZip from 'adm-zip';
+import unzip from './unzip';
 interface HintOptions {
   loading?: string;
   success?: string;
@@ -130,25 +128,8 @@ export async function downloadRequest(
       spin.succeed(`download success: ${url}`);
       return;
     }
-    spin.text = filename ? `${filename} file unzipping...` : 'file unzipping...';
-    const zip = new AdmZip(res.rawBody);
-
-    // 是否提取目录层级
-    if (!strip) {
-      zip.extractAllTo(dest, true);
-      spin.succeed(
-        filename ? `${filename} file decompression completed` : 'file decompression completed',
-      );
-      return;
-    }
-    const zipEntries = zip.getEntries();
-    for (const iterator of zipEntries) {
-      const filepath = path.join(dest, stripDirs(iterator.entryName, strip));
-      zip.extractEntryTo(iterator.entryName, path.dirname(filepath), false, true);
-    }
-    spin.succeed(
-      filename ? `${filename} file decompression completed` : 'file decompression completed',
-    );
+    spin.stop();
+    await unzip(res.rawBody, dest, { filename, strip });
   } catch (error) {
     spin.stop();
     reportError({

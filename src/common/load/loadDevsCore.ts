@@ -50,6 +50,3 @@ function isSymbolicLink(p: string) {
     return fs.lstatSync(p).isSymbolicLink();
   }
 }
-
-
-lns('/Users/shihuali/.s/components/devsapp.cn/devsapp/fc-base-sdk@dev')

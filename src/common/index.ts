@@ -12,3 +12,4 @@ export { default as modifyProps } from './modifyProps';
 export { default as installDependency } from './installDependency';
 export { default as getYamlContent } from './getYamlContent';
 export { default as report } from './report';
+export { default as unzip } from './unzip';

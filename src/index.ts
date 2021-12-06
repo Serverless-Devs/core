@@ -5,7 +5,6 @@ export { Logger, ILogger } from './logger';
 export { HLogger } from './decorator';
 export * from './common';
 export * from './libs/common';
-export { default as unzip } from 'decompress';
 export { default as chalk } from 'chalk';
 export { default as colors } from 'chalk';
 export { default as getMAC } from 'getmac';
@@ -22,4 +21,3 @@ export { default as ip } from 'ip';
 export { default as ansiEscapes } from 'ansi-escapes';
 export { default as ignore } from 'ignore';
 export { default as archiver } from 'archiver';
-
