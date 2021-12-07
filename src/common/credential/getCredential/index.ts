@@ -8,7 +8,7 @@ import getYamlContent from '../../getYamlContent';
 import { logger } from '../../../libs/utils';
 import { getRootHome } from '../../../libs/common';
 import chalk from 'chalk';
-import { transformInputs, trim, getServerlessDevsAccessFromEnv } from './utils'
+import { transformInputs, trim, getServerlessDevsAccessFromEnv } from './utils';
 
 const Crypto = require('crypto-js');
 
@@ -78,9 +78,9 @@ async function getCredentialWithAccess(access?: string, ...args: any[]) {
       SecurityToken: get(process, 'env.SecurityToken'),
     });
   }
-  const serverlessDevsAccessFromEnv = getServerlessDevsAccessFromEnv()
+  const serverlessDevsAccessFromEnv = getServerlessDevsAccessFromEnv(access);
   if (serverlessDevsAccessFromEnv) {
-    return trim(serverlessDevsAccessFromEnv)
+    return trim(serverlessDevsAccessFromEnv);
   }
 
   const accessContent = await getAccess(accessAlias);

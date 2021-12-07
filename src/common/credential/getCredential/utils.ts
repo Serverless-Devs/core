@@ -1,5 +1,3 @@
-import { jsonparse } from '../../../libs/utils';
-
 export function transformInputs(inputs, result) {
   if (!inputs || !result) return;
   const { Alias } = result;
@@ -18,8 +16,29 @@ export function trim(obj) {
   return obj;
 }
 
-export function getServerlessDevsAccessFromEnv() {
+function parse(key: string) {
+  try {
+    const params = JSON.parse(process.env[key]);
+    return Object.keys(params).length > 0 ? params : undefined;
+  } catch (error) {}
+}
+
+export function getServerlessDevsAccessFromEnv(access?: string) {
+  if (access) {
+    const data = parse(access);
+    return data
+      ? {
+          Alias: access,
+          ...parse(access),
+        }
+      : undefined;
+  }
   for (const key in process.env) {
-    if (key.endsWith('serverless_devs_access')) return jsonparse(process.env[key]);
+    if (key.endsWith('serverless_devs_access')) {
+      return {
+        Alias: key,
+        ...parse(key),
+      };
+    }
   }
 }
