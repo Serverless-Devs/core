@@ -45,7 +45,6 @@ interface ITaskOptions {
   title: string;
   id?: string;
   task: () => Promise<any>;
-  enabled?: boolean;
 }
 
 const args = minimist(process.argv.slice(2));
@@ -164,11 +163,10 @@ export class Logger {
   }
 
   async task(title: string, list: ITaskOptions[]) {
-    const formatList = list.filter((item) => item.enabled !== false);
-    if (formatList.length === 0) return true;
+    if (list.length === 0) return true;
     const plist = [];
     const startTime = Date.now();
-    for (const item of formatList) {
+    for (const item of list) {
       if (item.title && item.task) {
         if (getEnableDebug()) {
           this.log(gray(item.title));
