@@ -48,8 +48,25 @@
 // }
 // getLentest();
 
-import {downloadRequest} from '../../src';
+// import { downloadRequest } from '../../src';
 
-downloadRequest('https://registry.devsapp.cn/simple/devsapp/image-prediction-app/zipball/0.0.6', '/Users/shihuali/workspace/core/test/fixtures/a',{
-extract: true,
-strip: 1,})
+// downloadRequest(
+//     // 'https://registry.devsapp.cn/simple/devsapp/image-prediction-app/zipball/0.0.6',
+//     'https://registry.devsapp.cn/simple/devsapp/core/zipball/dev',
+//     '/Users/shihuali/workspace/core/test/fixtures/a',
+//     {
+//         extract: true,
+//         strip: 1,
+//     })
+
+import { request } from '../../src';
+
+request('http://domain.devsapp.net/token', {
+    method: 'post',
+    body: {"type":"fc","user":"1694024725952210","region":"cn-hangzhou","service":"fc-deploy-service","function":"http-trigger-nodejs12"},
+    form: true,
+}).then(res=>{
+    console.log(res);
+    
+})
+

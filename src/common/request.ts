@@ -1,19 +1,15 @@
-import download from 'download';
-import got from 'got';
-import spinner from './spinner';
-import decompress from 'decompress';
+import got, { Method } from 'got';
+import spinner, { Ora } from './spinner';
 import { logger } from '../libs/utils';
 import report from '../common/report';
-import rimraf from 'rimraf';
-import path from 'path';
-
+import unzip from './unzip';
 interface HintOptions {
   loading?: string;
   success?: string;
   error?: string;
 }
 interface RequestOptions {
-  method?: string;
+  method?: Method;
   body?: object;
   params?: object;
   hint?: HintOptions;
@@ -35,157 +31,111 @@ export function reportError(config: IErrorConfig) {
 }
 
 export interface IDownloadOptions {
-  /**
-   * If set to true, try extracting the file using decompress.
-   */
   extract?: boolean;
-  /**
-   * Name of the saved file.
-   */
   filename?: string;
-  /**
-   * Proxy endpoint
-   */
-  proxy?: string;
-  /**
-   * Request Headers
-   */
-  headers?: {
-    [name: string]: string;
-  };
-  /**
-   * Filter out files before extracting
-   */
-  filter?: any;
-  /**
-   * Map files before extracting
-   */
-  map?: any;
-  /**
-   * Array of plugins to use.
-   * Default: [decompressTar(), decompressTarbz2(), decompressTargz(), decompressUnzip()]
-   */
-  plugins?: any[];
-  /**
-   * Remove leading directory components from extracted files.
-   * Default: 0
-   */
   strip?: number;
-  body?: string | Buffer;
-  postfix?: string;
 }
 
-export async function request(url: string, options?: RequestOptions): Promise<any> {
+const isResponseOk = (response) => {
+  const { statusCode } = response;
+  const limitStatusCode = response.request.options.followRedirect ? 299 : 399;
+
+  return (statusCode >= 200 && statusCode <= limitStatusCode) || statusCode === 304;
+};
+
+const instance = got.extend({
+  https: {
+    rejectUnauthorized: false,
+  },
+  hooks: {
+    afterResponse: [
+      (response) => {
+        if (isResponseOk(response)) {
+          response.request.destroy();
+        }
+
+        return response;
+      },
+    ],
+  },
+});
+
+export async function request(url: string, options: RequestOptions = {}): Promise<any> {
+  const errorMessage = (code: string | number, message: string) =>
+    `Url:${url}\n,params: ${JSON.stringify(options)}\n,ErrorMessage:${message}\n, Code: ${code}`;
   const {
     method = 'get',
     params,
     body: bodyFromOptions,
     hint = {},
-    json = true,
     ignoreError = false,
+    json,
+    form,
     ...rest
-  } = options || {};
+  } = options;
   const { loading, success, error } = hint;
-  let vm = null;
-  let result = null;
-  const errorMessage = (code: string | number, message: string) =>
-    `Url:${url}\n,params: ${JSON.stringify(options)}\n,ErrorMessage:${message}\n, Code: ${code}`;
-  loading && (vm = spinner(loading));
+  let spin: Ora;
+  if (loading) {
+    spin = spinner(loading);
+  }
+  const isGet = method.toUpperCase() === 'GET';
+
+  const configs: any = {
+    method,
+    ...rest,
+  };
+  if (isGet) {
+    configs.searchParams = params;
+  } else if (json) {
+    configs.json = bodyFromOptions;
+  } else if (form) {
+    configs.form = bodyFromOptions;
+  } else {
+    configs.body = bodyFromOptions;
+  }
 
   try {
-    const isGet = method.toUpperCase() === 'GET';
     logger.debug(`URL: ${url}`);
-    result = await got(url, {
-      method,
-      [isGet ? 'query' : 'body']: isGet ? params : bodyFromOptions,
-      json,
-      ...rest,
-      rejectUnauthorized: false,
-    });
-    loading && vm.stop();
+    const result: any = await instance(url, configs).json();
+    spin?.stop();
+    success && spinner(success).succeed();
+    return result.Response || result;
   } catch (e) {
-    loading && vm.stop();
+    spin?.stop();
     if (!ignoreError) {
-      spinner(e.message).fail();
+      error && spinner(error).fail();
       reportError({
         requestUrl: url,
-        statusCode: e.statusCode,
+        statusCode: e.code,
         errorMsg: e.message,
       });
       throw new Error(errorMessage(e.statusCode, e.message));
     }
   }
-
-  const { statusCode, body }: { statusCode: number; body: any } = result;
-
-  if (statusCode !== 200) {
-    error && spinner(error).fail();
-    if (!ignoreError) {
-      reportError({
-        requestUrl: url,
-        statusCode,
-        errorMsg: 'System exception',
-      });
-      throw new Error(errorMessage(statusCode, 'System exception'));
-    }
-  } else if (body.Error) {
-    error && spinner(error).fail();
-    if (!ignoreError) {
-      reportError({
-        requestUrl: url,
-        statusCode: body.Error.Code,
-        errorMsg: body.Error.Message,
-      });
-      throw new Error(errorMessage(body.Error.Code, body.Error.Message));
-    }
-  }
-
-  success && spinner(success).succeed();
-  return body.Response || body;
 }
 
-export async function downloadRequest(url: string, dest: string, options?: IDownloadOptions) {
-  const { extract, postfix, strip, filename, ...rest } = options || {};
+export async function downloadRequest(
+  url: string,
+  dest: string,
+  options: IDownloadOptions = {},
+): Promise<void> {
+  const { extract, strip, filename } = options;
   const spin = spinner(`start downloading: ${url}`);
-  if (extract) {
-    return await downloadWithExtract({ url, dest, filename, strip, rest, spin });
-  }
-  await downloadWithNoExtract({ url, dest, filename, rest, spin });
-}
-
-async function downloadWithExtract({ url, dest, filename, strip, rest, spin }) {
   try {
-    const formatFilename = filename || 'demo.zip';
-    const options = { ...rest, filename: formatFilename, rejectUnauthorized: false };
-    await download(url, dest, options);
-    spin.text = filename ? `${filename} file unzipping...` : 'file unzipping...';
-    rimraf.sync(path.resolve(dest, '.git'));
-    try {
-      await decompress(`${dest}/${formatFilename}`, dest, { strip });
-    } catch (error) {
-      await decompress(`${dest}/${formatFilename}`, dest, { strip });
-      reportError({
-        requestUrl: url,
-        statusCode: error.statusCode,
-        errorMsg: error.message,
-      });
+    const res = await instance(url);
+    // 是否需要解压
+    if (!extract) {
+      spin.succeed(`download success: ${url}`);
+      return;
     }
-    rimraf.sync(`${dest}/${formatFilename}`);
-    const text = 'file decompression completed';
-    spin.succeed(filename ? `${filename} ${text}` : text);
+    spin.stop();
+    await unzip(res.rawBody, dest, { filename, strip });
   } catch (error) {
     spin.stop();
     reportError({
       requestUrl: url,
-      statusCode: error.statusCode,
+      statusCode: error.code,
       errorMsg: error.message,
     });
-    throw error;
   }
-}
-
-async function downloadWithNoExtract({ url, dest, filename, rest, spin }) {
-  const options = { ...rest, filename, rejectUnauthorized: false };
-  await download(url, dest, options);
-  spin.succeed(`download success: ${url}`);
 }
