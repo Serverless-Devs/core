@@ -3,7 +3,7 @@ import minimist from 'minimist';
 import get from 'lodash.get';
 const prettyoutput = require('prettyoutput');
 import ansiEscapes from 'ansi-escapes';
-import ora from 'ora';
+import ora, { Ora } from 'ora';
 
 // CLI Colors
 const white = (str) => str;
@@ -43,6 +43,7 @@ export interface ILogger {
 
 interface ITaskOptions {
   title: string;
+  id?: string;
   task: () => Promise<any>;
 }
 
@@ -84,6 +85,7 @@ const bgRed = chalk.hex('#000').bgHex('#fd5750');
 
 const time = () => new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
 export class Logger {
+  spinner: Ora;
   context: string;
   constructor(context?: string) {
     this.context = context;
@@ -161,6 +163,7 @@ export class Logger {
   }
 
   async task(title: string, list: ITaskOptions[]) {
+    if (list.length === 0) return true;
     const plist = [];
     const startTime = Date.now();
     for (const item of list) {
@@ -169,22 +172,22 @@ export class Logger {
           this.log(gray(item.title));
           try {
             await item.task();
-            plist.push(true);
+            plist.push(Object.assign(item, { valid: true }));
           } catch (error) {
             const index = error.stack.indexOf(':');
             this.log(bgRed(error.stack.slice(0, index + 1)) + error.stack.slice(index + 1));
-            plist.push(false);
+            plist.push(Object.assign(item, { valid: false }));
             break;
           }
         } else {
-          const vm = ora(gray(item.title)).start();
+          this.spinner = ora(gray(item.title)).start();
           try {
             await item.task();
-            vm.stop();
-            plist.push(true);
+            this.spinner.stop();
+            plist.push(Object.assign(item, { valid: true }));
           } catch (error) {
-            vm.stop();
-            plist.push(false);
+            this.spinner.stop();
+            plist.push(Object.assign(item, { valid: false }));
             break;
           }
         }
@@ -192,17 +195,19 @@ export class Logger {
     }
     const endTime = Date.now();
 
-    const time = Math.round((endTime - startTime) / 1000);
+    const time = (Math.round((endTime - startTime) / 10) * 10) / 1000;
 
-    if (plist.every((obj) => obj)) {
-      ora().succeed(`${title} succeed (${time}s)`);
-      return true;
+    const getOraMsg = () => {
+      const arr = plist.filter((item) => item.id).map((item) => item.id);
+      if (arr.length === 0) return `${title} (${time}s)`;
+      return `${title} ${arr.join(', ')} (${time}s)`;
+    };
+
+    if (plist.every((obj) => obj.valid)) {
+      endTime - startTime > 5 && ora().succeed(getOraMsg());
     } else {
-      ora().fail(`${title} fail (${time}s)`);
-      return false;
+      ora().fail(getOraMsg());
+      process.exit(1);
     }
-  }
-  static async task(title: string, list: ITaskOptions[]) {
-    await this.task(title, list);
   }
 }

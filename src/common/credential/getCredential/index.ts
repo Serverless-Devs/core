@@ -8,6 +8,7 @@ import getYamlContent from '../../getYamlContent';
 import { logger } from '../../../libs/utils';
 import { getRootHome } from '../../../libs/common';
 import chalk from 'chalk';
+import { transformInputs, trim, getServerlessDevsAccessFromEnv } from './utils';
 
 const Crypto = require('crypto-js');
 
@@ -42,15 +43,6 @@ async function getCredential(...args: any[]) {
   return result;
 }
 
-function transformInputs(inputs, result) {
-  if (!inputs || !result) return;
-  const { Alias } = result;
-  inputs.project = { ...inputs.project, access: Alias };
-  inputs.Project = { ...inputs.Project, accessAlias: Alias, AccessAlias: Alias };
-  inputs.credentials = result;
-  inputs.Credentials = result;
-}
-
 function formatValue(content: any, alias: string) {
   const formatObj = decryptCredential(content[alias]);
   if (Object.prototype.hasOwnProperty.call(formatObj, 'AccountID')) {
@@ -65,13 +57,6 @@ function formatValue(content: any, alias: string) {
     Alias: alias,
     ...formatObj,
   };
-}
-
-function trim(obj) {
-  for (const key in obj) {
-    obj[key] = obj[key] && obj[key].replace(/(^\s*)|(\s*$)/g, '');
-  }
-  return obj;
 }
 
 /**
@@ -92,6 +77,10 @@ async function getCredentialWithAccess(access?: string, ...args: any[]) {
       AccessKeySecret: AccessKeySecretFromEnv,
       SecurityToken: get(process, 'env.SecurityToken'),
     });
+  }
+  const serverlessDevsAccessFromEnv = getServerlessDevsAccessFromEnv(access);
+  if (serverlessDevsAccessFromEnv) {
+    return trim(serverlessDevsAccessFromEnv);
   }
 
   const accessContent = await getAccess(accessAlias);

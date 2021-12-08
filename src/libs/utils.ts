@@ -9,15 +9,13 @@ import report from '../common/report';
 
 export const logger = new Logger('S-CORE');
 
-export const jsonparse = (value) => {
+export function getServerlessDevsTempArgv() {
   try {
-    const data = JSON.parse(value);
-    return typeof data === 'object' ? data : {};
+    return JSON.parse(process.env.serverless_devs_temp_argv);
   } catch (error) {
-    return {};
+    return [];
   }
-};
-
+}
 export const merge = require('lodash.merge');
 
 export const isUndefined = (obj: any): obj is undefined => typeof obj === 'undefined';

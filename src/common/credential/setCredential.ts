@@ -4,7 +4,7 @@ import path from 'path';
 import yaml from 'js-yaml';
 import { providerCollection, checkProviderList } from './constant';
 import getYamlContent from '../getYamlContent';
-import { jsonparse } from '../../libs/utils';
+import { getServerlessDevsTempArgv } from '../../libs/utils';
 import { getRootHome } from '../../libs/common';
 
 const Crypto = require('crypto-js');
@@ -65,8 +65,8 @@ async function writeData(data: any) {
   const content = await getYamlContent(filePath);
   if (content) {
     const providerAliasKeys = Object.keys(content);
-    const Temp_Params = jsonparse(process.env.Temp_Params);
-    if (providerAliasKeys.includes(accessAlias) && !Temp_Params.f) {
+    const tempArgv = getServerlessDevsTempArgv();
+    if (providerAliasKeys.includes(accessAlias) && !tempArgv.find((i) => i === '-f')) {
       const option = [
         {
           type: 'list',

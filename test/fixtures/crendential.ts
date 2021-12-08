@@ -1,11 +1,11 @@
-// import { getCredential } from '../../src/common';
+import { getCredential } from '../../src/common';
 
-// async function get() {
-//   const c = await getCredential();
-//   console.log(c);
-// }
+async function get() {
+  const c = await getCredential();
+  console.log(c);
+}
 
-// get();
+get();
 
 // async function set() {
 //   const c = await setCredential('AccountID', 'SecretID', 'SecretKey');
@@ -15,14 +15,14 @@
 // set();
 
 
-import {setKnownCredential} from '../../src/common';
+// import {setKnownCredential} from '../../src/common';
 
-const info = {
-  AccountID: 'U2FsdGVkX1+jAj7Kxp3X1lHwFSUtBoSqkpFXp/dYEB0=',
-  SecretID: 'U2FsdGVkX1/NKNJ6MDERFRhQ6GIukaUogeKcFJrhMRU=',
-  SecretKey: 'U2FsdGVkX1/OSprVoM65l3trkwg4CgAjtQZzt/wN798=',
-};
+// const info = {
+//   AccountID: 'U2FsdGVkX1+jAj7Kxp3X1lHwFSUtBoSqkpFXp/dYEB0=',
+//   SecretID: 'U2FsdGVkX1/NKNJ6MDERFRhQ6GIukaUogeKcFJrhMRU=',
+//   SecretKey: 'U2FsdGVkX1/OSprVoM65l3trkwg4CgAjtQZzt/wN798=',
+// };
 
-(async()=>{
- await setKnownCredential(info, 'xxx')
-})()
+// (async()=>{
+//  await setKnownCredential(info, 'xxx')
+// })()
