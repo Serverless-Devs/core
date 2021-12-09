@@ -44,7 +44,8 @@ export interface ILogger {
 interface ITaskOptions {
   title: string;
   id?: string;
-  task: () => Promise<any>;
+  task: Function;
+  enabled?: Function;
 }
 
 const args = minimist(process.argv.slice(2));
@@ -163,10 +164,13 @@ export class Logger {
   }
 
   async task(title: string, list: ITaskOptions[]) {
-    if (list.length === 0) return true;
     const plist = [];
     const startTime = Date.now();
     for (const item of list) {
+      const enabled = typeof item.enabled === 'function' ? item.enabled() : true;
+      if (!enabled) {
+        continue;
+      }
       if (item.title && item.task) {
         if (getEnableDebug()) {
           this.log(gray(item.title));
@@ -209,5 +213,9 @@ export class Logger {
       ora().fail(getOraMsg());
       process.exit(1);
     }
+  }
+
+  static task(title: string, list: ITaskOptions[]) {
+    this.task(title, list);
   }
 }
