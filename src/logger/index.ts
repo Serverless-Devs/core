@@ -164,6 +164,7 @@ export class Logger {
   }
 
   async task(title: string, list: ITaskOptions[]) {
+    let err: Error;
     const plist = [];
     const startTime = Date.now();
     for (const item of list) {
@@ -191,7 +192,8 @@ export class Logger {
             plist.push(Object.assign(item, { valid: true }));
           } catch (error) {
             this.spinner.stop();
-            plist.push(Object.assign(item, { valid: false }));
+            err = error;
+            plist.push(Object.assign(item, { valid: false, error }));
             break;
           }
         }
@@ -211,7 +213,7 @@ export class Logger {
       endTime - startTime > 5 && ora().succeed(getOraMsg());
     } else {
       ora().fail(getOraMsg());
-      process.exit(1);
+      throw err;
     }
   }
 

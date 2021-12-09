@@ -25,7 +25,7 @@
     "watch": "npx tsc -w -p tsconfig.json",
     "debug": "ts-node test/fixtures/spinner.ts",
     "test": "npx jest",
-    "prebuild": "rimraf lib && rimraf dist",
+    "prebuild": "rimraf lib/* && rimraf dist/*",
     "build": "npx tsc && cp -r ./src/daemon ./lib",
     "postbuild": "npm run esbuild && cp -r ./src/daemon ./dist",
     "esbuild": "esbuild lib/index.js --bundle --log-level=error --minify --platform=node --format=cjs --target=node10.4 --external:electron --outfile=dist/index.js",

@@ -25,7 +25,7 @@ function sleep(timer: number) {
         return a
       },
       task: async () => {
-        
+        throw new Error('my error')
         logger.spinner?.stop()
         await inquirer.prompt([{
           type: 'confirm',
