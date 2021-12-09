@@ -75,6 +75,7 @@ export async function request(url: string, options: RequestOptions = {}): Promis
   } = options;
   const { loading, success, error } = hint;
   let spin: Ora;
+  let result;
   if (loading) {
     spin = spinner(loading);
   }
@@ -96,10 +97,7 @@ export async function request(url: string, options: RequestOptions = {}): Promis
 
   try {
     logger.debug(`URL: ${url}`);
-    const result: any = await instance(url, configs).json();
-    spin?.stop();
-    success && spinner(success).succeed();
-    return result.Response || result;
+    result = await instance(url, configs);
   } catch (e) {
     spin?.stop();
     if (!ignoreError) {
@@ -111,6 +109,35 @@ export async function request(url: string, options: RequestOptions = {}): Promis
       });
       throw new Error(errorMessage(e.statusCode, e.message));
     }
+  }
+  const { statusCode, body }: { statusCode: number; body: any } = result;
+  if (statusCode !== 200) {
+    error && spinner(error).fail();
+    if (!ignoreError) {
+      reportError({
+        requestUrl: url,
+        statusCode,
+        errorMsg: 'System exception',
+      });
+      throw new Error(errorMessage(statusCode, 'System exception'));
+    }
+  } else if (body.Error) {
+    error && spinner(error).fail();
+    if (!ignoreError) {
+      reportError({
+        requestUrl: url,
+        statusCode: body.Error.Code,
+        errorMsg: body.Error.Message,
+      });
+      throw new Error(errorMessage(body.Error.Code, body.Error.Message));
+    }
+  }
+
+  success && spinner(success).succeed();
+  try {
+    return JSON.parse(body).Response || body;
+  } catch (error) {
+    return body;
   }
 }
 
