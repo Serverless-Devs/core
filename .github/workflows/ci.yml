@@ -9,6 +9,8 @@ on:
   pull_request:
     branches: [develop]
 jobs:
+# 暂时屏蔽
+  if: false 
   develop:
     runs-on: ${{ matrix.os }}
     strategy:
