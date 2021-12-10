@@ -154,6 +154,7 @@ async function loadType(params: IParams) {
 async function loadApplicationByUrl({ source, registry, target }: IParams) {
   const applicationPath = path.resolve(target, source);
   await downloadRequest(registry, applicationPath, {
+    postfix: 'zip',
     extract: true,
   });
   return applicationPath;
