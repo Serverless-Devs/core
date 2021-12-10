@@ -34,7 +34,7 @@ async function unzip(
   for (const iterator of zipEntries) {
     const filepath = path.join(output, stripDirs(iterator.entryName, strip));
     zip.extractEntryTo(iterator.entryName, path.dirname(filepath), false, true);
-    fs.chmodSync(filepath, 755);
+    fs.chmodSync(filepath, 777);
   }
   spinSucceed(spin, filename);
 }
