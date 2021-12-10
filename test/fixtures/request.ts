@@ -51,13 +51,13 @@
 import { downloadRequest } from '../../src';
 
 downloadRequest(
-    // 'https://registry.devsapp.cn/simple/devsapp/image-prediction-app/zipball/0.0.6',
-    'https://registry.devsapp.cn/simple/devsapp/core/zipball/dev',
-    '/Users/shihuali/workspace/core/test/fixtures/a',
+    'https://registry.devsapp.cn/simple/devsapp/start-zblog/zipball/1.1.14',
+    // 'https://registry.devsapp.cn/simple/devsapp/core/zipball/dev',
+    '/Users/shihuali/workspace/a',
     {
-        filename: 'test.zip',
-        extract: false,
-        // strip: 1,
+        // filename: 'test.zip',
+        extract: true,
+        strip: 1,
     })
 
 // import { request } from '../../src';

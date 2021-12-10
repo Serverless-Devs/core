@@ -2,6 +2,7 @@ import stripDirs from 'strip-dirs';
 import AdmZip from 'adm-zip';
 import path from 'path';
 import spinner from './spinner';
+import fs from 'fs-extra';
 
 interface IOptions {
   filename?: string;
@@ -33,6 +34,7 @@ async function unzip(
   for (const iterator of zipEntries) {
     const filepath = path.join(output, stripDirs(iterator.entryName, strip));
     zip.extractEntryTo(iterator.entryName, path.dirname(filepath), false, true);
+    fs.chmodSync(filepath, 755);
   }
   spinSucceed(spin, filename);
 }
