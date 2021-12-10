@@ -61,10 +61,25 @@
 
 import { request } from '../../src';
 
+const HINT = {
+    loading: 'Get token....',
+    success: 'End of request',
+    error: 'Request failed',
+  };
+
+const body ={
+    "type": "fc",
+    "user": "1694024725952210",
+    "region": "cn-beijing",
+    "service": "web-framework1",
+    "function": "express"
+}
+
 request('http://domain.devsapp.net/token', {
     method: 'post',
-    body: {"type":"fc","user":"1694024725952210","region":"cn-hangzhou","service":"fc-deploy-service","function":"http-trigger-nodejs12"},
+    body,
     form: true,
+    hint: HINT,
 }).then(res=>{
     console.log(res);
     

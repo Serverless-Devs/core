@@ -98,6 +98,7 @@ export async function request(url: string, options: RequestOptions = {}): Promis
   try {
     logger.debug(`URL: ${url}`);
     result = await instance(url, configs);
+    spin?.stop();
   } catch (e) {
     spin?.stop();
     if (!ignoreError) {
