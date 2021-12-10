@@ -1,15 +1,18 @@
-import got, { Method } from 'got';
+import got from 'got';
 import spinner, { Ora } from './spinner';
 import { logger } from '../libs/utils';
 import report from '../common/report';
 import unzip from './unzip';
+import getStream from 'get-stream';
+import fs from 'fs-extra';
+
 interface HintOptions {
   loading?: string;
   success?: string;
   error?: string;
 }
 interface RequestOptions {
-  method?: Method;
+  method?: string;
   body?: object;
   params?: object;
   hint?: HintOptions;
@@ -36,73 +39,38 @@ export interface IDownloadOptions {
   strip?: number;
 }
 
-const isResponseOk = (response) => {
-  const { statusCode } = response;
-  const limitStatusCode = response.request.options.followRedirect ? 299 : 399;
-
-  return (statusCode >= 200 && statusCode <= limitStatusCode) || statusCode === 304;
-};
-
-const instance = got.extend({
-  https: {
-    rejectUnauthorized: false,
-  },
-  hooks: {
-    afterResponse: [
-      (response) => {
-        if (isResponseOk(response)) {
-          response.request.destroy();
-        }
-
-        return response;
-      },
-    ],
-  },
-});
-
-export async function request(url: string, options: RequestOptions = {}): Promise<any> {
-  const errorMessage = (code: string | number, message: string) =>
-    `Url:${url}\n,params: ${JSON.stringify(options)}\n,ErrorMessage:${message}\n, Code: ${code}`;
+export async function request(url: string, options?: RequestOptions): Promise<any> {
   const {
     method = 'get',
     params,
     body: bodyFromOptions,
     hint = {},
+    json = true,
     ignoreError = false,
-    json,
-    form,
     ...rest
-  } = options;
+  } = options || {};
   const { loading, success, error } = hint;
-  let spin: Ora;
-  let result;
-  if (loading) {
-    spin = spinner(loading);
-  }
-  const isGet = method.toUpperCase() === 'GET';
-
-  const configs: any = {
-    method,
-    ...rest,
-  };
-  if (isGet) {
-    configs.searchParams = params;
-  } else if (json) {
-    configs.json = bodyFromOptions;
-  } else if (form) {
-    configs.form = bodyFromOptions;
-  } else {
-    configs.body = bodyFromOptions;
-  }
+  let vm: Ora;
+  let result = null;
+  const errorMessage = (code: string | number, message: string) =>
+    `Url:${url}\n,params: ${JSON.stringify(options)}\n,ErrorMessage:${message}\n, Code: ${code}`;
+  loading && (vm = spinner(loading));
 
   try {
+    const isGet = method.toUpperCase() === 'GET';
     logger.debug(`URL: ${url}`);
-    result = await instance(url, configs);
-    spin?.stop();
+    result = await got(url, {
+      method,
+      [isGet ? 'query' : 'body']: isGet ? params : bodyFromOptions,
+      json,
+      ...rest,
+      rejectUnauthorized: false,
+    });
+    loading && vm.stop();
   } catch (e) {
-    spin?.stop();
+    loading && vm.stop();
     if (!ignoreError) {
-      error && spinner(error).fail();
+      spinner(e.message).fail();
       reportError({
         requestUrl: url,
         statusCode: e.code,
@@ -111,7 +79,9 @@ export async function request(url: string, options: RequestOptions = {}): Promis
       throw new Error(errorMessage(e.statusCode, e.message));
     }
   }
+
   const { statusCode, body }: { statusCode: number; body: any } = result;
+
   if (statusCode !== 200) {
     error && spinner(error).fail();
     if (!ignoreError) {
@@ -135,11 +105,7 @@ export async function request(url: string, options: RequestOptions = {}): Promis
   }
 
   success && spinner(success).succeed();
-  try {
-    return JSON.parse(body).Response || body;
-  } catch (error) {
-    return body;
-  }
+  return body.Response || body;
 }
 
 export async function downloadRequest(
@@ -150,14 +116,16 @@ export async function downloadRequest(
   const { extract, strip, filename } = options;
   const spin = spinner(`start downloading: ${url}`);
   try {
-    const res = await instance(url);
+    const stream = got.stream(url);
+    const res = await getStream(stream, { encoding: 'buffer' });
     // 是否需要解压
     if (!extract) {
+      fs.writeFileSync(filename || 'demo.zip', res);
       spin.succeed(`download success: ${url}`);
       return;
     }
     spin.stop();
-    await unzip(res.rawBody, dest, { filename, strip });
+    await unzip(res, dest, { filename, strip });
   } catch (error) {
     spin.stop();
     reportError({

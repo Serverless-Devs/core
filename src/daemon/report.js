@@ -1,4 +1,12 @@
-const { getMAC, got, getYamlContent, isDocker, getCicdEnv, getRootHome, ip } = require('../index');
+const {
+  getMAC,
+  request,
+  getYamlContent,
+  isDocker,
+  getCicdEnv,
+  getRootHome,
+  ip,
+} = require('../index');
 const path = require('path');
 const fs = require('fs');
 const getmac = getMAC();
@@ -25,7 +33,7 @@ async function init() {
     const template = await getYamlContent(templateFile);
     content = `${content}||${JSON.stringify(template)}`;
   }
-  await got(url, { method: 'post', body: content, timeout: 3000 });
+  await request(url, { method: 'post', json: false, body: content, timeout: 3000 });
 }
 
 function getCoreVersion() {
