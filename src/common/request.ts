@@ -1,10 +1,11 @@
+import download from 'download';
 import got from 'got';
-import spinner, { Ora } from './spinner';
+import spinner from './spinner';
+import decompress from 'decompress';
 import { logger } from '../libs/utils';
 import report from '../common/report';
-import unzip from './unzip';
-import getStream from 'get-stream';
-import fs from 'fs-extra';
+import rimraf from 'rimraf';
+import path from 'path';
 
 interface HintOptions {
   loading?: string;
@@ -34,9 +35,44 @@ export function reportError(config: IErrorConfig) {
 }
 
 export interface IDownloadOptions {
+  /**
+   * If set to true, try extracting the file using decompress.
+   */
   extract?: boolean;
+  /**
+   * Name of the saved file.
+   */
   filename?: string;
+  /**
+   * Proxy endpoint
+   */
+  proxy?: string;
+  /**
+   * Request Headers
+   */
+  headers?: {
+    [name: string]: string;
+  };
+  /**
+   * Filter out files before extracting
+   */
+  filter?: any;
+  /**
+   * Map files before extracting
+   */
+  map?: any;
+  /**
+   * Array of plugins to use.
+   * Default: [decompressTar(), decompressTarbz2(), decompressTargz(), decompressUnzip()]
+   */
+  plugins?: any[];
+  /**
+   * Remove leading directory components from extracted files.
+   * Default: 0
+   */
   strip?: number;
+  body?: string | Buffer;
+  postfix?: string;
 }
 
 export async function request(url: string, options?: RequestOptions): Promise<any> {
@@ -50,7 +86,7 @@ export async function request(url: string, options?: RequestOptions): Promise<an
     ...rest
   } = options || {};
   const { loading, success, error } = hint;
-  let vm: Ora;
+  let vm = null;
   let result = null;
   const errorMessage = (code: string | number, message: string) =>
     `Url:${url}\n,params: ${JSON.stringify(options)}\n,ErrorMessage:${message}\n, Code: ${code}`;
@@ -108,24 +144,35 @@ export async function request(url: string, options?: RequestOptions): Promise<an
   return body.Response || body;
 }
 
-export async function downloadRequest(
-  url: string,
-  dest: string,
-  options: IDownloadOptions = {},
-): Promise<void> {
-  const { extract, strip, filename } = options;
+export async function downloadRequest(url: string, dest: string, options?: IDownloadOptions) {
+  const { extract, postfix, strip, filename, ...rest } = options || {};
   const spin = spinner(`start downloading: ${url}`);
+  if (extract) {
+    return await downloadWithExtract({ url, dest, filename, strip, rest, spin });
+  }
+  await downloadWithNoExtract({ url, dest, filename, rest, spin });
+}
+
+async function downloadWithExtract({ url, dest, filename, strip, rest, spin }) {
   try {
-    const stream = got.stream(url);
-    const res = await getStream(stream, { encoding: 'buffer' });
-    // 是否需要解压
-    if (!extract) {
-      fs.writeFileSync(filename || 'demo.zip', res);
-      spin.succeed(`download success: ${url}`);
-      return;
+    const formatFilename = filename || 'demo.zip';
+    const options = { ...rest, filename: formatFilename, rejectUnauthorized: false };
+    await download(url, dest, options);
+    spin.text = filename ? `${filename} file unzipping...` : 'file unzipping...';
+    rimraf.sync(path.resolve(dest, '.git'));
+    try {
+      await decompress(`${dest}/${formatFilename}`, dest, { strip });
+    } catch (error) {
+      await decompress(`${dest}/${formatFilename}`, dest, { strip });
+      reportError({
+        requestUrl: url,
+        statusCode: error.code,
+        errorMsg: error.message,
+      });
     }
-    spin.stop();
-    await unzip(res, dest, { filename, strip });
+    rimraf.sync(`${dest}/${formatFilename}`);
+    const text = 'file decompression completed';
+    spin.succeed(filename ? `${filename} ${text}` : text);
   } catch (error) {
     spin.stop();
     reportError({
@@ -133,5 +180,12 @@ export async function downloadRequest(
       statusCode: error.code,
       errorMsg: error.message,
     });
+    throw error;
   }
+}
+
+async function downloadWithNoExtract({ url, dest, filename, rest, spin }) {
+  const options = { ...rest, filename, rejectUnauthorized: false };
+  await download(url, dest, options);
+  spin.succeed(`download success: ${url}`);
 }
