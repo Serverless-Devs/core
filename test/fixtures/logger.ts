@@ -21,11 +21,11 @@ function sleep(timer: number) {
     },
     {
       title: 'Checking remote history',
+      enabled(){
+        return a
+      },
       task: async () => {
-        if (a) {
-          return
-        }
-        
+        throw new Error('my error')
         logger.spinner?.stop()
         await inquirer.prompt([{
           type: 'confirm',
