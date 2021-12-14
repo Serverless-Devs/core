@@ -167,6 +167,9 @@ export class Logger {
     let err: Error;
     const plist = [];
     const startTime = Date.now();
+    if (!this.spinner) {
+      this.spinner = ora();
+    }
     for (const item of list) {
       const enabled = typeof item.enabled === 'function' ? item.enabled() : true;
       if (!enabled) {
@@ -185,7 +188,7 @@ export class Logger {
             break;
           }
         } else {
-          this.spinner = ora(gray(item.title)).start();
+          this.spinner.start(gray(item.title))
           try {
             await item.task();
             this.spinner.stop();
