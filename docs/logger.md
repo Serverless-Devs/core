@@ -134,8 +134,6 @@ class LoggerDemo {
 
 为了对[Serverless Devs 的命令行工具输出，进行规范化升级](https://github.com/Serverless-Devs/Serverless-Devs/blob/docs/docs/zh/cli_design.md)，Serverless Devs Core Logger 提供了 task 方法。
 
-方法会返回一个布尔值，表示该任务是否执行成功。
-
 - 基本模式下会输出极简的 log 信息
 - --debug 模式下会输出详细的 log 信息
 
@@ -150,10 +148,10 @@ function sleep(timer: number) {
 
 (async () => {
   const logger = new Logger('S-CORE');
-
-  await logger.task('test title111111', [
+  await logger.task('Checking', [
     {
       title: 'Checking git status',
+      id: 'git status',
       task: async () => {
         logger.debug('debug message');
         await sleep(1000);
@@ -161,49 +159,8 @@ function sleep(timer: number) {
     },
     {
       title: 'Checking remote history',
-      task: async () => {
-        await sleep(1000);
-      },
-    },
-    {
-      title: 'Install package dependencies with Yarn',
-      task: async () => {
-        await sleep(1000);
-      },
-    },
-  ]);
-
-  await logger.task('test title22222', [
-    {
-      title: 'Checking git status',
-      task: async () => {
-        await sleep(1000);
-      },
-    },
-    {
-      title: 'Checking remote history',
-      task: async () => {
-        await sleep(1000);
-        throw new Error('Unclean working tree. Commit or stash changes first.');
-      },
-    },
-    {
-      title: 'Install package dependencies with Yarn',
-      task: async () => {
-        await sleep(1000);
-      },
-    },
-  ]);
-
-  await logger.task('test title33333', [
-    {
-      title: 'Checking git status',
-      task: async () => {
-        await sleep(1000);
-      },
-    },
-    {
-      title: 'Checking remote history',
+      id: 'remote history',
+      enabled:() => Math.random() > 0.5,
       task: async () => {
         await sleep(1000);
       },
