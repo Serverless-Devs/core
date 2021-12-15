@@ -132,7 +132,7 @@ class LoggerDemo {
 
 ### task 方法
 
-为了对[Serverless Devs 的命令行工具输出，进行规范化升级](https://github.com/Serverless-Devs/Serverless-Devs/blob/docs/docs/zh/cli_design.md)，Serverless Devs Core Logger 提供了 task 方法。
+为了对[Serverless Devs 的命令行工具输出，进行规范化升级](https://github.com/Serverless-Devs/Serverless-Devs/blob/master/docs/zh/cli_design.md)，Serverless Devs Core Logger 提供了 task 方法。
 
 - 基本模式下会输出极简的 log 信息
 - --debug 模式下会输出详细的 log 信息

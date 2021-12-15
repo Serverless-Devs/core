@@ -82,7 +82,7 @@ function formatDebugData(data: string) {
 }
 
 const gray = chalk.hex('#8c8d91');
-const bgRed = chalk.hex('#000').bgHex('#fd5750');
+const red = chalk.hex('#fd5750');
 
 const time = () => new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
 export class Logger {
@@ -182,15 +182,14 @@ export class Logger {
             await item.task();
             plist.push(Object.assign(item, { valid: true }));
           } catch (error) {
-            const index = error.stack.indexOf(':');
-            this.log(bgRed(error.stack.slice(0, index + 1)) + error.stack.slice(index + 1));
-            plist.push(Object.assign(item, { valid: false }));
+            err = error;
+            plist.push(Object.assign(item, { valid: false, error }));
             break;
           }
         } else {
           this.spinner.start(gray(item.title))
           try {
-            await item.task();
+            await item.task(this.spinner);
             this.spinner.stop();
             plist.push(Object.assign(item, { valid: true }));
           } catch (error) {
@@ -202,6 +201,7 @@ export class Logger {
         }
       }
     }
+    if(plist.length === 0) return;
     const endTime = Date.now();
 
     const time = (Math.round((endTime - startTime) / 10) * 10) / 1000;
@@ -215,7 +215,7 @@ export class Logger {
     if (plist.every((obj) => obj.valid)) {
       endTime - startTime > 5 && ora().succeed(getOraMsg());
     } else {
-      ora().fail(getOraMsg());
+      this.log(`${red('✖') } ${getOraMsg()}`);
       throw err;
     }
   }
