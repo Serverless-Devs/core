@@ -6,7 +6,7 @@ import os from 'os';
 import path from 'path';
 import fs from 'fs-extra';
 import minimist from 'minimist';
-import get from 'lodash.get';
+import { get } from 'lodash';
 
 const semver = require('semver');
 

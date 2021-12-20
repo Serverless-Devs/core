@@ -12,7 +12,7 @@ import { RegistryEnum, Registry } from '../constant';
 import { getSetConfig } from './utils';
 import { downloadRequest } from '../request';
 import installDependency from '../installDependency';
-import get from 'lodash.get';
+import { get } from 'lodash';
 import { downLoadDesCore } from './loadDevsCore';
 import { execDaemonWithTTL } from '../../execDaemon';
 

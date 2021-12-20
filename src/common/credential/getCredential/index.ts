@@ -1,7 +1,7 @@
 import inquirer from 'inquirer';
 import getAccess from './getAccess';
 import setCredential from '../setCredential';
-import get from 'lodash.get';
+import { get } from 'lodash';
 import os from 'os';
 import path from 'path';
 import getYamlContent from '../../getYamlContent';
