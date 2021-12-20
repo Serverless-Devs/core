@@ -1,9 +1,8 @@
 import chalk from 'chalk';
-import minimist from 'minimist';
-import get from 'lodash.get';
 const prettyoutput = require('prettyoutput');
 import ansiEscapes from 'ansi-escapes';
 import ora, { Ora } from 'ora';
+import { isDebugMode } from '../libs/common';
 
 // CLI Colors
 const white = (str) => str;
@@ -20,14 +19,6 @@ type LogColor =
   | 'whiteBright'
   | 'gray';
 
-function getDebugFromEnv() {
-  const temp_params = get(process, 'env.temp_params');
-  if (temp_params) {
-    const temp = temp_params.split(' ');
-    const debugList = temp.filter((item) => item === '--debug');
-    return debugList.length > 0;
-  }
-}
 
 export interface ILogger {
   // 打印
@@ -48,8 +39,6 @@ interface ITaskOptions {
   enabled?: Function;
 }
 
-const args = minimist(process.argv.slice(2));
-const getEnableDebug = () => args.debug || getDebugFromEnv();
 
 function searchStr(data: string, str: string) {
   const arr = [];
@@ -96,7 +85,7 @@ export class Logger {
   }
 
   static debug(name: string, data) {
-    if (getEnableDebug()) {
+    if (isDebugMode()) {
       console.log(`${gray(`[${time()}] [DEBUG] [${name}] - `)}${data}`);
     }
   }
@@ -117,7 +106,7 @@ export class Logger {
   }
 
   debug(data) {
-    if (getEnableDebug()) {
+    if (isDebugMode()) {
       data = formatDebugData(data);
       console.log(`${gray(`[${time()}] [DEBUG] [${this.context}] - `)}${data}`);
     }
@@ -176,7 +165,7 @@ export class Logger {
         continue;
       }
       if (item.title && item.task) {
-        if (getEnableDebug()) {
+        if (isDebugMode()) {
           this.log(gray(item.title));
           try {
             await item.task();

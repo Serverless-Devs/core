@@ -5,12 +5,30 @@
 import os from 'os';
 import path from 'path';
 import fs from 'fs-extra';
+import minimist from 'minimist';
+import { get } from 'lodash';
+
 const semver = require('semver');
 
 const USER_HOME = os.homedir();
 
-// s工具的家目录
 
+// debug模式
+export const isDebugMode = ()=> {
+  function getDebugFromEnv() {
+    const temp_params = get(process, 'env.temp_params');
+    if (temp_params) {
+      const temp = temp_params.split(' ');
+      const debugList = temp.filter((item) => item === '--debug');
+      return debugList.length > 0;
+    }
+  }
+
+  const args = minimist(process.argv.slice(2));
+  return args.debug || getDebugFromEnv();
+}
+
+// s工具的家目录
 export function getCicdEnv() {
   for (const key in process.env) {
     if (key.startsWith('CLOUDSHELL')) return 'aliyun_ecs';

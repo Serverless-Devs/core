@@ -1,6 +1,6 @@
 import fs from 'fs-extra';
 import path from 'path';
-import get from 'lodash.get';
+import { get } from 'lodash';
 import execa, { StdioOption } from 'execa';
 import report from './report';
 import spinner from './spinner';
