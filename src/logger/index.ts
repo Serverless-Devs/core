@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-const prettyoutput = require('prettyoutput');
+const prettyjson = require('prettyjson');
 import ansiEscapes from 'ansi-escapes';
 import ora, { Ora } from 'ora';
 import { isDebugMode } from '../libs/common';
@@ -129,18 +129,15 @@ export class Logger {
     process.stdout.write(ansiEscapes.eraseDown);
     process.stdout.write(
       white(
-        prettyoutput(
+        prettyjson.render(
           outputs,
           {
-            colors: {
-              keys: 'bold',
-              dash: null,
-              number: null,
-              string: null,
-              true: null,
-              false: null,
-            },
-            maxDepth: 10,
+              keysColor: 'bold',
+              dashColor: null,
+              numberColor: null,
+              stringColor: null,
+              trueColor: null,
+              falseColor: null,
           },
           indent,
         ),
