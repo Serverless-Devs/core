@@ -3,7 +3,7 @@ const prettyjson = require('prettyjson');
 import ansiEscapes from 'ansi-escapes';
 import ora, { Ora } from 'ora';
 import { isDebugMode } from '../libs/common';
-import { isEmpty } from 'lodash';
+import { isEmpty, isFunction } from 'lodash';
 
 // CLI Colors
 const white = (str) => `${str}\n`;
@@ -34,7 +34,7 @@ export interface ILogger {
 }
 
 interface ITaskOptions {
-  title: string;
+  title: string | Function;
   id?: string;
   task: Function;
   enabled?: Function;
@@ -160,8 +160,9 @@ export class Logger {
         continue;
       }
       if (item.title && item.task) {
+        const title = isFunction(item.title) ? item.title() : item.title;
         if (isDebugMode()) {
-          this.log(gray(item.title));
+          this.log(gray(title));
           try {
             await item.task();
             plist.push(Object.assign(item, { valid: true }));
@@ -172,7 +173,7 @@ export class Logger {
           }
         } else {
           isEmpty(!this.spinner) && (this.spinner = ora());
-          this.spinner.start(gray(item.title))
+          this.spinner.start(gray(title))
           try {
             await item.task(this.spinner);
             this.spinner.stop();
