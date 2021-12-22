@@ -23,7 +23,7 @@ const npmInstall = async (
     production?: boolean;
     registry?: string;
     showLoading?: boolean;
-    stdio?: StdioOption;
+    stdio?: 'pipe' | 'ignore' | 'inherit' | readonly StdioOption[];
   } = {},
 ) => {
   const { showLoading, baseDir, npmList, production } = options;
@@ -55,7 +55,7 @@ const npmInstall = async (
 interface IOptions {
   cwd?: string;
   production?: boolean;
-  stdio?: StdioOption;
+  stdio?: 'pipe' | 'ignore' | 'inherit' | readonly StdioOption[];
   showLoading?: boolean;
   graceInstall?: boolean;
 }
