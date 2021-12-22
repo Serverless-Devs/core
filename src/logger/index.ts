@@ -3,9 +3,10 @@ const prettyjson = require('prettyjson');
 import ansiEscapes from 'ansi-escapes';
 import ora, { Ora } from 'ora';
 import { isDebugMode } from '../libs/common';
+import { isEmpty } from 'lodash';
 
 // CLI Colors
-const white = (str) => str;
+const white = (str) => `${str}\n`;
 
 type LogColor =
   | 'black'
@@ -153,9 +154,6 @@ export class Logger {
     let err: Error;
     const plist = [];
     const startTime = Date.now();
-    if (!this.spinner) {
-      this.spinner = ora();
-    }
     for (const item of list) {
       const enabled = typeof item.enabled === 'function' ? item.enabled() : true;
       if (!enabled) {
@@ -173,6 +171,7 @@ export class Logger {
             break;
           }
         } else {
+          isEmpty(!this.spinner) && (this.spinner = ora());
           this.spinner.start(gray(item.title))
           try {
             await item.task(this.spinner);
