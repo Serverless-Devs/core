@@ -39,7 +39,7 @@ async function postInit({ componentPath }) {
 }
 
 async function loadServerless(source: string, params?: any) {
-  const [provider, componentName] = source.includes('/') ? source.split('/') : ['.', source];
+  const [provider, componentName] = source.includes('/') ? source.split('/') : ['devsapp', source];
   if (!componentName) return;
   const [name, version] = componentName.split('@');
   const filename = provider === '.' ? `${componentName}.zip` : `${provider}_${componentName}.zip`;
