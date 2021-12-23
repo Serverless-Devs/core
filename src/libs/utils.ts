@@ -16,7 +16,7 @@ export function getServerlessDevsTempArgv() {
     return [];
   }
 }
-export const merge = require('lodash.merge');
+export const { merge } = require('lodash');
 
 export const isUndefined = (obj: any): obj is undefined => typeof obj === 'undefined';
 

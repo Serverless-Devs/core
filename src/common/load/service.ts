@@ -2,7 +2,7 @@ import { request } from '../request';
 import { readJsonFile } from '../../libs/utils';
 import path from 'path';
 import fs from 'fs-extra';
-import get from 'lodash.get';
+import { get } from 'lodash';
 import { RegistryEnum } from '../constant';
 
 export const buildComponentInstance = async (componentPath: string, params?: any) => {

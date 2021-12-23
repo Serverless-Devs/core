@@ -14,5 +14,4 @@ download
 lib
 dist
 .vscode
-package-lock.json
 .s.lock

@@ -12,7 +12,7 @@ import { downloadRequest } from '../request';
 import getYamlContent from '../getYamlContent';
 import fs from 'fs-extra';
 import inquirer from 'inquirer';
-import get from 'lodash.get';
+import { get } from 'lodash';
 import rimraf from 'rimraf';
 import installDependency from '../installDependency';
 import { readJsonFile } from '../../libs/utils';

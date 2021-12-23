@@ -1,12 +1,12 @@
 import chalk from 'chalk';
-import minimist from 'minimist';
-import get from 'lodash.get';
-const prettyoutput = require('prettyoutput');
+const prettyjson = require('prettyjson');
 import ansiEscapes from 'ansi-escapes';
 import ora, { Ora } from 'ora';
+import { isDebugMode } from '../libs/common';
+import { isEmpty, isFunction } from 'lodash';
 
 // CLI Colors
-const white = (str) => str;
+const white = (str) => `${str}\n`;
 
 type LogColor =
   | 'black'
@@ -20,14 +20,6 @@ type LogColor =
   | 'whiteBright'
   | 'gray';
 
-function getDebugFromEnv() {
-  const temp_params = get(process, 'env.temp_params');
-  if (temp_params) {
-    const temp = temp_params.split(' ');
-    const debugList = temp.filter((item) => item === '--debug');
-    return debugList.length > 0;
-  }
-}
 
 export interface ILogger {
   // 打印
@@ -42,13 +34,12 @@ export interface ILogger {
 }
 
 interface ITaskOptions {
-  title: string;
+  title: string | Function;
   id?: string;
-  task: () => Promise<any>;
+  task: Function;
+  enabled?: Function;
 }
 
-const args = minimist(process.argv.slice(2));
-const getEnableDebug = () => args.debug || getDebugFromEnv();
 
 function searchStr(data: string, str: string) {
   const arr = [];
@@ -81,7 +72,7 @@ function formatDebugData(data: string) {
 }
 
 const gray = chalk.hex('#8c8d91');
-const bgRed = chalk.hex('#000').bgHex('#fd5750');
+const red = chalk.hex('#fd5750');
 
 const time = () => new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
 export class Logger {
@@ -95,7 +86,7 @@ export class Logger {
   }
 
   static debug(name: string, data) {
-    if (getEnableDebug()) {
+    if (isDebugMode()) {
       console.log(`${gray(`[${time()}] [DEBUG] [${name}] - `)}${data}`);
     }
   }
@@ -116,7 +107,7 @@ export class Logger {
   }
 
   debug(data) {
-    if (getEnableDebug()) {
+    if (isDebugMode()) {
       data = formatDebugData(data);
       console.log(`${gray(`[${time()}] [DEBUG] [${this.context}] - `)}${data}`);
     }
@@ -139,18 +130,15 @@ export class Logger {
     process.stdout.write(ansiEscapes.eraseDown);
     process.stdout.write(
       white(
-        prettyoutput(
+        prettyjson.render(
           outputs,
           {
-            colors: {
-              keys: 'bold',
-              dash: null,
-              number: null,
-              string: null,
-              true: null,
-              false: null,
-            },
-            maxDepth: 10,
+              keysColor: 'bold',
+              dashColor: null,
+              numberColor: null,
+              stringColor: null,
+              trueColor: null,
+              falseColor: null,
           },
           indent,
         ),
@@ -163,36 +151,43 @@ export class Logger {
   }
 
   async task(title: string, list: ITaskOptions[]) {
-    if (list.length === 0) return true;
+    let err: Error;
     const plist = [];
     const startTime = Date.now();
     for (const item of list) {
+      const enabled = typeof item.enabled === 'function' ? item.enabled() : true;
+      if (!enabled) {
+        continue;
+      }
       if (item.title && item.task) {
-        if (getEnableDebug()) {
-          this.log(gray(item.title));
+        const title = isFunction(item.title) ? item.title() : item.title;
+        if (isDebugMode()) {
+          this.log(gray(title));
           try {
             await item.task();
             plist.push(Object.assign(item, { valid: true }));
           } catch (error) {
-            const index = error.stack.indexOf(':');
-            this.log(bgRed(error.stack.slice(0, index + 1)) + error.stack.slice(index + 1));
-            plist.push(Object.assign(item, { valid: false }));
+            err = error;
+            plist.push(Object.assign(item, { valid: false, error }));
             break;
           }
         } else {
-          this.spinner = ora(gray(item.title)).start();
+          isEmpty(!this.spinner) && (this.spinner = ora());
+          this.spinner.start(gray(title))
           try {
-            await item.task();
+            await item.task(this.spinner);
             this.spinner.stop();
             plist.push(Object.assign(item, { valid: true }));
           } catch (error) {
             this.spinner.stop();
-            plist.push(Object.assign(item, { valid: false }));
+            err = error;
+            plist.push(Object.assign(item, { valid: false, error }));
             break;
           }
         }
       }
     }
+    if(plist.length === 0) return;
     const endTime = Date.now();
 
     const time = (Math.round((endTime - startTime) / 10) * 10) / 1000;
@@ -206,8 +201,12 @@ export class Logger {
     if (plist.every((obj) => obj.valid)) {
       endTime - startTime > 5 && ora().succeed(getOraMsg());
     } else {
-      ora().fail(getOraMsg());
-      process.exit(1);
+      this.log(`${red('✖') } ${getOraMsg()}`);
+      throw err;
     }
+  }
+
+  static task(title: string, list: ITaskOptions[]) {
+    this.task(title, list);
   }
 }

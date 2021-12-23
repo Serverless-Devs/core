@@ -1,11 +1,11 @@
 import inquirer from 'inquirer';
 import getAccess from './getAccess';
 import setCredential from '../setCredential';
-import get from 'lodash.get';
+import { get } from 'lodash';
 import os from 'os';
 import path from 'path';
 import getYamlContent from '../../getYamlContent';
-import { logger } from '../../../libs/utils';
+import { logger, getServerlessDevsTempArgv } from '../../../libs/utils';
 import { getRootHome } from '../../../libs/common';
 import chalk from 'chalk';
 import { transformInputs, trim, getServerlessDevsAccessFromEnv } from './utils';
@@ -93,6 +93,9 @@ async function getCredentialWithAccess(access?: string, ...args: any[]) {
     logger.debug(`access information: ${JSON.stringify(result, null, 2)}`);
     return trim(result);
   }
+  const argv = getServerlessDevsTempArgv();
+  if (argv[2]==='config' && argv[3]==='get') return;
+
   const userInfo = await getYamlContent(path.join(getRootHome(), 'access.yaml'));
 
   let choices = [];

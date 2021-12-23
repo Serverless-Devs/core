@@ -1,6 +1,6 @@
 import fs from 'fs-extra';
 import path from 'path';
-import get from 'lodash.get';
+import { get } from 'lodash';
 import execa, { StdioOption } from 'execa';
 import report from './report';
 import spinner from './spinner';
@@ -23,7 +23,7 @@ const npmInstall = async (
     production?: boolean;
     registry?: string;
     showLoading?: boolean;
-    stdio?: StdioOption;
+    stdio?: 'pipe' | 'ignore' | 'inherit' | readonly StdioOption[];
   } = {},
 ) => {
   const { showLoading, baseDir, npmList, production } = options;
@@ -55,7 +55,7 @@ const npmInstall = async (
 interface IOptions {
   cwd?: string;
   production?: boolean;
-  stdio?: StdioOption;
+  stdio?: 'pipe' | 'ignore' | 'inherit' | readonly StdioOption[];
   showLoading?: boolean;
   graceInstall?: boolean;
 }
