@@ -43,8 +43,12 @@ const publishHelper  =  {
         }
         list = _.isArray(list) ? list: _.map(list,(item, key) => ({[key]:item}) );
         return `${_.repeat(' ', leftPad)}${leftPad?bold(title):underline(bold(title))}\n` + _.reduce(list, (total, item) => {
+            let description = descFn(item);
+            if(descFn(item).lastIndexOf('.') <= -1) {
+                description = `${descFn(item)}.`;
+            } 
             total+= (
-                '  ' + _.padEnd(wrap(keyFn(item), {indent: _.repeat(' ', leftPad)}), length + 2) + wrap(descFn(item), {width: 80} ) + '\n');
+                '  ' + _.padEnd(wrap(keyFn(item), {indent: _.repeat(' ', leftPad)}), length + 2) + wrap(description, {width: 80} ) + '\n');
             return total;
             },'')
     },
