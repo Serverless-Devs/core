@@ -20,6 +20,8 @@ export const providerObject: any = {
   custom: 'Custom',
 };
 
+const akRegx = /^[A-Za-z0-9-]+$/;
+
 export const providerCollection: any = {
   alibaba: [
     {
@@ -27,18 +29,27 @@ export const providerCollection: any = {
       message: 'AccountID',
       name: 'AccountID',
       default: '', // 默认值
+      validate(input) {
+        return /^\d+$/.test(input) ? true : 'Please check if your AccountID is correct.';
+      },
     },
     {
       type: 'input',
       message: 'AccessKeyID',
       name: 'AccessKeyID',
       default: '', // 默认值
+      validate(input) {
+        return akRegx.test(input) ? true : 'Please check if your AccessKeyID is correct.';
+      },
     },
     {
       type: 'input',
       message: 'AccessKeySecret',
       name: 'AccessKeySecret',
       default: '', // 默认值
+      validate(input) {
+        return akRegx.test(input) ? true : 'Please check if your AccessKeySecret is correct.';
+      },
     },
   ],
 
