@@ -133,12 +133,12 @@ export class Logger {
         prettyjson.render(
           outputs,
           {
-              keysColor: 'bold',
-              dashColor: null,
-              numberColor: null,
-              stringColor: null,
-              trueColor: null,
-              falseColor: null,
+            keysColor: 'bold',
+            dashColor: null,
+            numberColor: null,
+            stringColor: null,
+            trueColor: null,
+            falseColor: null,
           },
           indent,
         ),

@@ -13,3 +13,4 @@ export { default as installDependency } from './installDependency';
 export { default as getYamlContent } from './getYamlContent';
 export { default as report } from './report';
 export { default as formatterOutput} from './formatterOutput'
+export { default as publishHelp} from './publishHelp'
