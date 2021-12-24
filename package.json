@@ -21,6 +21,7 @@
   },
   "homepage": "https://www.serverless-devs.com",
   "scripts": {
+    "start": "npm run watch",
     "prewatch": "rimraf lib && mkdir lib && cp -r ./src/daemon ./lib",
     "watch": "npx tsc -w -p tsconfig.json",
     "debug": "ts-node test/fixtures/spinner.ts",

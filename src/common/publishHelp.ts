@@ -42,6 +42,9 @@ const publishHelper  =  {
             }
         }
         list = _.isArray(list) ? list: _.map(list,(item, key) => ({[key]:item}) );
+        if(_.isEmpty(list)) {
+            return '';
+        }
         return `${_.repeat(' ', leftPad)}${leftPad?bold(title):underline(bold(title))}\n` + _.reduce(list, (total, item) => {
             let description = descFn(item);
             if(descFn(item).lastIndexOf('.') <= -1) {
