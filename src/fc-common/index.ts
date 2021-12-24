@@ -12,10 +12,12 @@ import commandExists from 'command-exists';
 import os from 'os';
 import path from 'path';
 import './utils/fc-client';
+import { getRootHome } from '../libs/common';
 
 const DEFAULT_TIMEOUT = 600 * 1000;
 
-export default class FcCommonComponent {
+const FcCommonComponent = {
+  defaultConfigFile: path.join(getRootHome(), '.fc.default.yaml'),
   /**
    * 获取 fc client
    * @param {InputProps} inputs
@@ -58,7 +60,7 @@ export default class FcCommonComponent {
       timeout: timeout * 1000 || DEFAULT_TIMEOUT,
       endpoint,
     });
-  }
+  },
 
   /**
    * 获取 credentials 值
@@ -83,7 +85,7 @@ export default class FcCommonComponent {
       access: res?.Alias,
       credentials,
     };
-  }
+  },
 
   /**
    * 生成容器资源限制配置
@@ -134,7 +136,7 @@ Now the limit of RAM resource is ${MemTotal} bytes. To improve the limit, please
       Memory: memory,
       Ulimits: ulimits,
     };
-  }
+  },
 
   /**
    * 检查环境是否安装python，java，nodejs等语言环境
@@ -207,7 +209,7 @@ Now the limit of RAM resource is ${MemTotal} bytes. To improve the limit, please
     }
 
     return [result, details];
-  }
+  },
 
   /**
    * 检查环境是否安装docker环境
@@ -224,5 +226,7 @@ Now the limit of RAM resource is ${MemTotal} bytes. To improve the limit, please
       details += 'Docker installed.\n';
     }
     return [result, details];
-  }
+  },
 }
+
+export default FcCommonComponent;
