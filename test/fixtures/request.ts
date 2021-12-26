@@ -51,8 +51,8 @@
 import { downloadRequest } from '../../src';
 
 downloadRequest(
-    'https://registry.devsapp.cn/simple/devsapp/start-zblog/zipball/1.1.14',
-    // 'https://registry.devsapp.cn/simple/devsapp/core/zipball/dev',
+    // 'https://registry.devsapp.cn/simple/devsapp/start-zblog/zipball/1.1.14',
+    'https://registry.devsapp.cn/simple/devsapp/core/zipball/dev',
     '/Users/yk/heimanba/aliFE/serverless/npm/core/test/work',
     {
         // filename: 'test.zip',
