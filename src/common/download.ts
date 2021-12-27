@@ -109,6 +109,7 @@ const download = (uri, output, opts, ee) => {
 				clearInterval(interval);
 				opts.retries++;
 				res.socket.destroy();
+				stream && stream.destroy();
 				if(opts.retries >= RETRY_TIMES) {
 					spin.fail(`Downloading failed: [${chalk.green(uri)}]`);
 					return;
