@@ -52,12 +52,13 @@ import { downloadRequest } from '../../src';
 
 downloadRequest(
     // 'https://registry.devsapp.cn/simple/devsapp/start-zblog/zipball/1.1.14',
-    'https://registry.devsapp.cn/simple/devsapp/core/zipball/dev',
-    '/Users/yk/heimanba/aliFE/serverless/npm/core/test/work',
+    // 'https://registry.devsapp.cn/simple/devsapp/core/zipball/dev',
+    'https://registry.devsapp.cn/simple/devsapp/fc-api/zipball/0.0.45',
+    '/Users/shihuali/workspace/core/test/fixtures/aaa',
     {
         // filename: 'test.zip',
-        // extract: true,
-        // strip: 1,
+        extract: true,
+        strip: 1,
     });
 
 // import { request } from '../../src';

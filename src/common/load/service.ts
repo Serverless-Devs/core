@@ -1,4 +1,4 @@
-import { request } from '../request';
+import request from '../request';
 import { readJsonFile } from '../../libs/utils';
 import path from 'path';
 import fs from 'fs-extra';

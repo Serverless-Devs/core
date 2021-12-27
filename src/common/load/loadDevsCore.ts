@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 import path from 'path';
 import { getRootHome, isBetaS } from '../../libs/common';
-import { downloadRequest } from '../request';
+import downloadRequest from '../downloadRequest';
 import { DEFAULT_CORE_VERSION } from '../../daemon/constant';
 import { execDaemonWithTTL } from '../../execDaemon';
 import rimraf from 'rimraf';

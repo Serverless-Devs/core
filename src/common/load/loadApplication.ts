@@ -8,7 +8,7 @@ import {
 import { RegistryEnum } from '../constant';
 import path from 'path';
 import { getSetConfig } from './utils';
-import { downloadRequest } from '../request';
+import downloadRequest from '../downloadRequest';
 import getYamlContent from '../getYamlContent';
 import fs from 'fs-extra';
 import inquirer from 'inquirer';
@@ -154,7 +154,6 @@ async function loadType(params: IParams) {
 async function loadApplicationByUrl({ source, registry, target }: IParams) {
   const applicationPath = path.resolve(target, source);
   await downloadRequest(registry, applicationPath, {
-    postfix: 'zip',
     extract: true,
   });
   return applicationPath;

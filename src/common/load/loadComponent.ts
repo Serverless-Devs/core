@@ -10,7 +10,7 @@ import {
 } from './service';
 import { RegistryEnum, Registry } from '../constant';
 import { getSetConfig } from './utils';
-import { downloadRequest } from '../request';
+import downloadRequest from '../downloadRequest';
 import installDependency from '../installDependency';
 import { get } from 'lodash';
 import { downLoadDesCore } from './loadDevsCore';
