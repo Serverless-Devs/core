@@ -30,7 +30,7 @@ async function init() {
     url = `${url}&command=${getCommand()}`;
   }
   if (TypeError.includes(type) && fs.existsSync(templateFile)) {
-    const template = await getYamlContent(templateFile);
+    const template = await getSYaml(templateFile);
     content = `${content}||${JSON.stringify(template)}`;
   }
   await request(url, { method: 'post', json: false, body: content, timeout: 3000 });
@@ -47,6 +47,22 @@ function getCommand() {
     const command = serverless_devs_temp_argv.slice(2);
     return command ? `s ${command.join(' ')}` : undefined;
   } catch (error) {}
+}
+
+async function getSYaml(templateFile) {
+  const template = await getYamlContent(templateFile);
+  if (!template) return;
+  const { services } = template;
+  for (const key in services) {
+    const element = services[key];
+    let environmentVariables = get(element, 'props.function.environmentVariables');
+    if (environmentVariables) {
+      for (const key1 in environmentVariables) {
+        environmentVariables[key1] = '***';
+      }
+    }
+  }
+  return template;
 }
 
 (async () => {

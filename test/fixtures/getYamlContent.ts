@@ -1,10 +1,21 @@
 import { getYamlContent } from '../../src/common';
+import { get } from 'lodash';
 
-async function test() {
-  const c = getYamlContent(
-    '/Users/shihuali/workspace/s-core/packages/core/test/fixtures/modifyProps/s.yaml',
+(async () => {
+  const c = await getYamlContent(
+    '/Users/shihuali/workspace/core/test/fixtures/modifyProps/s.yml'
   );
-  console.log(c);
-}
 
-test();
+  const {services} = c;
+  for (const key in services) {
+    const element = services[key];
+    let environmentVariables = get(element, 'props.function.environmentVariables');
+    if (environmentVariables) {
+      for (const key1 in environmentVariables) {
+        environmentVariables[key1] = '***'
+      }
+    }
+  }
+
+  console.log(JSON.stringify(c, null, 2));
+})()
