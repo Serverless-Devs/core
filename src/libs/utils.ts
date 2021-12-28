@@ -6,6 +6,7 @@ import { nanoid } from 'nanoid';
 import * as fs from 'fs-extra';
 import { Logger } from '../logger';
 import report from '../common/report';
+import _ from 'lodash';
 
 export const logger = new Logger('S-CORE');
 
@@ -102,4 +103,12 @@ export function isCICDEnv() {
     if (key.startsWith('JENKINS')) return true;
   }
   return false;
+}
+
+
+export function isChinese(temp) {
+  if(_.isEmpty(temp)) return false
+  var re=/[^/u4e00-/u9fa5]/;
+  if (re.test(temp)) return false ;
+  return true ;
 }

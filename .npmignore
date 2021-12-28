@@ -17,3 +17,4 @@ tsconfig.json
 .prettierrc.js
 .signore
 .eslintrc.js
+Makefile

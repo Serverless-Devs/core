@@ -1,6 +1,7 @@
 import _  from 'lodash';
 import wrap from 'word-wrap';
-import {bold, underline}  from 'chalk';
+import { bold, underline }  from 'chalk';
+import { isChinese } from '../libs/utils'
 
 const keyFn = list => _.first(_.keys(list));
 const descFn = list => _.first(_.values(list));
@@ -47,8 +48,8 @@ const publishHelper  =  {
         }
         return `${_.repeat(' ', leftPad)}${leftPad?bold(title):underline(bold(title))}\n` + _.reduce(list, (total, item) => {
             let description = descFn(item);
-            if(descFn(item).lastIndexOf('.') <= -1) {
-                description = `${descFn(item)}.`;
+            if(isChinese(description) && description.lastIndexOf('.') <= -1) {
+                description = `${description}.`;
             } 
             total+= (
                 '  ' + _.padEnd(wrap(keyFn(item), {indent: _.repeat(' ', leftPad)}), length + 2) + wrap(description, {width: 80} ) + '\n');
