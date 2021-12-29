@@ -187,6 +187,8 @@ export class Logger {
         }
       }
     }
+    this.spinner?.stop();
+    this.spinner = null;
     if(plist.length === 0) return;
     const endTime = Date.now();
 
