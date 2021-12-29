@@ -104,11 +104,3 @@ export function isCICDEnv() {
   }
   return false;
 }
-
-
-export function isChinese(temp) {
-  if(_.isEmpty(temp)) return false
-  var re=/[^/u4e00-/u9fa5]/;
-  if (re.test(temp)) return false ;
-  return true ;
-}

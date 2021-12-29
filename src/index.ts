@@ -23,3 +23,6 @@ export { default as ansiEscapes } from 'ansi-escapes';
 export { default as ignore } from 'ignore';
 export { default as archiver } from 'archiver';
 export { default as FcCommon } from './fc-common';
+export { default as tableLayout } from 'table-layout';
+export { default as httpx } from 'httpx';
+export { default as pEvent } from 'p-event';

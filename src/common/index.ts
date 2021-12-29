@@ -9,7 +9,6 @@ export { loadComponent, load, loadApplication } from './load';
 export { default as commandParse } from './commandParse';
 export { getCredential, setCredential, decryptCredential, setKnownCredential } from './credential';
 export { getState, setState } from './state';
-export { default as validateProps } from './validateProps';
 export { default as modifyProps } from './modifyProps';
 export { default as installDependency } from './installDependency';
 export { default as getYamlContent } from './getYamlContent';
