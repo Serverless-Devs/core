@@ -18,7 +18,7 @@ release-dev: push
 	-gh release delete dev -y
 	-git tag -d dev
 	-git push origin :refs/tags/dev
-	gh release create dev --notes "dev release" --target dev --title "Release dev"
+	gh release create dev --notes "dev release" --target develop --title "Release dev" --prerelease
 
 roll-back-dev:
 	git reset --soft HEAD~1
