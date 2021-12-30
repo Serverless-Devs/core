@@ -15,7 +15,7 @@ import inquirer from 'inquirer';
 import { get } from 'lodash';
 import rimraf from 'rimraf';
 import installDependency from '../installDependency';
-import { readJsonFile } from '../../libs/utils';
+import { readJsonFile, getServerlessDevsTempArgv } from '../../libs/utils';
 
 interface IParams {
   source: string;
@@ -108,6 +108,8 @@ async function needInstallDependency(cwd: string) {
   if (process.env.skipPrompt) {
     return await tryfun(installDependency({ cwd, production: false }));
   }
+  const tempArgv = getServerlessDevsTempArgv();
+  if (tempArgv.find((i) => i === '--force-creation')) return;
 
   const res = await inquirer.prompt([
     {
@@ -124,6 +126,8 @@ async function needInstallDependency(cwd: string) {
 
 async function checkFileExists(filePath: string, fileName: string) {
   if (process.env.skipPrompt) return true;
+  const tempArgv = getServerlessDevsTempArgv();
+  if (tempArgv.find((i) => i === '--force-creation')) return true;
   if (fs.existsSync(filePath)) {
     const res = await inquirer.prompt([
       {
