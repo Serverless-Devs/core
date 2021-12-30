@@ -6,6 +6,7 @@ const {
   getCicdEnv,
   getRootHome,
   ip,
+  getCommand,
 } = require('../index');
 const path = require('path');
 const fs = require('fs');
@@ -39,14 +40,6 @@ async function init() {
 function getCoreVersion() {
   const corePath = path.join(getRootHome(), 'cache', 'core', 'package.json');
   return fs.existsSync(corePath) ? require(corePath).version : 'unknown';
-}
-
-function getCommand() {
-  try {
-    const serverless_devs_temp_argv = JSON.parse(process.env['serverless_devs_temp_argv']);
-    const command = serverless_devs_temp_argv.slice(2);
-    return command ? `s ${command.join(' ')}` : undefined;
-  } catch (error) {}
 }
 
 async function getSYaml(templateFile) {

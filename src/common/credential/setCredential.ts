@@ -6,6 +6,7 @@ import { providerCollection, checkProviderList } from './constant';
 import getYamlContent from '../getYamlContent';
 import { getServerlessDevsTempArgv } from '../../libs/utils';
 import { getRootHome } from '../../libs/common';
+import getAccountId from './getAccountId';
 
 const Crypto = require('crypto-js');
 
@@ -184,10 +185,21 @@ async function setCredential(...args: any[]) {
       message: item,
       name: item,
     }));
+
     const promptList =
       selectedProvider === 'params' ? argsPrompt : providerCollection[selectedProvider];
     promptList.push(accessAliasObj);
     info = await inquirer.prompt(promptList);
+    // 阿里云密钥 获取accountid
+    if (selectedProvider === 'alibaba') {
+      try {
+        const data: any = await getAccountId(info);
+        info.AccountID = data.AccountId;
+      } catch (error) {
+        throw new Error('alibaba');
+      }
+    }
+
     Object.keys(info).forEach((item) => {
       if (item === 'aliasName') {
         accessAlias = info[item];

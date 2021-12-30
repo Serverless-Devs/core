@@ -26,15 +26,6 @@ export const providerCollection: any = {
   alibaba: [
     {
       type: 'input',
-      message: 'AccountID',
-      name: 'AccountID',
-      default: '', // 默认值
-      validate(input) {
-        return /^\d+$/.test(input) ? true : 'Please check if your AccountID is correct.';
-      },
-    },
-    {
-      type: 'input',
       message: 'AccessKeyID',
       name: 'AccessKeyID',
       default: '', // 默认值

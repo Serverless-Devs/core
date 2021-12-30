@@ -12,9 +12,8 @@ const semver = require('semver');
 
 const USER_HOME = os.homedir();
 
-
 // debug模式
-export const isDebugMode = ()=> {
+export const isDebugMode = () => {
   function getDebugFromEnv() {
     const temp_params = get(process, 'env.temp_params');
     if (temp_params) {
@@ -26,7 +25,7 @@ export const isDebugMode = ()=> {
 
   const args = minimist(process.argv.slice(2));
   return args.debug || getDebugFromEnv();
-}
+};
 
 // s工具的家目录
 export function getCicdEnv() {
@@ -105,3 +104,11 @@ export const S_CURRENT_HOME = path.join(process.cwd(), '.s');
 export const S_CURRENT = path.join(process.cwd(), './');
 
 export const getSComponentPath = () => path.join(getRootHome(), 'components');
+
+export const getCommand = () => {
+  try {
+    const serverless_devs_temp_argv = JSON.parse(process.env['serverless_devs_temp_argv']);
+    const command = serverless_devs_temp_argv.slice(2);
+    return command ? `s ${command.join(' ')}` : undefined;
+  } catch (error) {}
+};

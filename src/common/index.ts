@@ -7,7 +7,7 @@ export { default as zip } from './zip';
 export { default as help } from './help';
 export { loadComponent, load, loadApplication } from './load';
 export { default as commandParse } from './commandParse';
-export { getCredential, setCredential, decryptCredential, setKnownCredential } from './credential';
+export * from './credential';
 export { getState, setState } from './state';
 export { default as modifyProps } from './modifyProps';
 export { default as installDependency } from './installDependency';
