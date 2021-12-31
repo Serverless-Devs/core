@@ -9,7 +9,7 @@ import {
   getServerlessReleasesLatest,
 } from './service';
 import { RegistryEnum, Registry } from '../constant';
-import { getSetConfig } from './utils';
+import { getSetConfig, getComponentVersion } from './utils';
 import downloadRequest from '../downloadRequest';
 import installDependency from '../installDependency';
 import { get } from 'lodash';
@@ -41,19 +41,22 @@ async function postInit({ componentPath }) {
 async function loadServerless(source: string, params?: any) {
   const [provider, componentName] = source.includes('/') ? source.split('/') : ['devsapp', source];
   if (!componentName) return;
-  const [name, version] = componentName.split('@');
-  const filename = provider === '.' ? `${componentName}.zip` : `${provider}_${componentName}.zip`;
+  const [name, version] = await getComponentVersion(provider, componentName);
   let componentPath: string;
   if (version) {
+    const formatComponentName = `${name}@${version}`
+    const filename = provider === '.' ? `${formatComponentName}.zip` : `${provider}_${formatComponentName}.zip`;
     componentPath = await loadServerlessWithVersion({
       provider,
       name,
-      componentName,
+      componentName: formatComponentName,
       version,
       filename,
     });
+  } else {
+    const filename = provider === '.' ? `${name}.zip` : `${provider}_${name}.zip`;
+    componentPath = await loadServerlessWithNoVersion({ provider, name, componentName, filename });
   }
-  componentPath = await loadServerlessWithNoVersion({ provider, name, componentName, filename });
   if (!componentPath) return;
   await downLoadDesCore(componentPath);
   return await buildComponentInstance(componentPath, params);
@@ -110,12 +113,13 @@ async function loadGithub(source: string, params?: any) {
   if (!source.includes('/')) return;
   const [provider, componentName] = source.split('/');
   if (!componentName) return;
-  const [name, version] = componentName.split('@');
+  const [name, version] = await getComponentVersion(provider, componentName);
   let componentPath: string;
   if (version) {
-    componentPath = await loadGithubWithVersion({ provider, name, componentName, version });
+      componentPath = await loadGithubWithVersion({ provider, name, componentName: `${name}@${version}`, version });
+  } else {
+    componentPath = await loadGithubWithNoVersion({ provider, name, componentName });
   }
-  componentPath = await loadGithubWithNoVersion({ provider, name, componentName });
   if (!componentPath) return;
   await downLoadDesCore(componentPath);
   return await buildComponentInstance(componentPath, params);

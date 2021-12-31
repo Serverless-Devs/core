@@ -2,9 +2,9 @@ import fs from 'fs-extra';
 import path from 'path';
 import { getRootHome, isBetaS } from '../../libs/common';
 import downloadRequest from '../downloadRequest';
-import { DEFAULT_CORE_VERSION } from '../../daemon/constant';
 import { execDaemonWithTTL } from '../../execDaemon';
 import rimraf from 'rimraf';
+import { getCoreVersion } from './utils'
 
 const cachePath = path.join(getRootHome(), 'cache');
 const corePath = path.join(cachePath, 'core');
@@ -24,7 +24,7 @@ async function existCore(componentPath: string) {
 }
 async function nonExistCore(componentPath: string) {
   fs.ensureDirSync(cachePath);
-  const version = isBetaS() ? 'dev' : DEFAULT_CORE_VERSION;
+  const version = getCoreVersion();
   const url = `https://registry.devsapp.cn/simple/devsapp/core/zipball/${version}`;
   const filename = `core@${version}.zip`;
   await downloadRequest(url, corePath, { filename, extract: true, strip: 1 });
