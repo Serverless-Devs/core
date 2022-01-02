@@ -1,5 +1,5 @@
 import fs from 'fs-extra';
-import { get } from 'lodash';
+import { get, isEmpty } from 'lodash';
 const archiveType = require('archive-type');
 const decompress = require('decompress');
 const getStream = require('get-stream');
@@ -140,6 +140,11 @@ export default async (uri: string, output: string, options: IDownloadOptions = {
       download(uri, output, { ...opts, contentLength, retries: 0 }, ee);
       const result = await pEvent(ee, 'response');
       const [data] = result;
+      if (isEmpty(archiveType(data))) {
+        const errMsg = `Downloading failed: [${chalk.green(uri)}]`;
+        spin.fail(errMsg);
+        throw new Error(data.toString ? data.toString() : errMsg);
+      }
       const { filename } = opts;
 
       if (opts.extract && archiveType(data)) {
@@ -165,6 +170,7 @@ export default async (uri: string, output: string, options: IDownloadOptions = {
         type: 'networkError',
         content: `${uri}||${error.code}||${error.message}`,
       });
+      throw error;
     }
   }
   return await downloadRequest(uri, output, options);
