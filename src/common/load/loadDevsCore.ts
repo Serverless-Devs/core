@@ -24,7 +24,7 @@ async function existCore(componentPath: string) {
 }
 async function nonExistCore(componentPath: string) {
   fs.ensureDirSync(cachePath);
-  const version = getCoreVersion();
+  const version = await getCoreVersion();
   const url = `https://registry.devsapp.cn/simple/devsapp/core/zipball/${version}`;
   const filename = `core@${version}.zip`;
   await downloadRequest(url, corePath, { filename, extract: true, strip: 1 });

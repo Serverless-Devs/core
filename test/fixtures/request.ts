@@ -50,16 +50,21 @@
 
 import { downloadRequest } from '../../src';
 
-downloadRequest(
-    // 'https://registry.devsapp.cn/simple/devsapp/start-zblog/zipball/1.1.14',
-    // 'https://registry.devsapp.cn/simple/devsapp/core/zipball/dev',
-    'https://registry.devsapp.cn/simple/devsapp/fc-api/zipball/0.0.45',
-    '/Users/shihuali/workspace/core/test/fixtures/aaa',
-    {
-        // filename: 'test.zip',
-        extract: true,
-        strip: 1,
-    });
+(async()=>{
+  await  downloadRequest(
+        // 'https://registry.devsapp.cn/simple/devsapp/start-zblog/zipball/1.1.14',
+        'https://registry.devsapp.cn/simple/devsapp/core/zipball/11dev',
+        // 'https://registry.devsapp.cn/simple/devsapp/fc-api/zipball/0.0.45',
+        '/Users/shihuali/workspace/core/test/fixtures/aaa',
+        {
+            filename: 'core.zip',
+            extract: true,
+            strip: 1,
+        });
+
+ console.log('end');
+        
+})()
 
 // import { request } from '../../src';
 
