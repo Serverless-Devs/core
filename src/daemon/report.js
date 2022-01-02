@@ -16,7 +16,7 @@ const TypeError = ['jsError', 'networkError'];
 async function init() {
   const { type, templateFile, traceId, CLI_VERSION } = process.env;
   let { content } = process.env;
-  const core_version = getCoreVersion();
+  const core_version = await getCoreVersion();
   const os = getCicdEnv() || process.platform;
   const node_version = process.version;
   const time = 1;
