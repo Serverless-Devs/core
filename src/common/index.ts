@@ -13,7 +13,6 @@ export { default as modifyProps } from './modifyProps';
 export { default as installDependency } from './installDependency';
 export { default as getYamlContent } from './getYamlContent';
 export { default as report } from './report';
-export { default as formatterOutput } from './formatterOutput';
 export { default as publishHelp } from './publishHelp';
 export const makeUnderLine = (text: string) => {
   const matchs = text.match(/http[s]?:\/\/[^\s]+/);
