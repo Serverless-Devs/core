@@ -75,11 +75,13 @@ const gray = chalk.hex('#8c8d91');
 const red = chalk.hex('#fd5750');
 
 const time = () => new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
+const getName = name =>  name ? ` [${name}]` : '';
+
 export class Logger {
   spinner: Ora;
   context: string;
   constructor(context?: string) {
-    this.context = context;
+    this.context = getName(context);
   }
   static log(message: any, color?: LogColor) {
     return process.stdout.write(`${color ? chalk[color](message) : message}\n`);
@@ -87,20 +89,20 @@ export class Logger {
 
   static debug(name: string, data) {
     if (isDebugMode()) {
-      console.log(`${gray(`[${time()}] [DEBUG] [${name}] - `)}${data}`);
+      console.log(`${gray(`[${time()}] [DEBUG]${getName(name)} - `)}${data}`);
     }
   }
 
   static info(name: string, data) {
-    console.log(`${chalk.green(`[${time()}] [INFO] [${name}] - `)}${data}`);
+    console.log(`${chalk.green(`[${time()}] [INFO]${getName(name)} - `)}${data}`);
   }
 
   static warn(name: string, data) {
-    console.log(`${chalk.yellow(`[${time()}] [WARN] [${name}] - `)}${data}`);
+    console.log(`${chalk.yellow(`[${time()}] [WARN]${getName(name)} - `)}${data}`);
   }
 
   static error(name: string, data) {
-    console.log(`${chalk.red(`[${time()}] [ERROR] [${name}] - `)}${data}`);
+    console.log(`${chalk.red(`[${time()}] [ERROR]${getName(name)} - `)}${data}`);
   }
   log(message: any, color?: LogColor) {
     return process.stdout.write(`${color ? chalk[color](message) : message}\n`);
@@ -109,20 +111,20 @@ export class Logger {
   debug(data) {
     if (isDebugMode()) {
       data = formatDebugData(data);
-      console.log(`${gray(`[${time()}] [DEBUG] [${this.context}] - `)}${data}`);
+      console.log(`${gray(`[${time()}] [DEBUG]${this.context} - `)}${data}`);
     }
   }
 
   info(data) {
-    console.log(`${chalk.green(`[${time()}] [INFO] [${this.context}] - `)}${data}`);
+    console.log(`${chalk.green(`[${time()}] [INFO]${this.context} - `)}${data}`);
   }
 
   warn(data) {
-    console.log(`${chalk.yellow(`[${time()}] [WARN] [${this.context}] - `)}${data}`);
+    console.log(`${chalk.yellow(`[${time()}] [WARN]${this.context} - `)}${data}`);
   }
 
   error(data) {
-    console.log(`${chalk.red(`[${time()}] [ERROR] [${this.context}] - `)}${data}`);
+    console.log(`${chalk.red(`[${time()}] [ERROR]${this.context} - `)}${data}`);
   }
 
   output(outputs, indent = 0) {
