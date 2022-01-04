@@ -27,3 +27,4 @@ export { default as httpx } from 'httpx';
 export { default as pEvent } from 'p-event';
 export { default as got } from 'got';
 export { default as lodash } from 'lodash';
+export { default as popCore } from '@alicloud/pop-core';
