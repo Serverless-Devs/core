@@ -3,7 +3,7 @@ const prettyjson = require('prettyjson');
 import ansiEscapes from 'ansi-escapes';
 import ora, { Ora } from 'ora';
 import { isDebugMode } from '../libs/common';
-import { isEmpty, isFunction } from 'lodash';
+import { isFunction } from 'lodash';
 
 // CLI Colors
 const white = (str) => `${str}\n`;
@@ -174,7 +174,7 @@ export class Logger {
             break;
           }
         } else {
-          isEmpty(!this.spinner) && (this.spinner = ora());
+          this.spinner = ora();
           this.spinner.start(gray(title))
           try {
             await item.task(this.spinner);
@@ -189,8 +189,6 @@ export class Logger {
         }
       }
     }
-    this.spinner?.stop();
-    this.spinner = null;
     if(plist.length === 0) return;
     const endTime = Date.now();
 
