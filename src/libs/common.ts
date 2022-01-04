@@ -6,17 +6,16 @@ import os from 'os';
 import path from 'path';
 import fs from 'fs-extra';
 import minimist from 'minimist';
-import { get } from 'lodash';
+import _ from 'lodash';
 
 const semver = require('semver');
 
 const USER_HOME = os.homedir();
 
-
 // debug模式
-export const isDebugMode = ()=> {
+export const isDebugMode = () => {
   function getDebugFromEnv() {
-    const temp_params = get(process, 'env.temp_params');
+    const temp_params = _.get(process, 'env.temp_params');
     if (temp_params) {
       const temp = temp_params.split(' ');
       const debugList = temp.filter((item) => item === '--debug');
@@ -26,17 +25,21 @@ export const isDebugMode = ()=> {
 
   const args = minimist(process.argv.slice(2));
   return args.debug || getDebugFromEnv();
-}
+};
 
 // s工具的家目录
 export function getCicdEnv() {
   for (const key in process.env) {
-    if (key.startsWith('CLOUDSHELL')) return 'aliyun_ecs';
+    if (key.startsWith('CLOUDSHELL')) return 'cloud_shell';
     if (key.startsWith('PIPELINE')) return 'yunxiao';
     if (key.startsWith('GITHUB')) return 'github';
     if (key.startsWith('GITLAB')) return 'gitlab';
     if (key.startsWith('JENKINS')) return 'jenkins';
   }
+}
+
+export function isCiCdEnv() {
+  return _.includes(['cloud_shell', 'yunxiao', 'github', 'gitlab', 'jenkins'], getCicdEnv());
 }
 
 export function formatWorkspacePath(val: string) {
@@ -105,3 +108,11 @@ export const S_CURRENT_HOME = path.join(process.cwd(), '.s');
 export const S_CURRENT = path.join(process.cwd(), './');
 
 export const getSComponentPath = () => path.join(getRootHome(), 'components');
+
+export const getCommand = () => {
+  try {
+    const serverless_devs_temp_argv = JSON.parse(process.env['serverless_devs_temp_argv']);
+    const command = serverless_devs_temp_argv.slice(2);
+    return command ? `s ${command.join(' ')}` : undefined;
+  } catch (error) {}
+};

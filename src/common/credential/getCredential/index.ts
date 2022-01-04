@@ -68,11 +68,12 @@ async function getCredentialWithAccess(access?: string, ...args: any[]) {
   // 从环境变量获取
   const AccountKeyIDFromEnv = get(process, 'env.AccessKeyID');
   const AccessKeySecretFromEnv = get(process, 'env.AccessKeySecret');
+  const AccountIDFromEnv = get(process, 'env.AccountID');
 
-  if (AccountKeyIDFromEnv && AccessKeySecretFromEnv) {
+  if (AccountKeyIDFromEnv && AccessKeySecretFromEnv && AccountIDFromEnv) {
     return trim({
       Alias: get(process, 'env.AccessKeySecret', 'default'),
-      AccountID: get(process, 'env.AccountID'),
+      AccountID: AccountIDFromEnv,
       AccessKeyID: AccountKeyIDFromEnv,
       AccessKeySecret: AccessKeySecretFromEnv,
       SecurityToken: get(process, 'env.SecurityToken'),

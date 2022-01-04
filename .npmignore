@@ -11,9 +11,11 @@ f2elint.config.js
 publish.yaml
 tsconfig.json
 .github
+.vscode
 .editorconfig
 .eslintignore
 .prettierignore
 .prettierrc.js
 .signore
 .eslintrc.js
+Makefile

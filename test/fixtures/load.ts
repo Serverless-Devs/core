@@ -36,7 +36,8 @@ async function test() {
   // const fc = await loadComponent('xsahxl/xsahxl.github.io@0.0.1');
   // const fc = await loadComponent('devsapp/springboot');
   // process.env.skipPrompt = 'true';
-  const fc = await loadComponent('website');
+  process.env.core_load_serverless_devs_component = 'devsapp/fc-info@dev;xsahxl/fc-deploy@0.0.55'
+  const fc = await loadComponent('xsahxl/fc-deploy');
   console.log(fc);
 }
 

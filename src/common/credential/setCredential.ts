@@ -4,8 +4,11 @@ import path from 'path';
 import yaml from 'js-yaml';
 import { providerCollection, checkProviderList } from './constant';
 import getYamlContent from '../getYamlContent';
-import { getServerlessDevsTempArgv } from '../../libs/utils';
+import { getServerlessDevsTempArgv, logger } from '../../libs/utils';
 import { getRootHome } from '../../libs/common';
+import getAccountId from './getAccountId';
+import spinner from '../spinner';
+import { isEmpty } from 'lodash';
 
 const Crypto = require('crypto-js');
 
@@ -40,14 +43,29 @@ async function handleCustom(info: any) {
   }
 }
 
+function secret(tempAccess) {
+  if (isEmpty(tempAccess)) return tempAccess;
+  const tempSecretAccess = {};
+  for (const eveValue in tempAccess) {
+    const valueLength = tempAccess[eveValue].length;
+    tempSecretAccess[eveValue] =
+      valueLength > 6
+        ? tempAccess[eveValue].slice(0, 3) +
+          '*'.repeat(valueLength - 6) +
+          tempAccess[eveValue].slice(valueLength - 3, valueLength)
+        : tempAccess[eveValue];
+  }
+  return tempSecretAccess;
+}
+
 function output({ info, accessAlias }) {
-  console.log('');
-  console.info(`    Alias: ${accessAlias}`);
-  Object.keys(info).forEach((item) => {
-    console.info(`    ${item}: ${info[item]}`);
-  });
-  console.log('');
-  console.info('Configuration successful');
+  console.log('')
+  logger.output({
+    Alias: accessAlias,
+    ...secret(info)
+  }, 2)
+  console.log('')
+  spinner('Configuration successful').succeed();
 }
 
 function encrypt(info: any = {}) {
@@ -184,10 +202,21 @@ async function setCredential(...args: any[]) {
       message: item,
       name: item,
     }));
+
     const promptList =
       selectedProvider === 'params' ? argsPrompt : providerCollection[selectedProvider];
     promptList.push(accessAliasObj);
     info = await inquirer.prompt(promptList);
+    // 阿里云密钥 获取accountid
+    if (selectedProvider === 'alibaba') {
+      try {
+        const data: any = await getAccountId(info);
+        info.AccountID = data.AccountId;
+      } catch (error) {
+        throw new Error('alibaba');
+      }
+    }
+
     Object.keys(info).forEach((item) => {
       if (item === 'aliasName') {
         accessAlias = info[item];

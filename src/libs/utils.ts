@@ -2,10 +2,11 @@
  * @description 用于存放工具函数
  */
 
-import { uid } from 'uid/secure';
+import { nanoid } from 'nanoid';
 import * as fs from 'fs-extra';
 import { Logger } from '../logger';
 import report from '../common/report';
+import _ from 'lodash';
 
 export const logger = new Logger('S-CORE');
 
@@ -65,7 +66,7 @@ export const map = (object, callback): Array<{ [key: string]: any }> => {
   }
   return newList;
 };
-export const uuid = uid;
+export const uuid = nanoid;
 
 export function readJsonFile(filePath: string) {
   if (fs.existsSync(filePath)) {

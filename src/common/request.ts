@@ -1,12 +1,8 @@
-import download from 'download';
 import got from 'got';
+import _ from 'lodash';
 import spinner from './spinner';
-import decompress from 'decompress';
 import { logger } from '../libs/utils';
 import report from '../common/report';
-import rimraf from 'rimraf';
-import path from 'path';
-
 interface HintOptions {
   loading?: string;
   success?: string;
@@ -75,7 +71,7 @@ export interface IDownloadOptions {
   postfix?: string;
 }
 
-export async function request(url: string, options?: RequestOptions): Promise<any> {
+async function request(url: string, options?: RequestOptions): Promise<any> {
   const {
     method = 'get',
     params,
@@ -144,48 +140,4 @@ export async function request(url: string, options?: RequestOptions): Promise<an
   return body.Response || body;
 }
 
-export async function downloadRequest(url: string, dest: string, options?: IDownloadOptions) {
-  const { extract, postfix, strip, filename, ...rest } = options || {};
-  const spin = spinner(`start downloading: ${url}`);
-  if (extract) {
-    return await downloadWithExtract({ url, dest, filename, strip, rest, spin });
-  }
-  await downloadWithNoExtract({ url, dest, filename, rest, spin });
-}
-
-async function downloadWithExtract({ url, dest, filename, strip, rest, spin }) {
-  try {
-    const formatFilename = filename || 'demo.zip';
-    const options = { ...rest, filename: formatFilename, rejectUnauthorized: false };
-    await download(url, dest, options);
-    spin.text = filename ? `${filename} file unzipping...` : 'file unzipping...';
-    rimraf.sync(path.resolve(dest, '.git'));
-    try {
-      await decompress(`${dest}/${formatFilename}`, dest, { strip });
-    } catch (error) {
-      await decompress(`${dest}/${formatFilename}`, dest, { strip });
-      reportError({
-        requestUrl: url,
-        statusCode: error.code,
-        errorMsg: error.message,
-      });
-    }
-    rimraf.sync(`${dest}/${formatFilename}`);
-    const text = 'file decompression completed';
-    spin.succeed(filename ? `${filename} ${text}` : text);
-  } catch (error) {
-    spin.stop();
-    reportError({
-      requestUrl: url,
-      statusCode: error.code,
-      errorMsg: error.message,
-    });
-    throw error;
-  }
-}
-
-async function downloadWithNoExtract({ url, dest, filename, rest, spin }) {
-  const options = { ...rest, filename, rejectUnauthorized: false };
-  await download(url, dest, options);
-  spin.succeed(`download success: ${url}`);
-}
+export default request;

@@ -6,6 +6,7 @@ const {
   getCicdEnv,
   getRootHome,
   ip,
+  getCommand,
 } = require('../index');
 const path = require('path');
 const fs = require('fs');
@@ -15,7 +16,7 @@ const TypeError = ['jsError', 'networkError'];
 async function init() {
   const { type, templateFile, traceId, CLI_VERSION } = process.env;
   let { content } = process.env;
-  const core_version = getCoreVersion();
+  const core_version = await getCoreVersion();
   const os = getCicdEnv() || process.platform;
   const node_version = process.version;
   const time = 1;
@@ -30,7 +31,7 @@ async function init() {
     url = `${url}&command=${getCommand()}`;
   }
   if (TypeError.includes(type) && fs.existsSync(templateFile)) {
-    const template = await getYamlContent(templateFile);
+    const template = await getSYaml(templateFile);
     content = `${content}||${JSON.stringify(template)}`;
   }
   await request(url, { method: 'post', json: false, body: content, timeout: 3000 });
@@ -41,12 +42,20 @@ function getCoreVersion() {
   return fs.existsSync(corePath) ? require(corePath).version : 'unknown';
 }
 
-function getCommand() {
-  try {
-    const serverless_devs_temp_argv = JSON.parse(process.env['serverless_devs_temp_argv']);
-    const command = serverless_devs_temp_argv.slice(2);
-    return command ? `s ${command.join(' ')}` : undefined;
-  } catch (error) {}
+async function getSYaml(templateFile) {
+  const template = await getYamlContent(templateFile);
+  if (!template) return;
+  const { services } = template;
+  for (const key in services) {
+    const element = services[key];
+    let environmentVariables = get(element, 'props.function.environmentVariables');
+    if (environmentVariables) {
+      for (const key1 in environmentVariables) {
+        environmentVariables[key1] = '***';
+      }
+    }
+  }
+  return template;
 }
 
 (async () => {
