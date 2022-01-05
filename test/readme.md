@@ -1,7 +1,7 @@
 ## 安装 jest
 
 ```shell
-npm i jest @types/jest -D
+npm i jest @types/jest ts-jest ts-node -D
 ```
 
 ## 默认会测试 spec 和 test 结尾的 js 文件，所有写单元测试的文件名必须是 sum.spec.js 或者 sum.test.js 这个的格式。
