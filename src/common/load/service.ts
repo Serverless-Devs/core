@@ -47,11 +47,15 @@ export const buildComponentInstance = async (componentPath: string, params?: any
   const ChildComponent = baseChildComponent.default
     ? baseChildComponent.default
     : baseChildComponent;
-  const componentInstance = new ChildComponent(params);
-  if (componentInstance) {
-    componentInstance.__path = componentPath;
+  try {
+    const componentInstance = new ChildComponent(params);
+    if (componentInstance) {
+      componentInstance.__path = componentPath;
+    }
+    return componentInstance;
+  } catch (error) {
+    return ChildComponent;
   }
-  return componentInstance;
 };
 
 export const getGithubReleases = async (user: string, name: string) => {
