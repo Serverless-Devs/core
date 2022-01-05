@@ -148,10 +148,6 @@ export class Logger {
     );
   }
 
-  static output(outputs, indent = 0) {
-    this.output(outputs, indent);
-  }
-
   async task(title: string, list: ITaskOptions[]) {
     let err: Error;
     const plist = [];
@@ -206,9 +202,5 @@ export class Logger {
       this.log(`${red('✖') } ${getOraMsg()}`);
       throw err;
     }
-  }
-
-  static task(title: string, list: ITaskOptions[]) {
-    this.task(title, list);
   }
 }
