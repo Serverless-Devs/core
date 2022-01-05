@@ -1,4 +1,5 @@
 process.setMaxListeners(0);
+(process as any).noDeprecation = true;
 
 export { IV1Inputs, IInputs } from './interface';
 export { Logger, ILogger } from './logger';
