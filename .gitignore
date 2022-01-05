@@ -15,3 +15,4 @@ lib
 dist
 .vscode
 .s.lock
+website-base/
