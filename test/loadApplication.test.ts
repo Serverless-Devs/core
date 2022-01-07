@@ -1,6 +1,9 @@
-import { loadApplication, Logger } from '../src';
+import {loadApplication, Logger} from '../src';
 
 const logger = new Logger('loadApplication');
+
+// Note: 这些测试用例比较耗时, 已从默认的测试用例范围中移除。
+// 如果你需要运行这些测试用例, 请删除 jest.config.js 中 testPathIgnorePatterns 的 './test/loadApplication.test.ts'。
 
 describe('loadApplication 基础组件', () => {
   it('devsapp/website-example:website-base', async () => {
@@ -41,7 +44,7 @@ describe('loadApplication 复杂组件', () => {
 describe('loadApplication ts重载', () => {
   it('devsapp/start-malagu', async () => {
     logger.info('开始测试 devsapp/start-malagu ts重载');
-    const res = await loadApplication({ source: 'devsapp/start-malagu', name: 'start-malagu01' });
+    const res = await loadApplication({source: 'devsapp/start-malagu', name: 'start-malagu01'});
     expect(res).not.toBeNull();
   });
 });
