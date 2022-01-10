@@ -7,6 +7,7 @@ import * as fs from 'fs-extra';
 import { Logger } from '../logger';
 import report from '../common/report';
 import _ from 'lodash';
+import os from 'os';
 
 export const logger = new Logger('S-CORE');
 
@@ -16,6 +17,13 @@ export function getServerlessDevsTempArgv() {
   } catch (error) {
     return [];
   }
+}
+
+export function emoji(text: string, fallback?: string) {
+  if (os.platform() === 'win32') {
+    return fallback || '◆';
+  }
+  return `${text} `;
 }
 export const { merge } = require('lodash');
 
