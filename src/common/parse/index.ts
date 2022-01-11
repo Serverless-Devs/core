@@ -1,9 +1,10 @@
-import { getTemplatePath } from './utils';
 import Parse from './parse';
 import { isEmpty, get, isNil } from 'lodash';
 import { logger, emoji } from '../../libs/utils';
 import chalk from 'chalk';
 import Analysis from './analysis';
+import { getTemplatePath, getProjectConfig, setupEnv } from './utils';
+import ComponentExec from './ComponentExec';
 
 interface IConfigs {
   syaml: string;
@@ -14,14 +15,20 @@ async function parse(configs: IConfigs) {
   const { syaml, serverName } = configs;
   const spath = await getTemplatePath(syaml);
   if (spath) {
+    await setupEnv(spath);
     const parse = await new Parse(spath).init();
     await warnEnvironmentVariables(parse.realVariables);
     const analysis = new Analysis(parse.realVariables, parse.dependenciesMap);
     const executeOrderList = analysis.getProjectOrder();
-    console.log(executeOrderList);
+    // 只有一个服务，或者指定服务操作
     if (executeOrderList.length === 1 || serverName) {
-      await serviceOnlyOne();
+      const tempCustomerCommandName = executeOrderList[0];
+      await serviceOnlyOne({
+        realVariables: parse.realVariables,
+        serverName: serverName || tempCustomerCommandName,
+      });
     } else {
+      // 多个服务
       await serviceWithMany();
     }
   } else {
@@ -66,7 +73,12 @@ async function warnEnvironmentVariables(realVariables) {
     logger.warn(`The value of environment variable [${keys.join(', ')}] is undefined.`);
 }
 
-async function serviceOnlyOne() {}
+async function serviceOnlyOne({ realVariables, serverName }) {
+  const projectConfig = getProjectConfig(realVariables, serverName);
+  new ComponentExec({
+    projectConfig,
+  });
+}
 
 async function serviceWithMany() {}
 

@@ -1,9 +1,10 @@
 import fs from 'fs-extra';
-import { endsWith, isEmpty } from 'lodash';
+import { endsWith, isEmpty, get, assign } from 'lodash';
 import getYamlContent from '../getYamlContent';
 import path from 'path';
 import HumanError from '../../error/HumanError';
 import chalk from 'chalk';
+import { IProjectConfig } from './interface';
 
 async function validateTemplateFile(spath: string): Promise<boolean> {
   if (isEmpty(spath)) return false;
@@ -38,4 +39,32 @@ export async function getTemplatePath(spath: string) {
   if (await validateTemplateFile(sYamlPath)) return sYamlPath;
   const sJsonPath = path.join(cwd, 's.json');
   if (await validateTemplateFile(sJsonPath)) return sJsonPath;
+}
+
+export async function setupEnv(templateFile: string) {
+  const spath = path.dirname(templateFile);
+  require('dotenv').config({ path: path.join(spath, '.env') });
+  const data = await getYamlContent(templateFile);
+  const { services } = data;
+  for (const key in services) {
+    const element = services[key];
+    let codeUri = get(element, 'props.function.codeUri');
+    if (codeUri) {
+      codeUri = path.isAbsolute(codeUri) ? codeUri : path.join(spath, codeUri);
+      require('dotenv').config({ path: path.join(codeUri, '.env') });
+    }
+  }
+}
+
+export function getProjectConfig(realVariables: any, serviceName: string): IProjectConfig {
+  const services = get(realVariables, 'services', {});
+  const data = services[serviceName];
+  const provider = data.provider || realVariables.provider;
+  const access = data.access || realVariables.access;
+  return assign({}, data, {
+    access,
+    provider,
+    appName: realVariables.name,
+    serviceName,
+  });
 }

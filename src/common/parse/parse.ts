@@ -80,13 +80,9 @@ export default class Parse {
     } else if (Object.prototype.toString.call(value) === '[object Array]') {
       value.forEach((_arrValue: any, i: number) => {
         const showKey = `${parentStr}[${i}]`;
-        const showKeyNe = `${parentStr}[${i - value.length}]`;
         arr.push(showKey);
-        arr.push(showKeyNe);
         arr.concat(this.generateMagicVariables(_arrValue, arr, `${showKey}`));
-        arr.concat(this.generateMagicVariables(_arrValue, arr, `${showKeyNe}`));
         this.globalJsonKeyMap[showKey] = _arrValue;
-        this.globalJsonKeyMap[showKeyNe] = _arrValue;
       });
     } else {
       arr = [];
