@@ -28,7 +28,7 @@ export default class Parse {
     }
   }
 
-  getFileObj(filePath: string) {
+  private getFileObj(filePath: string) {
     let fileObj = {};
     try {
       const extname = path.extname(filePath);
@@ -65,7 +65,7 @@ export default class Parse {
     return result;
   }
 
-  generateMagicVariables(value: any, arr: any[] = [], parentStr = '') {
+  private generateMagicVariables(value: any, arr: any[] = [], parentStr = '') {
     if (Object.prototype.toString.call(value) === '[object Object]') {
       if (parentStr !== '') {
         parentStr = `${parentStr}.`;
@@ -90,7 +90,7 @@ export default class Parse {
     return arr;
   }
 
-  iteratorToSetValue(objValue: any, topKey: string, parentKey?: any) {
+  private iteratorToSetValue(objValue: any, topKey: string, parentKey?: any) {
     if (OTHER_BASIC_DATA_TYPE.includes(Object.prototype.toString.call(objValue))) {
       return objValue;
     }
@@ -146,7 +146,7 @@ export default class Parse {
     }
   }
 
-  replaceVariable(variable: any | MAP_OBJECT) {
+  private replaceVariable(variable: any | MAP_OBJECT) {
     const _variable = variable.services;
     Object.keys(_variable).forEach((key) => {
       const objValue = _variable[key];

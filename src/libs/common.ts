@@ -7,10 +7,21 @@ import path from 'path';
 import fs from 'fs-extra';
 import minimist from 'minimist';
 import _ from 'lodash';
+import getYamlContent from '../common/getYamlContent';
+import chalk from 'chalk';
 
 const semver = require('semver');
 
 const USER_HOME = os.homedir();
+
+export const makeUnderLine = (text: string) => {
+  const matchs = text.match(/http[s]?:\/\/[^\s]+/);
+  if (matchs) {
+    return text.replace(matchs[0], chalk.underline(matchs[0]));
+  } else {
+    return text;
+  }
+};
 
 // debug模式
 export const isDebugMode = () => {
@@ -53,6 +64,13 @@ export function getConfig(key?: string, defaultValue?: any) {
     const val = key ? data[key] : data;
     return val || defaultValue;
   }
+}
+
+export async function getSetConfig(key: string, defaultValue?: any) {
+  const setConfigPath = path.join(getRootHome(), 'set-config.yml');
+  const res = await getYamlContent(setConfigPath);
+  if (!res) return defaultValue;
+  return res[key];
 }
 
 export function setConfig(key: string, value: any) {
@@ -116,3 +134,9 @@ export const getCommand = () => {
     return command ? `s ${command.join(' ')}` : undefined;
   } catch (error) {}
 };
+
+export function getCoreVersion() {
+  const corePath = path.join(getRootHome(), 'cache', 'core');
+  const corePackagePath = path.join(corePath, 'package.json');
+  return fs.existsSync(corePackagePath) ? require(corePackagePath).version : undefined;
+}

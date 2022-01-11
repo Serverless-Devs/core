@@ -36,9 +36,8 @@ class Hook {
     }
   }
 
-  async commandExecute(configs: IActionHook) {
-    const cwd = process.cwd();
-    const execPath = configs.path ? path.resolve(cwd, configs.path) : cwd;
+  private async commandExecute(configs: IActionHook) {
+    const execPath = configs.path;
     if (fs.existsSync(execPath) && fs.lstatSync(execPath).isDirectory()) {
       try {
         execa.sync(configs.run, { cwd: execPath, stdio: 'inherit', shell: true });

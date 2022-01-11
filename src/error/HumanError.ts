@@ -1,7 +1,6 @@
 import chalk from 'chalk';
 import report from '../common/report';
-
-const bgRed = chalk.hex('#000').bgHex('#fd5750');
+import { bgRed } from './utils';
 
 interface IConfigs {
   errorMessage: string;

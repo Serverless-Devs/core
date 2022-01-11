@@ -1,4 +1,3 @@
-import { underline } from 'chalk';
 export { default as request } from './request';
 export { default as downloadRequest } from './downloadRequest';
 export { default as reportComponent } from './reportComponent';
@@ -15,14 +14,6 @@ export { default as getYamlContent } from './getYamlContent';
 export { default as report } from './report';
 export { default as publishHelp } from './publishHelp';
 export { default as parse } from './parse';
-export const makeUnderLine = (text: string) => {
-  const matchs = text.match(/http[s]?:\/\/[^\s]+/);
-  if (matchs) {
-    return text.replace(matchs[0], underline(matchs[0]));
-  } else {
-    return text;
-  }
-};
 export class CatchableError extends Error {
   constructor(tips, message?: string) {
     super(

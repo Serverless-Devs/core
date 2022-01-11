@@ -19,6 +19,9 @@ export interface ICredentials {
 export interface IComponentConfig {
   projectConfig: IProjectConfig;
   method: string;
+  args: string;
+  spath: string;
+  serverName: string;
 }
 
 export interface IActionHook {
@@ -26,4 +29,22 @@ export interface IActionHook {
   pre: boolean;
   path?: string;
   plugin?: string;
+}
+
+export interface IInputs {
+  props: object;
+  credentials: ICredentials;
+  appName: string;
+  project: {
+    component: string;
+    access: string;
+    projectName: string;
+    provider: string;
+  };
+  command: string;
+  args: string;
+  argsObj: string[];
+  path: {
+    configPath: string;
+  };
 }

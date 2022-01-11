@@ -11,7 +11,7 @@ import {
 import { logger } from '../libs/utils';
 import chalk from 'chalk';
 import getYamlContent from '../common/getYamlContent';
-import { get, first, values } from 'lodash';
+import { get, first, values, filter } from 'lodash';
 import { getTemplatePath } from '../common/parse/utils';
 import got from 'got';
 import isDocker from 'is-docker';
@@ -21,16 +21,14 @@ export const yellow = chalk.hex('#F3F99D');
 export const bgRed = chalk.hex('#000').bgHex('#fd5750');
 
 export function getVersion() {
-  const coreVersion = getCoreVersion();
-  const platform = `${process.platform}-${process.arch}`;
-  const nodeVersion = `node-${process.version}`;
-  const coreVersionStr = `core: ${coreVersion}`;
-  const homeWork = `s-home: ${getRootHome()}`;
-  const pkgVersion = `@serverless-devs/s: ${getCliVersion()}`;
-
-  return coreVersion
-    ? `${pkgVersion}, ${coreVersionStr}, ${homeWork}, ${platform}, ${nodeVersion}`
-    : `${pkgVersion}, ${homeWork}, ${platform}, ${nodeVersion}`;
+  const options = [
+    getCliVersion() ? `@serverless-devs/s: ${getCliVersion()}` : undefined,
+    getCoreVersion() ? `core: ${getCoreVersion()}` : undefined,
+    `s-home: ${getRootHome()}`,
+    `${process.platform}-${process.arch}`,
+    `node-${process.version}`,
+  ];
+  return filter(options, (o) => o).join(', ');
 }
 
 const _AiRequest = (category, message) => {

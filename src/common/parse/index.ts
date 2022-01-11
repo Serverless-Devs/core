@@ -10,10 +10,11 @@ interface IConfigs {
   syaml: string;
   serverName?: string;
   method?: string;
+  args?: string;
 }
 
 async function parse(configs: IConfigs) {
-  const { syaml, serverName, method } = configs;
+  const { syaml, serverName, method, args = '' } = configs;
   const spath = await getTemplatePath(syaml);
   if (spath) {
     await setupEnv(spath);
@@ -28,28 +29,34 @@ async function parse(configs: IConfigs) {
         realVariables: parse.realVariables,
         serverName: serverName || tempCustomerCommandName,
         method,
+        args,
+        spath,
       });
     } else {
       // 多个服务
       await serviceWithMany();
     }
   } else {
-    logger.error(`Failed to execute:\n
-    ${emoji(
-      '❌',
-    )} Message: Cannot find s.yaml / s.yml / template.yaml / template.yml file, please check the directory ${syaml}
-    ${emoji(
-      '🧭',
-    )} If you want to use Serverless Devs, you should have a s.yaml or use [s cli] command.
-    ${emoji('1️⃣')} Yaml document: ${chalk.underline(
-      'https://github.com/Serverless-Devs/docs/blob/master/zh/yaml.md',
-    )}
-    ${emoji('2️⃣')} Cli document: [s cli -h]
-    ${emoji('😈')} If you have questions, please tell us: ${chalk.underline(
-      'https://github.com/Serverless-Devs/Serverless-Devs/issues',
-    )}\n`);
+    notFound(syaml);
     process.exit(1);
   }
+}
+
+function notFound(syaml: string) {
+  logger.error(`Failed to execute:\n
+  ${emoji(
+    '❌',
+  )} Message: Cannot find s.yaml / s.yml / template.yaml / template.yml file, please check the directory ${syaml}
+  ${emoji(
+    '🧭',
+  )} If you want to use Serverless Devs, you should have a s.yaml or use [s cli] command.
+  ${emoji('1️⃣')} Yaml document: ${chalk.underline(
+    'https://github.com/Serverless-Devs/docs/blob/master/zh/yaml.md',
+  )}
+  ${emoji('2️⃣')} Cli document: [s cli -h]
+  ${emoji('😈')} If you have questions, please tell us: ${chalk.underline(
+    'https://github.com/Serverless-Devs/Serverless-Devs/issues',
+  )}\n`);
 }
 
 async function warnEnvironmentVariables(realVariables) {
@@ -75,11 +82,14 @@ async function warnEnvironmentVariables(realVariables) {
     logger.warn(`The value of environment variable [${keys.join(', ')}] is undefined.`);
 }
 
-async function serviceOnlyOne({ realVariables, serverName, method }) {
+async function serviceOnlyOne({ realVariables, serverName, method, args, spath }) {
   const projectConfig = getProjectConfig(realVariables, serverName);
   await new ComponentExec({
     projectConfig,
     method,
+    args,
+    spath,
+    serverName,
   }).init();
 }
 

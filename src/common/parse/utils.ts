@@ -4,7 +4,7 @@ import getYamlContent from '../getYamlContent';
 import path from 'path';
 import HumanError from '../../error/HumanError';
 import chalk from 'chalk';
-import { IProjectConfig, IActionHook } from './interface';
+import { IProjectConfig, IActionHook, IInputs } from './interface';
 
 async function validateTemplateFile(spath: string): Promise<boolean> {
   if (isEmpty(spath)) return false;
@@ -32,7 +32,7 @@ async function validateTemplateFile(spath: string): Promise<boolean> {
   }
 }
 
-export async function getTemplatePath(spath: string) {
+export async function getTemplatePath(spath?: string) {
   if (await validateTemplateFile(spath)) return spath;
   const cwd = process.cwd();
   const sYamlPath = path.join(cwd, 's.yaml');
@@ -69,7 +69,13 @@ export function getProjectConfig(configs: any, serviceName: string): IProjectCon
   });
 }
 
-export function getActions(configs: IProjectConfig, method: string): IActionHook[] {
+function getRunPath(p: string, spath: string) {
+  if (path.isAbsolute(p)) return p;
+  const dir = path.dirname(spath);
+  return p ? path.join(dir, p) : dir;
+}
+
+export function getActions(configs: IProjectConfig, { method, spath }): IActionHook[] {
   const { actions } = configs;
   if (isEmpty(actions)) return;
   const hooks: IActionHook[] = [];
@@ -81,7 +87,7 @@ export function getActions(configs: IProjectConfig, method: string): IActionHook
       for (const hookDetail of hookList) {
         const obj = {
           run: hookDetail.run,
-          path: hookDetail.path,
+          path: getRunPath(hookDetail.path, spath),
           pre: start === 'pre' ? true : false,
         };
         hooks.push(obj);
@@ -90,7 +96,7 @@ export function getActions(configs: IProjectConfig, method: string): IActionHook
       for (const hookDetail of hookList) {
         const obj = {
           run: hookDetail.run,
-          path: hookDetail.path,
+          path: getRunPath(hookDetail.path, spath),
           pre: false,
         };
         hooks.push(obj);
@@ -98,4 +104,26 @@ export function getActions(configs: IProjectConfig, method: string): IActionHook
     }
   }
   return hooks;
+}
+
+export function getInputs(configs: IProjectConfig, { method, args, spath }): IInputs {
+  const argsObj = split(args, ' ');
+  const inputs = {
+    props: configs.props,
+    credentials: configs.credentials,
+    appName: configs.appName,
+    project: {
+      component: configs.component,
+      access: configs.access,
+      projectName: configs.serviceName,
+      provider: configs.provider,
+    },
+    command: method,
+    args,
+    argsObj,
+    path: {
+      configPath: spath,
+    },
+  };
+  return inputs;
 }

@@ -1,6 +1,6 @@
 import fs from 'fs-extra';
 import path from 'path';
-import { getSComponentPath } from '../../libs/common';
+import { getSComponentPath, getSetConfig } from '../../libs/common';
 import {
   buildComponentInstance,
   getGithubReleases,
@@ -8,8 +8,8 @@ import {
   getServerlessReleases,
   getServerlessReleasesLatest,
 } from './service';
-import { RegistryEnum, Registry } from '../constant';
-import { getSetConfig, getComponentVersion } from './utils';
+import { RegistryEnum, IRegistry } from '../constant';
+import { getComponentVersion } from './utils';
 import downloadRequest from '../downloadRequest';
 import installDependency from '../installDependency';
 import { get } from 'lodash';
@@ -44,8 +44,9 @@ async function loadServerless(source: string, params?: any) {
   const [name, version] = await getComponentVersion(provider, componentName);
   let componentPath: string;
   if (version) {
-    const formatComponentName = `${name}@${version}`
-    const filename = provider === '.' ? `${formatComponentName}.zip` : `${provider}_${formatComponentName}.zip`;
+    const formatComponentName = `${name}@${version}`;
+    const filename =
+      provider === '.' ? `${formatComponentName}.zip` : `${provider}_${formatComponentName}.zip`;
     componentPath = await loadServerlessWithVersion({
       provider,
       name,
@@ -116,7 +117,12 @@ async function loadGithub(source: string, params?: any) {
   const [name, version] = await getComponentVersion(provider, componentName);
   let componentPath: string;
   if (version) {
-      componentPath = await loadGithubWithVersion({ provider, name, componentName: `${name}@${version}`, version });
+    componentPath = await loadGithubWithVersion({
+      provider,
+      name,
+      componentName: `${name}@${version}`,
+      version,
+    });
   } else {
     componentPath = await loadGithubWithNoVersion({ provider, name, componentName });
   }
@@ -169,7 +175,7 @@ async function loadGithubWithNoVersion({ provider, name, componentName }) {
   return componentPath;
 }
 
-async function loadType(source: string, registry?: Registry, params?: any) {
+async function loadType(source: string, registry?: IRegistry, params?: any) {
   if (registry === RegistryEnum.serverless || registry === RegistryEnum.serverlessOld) {
     return await loadServerless(source, params);
   }
@@ -183,7 +189,7 @@ function isComponent(result) {
   return !!result;
 }
 
-async function loadRemoteComponent(source: string, registry?: Registry, params?: any) {
+async function loadRemoteComponent(source: string, registry?: IRegistry, params?: any) {
   let result: any;
   if (registry) {
     result = await loadType(source, registry, params);
@@ -215,7 +221,7 @@ async function loadRemoteComponent(source: string, registry?: Registry, params?:
   }
 }
 
-async function loadComponent(source: string, registry?: Registry, params?: any) {
+async function loadComponent(source: string, registry?: IRegistry, params?: any) {
   // 本地调试
   if (fs.existsSync(source)) {
     return await buildComponentInstance(source, params);

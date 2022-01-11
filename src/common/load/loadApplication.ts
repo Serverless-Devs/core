@@ -1,4 +1,4 @@
-import { S_CURRENT } from '../../libs/common';
+import { S_CURRENT, getSetConfig } from '../../libs/common';
 import {
   getGithubReleases,
   getGithubReleasesLatest,
@@ -7,7 +7,6 @@ import {
 } from './service';
 import { RegistryEnum } from '../constant';
 import path from 'path';
-import { getSetConfig } from './utils';
 import downloadRequest from '../downloadRequest';
 import getYamlContent from '../getYamlContent';
 import fs from 'fs-extra';

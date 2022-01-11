@@ -1,5 +1,5 @@
 export default class Analysis {
-  protected componentOrderKeyMap: { [key: string]: any } = {};
+  private componentOrderKeyMap: { [key: string]: any } = {};
   constructor(protected readonly parsedObj: any, protected readonly dependenciesMap: any) {}
   private getComponentOrderKeyMap(projKeys: string[]) {
     projKeys.forEach((key: string) => {
