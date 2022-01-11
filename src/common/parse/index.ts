@@ -4,15 +4,16 @@ import { logger, emoji } from '../../libs/utils';
 import chalk from 'chalk';
 import Analysis from './analysis';
 import { getTemplatePath, getProjectConfig, setupEnv } from './utils';
-import ComponentExec from './ComponentExec';
+import ComponentExec from './component';
 
 interface IConfigs {
   syaml: string;
   serverName?: string;
+  method?: string;
 }
 
 async function parse(configs: IConfigs) {
-  const { syaml, serverName } = configs;
+  const { syaml, serverName, method } = configs;
   const spath = await getTemplatePath(syaml);
   if (spath) {
     await setupEnv(spath);
@@ -26,6 +27,7 @@ async function parse(configs: IConfigs) {
       await serviceOnlyOne({
         realVariables: parse.realVariables,
         serverName: serverName || tempCustomerCommandName,
+        method,
       });
     } else {
       // 多个服务
@@ -73,11 +75,12 @@ async function warnEnvironmentVariables(realVariables) {
     logger.warn(`The value of environment variable [${keys.join(', ')}] is undefined.`);
 }
 
-async function serviceOnlyOne({ realVariables, serverName }) {
+async function serviceOnlyOne({ realVariables, serverName, method }) {
   const projectConfig = getProjectConfig(realVariables, serverName);
-  new ComponentExec({
+  await new ComponentExec({
     projectConfig,
-  });
+    method,
+  }).init();
 }
 
 async function serviceWithMany() {}

@@ -1,10 +1,10 @@
 import fs from 'fs-extra';
-import { endsWith, isEmpty, get, assign } from 'lodash';
+import { endsWith, isEmpty, get, assign, keys, split } from 'lodash';
 import getYamlContent from '../getYamlContent';
 import path from 'path';
 import HumanError from '../../error/HumanError';
 import chalk from 'chalk';
-import { IProjectConfig } from './interface';
+import { IProjectConfig, IActionHook } from './interface';
 
 async function validateTemplateFile(spath: string): Promise<boolean> {
   if (isEmpty(spath)) return false;
@@ -56,15 +56,46 @@ export async function setupEnv(templateFile: string) {
   }
 }
 
-export function getProjectConfig(realVariables: any, serviceName: string): IProjectConfig {
-  const services = get(realVariables, 'services', {});
+export function getProjectConfig(configs: any, serviceName: string): IProjectConfig {
+  const services = get(configs, 'services', {});
   const data = services[serviceName];
-  const provider = data.provider || realVariables.provider;
-  const access = data.access || realVariables.access;
+  const provider = data.provider || configs.provider;
+  const access = data.access || configs.access;
   return assign({}, data, {
     access,
     provider,
-    appName: realVariables.name,
+    appName: configs.name,
     serviceName,
   });
+}
+
+export function getActions(configs: IProjectConfig, method: string): IActionHook[] {
+  const { actions } = configs;
+  if (isEmpty(actions)) return;
+  const hooks: IActionHook[] = [];
+  const keyList = keys(actions);
+  for (const actionKey of keyList) {
+    const hookList = actions[actionKey];
+    const [start, end] = split(actionKey, '-');
+    if (end === method) {
+      for (const hookDetail of hookList) {
+        const obj = {
+          run: hookDetail.run,
+          path: hookDetail.path,
+          pre: start === 'pre' ? true : false,
+        };
+        hooks.push(obj);
+      }
+    } else if (actionKey === method) {
+      for (const hookDetail of hookList) {
+        const obj = {
+          run: hookDetail.run,
+          path: hookDetail.path,
+          pre: false,
+        };
+        hooks.push(obj);
+      }
+    }
+  }
+  return hooks;
 }
