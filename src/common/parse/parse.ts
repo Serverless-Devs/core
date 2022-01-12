@@ -1,9 +1,7 @@
 import * as fs from 'fs-extra';
-import * as path from 'path';
 import { startsWith, get } from 'lodash';
-import yaml from 'js-yaml';
 import { merge } from 'lodash';
-import { getCurrentPath } from './utils';
+import { getCurrentPath, getFileObj } from './utils';
 
 const COMMON_VARIABLE_TYPE_REG = new RegExp(/\$\{(.*)\}/, 'i');
 const SPECIALL_VARIABLE_TYPE_REG = new RegExp(/(.*)\((.*)\)/, 'i');
@@ -18,25 +16,11 @@ export default class Parse {
   constructor(protected spath: string) {
     if (fs.existsSync(spath)) {
       try {
-        this.parsedObj = this.getFileObj(spath);
+        this.parsedObj = getFileObj(spath);
       } catch (error) {
         throw error;
       }
     }
-  }
-
-  private getFileObj(filePath: string) {
-    let fileObj = {};
-    try {
-      const extname = path.extname(filePath);
-      if (extname.indexOf('.yaml') !== -1 || extname.indexOf('.yml') !== -1) {
-        fileObj = yaml.load(fs.readFileSync(filePath, 'utf8'));
-      }
-      if (extname.indexOf('.json') !== -1) {
-        fileObj = fs.readJSONSync(filePath);
-      }
-    } catch (error) {}
-    return fileObj;
   }
 
   private findVariableValue(variableObj: any) {
@@ -57,7 +41,7 @@ export default class Parse {
     }
 
     if (type === 'Fun' && (funName === 'File' || funName === 'file')) {
-      return this.getFileObj(funVariable);
+      return getFileObj(funVariable);
     }
     return result;
   }

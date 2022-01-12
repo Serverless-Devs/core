@@ -1,9 +1,8 @@
 import Parse from './parse';
-import { isEmpty, get, isNil, keys } from 'lodash';
-import { logger, emoji } from '../../libs/utils';
-import chalk from 'chalk';
+import { isEmpty, get, isNil, keys, find } from 'lodash';
+import { logger } from '../../libs/utils';
 import Analysis from './analysis';
-import { getTemplatePath, getProjectConfig, setupEnv } from './utils';
+import { getTemplatePath, getProjectConfig, setupEnv, getFileObj } from './utils';
 import ComponentExec from './component';
 
 interface IConfigs {
@@ -24,23 +23,29 @@ class MyParse {
     if (isEmpty(spath)) {
       throw new Error(`${syaml} file not found`);
     }
-    if (spath) {
-      await setupEnv(spath);
-      const parse = new Parse(spath);
-      const parsedObj = await parse.init();
-      await this.warnEnvironmentVariables(parsedObj.realVariables);
-      const analysis = new Analysis(parsedObj.realVariables, parsedObj.dependenciesMap);
-      const executeOrderList = analysis.getProjectOrder();
-      // 只有一个服务，或者指定服务操作
-      if (executeOrderList.length === 1 || serverName) {
-        const tempCustomerCommandName = executeOrderList[0];
-        return await this.serviceOnlyOne({
-          realVariables: parsedObj.realVariables,
-          serverName: serverName || tempCustomerCommandName,
-          spath,
-        });
-      }
-      return await this.serviceWithMany({ executeOrderList, parse, spath });
+    await this.validateServerName();
+    await setupEnv(spath);
+    const parse = new Parse(spath);
+    const parsedObj = await parse.init();
+    await this.warnEnvironmentVariables(parsedObj.realVariables);
+    const analysis = new Analysis(parsedObj.realVariables, parsedObj.dependenciesMap);
+    const executeOrderList = analysis.getProjectOrder();
+    // 只有一个服务，或者指定服务操作
+    if (executeOrderList.length === 1 || serverName) {
+      const tempCustomerCommandName = executeOrderList[0];
+      return await this.serviceOnlyOne({
+        realVariables: parsedObj.realVariables,
+        serverName: serverName || tempCustomerCommandName,
+        spath,
+      });
+    }
+    return await this.serviceWithMany({ executeOrderList, parse, spath });
+  }
+  async validateServerName() {
+    const { syaml, serverName } = this.configs;
+    const data = getFileObj(syaml);
+    if (!find(keys(data), (o) => o === serverName)) {
+      throw new Error(`${serverName} server not found`);
     }
   }
   async serviceOnlyOne({ realVariables, serverName, spath }) {
@@ -111,22 +116,6 @@ class MyParse {
     }
     keys.length > 0 &&
       logger.warn(`The value of environment variable [${keys.join(', ')}] is undefined.`);
-  }
-  notFound(syaml: string) {
-    logger.error(`Failed to execute:\n
-    ${emoji(
-      '❌',
-    )} Message: Cannot find s.yaml / s.yml / template.yaml / template.yml file, please check the directory ${syaml}
-    ${emoji(
-      '🧭',
-    )} If you want to use Serverless Devs, you should have a s.yaml or use [s cli] command.
-    ${emoji('1️⃣')} Yaml document: ${chalk.underline(
-      'https://github.com/Serverless-Devs/docs/blob/master/zh/yaml.md',
-    )}
-    ${emoji('2️⃣')} Cli document: [s cli -h]
-    ${emoji('😈')} If you have questions, please tell us: ${chalk.underline(
-      'https://github.com/Serverless-Devs/Serverless-Devs/issues',
-    )}\n`);
   }
 }
 

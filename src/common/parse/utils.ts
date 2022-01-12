@@ -4,6 +4,7 @@ import getYamlContent from '../getYamlContent';
 import path from 'path';
 import chalk from 'chalk';
 import { IProjectConfig, IActionHook, IInputs } from './interface';
+import yaml from 'js-yaml';
 
 async function validateTemplateFile(spath: string): Promise<boolean> {
   if (isEmpty(spath)) return false;
@@ -126,4 +127,18 @@ export function getInputs(configs: IProjectConfig, { method, args, spath }): IIn
     },
   };
   return inputs;
+}
+
+export function getFileObj(filePath: string) {
+  let fileObj = {};
+  try {
+    const extname = path.extname(filePath);
+    if (extname.indexOf('.yaml') !== -1 || extname.indexOf('.yml') !== -1) {
+      fileObj = yaml.load(fs.readFileSync(filePath, 'utf8'));
+    }
+    if (extname.indexOf('.json') !== -1) {
+      fileObj = fs.readJSONSync(filePath);
+    }
+  } catch (error) {}
+  return fileObj;
 }
