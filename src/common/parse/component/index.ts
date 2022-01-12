@@ -1,6 +1,5 @@
 import { IComponentConfig, IProjectConfig, IInputs } from '../interface';
 import { getRootHome, getSetConfig } from '../../../libs/common';
-import { logger } from '../../../libs/utils';
 import path from 'path';
 import getYamlContent from '../../getYamlContent';
 import { getCredential } from '../../credential';
@@ -8,9 +7,8 @@ import { getActions, getInputs } from '../utils';
 import Hook from './hook';
 import { loadComponent } from '../../load';
 import { DEFAULT_REGIRSTRY, IRegistry } from '../../constant';
-import { HumanError, HandleError, HumanWarning } from '../../../error';
+import { HumanError, HandleError, HumanWarning } from '../../../error/index';
 import chalk from 'chalk';
-import { keys } from 'lodash';
 
 class ComponentExec {
   private projectConfig: IProjectConfig;
@@ -45,10 +43,7 @@ class ComponentExec {
     this.hook.executePreHook();
     const outPutData = await this.executeCommand();
     this.hook.executeAfterHook();
-
-    keys(outPutData).length === 0
-      ? logger.log(`End of method: ${this.method}`, 'green')
-      : logger.output(outPutData);
+    return outPutData;
   }
   private async executeCommand() {
     const inputs = getInputs(this.projectConfig, {
@@ -59,7 +54,7 @@ class ComponentExec {
     const registry: IRegistry = await getSetConfig('registry', DEFAULT_REGIRSTRY);
     const instance = await loadComponent(this.projectConfig.component, registry);
     const res = await this.invokeMethod(instance, this.method, inputs);
-    return JSON.parse(JSON.stringify({ [this.projectConfig.serviceName]: res }));
+    return JSON.parse(JSON.stringify(res));
   }
   async invokeMethod(instance: any, method: string, inputs: IInputs) {
     // 服务级操作

@@ -2,7 +2,7 @@ import fs from 'fs-extra';
 import { endsWith, isEmpty, get, assign, keys, split } from 'lodash';
 import getYamlContent from '../getYamlContent';
 import path from 'path';
-import HumanError from '../../error/HumanError';
+import { HumanError } from '../../error';
 import chalk from 'chalk';
 import { IProjectConfig, IActionHook, IInputs } from './interface';
 
@@ -69,7 +69,7 @@ export function getProjectConfig(configs: any, serviceName: string): IProjectCon
   });
 }
 
-function getRunPath(p: string, spath: string) {
+export function getCurrentPath(p: string, spath: string) {
   if (path.isAbsolute(p)) return p;
   const dir = path.dirname(spath);
   return p ? path.join(dir, p) : dir;
@@ -87,7 +87,7 @@ export function getActions(configs: IProjectConfig, { method, spath }): IActionH
       for (const hookDetail of hookList) {
         const obj = {
           run: hookDetail.run,
-          path: getRunPath(hookDetail.path, spath),
+          path: getCurrentPath(hookDetail.path, spath),
           pre: start === 'pre' ? true : false,
         };
         hooks.push(obj);
@@ -96,7 +96,7 @@ export function getActions(configs: IProjectConfig, { method, spath }): IActionH
       for (const hookDetail of hookList) {
         const obj = {
           run: hookDetail.run,
-          path: getRunPath(hookDetail.path, spath),
+          path: getCurrentPath(hookDetail.path, spath),
           pre: false,
         };
         hooks.push(obj);

@@ -1,12 +1,9 @@
-import * as fs from 'fs';
+import * as fs from 'fs-extra';
 import * as path from 'path';
 import { startsWith, get } from 'lodash';
 import yaml from 'js-yaml';
-import { cloneDeep } from 'lodash';
-
-interface MAP_OBJECT {
-  [key: string]: any;
-}
+import { merge } from 'lodash';
+import { getCurrentPath } from './utils';
 
 const COMMON_VARIABLE_TYPE_REG = new RegExp(/\$\{(.*)\}/, 'i');
 const SPECIALL_VARIABLE_TYPE_REG = new RegExp(/(.*)\((.*)\)/, 'i');
@@ -18,12 +15,12 @@ export default class Parse {
   private dependenciesMap: { [key: string]: any } = {};
   private globalJsonKeyMap: any = {};
 
-  constructor(protected path: string) {
-    if (fs.existsSync(path)) {
+  constructor(protected spath: string) {
+    if (fs.existsSync(spath)) {
       try {
-        this.parsedObj = this.getFileObj(path);
-      } catch (ex) {
-        throw new Error(ex.message);
+        this.parsedObj = this.getFileObj(spath);
+      } catch (error) {
+        throw error;
       }
     }
   }
@@ -36,7 +33,7 @@ export default class Parse {
         fileObj = yaml.load(fs.readFileSync(filePath, 'utf8'));
       }
       if (extname.indexOf('.json') !== -1) {
-        fileObj = JSON.parse(fs.readFileSync(filePath).toString());
+        fileObj = fs.readJSONSync(filePath);
       }
     } catch (error) {}
     return fileObj;
@@ -56,7 +53,7 @@ export default class Parse {
       return process.env[funVariable];
     }
     if (type === 'Fun' && (funName === 'Path' || funName === 'path')) {
-      return path.join(process.cwd(), funVariable);
+      return getCurrentPath(funVariable, this.spath);
     }
 
     if (type === 'Fun' && (funName === 'File' || funName === 'file')) {
@@ -146,23 +143,19 @@ export default class Parse {
     }
   }
 
-  private replaceVariable(variable: any | MAP_OBJECT) {
+  private replaceVariable(variable) {
     const _variable = variable.services;
     Object.keys(_variable).forEach((key) => {
       const objValue = _variable[key];
-      _variable[key] = this.iteratorToSetValue(objValue, key);
+      variable.services[key] = this.iteratorToSetValue(objValue, key);
     });
-    if (variable.services) {
-      variable.services = _variable;
-    } else {
-      variable = _variable;
-    }
-    return cloneDeep(variable);
+    return variable;
   }
 
-  async init(): Promise<{ realVariables: any; parsedObj: any; dependenciesMap: any }> {
-    this.generateMagicVariables(this.parsedObj);
-    const realVariables = this.replaceVariable(this.parsedObj);
-    return { realVariables, parsedObj: this.parsedObj, dependenciesMap: this.dependenciesMap };
+  async init(obj?: object): Promise<{ realVariables: any; dependenciesMap: any }> {
+    const val = obj ? merge(this.parsedObj, obj) : this.parsedObj;
+    this.generateMagicVariables(val);
+    const realVariables = this.replaceVariable(val);
+    return { realVariables, dependenciesMap: this.dependenciesMap };
   }
 }
