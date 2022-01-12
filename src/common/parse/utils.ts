@@ -2,7 +2,6 @@ import fs from 'fs-extra';
 import { endsWith, isEmpty, get, assign, keys, split } from 'lodash';
 import getYamlContent from '../getYamlContent';
 import path from 'path';
-import { HumanError } from '../../error';
 import chalk from 'chalk';
 import { IProjectConfig, IActionHook, IInputs } from './interface';
 
@@ -17,13 +16,14 @@ async function validateTemplateFile(spath: string): Promise<boolean> {
       const data = await getYamlContent(spath);
       if (isEmpty(data)) {
         const filename = path.basename(spath);
-        new HumanError({
-          errorMessage: `${filename} format is incorrect`,
-          tips: `Please check the configuration of ${filename}, Serverless Devs' Yaml specification document can refer to：${chalk.underline(
-            'https://github.com/Serverless-Devs/Serverless-Devs/blob/master/docs/zh/yaml.md',
-          )}`,
-        });
-        process.exit(1);
+        throw new Error(
+          JSON.stringify({
+            message: `${filename} format is incorrect`,
+            tips: `Please check the configuration of ${filename}, Serverless Devs' Yaml specification document can refer to：${chalk.underline(
+              'https://github.com/Serverless-Devs/Serverless-Devs/blob/master/docs/zh/yaml.md',
+            )}`,
+          }),
+        );
       }
       return data.hasOwnProperty('edition');
     }
@@ -58,7 +58,7 @@ export async function setupEnv(templateFile: string) {
 
 export function getProjectConfig(configs: any, serviceName: string): IProjectConfig {
   const services = get(configs, 'services', {});
-  const data = services[serviceName];
+  const data = get(services, serviceName, {});
   const provider = data.provider || configs.provider;
   const access = data.access || configs.access;
   return assign({}, data, {

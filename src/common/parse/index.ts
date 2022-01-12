@@ -21,6 +21,9 @@ class MyParse {
   async init() {
     const { syaml, serverName } = this.configs;
     const spath = await getTemplatePath(syaml);
+    if (isEmpty(spath)) {
+      throw new Error(`${syaml} file not found`);
+    }
     if (spath) {
       await setupEnv(spath);
       const parse = new Parse(spath);
@@ -38,9 +41,6 @@ class MyParse {
         });
       }
       return await this.serviceWithMany({ executeOrderList, parse, spath });
-    } else {
-      this.notFound(syaml);
-      process.exit(1);
     }
   }
   async serviceOnlyOne({ realVariables, serverName, spath }) {
@@ -71,6 +71,7 @@ class MyParse {
     // 临时存储output, 对yaml文件再次解析
     const tempData = { services: {} };
     for (const serverName of executeOrderList) {
+      logger.info(`Start executing project ${serverName}`);
       const parsedObj = await parse.init(tempData);
       const projectConfig = getProjectConfig(parsedObj.realVariables, serverName);
       const outputData = await new ComponentExec({
@@ -82,6 +83,7 @@ class MyParse {
       }).init();
       tempData.services[serverName] = { output: outputData };
       result[serverName] = outputData;
+      logger.info(`Project ${serverName} successfully to execute \n\t`);
     }
     keys(result).length === 0
       ? logger.log(`End of method: ${method}`, 'green')

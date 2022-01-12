@@ -7,7 +7,6 @@ import { getActions, getInputs } from '../utils';
 import Hook from './hook';
 import { loadComponent } from '../../load';
 import { DEFAULT_REGIRSTRY, IRegistry } from '../../constant';
-import { HumanError, HandleError, HumanWarning } from '../../../error/index';
 import chalk from 'chalk';
 
 class ComponentExec {
@@ -65,23 +64,28 @@ class ComponentExec {
           const result = await instance[method](inputs);
           return result;
         } catch (error) {
-          await HandleError({
-            error,
-            prefix: `Project ${this.projectConfig.serviceName} failed to execute:`,
-          });
-          process.exit(101);
+          throw new Error(
+            JSON.stringify({
+              code: 101,
+              message: error.message,
+              stack: error.stack,
+              prefix: `Project ${this.projectConfig.serviceName} failed to execute:`,
+            }),
+          );
         }
       }
       // 方法不存在，此时系统将会认为是未找到组件方法，系统的exit code为100；
-      new HumanError({
-        errorMessage: `The [${this.method}] command was not found.`,
-        tips: `Please check the component ${this.projectConfig.component} has the ${
-          this.method
-        } method. Serverless Devs documents：${chalk.underline(
-          'https://github.com/Serverless-Devs/Serverless-Devs/blob/master/docs/zh/command',
-        )}`,
-      });
-      process.exit(100);
+      throw new Error(
+        JSON.stringify({
+          code: 100,
+          message: `The [${this.method}] command was not found.`,
+          tips: `Please check the component ${this.projectConfig.component} has the ${
+            this.method
+          } method. Serverless Devs documents：${chalk.underline(
+            'https://github.com/Serverless-Devs/Serverless-Devs/blob/master/docs/zh/command',
+          )}`,
+        }),
+      );
     }
     // 应用级操作
     if (instance[method]) {
@@ -90,22 +94,28 @@ class ComponentExec {
         const result = await instance[method](inputs);
         return result;
       } catch (error) {
-        await HandleError({
-          error,
-          prefix: `Project ${this.projectConfig.serviceName} failed to execute:`,
-        });
-        process.exit(101);
+        throw new Error(
+          JSON.stringify({
+            code: 101,
+            message: error.message,
+            stack: error.stack,
+            prefix: `Project ${this.projectConfig.serviceName} failed to execute:`,
+          }),
+        );
       }
     } else {
       // 方法不存在，进行警告，但是并不会报错，最终的exit code为0；
-      new HumanWarning({
-        warningMessage: `The [${this.method}] command was not found.`,
-        tips: `Please check the component ${this.projectConfig.component} has the ${
-          this.method
-        } method, Serverless Devs documents：${chalk.underline(
-          'https://github.com/Serverless-Devs/Serverless-Devs/blob/master/docs/zh/command',
-        )}`,
-      });
+      throw new Error(
+        JSON.stringify({
+          code: 0,
+          message: `The [${this.method}] command was not found.`,
+          tips: `Please check the component ${this.projectConfig.component} has the ${
+            this.method
+          } method. Serverless Devs documents：${chalk.underline(
+            'https://github.com/Serverless-Devs/Serverless-Devs/blob/master/docs/zh/command',
+          )}`,
+        }),
+      );
     }
   }
 }
