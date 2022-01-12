@@ -6,9 +6,9 @@ import { getTemplatePath, getProjectConfig, setupEnv, getFileObj } from './utils
 import ComponentExec from './component';
 
 interface IConfigs {
-  syaml: string;
+  syaml?: string;
   serverName?: string;
-  method?: string;
+  method: string;
   args?: string;
 }
 
@@ -23,7 +23,7 @@ class MyParse {
     if (isEmpty(spath)) {
       throw new Error(`${syaml} file not found`);
     }
-    await this.validateServerName();
+    await this.validateServerName(spath);
     await setupEnv(spath);
     const parse = new Parse(spath);
     const parsedObj = await parse.init();
@@ -41,10 +41,11 @@ class MyParse {
     }
     return await this.serviceWithMany({ executeOrderList, parse, spath });
   }
-  async validateServerName() {
-    const { syaml, serverName } = this.configs;
-    const data = getFileObj(syaml);
-    if (!find(keys(data), (o) => o === serverName)) {
+  async validateServerName(filePath: string) {
+    const { serverName } = this.configs;
+    if (!serverName) return;
+    const data: any = getFileObj(filePath);
+    if (!find(keys(data.services), (o) => o === serverName)) {
       throw new Error(`${serverName} server not found`);
     }
   }
