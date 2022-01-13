@@ -10,6 +10,7 @@ interface IConfigs {
   serverName?: string;
   method: string;
   args?: string;
+  globalArgs?: string;
 }
 
 class MyParse {
