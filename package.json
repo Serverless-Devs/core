@@ -1,6 +1,6 @@
 {
   "name": "@serverless-devs/core",
-  "version": "0.1.28-beta.1",
+  "version": "0.1.28-beta.2",
   "description": "Serverless Devs Tool Core Component",
   "keywords": [
     "Serverless",
@@ -26,11 +26,12 @@
     "watch": "npx tsc -w -p tsconfig.json",
     "debug": "ts-node test/fixtures/spinner.ts",
     "test": "npx jest",
-    "prebuild": "rimraf lib",
+    "prebuild": "rimraf lib && rimraf dist",
     "build:s": "npm run prebuild && npx tsc && cp -r ./src/daemon ./lib",
     "postbuild:s": "npm run esbuild && cp -r ./src/daemon ./dist",
-    "esbuild": "esbuild lib/index.js --bundle --log-level=error --minify --platform=node --format=cjs --target=node10.4 --external:electron --allow-overwrite --outfile=lib/index.js",
+    "esbuild": "esbuild lib/index.js --bundle --log-level=error --minify --platform=node --format=cjs --target=node10.4 --external:electron --outfile=dist/index.js",
     "build:npm": "npm run prebuild && npx tsc && cp -r ./src/daemon ./lib",
+    "postbuild:npm": "cp -r ./lib ./dist",
     "test:cov": "jest --coverage",
     "lint": "npm run typecheck && f2elint scan -i src",
     "fix": "f2elint fix",
@@ -39,7 +40,7 @@
     "beta": "npm publish --tag=beta"
   },
   "autoInstall": false,
-  "main": "./lib/index.js",
+  "main": "./dist/index.js",
   "devDependencies": {
     "@alicloud/pop-core": "^1.7.10",
     "@serverless-devs/s-progress-bar": "^0.0.8",
