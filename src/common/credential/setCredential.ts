@@ -3,9 +3,8 @@ import fs from 'fs-extra';
 import path from 'path';
 import yaml from 'js-yaml';
 import { providerCollection, checkProviderList } from './constant';
-import getYamlContent from '../getYamlContent';
-import { getServerlessDevsTempArgv, logger } from '../../libs/utils';
-import { getRootHome } from '../../libs/common';
+import { getServerlessDevsTempArgv, getYamlContent, getRootHome } from '../../libs';
+import { logger } from '../../logger';
 import getAccountId from './getAccountId';
 import spinner from '../spinner';
 import { isEmpty } from 'lodash';
@@ -59,12 +58,15 @@ function secret(tempAccess) {
 }
 
 function output({ info, accessAlias }) {
-  console.log('')
-  logger.output({
-    Alias: accessAlias,
-    ...secret(info)
-  }, 2)
-  console.log('')
+  console.log('');
+  logger.output(
+    {
+      Alias: accessAlias,
+      ...secret(info),
+    },
+    2,
+  );
+  console.log('');
   spinner('Configuration successful').succeed();
 }
 

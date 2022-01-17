@@ -1,7 +1,6 @@
 import fs from 'fs-extra';
 import path from 'path';
-import getYamlContent from '../../getYamlContent';
-import { getRootHome } from '../../../libs/common';
+import { getRootHome, getYamlContent } from '../../../libs';
 
 export default async function getAccess(accessAlias: string) {
   const globalPath = path.join(getRootHome(), 'access.yaml');

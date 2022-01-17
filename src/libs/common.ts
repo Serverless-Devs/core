@@ -6,32 +6,20 @@ import os from 'os';
 import path from 'path';
 import fs from 'fs-extra';
 import minimist from 'minimist';
-import _ from 'lodash';
-import getYamlContent from '../common/getYamlContent';
-import chalk from 'chalk';
+import { get, includes } from 'lodash';
+import getYamlContent from './getYamlContent';
+import { transformGlobalArgs } from './utils';
 
 const semver = require('semver');
 
 const USER_HOME = os.homedir();
 
-export const makeUnderLine = (text: string) => {
-  const matchs = text.match(/http[s]?:\/\/[^\s]+/);
-  if (matchs) {
-    return text.replace(matchs[0], chalk.underline(matchs[0]));
-  } else {
-    return text;
-  }
-};
-
 // debug模式
 export const isDebugMode = () => {
   function getDebugFromEnv() {
-    const temp_params = _.get(process, 'env.temp_params');
-    if (temp_params) {
-      const temp = temp_params.split(' ');
-      const debugList = temp.filter((item) => item === '--debug');
-      return debugList.length > 0;
-    }
+    const temp_params = get(process, 'env.temp_params');
+    const data = transformGlobalArgs(temp_params);
+    return data.debug;
   }
 
   const args = minimist(process.argv.slice(2));
@@ -50,7 +38,7 @@ export function getCicdEnv() {
 }
 
 export function isCiCdEnv() {
-  return _.includes(['cloud_shell', 'yunxiao', 'github', 'gitlab', 'jenkins'], getCicdEnv());
+  return includes(['cloud_shell', 'yunxiao', 'github', 'gitlab', 'jenkins'], getCicdEnv());
 }
 
 export function formatWorkspacePath(val: string) {
@@ -134,9 +122,3 @@ export const getCommand = () => {
     return command ? `s ${command.join(' ')}` : undefined;
   } catch (error) {}
 };
-
-export function getCoreVersion() {
-  const corePath = path.join(getRootHome(), 'cache', 'core');
-  const corePackagePath = path.join(corePath, 'package.json');
-  return fs.existsSync(corePackagePath) ? require(corePackagePath).version : undefined;
-}

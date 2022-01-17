@@ -1,5 +1,5 @@
 import fs from 'fs';
-import { logger } from '../../../libs/utils';
+import { logger } from '../../../logger';
 import { IActionHook } from '../interface';
 import execa from 'execa';
 

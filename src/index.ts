@@ -5,7 +5,7 @@ export { IInputs } from './interface';
 export { Logger, ILogger } from './logger';
 export { HLogger } from './decorator';
 export * from './common';
-export * from './libs/common';
+export * from './libs';
 export { default as unzip } from 'decompress';
 export { default as chalk } from 'chalk';
 export { default as colors } from 'chalk';

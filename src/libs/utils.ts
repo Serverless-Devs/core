@@ -2,15 +2,20 @@
  * @description 用于存放工具函数
  */
 
-import { nanoid } from 'nanoid';
 import * as fs from 'fs-extra';
-import { Logger } from '../logger';
-import report from '../common/report';
 import { IGlobalParams } from '../interface';
 import { split } from 'lodash';
 import minimist from 'minimist';
+import chalk from 'chalk';
 
-export const logger = new Logger('S-CORE');
+export const makeUnderLine = (text: string) => {
+  const matchs = text.match(/http[s]?:\/\/[^\s]+/);
+  if (matchs) {
+    return text.replace(matchs[0], chalk.underline(matchs[0]));
+  } else {
+    return text;
+  }
+};
 
 export function getServerlessDevsTempArgv() {
   try {
@@ -34,21 +39,12 @@ export function transformGlobalArgs(args: string): IGlobalParams {
   };
 }
 
-export const uuid = nanoid;
-
 export function readJsonFile(filePath: string) {
   if (fs.existsSync(filePath)) {
     const data = fs.readFileSync(filePath, 'utf8');
     try {
       return JSON.parse(data);
-    } catch (error) {
-      report({
-        type: 'jsError',
-        content: `${error.message}||${error.stack}`,
-      });
-    }
-  } else {
-    logger.debug(`readJsonFile: the file ${filePath} does not exist`);
+    } catch (error) {}
   }
 }
 

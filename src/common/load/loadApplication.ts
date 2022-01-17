@@ -1,4 +1,3 @@
-import { S_CURRENT, getSetConfig } from '../../libs/common';
 import {
   getGithubReleases,
   getGithubReleasesLatest,
@@ -8,13 +7,18 @@ import {
 import { RegistryEnum } from '../constant';
 import path from 'path';
 import downloadRequest from '../downloadRequest';
-import getYamlContent from '../getYamlContent';
 import fs from 'fs-extra';
 import inquirer from 'inquirer';
 import { get } from 'lodash';
 import rimraf from 'rimraf';
 import installDependency from '../installDependency';
-import { readJsonFile, getServerlessDevsTempArgv } from '../../libs/utils';
+import {
+  readJsonFile,
+  getServerlessDevsTempArgv,
+  getYamlContent,
+  S_CURRENT,
+  getSetConfig,
+} from '../../libs';
 
 interface IParams {
   source: string;

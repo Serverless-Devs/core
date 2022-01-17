@@ -1,6 +1,7 @@
 import Parse from './parse';
 import { isEmpty, get, isNil, keys, find } from 'lodash';
-import { logger, transformGlobalArgs } from '../../libs/utils';
+import { transformGlobalArgs } from '../../libs/utils';
+import { logger } from '../../logger';
 import Analysis from './analysis';
 import { getTemplatePath, getProjectConfig, setupEnv, getFileObj } from './utils';
 import ComponentExec from './component';

@@ -1,7 +1,6 @@
 import { IComponentConfig, IProjectConfig, IInputs } from '../interface';
-import { getRootHome, getSetConfig } from '../../../libs/common';
+import { getRootHome, getSetConfig, getYamlContent } from '../../../libs';
 import path from 'path';
-import getYamlContent from '../../getYamlContent';
 import { getCredential } from '../../credential';
 import { getActions, getInputs } from '../utils';
 import Hook from './hook';

@@ -1,6 +1,6 @@
 import fs from 'fs-extra';
 import path from 'path';
-import { getSComponentPath, getSetConfig } from '../../libs/common';
+import { getSComponentPath, getSetConfig } from '../../libs';
 import {
   buildComponentInstance,
   getGithubReleases,

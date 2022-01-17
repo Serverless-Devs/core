@@ -10,7 +10,6 @@ export * from './credential';
 export { getState, setState } from './state';
 export { default as modifyProps } from './modifyProps';
 export { default as installDependency } from './installDependency';
-export { default as getYamlContent } from './getYamlContent';
 export { default as report } from './report';
 export { default as publishHelp } from './publishHelp';
 export { default as parse } from './parse';

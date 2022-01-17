@@ -1,4 +1,4 @@
-import { isBetaS } from '../../libs/common';
+import { isBetaS } from '../../libs';
 import { split, filter, includes, find } from 'lodash';
 import { DEFAULT_CORE_VERSION } from '../../daemon/constant';
 

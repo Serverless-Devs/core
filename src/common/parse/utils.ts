@@ -1,11 +1,11 @@
 import fs from 'fs-extra';
 import { endsWith, isEmpty, get, assign, keys, split } from 'lodash';
-import getYamlContent from '../getYamlContent';
 import path from 'path';
 import chalk from 'chalk';
 import { IProjectConfig, IActionHook, IInputs } from './interface';
 import yaml from 'js-yaml';
 import { IGlobalParams } from '../../interface';
+import { getYamlContent } from '../../libs';
 
 async function validateTemplateFile(spath: string): Promise<boolean> {
   if (isEmpty(spath)) return false;

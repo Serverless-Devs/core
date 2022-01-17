@@ -1,10 +1,10 @@
 import fs from 'fs-extra';
 import path from 'path';
-import { getRootHome, isBetaS } from '../../libs/common';
+import { getRootHome, isBetaS } from '../../libs';
 import downloadRequest from '../downloadRequest';
 import { execDaemonWithTTL } from '../../execDaemon';
 import rimraf from 'rimraf';
-import { getCoreVersion } from './utils'
+import { getCoreVersion } from './utils';
 
 const cachePath = path.join(getRootHome(), 'cache');
 const corePath = path.join(cachePath, 'core');

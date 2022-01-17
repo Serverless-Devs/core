@@ -2,7 +2,7 @@ import chalk from 'chalk';
 const prettyjson = require('prettyjson');
 import ansiEscapes from 'ansi-escapes';
 import ora, { Ora } from 'ora';
-import { isDebugMode } from '../libs/common';
+import { isDebugMode } from '../libs';
 import { isFunction } from 'lodash';
 
 // CLI Colors
@@ -19,7 +19,6 @@ type LogColor =
   | 'white'
   | 'whiteBright'
   | 'gray';
-
 
 export interface ILogger {
   // 打印
@@ -39,7 +38,6 @@ interface ITaskOptions {
   task: Function;
   enabled?: Function;
 }
-
 
 function searchStr(data: string, str: string) {
   const arr = [];
@@ -75,7 +73,7 @@ const gray = chalk.hex('#8c8d91');
 const red = chalk.hex('#fd5750');
 
 const time = () => new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
-const getName = name =>  name ? ` [${name}]` : '';
+const getName = (name) => (name ? ` [${name}]` : '');
 
 export class Logger {
   spinner: Ora;
@@ -171,7 +169,7 @@ export class Logger {
           }
         } else {
           this.spinner = ora();
-          this.spinner.start(gray(title))
+          this.spinner.start(gray(title));
           try {
             await item.task(this.spinner);
             this.spinner.stop();
@@ -185,7 +183,7 @@ export class Logger {
         }
       }
     }
-    if(plist.length === 0) return;
+    if (plist.length === 0) return;
     const endTime = Date.now();
 
     const time = (Math.round((endTime - startTime) / 10) * 10) / 1000;
@@ -199,8 +197,10 @@ export class Logger {
     if (plist.every((obj) => obj.valid)) {
       endTime - startTime > 5 && ora().succeed(getOraMsg());
     } else {
-      this.log(`${red('✖') } ${getOraMsg()}`);
+      this.log(`${red('✖')} ${getOraMsg()}`);
       throw err;
     }
   }
 }
+
+export const logger = new Logger('S-CORE');

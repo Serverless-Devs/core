@@ -1,7 +1,7 @@
 import got from 'got';
 import _ from 'lodash';
 import spinner from './spinner';
-import { logger } from '../libs/utils';
+import { logger } from '../logger';
 import report from '../common/report';
 interface HintOptions {
   loading?: string;

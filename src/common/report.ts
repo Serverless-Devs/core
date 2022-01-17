@@ -1,7 +1,6 @@
 import { execDaemon } from '../execDaemon';
-import getYamlContent from './getYamlContent';
 import path from 'path';
-import { getRootHome } from '../libs/common';
+import { getRootHome, getYamlContent } from '../libs';
 
 interface IConfig {
   type: 'pv' | 'action' | 'jsError' | 'networkError' | 'initTemplate' | 'installError';

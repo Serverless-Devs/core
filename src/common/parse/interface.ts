@@ -33,7 +33,7 @@ export interface IActionHook {
 
 export interface IInputs {
   props: object;
-  credentials: ICredentials;
+  credentials: ICredentials | undefined;
   appName: string;
   project: {
     component: string;
