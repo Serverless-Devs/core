@@ -1,6 +1,6 @@
 {
   "name": "@serverless-devs/core",
-  "version": "0.1.28-beta.2",
+  "version": "0.1.28-beta.3",
   "description": "Serverless Devs Tool Core Component",
   "keywords": [
     "Serverless",
@@ -42,8 +42,6 @@
   "autoInstall": false,
   "main": "./dist/index.js",
   "devDependencies": {
-    "@alicloud/pop-core": "^1.7.10",
-    "@serverless-devs/s-progress-bar": "^0.0.8",
     "@types/archiver": "^5.1.1",
     "@types/command-line-usage": "^5.0.1",
     "@types/fs-extra": "^9.0.13",
@@ -70,6 +68,8 @@
   },
   "gitHead": "aec19d7a89cb711f0a246ecf77e79d3668fcb8da",
   "dependencies": {
+    "@alicloud/pop-core": "^1.7.10",
+    "@serverless-devs/s-progress-bar": "^0.0.8",
     "chalk": "^4.1.0",
     "ansi-escapes": "^4.3.2",
     "archive-type": "^4.0.0",
