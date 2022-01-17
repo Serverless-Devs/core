@@ -8,6 +8,7 @@ import Hook from './hook';
 import { loadComponent } from '../../load';
 import { DEFAULT_REGIRSTRY, IRegistry } from '../../constant';
 import chalk from 'chalk';
+import { IGlobalParams } from '../../../interface';
 
 class ComponentExec {
   private projectConfig: IProjectConfig;
@@ -15,6 +16,7 @@ class ComponentExec {
   private args: string;
   private spath: string;
   private serverName: string;
+  private globalParams: IGlobalParams;
 
   protected hook: Hook;
 
@@ -24,12 +26,14 @@ class ComponentExec {
     this.args = config.args;
     this.spath = config.spath;
     this.serverName = config.serverName;
+    this.globalParams = config.globalParams;
   }
   private async handleCredentials() {
     const accessPath = path.join(getRootHome(), 'access.yaml');
     const data = await getYamlContent(accessPath);
+    // 密钥存在 才去获取密钥信息
     if (data[this.projectConfig.access]) {
-      this.projectConfig.credentials = await getCredential();
+      this.projectConfig.credentials = await getCredential(this.projectConfig.access);
     }
   }
   async init() {
@@ -38,7 +42,8 @@ class ComponentExec {
       method: this.method,
       spath: this.spath,
     });
-    this.hook = new Hook(actions);
+    const params = this.globalParams.skipActions ? [] : actions;
+    this.hook = new Hook(params);
     this.hook.executePreHook();
     const outPutData = await this.executeCommand();
     this.hook.executeAfterHook();

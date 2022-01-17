@@ -1,9 +1,10 @@
 import Parse from './parse';
 import { isEmpty, get, isNil, keys, find } from 'lodash';
-import { logger } from '../../libs/utils';
+import { logger, transformGlobalArgs } from '../../libs/utils';
 import Analysis from './analysis';
 import { getTemplatePath, getProjectConfig, setupEnv, getFileObj } from './utils';
 import ComponentExec from './component';
+import { IGlobalParams } from '../../interface';
 
 interface IConfigs {
   syaml?: string;
@@ -15,8 +16,11 @@ interface IConfigs {
 
 class MyParse {
   private configs: IConfigs;
+  private globalParams: IGlobalParams;
   constructor(configs: IConfigs) {
     this.configs = configs;
+    process.env['temp_params'] = get(configs, 'globalArgs', '');
+    this.globalParams = transformGlobalArgs(configs.globalArgs);
   }
   async init() {
     const { syaml, serverName } = this.configs;
@@ -42,7 +46,7 @@ class MyParse {
     }
     return await this.serviceWithMany({ executeOrderList, parse, spath });
   }
-  async validateServerName(filePath: string) {
+  private async validateServerName(filePath: string) {
     const { serverName } = this.configs;
     if (!serverName) return;
     const data: any = getFileObj(filePath);
@@ -50,15 +54,16 @@ class MyParse {
       throw new Error(`${serverName} server not found`);
     }
   }
-  async serviceOnlyOne({ realVariables, serverName, spath }) {
+  private async serviceOnlyOne({ realVariables, serverName, spath }) {
     const { method, args = '' } = this.configs;
-    const projectConfig = getProjectConfig(realVariables, serverName);
+    const projectConfig = getProjectConfig(realVariables, serverName, this.globalParams);
     const outPutData = await new ComponentExec({
       projectConfig,
       method,
       args,
       spath,
       serverName,
+      globalParams: this.globalParams,
     }).init();
     const result = { [serverName]: outPutData };
     keys(outPutData).length === 0
@@ -67,7 +72,7 @@ class MyParse {
     return result;
   }
 
-  async serviceWithMany({ executeOrderList, parse, spath }) {
+  private async serviceWithMany({ executeOrderList, parse, spath }) {
     const { method, args = '' } = this.configs;
     logger.info(
       `It is detected that your project has the following projects < ${executeOrderList.join(
@@ -80,13 +85,18 @@ class MyParse {
     for (const serverName of executeOrderList) {
       logger.info(`Start executing project ${serverName}`);
       const parsedObj = await parse.init(tempData);
-      const projectConfig = getProjectConfig(parsedObj.realVariables, serverName);
+      const projectConfig = getProjectConfig(
+        parsedObj.realVariables,
+        serverName,
+        this.globalParams,
+      );
       const outputData = await new ComponentExec({
         projectConfig,
         method,
         args,
         spath,
         serverName,
+        globalParams: this.globalParams,
       }).init();
       tempData.services[serverName] = { output: outputData };
       result[serverName] = outputData;
@@ -98,7 +108,7 @@ class MyParse {
     return result;
   }
 
-  async warnEnvironmentVariables(realVariables) {
+  private async warnEnvironmentVariables(realVariables) {
     const services = realVariables?.services;
     if (isEmpty(services)) return;
     let envObj = {};

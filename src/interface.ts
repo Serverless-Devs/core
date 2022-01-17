@@ -15,19 +15,8 @@ export interface IInputs {
   };
 }
 
-export interface IV1Inputs {
-  Properties?: any;
-  Credentials?: any;
-  Project?: {
-    ProjectName?: string;
-    Component?: string;
-    Provider?: string;
-    AccessAlias?: string;
-  };
-  Command?: string;
-  Args?: string;
-  State?: object;
-  Path?: {
-    ConfigPath?: string;
-  };
+export interface IGlobalParams {
+  access?: string;
+  skipActions?: boolean;
+  debug?: boolean;
 }

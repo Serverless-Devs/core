@@ -6,7 +6,9 @@ import { nanoid } from 'nanoid';
 import * as fs from 'fs-extra';
 import { Logger } from '../logger';
 import report from '../common/report';
-import _ from 'lodash';
+import { IGlobalParams } from '../interface';
+import { split } from 'lodash';
+import minimist from 'minimist';
 
 export const logger = new Logger('S-CORE');
 
@@ -16,6 +18,20 @@ export function getServerlessDevsTempArgv() {
   } catch (error) {
     return [];
   }
+}
+
+export function transformGlobalArgs(args: string): IGlobalParams {
+  const data = minimist(split(args, ' '), {
+    alias: {
+      access: 'a',
+    },
+    boolean: ['debug', 'skip-actions'],
+  });
+  return {
+    access: data.access,
+    debug: data.debug,
+    skipActions: data['skip-actions'],
+  };
 }
 
 export const uuid = nanoid;

@@ -8,7 +8,6 @@ export interface IProjectConfig {
   credentials?: ICredentials;
   actions?: object;
 }
-
 export interface ICredentials {
   AccountID?: string;
   AccessKeyID?: string;
@@ -22,6 +21,7 @@ export interface IComponentConfig {
   args: string;
   spath: string;
   serverName: string;
+  globalParams: object;
 }
 
 export interface IActionHook {

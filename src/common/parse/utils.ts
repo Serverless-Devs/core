@@ -5,6 +5,7 @@ import path from 'path';
 import chalk from 'chalk';
 import { IProjectConfig, IActionHook, IInputs } from './interface';
 import yaml from 'js-yaml';
+import { IGlobalParams } from '../../interface';
 
 async function validateTemplateFile(spath: string): Promise<boolean> {
   if (isEmpty(spath)) return false;
@@ -57,13 +58,17 @@ export async function setupEnv(templateFile: string) {
   }
 }
 
-export function getProjectConfig(configs: any, serviceName: string): IProjectConfig {
+export function getProjectConfig(
+  configs: any,
+  serviceName: string,
+  globalParams: IGlobalParams,
+): IProjectConfig {
   const services = get(configs, 'services', {});
   const data = get(services, serviceName, {});
   const provider = data.provider || configs.provider;
   const access = data.access || configs.access;
   return assign({}, data, {
-    access,
+    access: globalParams.access || access,
     provider,
     appName: configs.name,
     serviceName,
