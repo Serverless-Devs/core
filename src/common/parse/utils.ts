@@ -2,10 +2,9 @@ import fs from 'fs-extra';
 import { endsWith, isEmpty, get, assign, keys, split } from 'lodash';
 import path from 'path';
 import chalk from 'chalk';
-import { IProjectConfig, IActionHook, IInputs } from './interface';
+import { IProjectConfig, IActionHook, IInputs, IGlobalArgs } from './interface';
 import yaml from 'js-yaml';
-import { IGlobalParams } from '../../interface';
-import { getYamlContent } from '../../libs';
+import { getYamlContent, getGlobalArgs } from '../../libs';
 
 async function validateTemplateFile(spath: string): Promise<boolean> {
   if (isEmpty(spath)) return false;
@@ -61,14 +60,14 @@ export async function setupEnv(templateFile: string) {
 export function getProjectConfig(
   configs: any,
   serviceName: string,
-  globalParams: IGlobalParams,
+  globalArgs: IGlobalArgs,
 ): IProjectConfig {
   const services = get(configs, 'services', {});
   const data = get(services, serviceName, {});
   const provider = data.provider || configs.provider;
   const access = data.access || configs.access;
   return assign({}, data, {
-    access: globalParams.access || access,
+    access: globalArgs.access || access,
     provider,
     appName: configs.name,
     serviceName,
@@ -113,7 +112,7 @@ export function getActions(configs: IProjectConfig, { method, spath }): IActionH
 }
 
 export function getInputs(configs: IProjectConfig, { method, args, spath }): IInputs {
-  const argsObj = split(args, ' ');
+  const globalArgs = getGlobalArgs(args);
   const inputs = {
     props: configs.props,
     credentials: configs.credentials,
@@ -125,8 +124,8 @@ export function getInputs(configs: IProjectConfig, { method, args, spath }): IIn
       provider: configs.provider,
     },
     command: method,
-    args,
-    argsObj,
+    args: globalArgs.args,
+    argsObj: globalArgs.argsObj,
     path: {
       configPath: spath,
     },

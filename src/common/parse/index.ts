@@ -1,27 +1,23 @@
 import Parse from './parse';
 import { isEmpty, get, isNil, keys, find } from 'lodash';
-import { transformGlobalArgs } from '../../libs/utils';
 import { logger } from '../../logger';
 import Analysis from './analysis';
 import { getTemplatePath, getProjectConfig, setupEnv, getFileObj } from './utils';
 import ComponentExec from './component';
-import { IGlobalParams } from '../../interface';
+import { IGlobalArgs } from './interface';
 
 interface IConfigs {
   syaml?: string;
   serverName?: string;
   method: string;
-  args?: string;
-  globalArgs?: string;
+  args?: string[];
+  globalArgs?: IGlobalArgs;
 }
 
 class MyParse {
   private configs: IConfigs;
-  private globalParams: IGlobalParams;
   constructor(configs: IConfigs) {
     this.configs = configs;
-    process.env['temp_params'] = get(configs, 'globalArgs', '');
-    this.globalParams = transformGlobalArgs(configs.globalArgs);
   }
   async init() {
     const { syaml, serverName } = this.configs;
@@ -56,15 +52,15 @@ class MyParse {
     }
   }
   private async serviceOnlyOne({ realVariables, serverName, spath }) {
-    const { method, args = '' } = this.configs;
-    const projectConfig = getProjectConfig(realVariables, serverName, this.globalParams);
+    const { method, args, globalArgs } = this.configs;
+    const projectConfig = getProjectConfig(realVariables, serverName, globalArgs);
     const outPutData = await new ComponentExec({
       projectConfig,
       method,
       args,
       spath,
       serverName,
-      globalParams: this.globalParams,
+      globalArgs,
     }).init();
     const result = { [serverName]: outPutData };
     keys(outPutData).length === 0
@@ -74,7 +70,7 @@ class MyParse {
   }
 
   private async serviceWithMany({ executeOrderList, parse, spath }) {
-    const { method, args = '' } = this.configs;
+    const { method, args, globalArgs } = this.configs;
     logger.info(
       `It is detected that your project has the following projects < ${executeOrderList.join(
         ',',
@@ -86,18 +82,14 @@ class MyParse {
     for (const serverName of executeOrderList) {
       logger.info(`Start executing project ${serverName}`);
       const parsedObj = await parse.init(tempData);
-      const projectConfig = getProjectConfig(
-        parsedObj.realVariables,
-        serverName,
-        this.globalParams,
-      );
+      const projectConfig = getProjectConfig(parsedObj.realVariables, serverName, globalArgs);
       const outputData = await new ComponentExec({
         projectConfig,
         method,
         args,
         spath,
         serverName,
-        globalParams: this.globalParams,
+        globalArgs,
       }).init();
       tempData.services[serverName] = { output: outputData };
       result[serverName] = outputData;

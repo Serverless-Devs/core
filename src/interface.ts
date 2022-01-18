@@ -1,3 +1,4 @@
+import { ParsedArgs } from 'minimist';
 export interface IInputs {
   properties?: any;
   credentials?: any;
@@ -15,8 +16,11 @@ export interface IInputs {
   };
 }
 
-export interface IGlobalParams {
+export interface IGlobalParams extends ParsedArgs {
   access?: string;
-  skipActions?: boolean;
+  template?: string;
+  help?: boolean;
+  version?: boolean;
   debug?: boolean;
+  'skip-actions'?: boolean;
 }

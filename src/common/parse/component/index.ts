@@ -1,4 +1,4 @@
-import { IComponentConfig, IProjectConfig, IInputs } from '../interface';
+import { IComponentConfig, IInputs, IProjectConfig } from '../interface';
 import { getRootHome, getSetConfig, getYamlContent } from '../../../libs';
 import path from 'path';
 import { getCredential } from '../../credential';
@@ -7,41 +7,33 @@ import Hook from './hook';
 import { loadComponent } from '../../load';
 import { DEFAULT_REGIRSTRY, IRegistry } from '../../constant';
 import chalk from 'chalk';
-import { IGlobalParams } from '../../../interface';
+import { assign } from 'lodash';
 
 class ComponentExec {
-  private projectConfig: IProjectConfig;
-  private method: string;
-  private args: string;
-  private spath: string;
-  private serverName: string;
-  private globalParams: IGlobalParams;
-
   protected hook: Hook;
+  projectConfig: IProjectConfig;
 
-  constructor(config: IComponentConfig) {
+  constructor(private config: IComponentConfig) {
     this.projectConfig = config.projectConfig;
-    this.method = config.method;
-    this.args = config.args;
-    this.spath = config.spath;
-    this.serverName = config.serverName;
-    this.globalParams = config.globalParams;
   }
   private async handleCredentials() {
+    const { projectConfig } = this.config;
     const accessPath = path.join(getRootHome(), 'access.yaml');
     const data = await getYamlContent(accessPath);
     // 密钥存在 才去获取密钥信息
-    if (data[this.projectConfig.access]) {
-      this.projectConfig.credentials = await getCredential(this.projectConfig.access);
+    if (data[projectConfig.access]) {
+      const credentials = await getCredential(projectConfig.access);
+      this.projectConfig = assign({}, projectConfig, { credentials });
     }
   }
   async init() {
+    const { method, spath, globalArgs } = this.config;
     await this.handleCredentials();
     const actions = getActions(this.projectConfig, {
-      method: this.method,
-      spath: this.spath,
+      method,
+      spath,
     });
-    const params = this.globalParams.skipActions ? [] : actions;
+    const params = globalArgs?.skipActions ? [] : actions;
     this.hook = new Hook(params);
     this.hook.executePreHook();
     const outPutData = await this.executeCommand();
@@ -49,19 +41,22 @@ class ComponentExec {
     return outPutData;
   }
   private async executeCommand() {
+    const { method, spath, args } = this.config;
+
     const inputs = getInputs(this.projectConfig, {
-      method: this.method,
-      args: this.args,
-      spath: this.spath,
+      method,
+      args,
+      spath,
     });
     const registry: IRegistry = await getSetConfig('registry', DEFAULT_REGIRSTRY);
     const instance = await loadComponent(this.projectConfig.component, registry);
-    const res = await this.invokeMethod(instance, this.method, inputs);
-    return JSON.parse(JSON.stringify(res));
+    const res = await this.invokeMethod(instance, inputs);
+    return res && JSON.parse(JSON.stringify(res));
   }
-  async invokeMethod(instance: any, method: string, inputs: IInputs) {
+  async invokeMethod(instance: any, inputs: IInputs) {
+    const { serverName, method } = this.config;
     // 服务级操作
-    if (this.serverName) {
+    if (serverName) {
       if (instance[method]) {
         // 方法存在，执行报错，退出码101
         try {
@@ -82,10 +77,10 @@ class ComponentExec {
       throw new Error(
         JSON.stringify({
           code: 100,
-          message: `The [${this.method}] command was not found.`,
-          tips: `Please check the component ${this.projectConfig.component} has the ${
-            this.method
-          } method. Serverless Devs documents：${chalk.underline(
+          message: `The [${method}] command was not found.`,
+          tips: `Please check the component ${
+            this.projectConfig.component
+          } has the ${method} method. Serverless Devs documents：${chalk.underline(
             'https://github.com/Serverless-Devs/Serverless-Devs/blob/master/docs/zh/command',
           )}`,
         }),
@@ -112,10 +107,10 @@ class ComponentExec {
       throw new Error(
         JSON.stringify({
           code: 0,
-          message: `The [${this.method}] command was not found.`,
-          tips: `Please check the component ${this.projectConfig.component} has the ${
-            this.method
-          } method. Serverless Devs documents：${chalk.underline(
+          message: `The [${method}] command was not found.`,
+          tips: `Please check the component ${
+            this.projectConfig.component
+          } has the ${method} method. Serverless Devs documents：${chalk.underline(
             'https://github.com/Serverless-Devs/Serverless-Devs/blob/master/docs/zh/command',
           )}`,
         }),

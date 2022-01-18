@@ -4,7 +4,7 @@
 
 import * as fs from 'fs-extra';
 import { IGlobalParams } from '../interface';
-import { split } from 'lodash';
+import { isEmpty, trim, startsWith, assign, filter, find, join } from 'lodash';
 import minimist from 'minimist';
 import chalk from 'chalk';
 
@@ -25,18 +25,39 @@ export function getServerlessDevsTempArgv() {
   }
 }
 
-export function transformGlobalArgs(args: string): IGlobalParams {
-  const data = minimist(split(args, ' '), {
+export function getGlobalArgs(args: string[]): IGlobalParams {
+  if (isEmpty(args)) return;
+  const newArgs = [];
+  const temp = {};
+  const params = [];
+  let lastVal: string;
+  for (const index in args) {
+    const val = trim(args[index]);
+    // 对包含空格的参数 单独处理
+    if (/\s/.test(val) && startsWith(lastVal, '-')) {
+      params.push(lastVal, val);
+      const key = lastVal.slice(startsWith(lastVal, '--') ? 2 : 1);
+      temp[key] = val;
+      newArgs.pop();
+    } else {
+      newArgs.push(val);
+    }
+    lastVal = val;
+  }
+  const data = minimist(newArgs, {
     alias: {
+      template: 't',
       access: 'a',
+      help: 'h',
+      version: 'v',
     },
     boolean: ['debug', 'skip-actions'],
   });
-  return {
-    access: data.access,
-    debug: data.debug,
-    skipActions: data['skip-actions'],
-  };
+  const filterArgs = filter(args, (item) => !find(data._, (o) => o === item));
+  return assign({}, data, temp, {
+    args: join(filterArgs, ' '),
+    argsObj: params,
+  });
 }
 
 export function readJsonFile(filePath: string) {

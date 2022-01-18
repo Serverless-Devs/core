@@ -6,9 +6,8 @@ import os from 'os';
 import path from 'path';
 import fs from 'fs-extra';
 import minimist from 'minimist';
-import { get, includes } from 'lodash';
+import { includes } from 'lodash';
 import getYamlContent from './getYamlContent';
-import { transformGlobalArgs } from './utils';
 
 const semver = require('semver');
 
@@ -16,14 +15,8 @@ const USER_HOME = os.homedir();
 
 // debug模式
 export const isDebugMode = () => {
-  function getDebugFromEnv() {
-    const temp_params = get(process, 'env.temp_params');
-    const data = transformGlobalArgs(temp_params);
-    return data.debug;
-  }
-
   const args = minimist(process.argv.slice(2));
-  return args.debug || getDebugFromEnv();
+  return args.debug;
 };
 
 // s工具的家目录

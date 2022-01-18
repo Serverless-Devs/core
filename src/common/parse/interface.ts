@@ -15,15 +15,20 @@ export interface ICredentials {
   SecurityToken?: string;
   [key: string]: string;
 }
+
+export interface IGlobalArgs {
+  debug?: boolean;
+  skipActions?: boolean;
+  access?: string;
+}
 export interface IComponentConfig {
   projectConfig: IProjectConfig;
   method: string;
-  args: string;
+  args: string[];
   spath: string;
   serverName: string;
-  globalParams: object;
+  globalArgs: IGlobalArgs;
 }
-
 export interface IActionHook {
   run: string;
   pre: boolean;
