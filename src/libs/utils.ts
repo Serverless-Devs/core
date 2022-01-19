@@ -29,13 +29,16 @@ export function getGlobalArgs(args: string[]): IGlobalParams {
   if (isEmpty(args)) return;
   const newArgs = [];
   const temp = {};
-  const params = [];
+  const _argsObj = [];
   let lastVal: string;
   for (const index in args) {
     const val = trim(args[index]);
+    // 将参数放到_argsObj
+    if (startsWith(val, '-') || _argsObj.length > 0) {
+      _argsObj.push(val);
+    }
     // 对包含空格的参数 单独处理
     if (/\s/.test(val) && startsWith(lastVal, '-')) {
-      params.push(lastVal, val);
       const key = lastVal.slice(startsWith(lastVal, '--') ? 2 : 1);
       temp[key] = val;
       newArgs.pop();
@@ -55,8 +58,8 @@ export function getGlobalArgs(args: string[]): IGlobalParams {
   });
   const filterArgs = filter(args, (item) => !find(data._, (o) => o === item));
   return assign({}, data, temp, {
-    args: join(filterArgs, ' '),
-    argsObj: params,
+    _args: join(filterArgs, ' '),
+    _argsObj,
   });
 }
 

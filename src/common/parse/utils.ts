@@ -124,8 +124,8 @@ export function getInputs(configs: IProjectConfig, { method, args, spath }): IIn
       provider: configs.provider,
     },
     command: method,
-    args: globalArgs.args,
-    argsObj: globalArgs.argsObj,
+    args: globalArgs._args,
+    argsObj: globalArgs._argsObj,
     path: {
       configPath: spath,
     },
