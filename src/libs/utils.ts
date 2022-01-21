@@ -54,7 +54,8 @@ export function getGlobalArgs(args: string[]): IGlobalParams {
       help: 'h',
       version: 'v',
     },
-    boolean: ['debug', 'skip-actions'],
+    string: ['access', 'template'],
+    boolean: ['debug', 'skip-actions', 'help', 'version'],
   });
   const filterArgs = filter(args, (item) => !find(data._, (o) => o === item));
   return assign({}, data, temp, {

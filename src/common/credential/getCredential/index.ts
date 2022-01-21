@@ -4,7 +4,7 @@ import setCredential from '../setCredential';
 import { get } from 'lodash';
 import os from 'os';
 import path from 'path';
-import { getServerlessDevsTempArgv, getYamlContent, getRootHome } from '../../../libs';
+import { getYamlContent, getRootHome } from '../../../libs';
 import { logger } from '../../../logger';
 import chalk from 'chalk';
 import { transformInputs, trim, getServerlessDevsAccessFromEnv } from './utils';
@@ -65,22 +65,9 @@ function formatValue(content: any, alias: string) {
 async function getCredentialWithAccess(access?: string, ...args: any[]) {
   const accessAlias = access || 'default';
   // 从环境变量获取
-  const AccountKeyIDFromEnv = get(process, 'env.AccessKeyID');
-  const AccessKeySecretFromEnv = get(process, 'env.AccessKeySecret');
-  const AccountIDFromEnv = get(process, 'env.AccountID');
-
-  if (AccountKeyIDFromEnv && AccessKeySecretFromEnv && AccountIDFromEnv) {
-    return trim({
-      Alias: get(process, 'env.AccessKeySecret', 'default'),
-      AccountID: AccountIDFromEnv,
-      AccessKeyID: AccountKeyIDFromEnv,
-      AccessKeySecret: AccessKeySecretFromEnv,
-      SecurityToken: get(process, 'env.SecurityToken'),
-    });
-  }
-  const serverlessDevsAccessFromEnv = getServerlessDevsAccessFromEnv(access);
-  if (serverlessDevsAccessFromEnv) {
-    return trim(serverlessDevsAccessFromEnv);
+  const data = await getCredentialFromEnv(access);
+  if (data) {
+    return data;
   }
 
   const accessContent = await getAccess(accessAlias);
@@ -93,8 +80,6 @@ async function getCredentialWithAccess(access?: string, ...args: any[]) {
     logger.debug(`access information: ${JSON.stringify(result, null, 2)}`);
     return trim(result);
   }
-  const argv = getServerlessDevsTempArgv();
-  if (argv[2] === 'config' && argv[3] === 'get') return;
 
   const userInfo = await getYamlContent(path.join(getRootHome(), 'access.yaml'));
 
@@ -138,6 +123,26 @@ async function getCredentialWithAccess(access?: string, ...args: any[]) {
 
   logger.debug(`access information: ${JSON.stringify(result, null, 2)}`);
   return trim(result);
+}
+
+export async function getCredentialFromEnv(access: string) {
+  const AccountKeyIDFromEnv = get(process, 'env.AccessKeyID');
+  const AccessKeySecretFromEnv = get(process, 'env.AccessKeySecret');
+  const AccountIDFromEnv = get(process, 'env.AccountID');
+
+  if (AccountKeyIDFromEnv && AccessKeySecretFromEnv && AccountIDFromEnv) {
+    return trim({
+      Alias: get(process, 'env.AccessKeySecret', 'default'),
+      AccountID: AccountIDFromEnv,
+      AccessKeyID: AccountKeyIDFromEnv,
+      AccessKeySecret: AccessKeySecretFromEnv,
+      SecurityToken: get(process, 'env.SecurityToken'),
+    });
+  }
+  const serverlessDevsAccessFromEnv = getServerlessDevsAccessFromEnv(access);
+  if (serverlessDevsAccessFromEnv) {
+    return trim(serverlessDevsAccessFromEnv);
+  }
 }
 
 export default getCredential;
