@@ -9,6 +9,8 @@ export enum RegistryEnum {
   serverless = 'http://registry.devsapp.cn/simple',
 }
 
+export const DEFAULT_REGIRSTRY = 'http://registry.devsapp.cn/simple';
+
 export const FC_COMPONENT = [
   'domain',
   'fc',

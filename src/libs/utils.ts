@@ -17,11 +17,16 @@ export const makeUnderLine = (text: string) => {
   }
 };
 
-export function getServerlessDevsTempArgv() {
+export function getServerlessDevsTempArgv(): any {
+  const { serverless_devs_temp_argv } = process.env;
+  if (isEmpty(serverless_devs_temp_argv)) {
+    return {};
+  }
   try {
-    return JSON.parse(process.env.serverless_devs_temp_argv);
+    const tempArgv = JSON.parse(serverless_devs_temp_argv);
+    return getGlobalArgs(tempArgv.slice(2));
   } catch (error) {
-    return [];
+    return {};
   }
 }
 

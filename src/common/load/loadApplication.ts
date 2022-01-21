@@ -112,8 +112,7 @@ async function needInstallDependency(cwd: string) {
     return await tryfun(installDependency({ cwd, production: false }));
   }
   const tempArgv = getServerlessDevsTempArgv();
-  if (tempArgv.find((i) => i === '--force-creation')) return;
-
+  if (tempArgv['force-creation']) return true;
   const res = await inquirer.prompt([
     {
       type: 'confirm',
@@ -130,7 +129,7 @@ async function needInstallDependency(cwd: string) {
 async function checkFileExists(filePath: string, fileName: string) {
   if (process.env.skipPrompt) return true;
   const tempArgv = getServerlessDevsTempArgv();
-  if (tempArgv.find((i) => i === '--force-creation')) return true;
+  if (tempArgv['force-creation']) return true;
   if (fs.existsSync(filePath)) {
     const res = await inquirer.prompt([
       {

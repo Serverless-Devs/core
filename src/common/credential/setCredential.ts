@@ -86,7 +86,7 @@ async function writeData(data: any) {
   if (content) {
     const providerAliasKeys = Object.keys(content);
     const tempArgv = getServerlessDevsTempArgv();
-    if (providerAliasKeys.includes(accessAlias) && !tempArgv.find((i) => i === '-f')) {
+    if (providerAliasKeys.includes(accessAlias) && !tempArgv.f) {
       const option = [
         {
           type: 'list',
