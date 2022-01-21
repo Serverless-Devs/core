@@ -8,11 +8,11 @@ import {
   getServerlessReleases,
   getServerlessReleasesLatest,
 } from './service';
-import { RegistryEnum, IRegistry } from '../constant';
+import { RegistryEnum, IRegistry, FC_COMPONENT } from '../constant';
 import { getComponentVersion } from './utils';
 import downloadRequest from '../downloadRequest';
 import installDependency from '../installDependency';
-import { get } from 'lodash';
+import { get, find } from 'lodash';
 import { downLoadDesCore } from './loadDevsCore';
 import { execDaemonWithTTL } from '../../execDaemon';
 
@@ -38,8 +38,16 @@ async function postInit({ componentPath }) {
   } catch (e) {}
 }
 
+function getProviderComponent(source: string) {
+  if (source.includes('/')) {
+    return source.split('/');
+  }
+  const isFcComponent = find(FC_COMPONENT, (o) => o === source);
+  return isFcComponent ? ['devsapp', source] : ['.', source];
+}
+
 async function loadServerless(source: string, params?: any) {
-  const [provider, componentName] = source.includes('/') ? source.split('/') : ['devsapp', source];
+  const [provider, componentName] = getProviderComponent(source);
   if (!componentName) return;
   const [name, version] = await getComponentVersion(provider, componentName);
   let componentPath: string;
