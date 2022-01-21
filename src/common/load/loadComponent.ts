@@ -8,11 +8,11 @@ import {
   getServerlessReleases,
   getServerlessReleasesLatest,
 } from './service';
-import { RegistryEnum, Registry } from '../constant';
+import { RegistryEnum, Registry, FC_COMPONENT } from '../constant';
 import { getSetConfig, getComponentVersion } from './utils';
 import downloadRequest from '../downloadRequest';
 import installDependency from '../installDependency';
-import { get } from 'lodash';
+import { get, find } from 'lodash';
 import { downLoadDesCore } from './loadDevsCore';
 import { execDaemonWithTTL } from '../../execDaemon';
 
@@ -38,14 +38,23 @@ async function postInit({ componentPath }) {
   } catch (e) {}
 }
 
+function getProviderComponent(source: string) {
+  if (source.includes('/')) {
+    return source.split('/');
+  }
+  const isFcComponent = find(FC_COMPONENT, (o) => o === source);
+  return isFcComponent ? ['devsapp', source] : ['.', source];
+}
+
 async function loadServerless(source: string, params?: any) {
-  const [provider, componentName] = source.includes('/') ? source.split('/') : ['devsapp', source];
+  const [provider, componentName] = getProviderComponent(source);
   if (!componentName) return;
   const [name, version] = await getComponentVersion(provider, componentName);
   let componentPath: string;
   if (version) {
-    const formatComponentName = `${name}@${version}`
-    const filename = provider === '.' ? `${formatComponentName}.zip` : `${provider}_${formatComponentName}.zip`;
+    const formatComponentName = `${name}@${version}`;
+    const filename =
+      provider === '.' ? `${formatComponentName}.zip` : `${provider}_${formatComponentName}.zip`;
     componentPath = await loadServerlessWithVersion({
       provider,
       name,
@@ -116,7 +125,12 @@ async function loadGithub(source: string, params?: any) {
   const [name, version] = await getComponentVersion(provider, componentName);
   let componentPath: string;
   if (version) {
-      componentPath = await loadGithubWithVersion({ provider, name, componentName: `${name}@${version}`, version });
+    componentPath = await loadGithubWithVersion({
+      provider,
+      name,
+      componentName: `${name}@${version}`,
+      version,
+    });
   } else {
     componentPath = await loadGithubWithNoVersion({ provider, name, componentName });
   }
