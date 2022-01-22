@@ -110,8 +110,7 @@ export const getSComponentPath = () => path.join(getRootHome(), 'components');
 
 export const getCommand = () => {
   try {
-    const serverless_devs_temp_argv = JSON.parse(process.env['serverless_devs_temp_argv']);
-    const command = serverless_devs_temp_argv.slice(2);
+    const command = JSON.parse(process.env['serverless_devs_temp_argv']);
     return command ? `s ${command.join(' ')}` : undefined;
   } catch (error) {}
 };

@@ -4,9 +4,11 @@
 
 import * as fs from 'fs-extra';
 import { IGlobalParams } from '../interface';
-import { isEmpty, trim, startsWith, assign, filter, find, join } from 'lodash';
+import { isEmpty, trim, startsWith, assign, endsWith } from 'lodash';
 import minimist from 'minimist';
 import chalk from 'chalk';
+import path from 'path';
+import getYamlContent from './getYamlContent';
 
 export const makeUnderLine = (text: string) => {
   const matchs = text.match(/http[s]?:\/\/[^\s]+/);
@@ -24,7 +26,7 @@ export function getServerlessDevsTempArgv(): any {
   }
   try {
     const tempArgv = JSON.parse(serverless_devs_temp_argv);
-    return getGlobalArgs(tempArgv.slice(2));
+    return getGlobalArgs(tempArgv);
   } catch (error) {
     return {};
   }
@@ -62,11 +64,7 @@ export function getGlobalArgs(args: string[]): IGlobalParams {
     string: ['access', 'template'],
     boolean: ['debug', 'skip-actions', 'help', 'version'],
   });
-  const filterArgs = filter(args, (item) => !find(data._, (o) => o === item));
-  return assign({}, data, temp, {
-    _args: join(filterArgs, ' '),
-    _argsObj,
-  });
+  return assign({}, data, temp);
 }
 
 export function readJsonFile(filePath: string) {
@@ -86,4 +84,40 @@ export function sleep(timer: number) {
   return new Promise((resolve) => {
     setTimeout(() => resolve(true), timer);
   });
+}
+
+async function validateTemplateFile(spath: string): Promise<boolean> {
+  if (isEmpty(spath)) return false;
+  try {
+    if (endsWith('json')) {
+      const data = fs.readJSONSync(spath);
+      return data.hasOwnProperty('edition');
+    }
+    if (endsWith(spath, 'yaml') || endsWith(spath, 'yml')) {
+      const data = await getYamlContent(spath);
+      if (isEmpty(data)) {
+        const filename = path.basename(spath);
+        throw new Error(
+          JSON.stringify({
+            message: `${filename} format is incorrect`,
+            tips: `Please check the configuration of ${filename}, Serverless Devs' Yaml specification document can refer to：${chalk.underline(
+              'https://github.com/Serverless-Devs/Serverless-Devs/blob/master/docs/zh/yaml.md',
+            )}`,
+          }),
+        );
+      }
+      return data.hasOwnProperty('edition');
+    }
+  } catch (error) {
+    return false;
+  }
+}
+
+export async function getTemplatePath(spath?: string) {
+  if (await validateTemplateFile(spath)) return spath;
+  const cwd = process.cwd();
+  const sYamlPath = path.join(cwd, 's.yaml');
+  if (await validateTemplateFile(sYamlPath)) return sYamlPath;
+  const sJsonPath = path.join(cwd, 's.json');
+  if (await validateTemplateFile(sJsonPath)) return sJsonPath;
 }

@@ -41,12 +41,13 @@ class ComponentExec {
     return outPutData;
   }
   private async executeCommand() {
-    const { method, spath, args } = this.config;
+    const { method, spath, args, serverName } = this.config;
 
     const inputs = getInputs(this.projectConfig, {
       method,
       args,
       spath,
+      serverName,
     });
     const registry: IRegistry = await getSetConfig('registry', DEFAULT_REGIRSTRY);
     const instance = await loadComponent(this.projectConfig.component, registry);

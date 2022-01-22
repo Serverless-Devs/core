@@ -2,7 +2,8 @@ import Parse from './parse';
 import { isEmpty, get, isNil, keys, find } from 'lodash';
 import { logger } from '../../logger';
 import Analysis from './analysis';
-import { getTemplatePath, getProjectConfig, setupEnv, getFileObj } from './utils';
+import { getProjectConfig, setupEnv, getFileObj } from './utils';
+import { getTemplatePath } from '../../libs';
 import ComponentExec from './component';
 import { IGlobalArgs } from './interface';
 
