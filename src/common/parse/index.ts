@@ -24,7 +24,7 @@ class MyParse {
     const { syaml, serverName } = this.configs;
     const spath = await getTemplatePath(syaml);
     if (isEmpty(spath)) {
-      throw new Error(`${syaml} file not found`);
+      throw new Error(`${syaml || 's.yaml/s.yml'} file not found`);
     }
     await this.validateServerName(spath);
     await setupEnv(spath);

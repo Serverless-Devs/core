@@ -11,7 +11,7 @@ import path from 'path';
 import getYamlContent from './getYamlContent';
 
 export const makeUnderLine = (text: string) => {
-  const matchs = text.match(/http[s]?:\/\/[^\s]+/);
+  const matchs = text.match(/http[s]?:\/\/[^\s|,]+/);
   if (matchs) {
     return text.replace(matchs[0], chalk.underline(matchs[0]));
   } else {
@@ -113,8 +113,9 @@ async function validateTemplateFile(spath: string): Promise<boolean> {
   }
 }
 
-export async function getTemplatePath(spath?: string) {
-  if (await validateTemplateFile(spath)) return spath;
+export async function getTemplatePath(spath: string = '') {
+  const filePath = path.isAbsolute(spath) ? spath : path.resolve(spath);
+  if (await validateTemplateFile(filePath)) return filePath;
   const cwd = process.cwd();
   const sYamlPath = path.join(cwd, 's.yaml');
   if (await validateTemplateFile(sYamlPath)) return sYamlPath;

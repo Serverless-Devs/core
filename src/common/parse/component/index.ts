@@ -7,7 +7,7 @@ import Hook from './hook';
 import { loadComponent } from '../../load';
 import { DEFAULT_REGIRSTRY, IRegistry } from '../../constant';
 import chalk from 'chalk';
-import { assign } from 'lodash';
+import { assign, toString } from 'lodash';
 
 class ComponentExec {
   protected hook: Hook;
@@ -49,10 +49,32 @@ class ComponentExec {
       spath,
       serverName,
     });
+
+    this.debugForJest(inputs, { method });
+
     const registry: IRegistry = await getSetConfig('registry', DEFAULT_REGIRSTRY);
     const instance = await loadComponent(this.projectConfig.component, registry);
     const res = await this.invokeMethod(instance, inputs);
     return res && JSON.parse(JSON.stringify(res));
+  }
+  private debugForJest(inputs, { method }) {
+    if (process.env['serverless-devs-debug'] === 'true') {
+      const newInputs = assign({}, inputs);
+      const credentials = newInputs.credentials;
+      if (credentials) {
+        for (const key in credentials) {
+          const val = toString(credentials[key]);
+          const len = val.length;
+          newInputs.credentials[key] =
+            len > 6 ? val.slice(0, 3) + '*'.repeat(len - 6) + val.slice(len - 3) : val;
+        }
+      }
+      console.log(
+        `project:${this.projectConfig.serviceName} component:${
+          this.projectConfig.component
+        } method: ${method} inputs: ${JSON.stringify(newInputs, null, 2)} `,
+      );
+    }
   }
   async invokeMethod(instance: any, inputs: IInputs) {
     const { serverName, method } = this.config;
