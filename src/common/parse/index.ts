@@ -1,8 +1,8 @@
 import Parse from './parse';
-import { isEmpty, get, isNil, keys, find } from 'lodash';
+import { isEmpty, get, isNil, keys } from 'lodash';
 import { logger } from '../../logger';
 import Analysis from './analysis';
-import { getProjectConfig, setupEnv, getFileObj } from './utils';
+import { getProjectConfig, setupEnv } from './utils';
 import { getTemplatePath } from '../../libs';
 import ComponentExec from './component';
 import { IGlobalArgs } from './interface';
@@ -23,10 +23,6 @@ class MyParse {
   async init() {
     const { syaml, serverName } = this.configs;
     const spath = await getTemplatePath(syaml);
-    if (isEmpty(spath)) {
-      throw new Error(`${syaml || 's.yaml/s.yml'} file not found`);
-    }
-    await this.validateServerName(spath);
     await setupEnv(spath);
     const parse = new Parse(spath);
     const parsedObj = await parse.init();
@@ -40,19 +36,12 @@ class MyParse {
         realVariables: parsedObj.realVariables,
         serverName: serverName || tempCustomerCommandName,
         spath,
+        specifyService: Boolean(serverName),
       });
     }
     return await this.serviceWithMany({ executeOrderList, parse, spath });
   }
-  private async validateServerName(filePath: string) {
-    const { serverName } = this.configs;
-    if (!serverName) return;
-    const data: any = getFileObj(filePath);
-    if (!find(keys(data.services), (o) => o === serverName)) {
-      throw new Error(`${serverName} server not found`);
-    }
-  }
-  private async serviceOnlyOne({ realVariables, serverName, spath }) {
+  private async serviceOnlyOne({ realVariables, serverName, spath, specifyService }) {
     const { method, args, globalArgs } = this.configs;
     const projectConfig = getProjectConfig(realVariables, serverName, globalArgs);
     const outPutData = await new ComponentExec({
@@ -62,6 +51,7 @@ class MyParse {
       spath,
       serverName,
       globalArgs,
+      specifyService,
     }).init();
     const result = { [serverName]: outPutData };
     keys(outPutData).length === 0

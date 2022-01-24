@@ -1,8 +1,6 @@
-import fs from 'fs-extra';
 import { isEmpty, get, assign, keys, split, filter, join, includes } from 'lodash';
 import path from 'path';
 import { IProjectConfig, IActionHook, IInputs, IGlobalArgs } from './interface';
-import yaml from 'js-yaml';
 import { getYamlContent } from '../../libs';
 
 export async function setupEnv(templateFile: string) {
@@ -94,18 +92,4 @@ export function getInputs(configs: IProjectConfig, { method, args, spath, server
     },
   };
   return inputs;
-}
-
-export function getFileObj(filePath: string) {
-  let fileObj = {};
-  try {
-    const extname = path.extname(filePath);
-    if (extname.indexOf('.yaml') !== -1 || extname.indexOf('.yml') !== -1) {
-      fileObj = yaml.load(fs.readFileSync(filePath, 'utf8'));
-    }
-    if (extname.indexOf('.json') !== -1) {
-      fileObj = fs.readJSONSync(filePath);
-    }
-  } catch (error) {}
-  return fileObj;
 }

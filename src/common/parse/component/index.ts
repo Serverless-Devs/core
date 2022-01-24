@@ -1,5 +1,5 @@
 import { IComponentConfig, IInputs, IProjectConfig } from '../interface';
-import { getRootHome, getSetConfig, getYamlContent } from '../../../libs';
+import { getRootHome, getSetConfig, getYamlContent, makeUnderLine } from '../../../libs';
 import path from 'path';
 import { getCredential } from '../../credential';
 import { getActions, getInputs } from '../utils';
@@ -8,6 +8,7 @@ import { loadComponent } from '../../load';
 import { DEFAULT_REGIRSTRY, IRegistry } from '../../constant';
 import chalk from 'chalk';
 import { assign, toString } from 'lodash';
+import { logger } from '../../../logger';
 
 class ComponentExec {
   protected hook: Hook;
@@ -77,9 +78,9 @@ class ComponentExec {
     }
   }
   async invokeMethod(instance: any, inputs: IInputs) {
-    const { serverName, method } = this.config;
+    const { method, specifyService } = this.config;
     // 服务级操作
-    if (serverName) {
+    if (specifyService) {
       if (instance[method]) {
         // 方法存在，执行报错，退出码101
         try {
@@ -127,17 +128,14 @@ class ComponentExec {
       }
     } else {
       // 方法不存在，进行警告，但是并不会报错，最终的exit code为0；
-      throw new Error(
-        JSON.stringify({
-          code: 0,
-          message: `The [${method}] command was not found.`,
-          tips: `Please check the component ${
-            this.projectConfig.component
-          } has the ${method} method. Serverless Devs documents：${chalk.underline(
-            'https://github.com/Serverless-Devs/Serverless-Devs/blob/master/docs/zh/command',
-          )}`,
-        }),
+      const tips = `Please check the component ${this.projectConfig.component} has the ${method} method. Serverless Devs documents：https://github.com/Serverless-Devs/Serverless-Devs/blob/master/docs/zh/command`;
+      logger.log(
+        `\n${chalk.hex('#000').bgYellow('WARNING:')}\n======================\n${makeUnderLine(
+          tips,
+        )}\n`,
+        'yellow',
       );
+      logger.log(chalk.grey(`The [${method}] command was not found.\n`));
     }
   }
 }

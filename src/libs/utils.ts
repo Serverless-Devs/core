@@ -88,28 +88,26 @@ export function sleep(timer: number) {
 
 async function validateTemplateFile(spath: string): Promise<boolean> {
   if (isEmpty(spath)) return false;
-  try {
-    if (endsWith('json')) {
-      const data = fs.readJSONSync(spath);
-      return data.hasOwnProperty('edition');
-    }
-    if (endsWith(spath, 'yaml') || endsWith(spath, 'yml')) {
+  if (endsWith('json')) {
+    const data = fs.readJSONSync(spath);
+    return data.hasOwnProperty('edition');
+  }
+
+  if (endsWith(spath, 'yaml') || endsWith(spath, 'yml')) {
+    try {
       const data = await getYamlContent(spath);
-      if (isEmpty(data)) {
-        const filename = path.basename(spath);
-        throw new Error(
-          JSON.stringify({
-            message: `${filename} format is incorrect`,
-            tips: `Please check the configuration of ${filename}, Serverless Devs' Yaml specification document can refer to：${chalk.underline(
-              'https://github.com/Serverless-Devs/Serverless-Devs/blob/master/docs/zh/yaml.md',
-            )}`,
-          }),
-        );
-      }
-      return data.hasOwnProperty('edition');
+      return data && data.hasOwnProperty('edition');
+    } catch (error) {
+      const filename = path.basename(spath);
+      throw new Error(
+        JSON.stringify({
+          message: `${filename} format is incorrect`,
+          tips: `Please check the configuration of ${filename}, Serverless Devs' Yaml specification document can refer to：${chalk.underline(
+            'https://github.com/Serverless-Devs/Serverless-Devs/blob/master/docs/zh/yaml.md',
+          )}`,
+        }),
+      );
     }
-  } catch (error) {
-    return false;
   }
 }
 
@@ -121,4 +119,10 @@ export async function getTemplatePath(spath: string = '') {
   if (await validateTemplateFile(sYamlPath)) return sYamlPath;
   const sJsonPath = path.join(cwd, 's.json');
   if (await validateTemplateFile(sJsonPath)) return sJsonPath;
+  throw new Error(
+    JSON.stringify({
+      message: 'the s.yaml/s.yml file was not found.',
+      tips: 'Please check if the s.yaml/s.yml file exists, you can also specify it with -t.',
+    }),
+  );
 }

@@ -28,6 +28,7 @@ export interface IComponentConfig {
   spath: string;
   serverName: string;
   globalArgs: IGlobalArgs;
+  specifyService?: boolean;
 }
 export interface IActionHook {
   run: string;
