@@ -87,14 +87,10 @@ class ComponentExec {
           const result = await instance[method](inputs);
           return result;
         } catch (error) {
-          throw new Error(
-            JSON.stringify({
-              code: 101,
-              message: error.message,
-              stack: error.stack,
-              prefix: `Project ${this.projectConfig.serviceName} failed to execute:`,
-            }),
-          );
+          this.throwError({
+            error,
+            serviceName: this.projectConfig.serviceName,
+          });
         }
       }
       // 方法不存在，此时系统将会认为是未找到组件方法，系统的exit code为100；
@@ -117,14 +113,10 @@ class ComponentExec {
         const result = await instance[method](inputs);
         return result;
       } catch (error) {
-        throw new Error(
-          JSON.stringify({
-            code: 101,
-            message: error.message,
-            stack: error.stack,
-            prefix: `Project ${this.projectConfig.serviceName} failed to execute:`,
-          }),
-        );
+        this.throwError({
+          error,
+          serviceName: this.projectConfig.serviceName,
+        });
       }
     } else {
       // 方法不存在，进行警告，但是并不会报错，最终的exit code为0；
@@ -136,6 +128,34 @@ class ComponentExec {
         'yellow',
       );
       logger.log(chalk.grey(`The [${method}] command was not found.\n`));
+    }
+  }
+  throwError(params: { error: any; serviceName: string }) {
+    const { error, serviceName } = params;
+
+    let jsonMsg;
+    try {
+      jsonMsg = JSON.parse(error.message);
+    } catch (error) {}
+
+    if (jsonMsg && jsonMsg.tips) {
+      throw new Error(
+        JSON.stringify({
+          code: 101,
+          message: jsonMsg.message,
+          tips: jsonMsg.tips,
+          prefix: `Project ${serviceName} failed to execute:`,
+        }),
+      );
+    } else {
+      throw new Error(
+        JSON.stringify({
+          code: 101,
+          message: error.message,
+          stack: error.stack,
+          prefix: `Project ${serviceName} failed to execute:`,
+        }),
+      );
     }
   }
 }
