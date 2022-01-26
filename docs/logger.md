@@ -1,8 +1,8 @@
 # Logger 日志相关文档
 
 - [基础使用](#基础使用)
-  - [decorator 使用方式](#decorator-使用方式)
   - [类使用方式](#类使用方式)
+  - [decorator 使用方式](#decorator-使用方式)
   - [效果展示](#效果展示)
 - [进阶使用](#进阶使用)
   - [上下文：context](#上下文context)
@@ -11,6 +11,28 @@
   - [task 方法](#task方法)
 
 ## 基础使用
+
+### 类使用方式
+
+以`logger`能力为例，类使用方式的案例代码可以有两种方法。
+
+- 方法 1：推荐使用 new Logger()方式
+  ```typescript
+  const { Logger } = require('@serverless-devs/core');
+  function loggerDemo() {
+    const logger = new Logger('S-CORE');
+    logger.info('abc');
+  }
+  ```
+- 方法 2：使用 Logger 的静态方法，比如：Logger.info
+
+  ```typescript
+  const { Logger } = require('@serverless-devs/core');
+
+  function loggerDemo() {
+    Logger.info('S-CORE', 'abc');
+  }
+  ```
 
 ### decorator 使用方式
 
@@ -25,28 +47,6 @@ class LoggerDemo {
   }
 }
 ```
-
-### 类使用方式
-
-以`logger`能力为例，类使用方式的案例代码可以有两种方法。
-
-- 方法 1：推荐使用 new Logger()方式
-  ```typescript
-  const { Logger } = require('@serverless-devs/core');
-  function loggerDemo() {
-    const logger = new Logger('S-CORE');
-    logger.info('abc');
-  }
-  ```
-- 方法 2：Logger.info 等方法目前只做兼容，不会写入文件日志
-
-  ```typescript
-  const { Logger } = require('@serverless-devs/core');
-
-  function loggerDemo() {
-    Logger.info('S-CORE', 'abc');
-  }
-  ```
 
 ### 效果展示
 
@@ -160,7 +160,7 @@ function sleep(timer: number) {
     {
       title: 'Checking remote history',
       id: 'remote history',
-      enabled:() => Math.random() > 0.5,
+      enabled: () => Math.random() > 0.5,
       task: async () => {
         await sleep(1000);
       },
@@ -174,4 +174,5 @@ function sleep(timer: number) {
   ]);
 })();
 ```
+
 ![Demo](https://img.alicdn.com/imgextra/i3/O1CN01yXv3FN1LllSCzte0b_!!6000000001340-1-tps-917-204.gif)
