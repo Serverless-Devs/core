@@ -12,7 +12,7 @@ export { default as modifyProps } from './modifyProps';
 export { default as installDependency } from './installDependency';
 export { default as report } from './report';
 export { default as publishHelp } from './publishHelp';
-export { default as parse } from './parse';
+export { default as execCommand } from './execCommand';
 export class CatchableError extends Error {
   constructor(tips, message?: string) {
     super(

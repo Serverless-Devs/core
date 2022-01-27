@@ -18,7 +18,7 @@
 - [modifyProps](#modifyProps)：修改 `s.yml` 文件的 `prop` 属性
 - [installDependency](#installDependency)：安装依赖
 - [getYamlContent](#getYamlContent)：获取文件内容
-- [parse](#parse)：parse yaml
+- [execCommand](#execCommand)：解析 yaml，提供函数的部署能力等
 
 ## request
 
@@ -540,9 +540,9 @@ const { getYamlContent } = require('@serverless-devs/core');
 getYamlContent('s.yaml');
 ```
 
-## parse
+## execCommand
 
-`parse(config)`接口，用于解析 yaml，提供函数的部署能力等。
+`execCommand(config)`接口，用于解析 yaml，提供函数的部署能力等。
 
 - config.syaml 参数选填，默认为 `prcoess.cwd()` 下的 `s.yaml/s.yml`文件。
 - config.serverName 参数选填，指定服务进行操作。
@@ -556,11 +556,14 @@ getYamlContent('s.yaml');
 ```typescript
 import * as core from '@serverless-devs/core';
 
-const data = core.parse({
-  syaml: 's.yaml',
-  serverName: 'helloworld',
-  method: 'deploy',
-  args: '-y --use-local',
-});
-console.log(data);
+(async () => {
+  const data = await core.execCommand({
+    syaml: 's.yaml',
+    serverName: 'helloworld',
+    method: 'deploy',
+    args: ['-y', '--use-local'],
+  });
+
+  console.log(data);
+})();
 ```

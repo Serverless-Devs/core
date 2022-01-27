@@ -15,7 +15,7 @@ interface IConfigs {
   globalArgs?: IGlobalArgs;
 }
 
-class MyParse {
+class ExecCommand {
   private configs: IConfigs;
   constructor(configs: IConfigs) {
     this.configs = configs;
@@ -115,8 +115,8 @@ class MyParse {
   }
 }
 
-async function parse(configs: IConfigs) {
-  return await new MyParse(configs).init();
+async function execCommand(configs: IConfigs) {
+  return await new ExecCommand(configs).init();
 }
 
-export default parse;
+export default execCommand;
