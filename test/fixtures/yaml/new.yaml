@@ -35,10 +35,8 @@ services:
     #        - run: s versions   # 要运行的命令行
     #          path: ./ # 命令行运行的路径
     props: #  组件的属性值
-      region: cn-hangzhou
-      service:
-        name: hello-world-service
-        description: hello world by serverless devs
+      region: ${vars.region}
+      service: ${vars.service}
       function:
         name: http-trigger-nodejs12
         description: 'hello world by serverless devs'
@@ -54,14 +52,12 @@ services:
           type: http
           config:
             authType: anonymous
-            methods:
-              - GET
-              - POSTx
-
+            methods: ${vars.methods}
+           
       customDomains:
         - domainName: auto
           protocol: HTTP
           routeConfigs:
             - path: /*
               methods:
-                - sme
+                - ${vars.methods2}
