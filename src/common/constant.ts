@@ -22,3 +22,5 @@ export const FC_COMPONENT = [
   'fc-info',
   'fc-plan',
 ];
+
+export const COMMON_VARIABLE_TYPE_REG = new RegExp(/\$\{(.*)\}/, 'i');

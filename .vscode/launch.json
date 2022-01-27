@@ -13,6 +13,16 @@
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}/test/fixtures",
             "skipFiles": ["<node_internals>/**"]
+        },
+        {
+            "name": "Debug Devs222",
+            "type": "node",
+            "request": "launch",
+            "runtimeExecutable": "ts-node",
+            "runtimeArgs": ["yaml/modifyYaml.ts"],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/test/fixtures",
+            "skipFiles": ["<node_internals>/**"]
         }
     ]
 }

@@ -1,15 +1,12 @@
 import YAML, { Document } from 'yaml';
-import fs from 'fs-extra';
 import { YAMLMap, Pair, Scalar } from 'yaml/types';
 import { isBoolean, isNumber, get } from 'lodash';
-const COMMON_VARIABLE_TYPE_REG = new RegExp(/\$\{(.*)\}/, 'i');
-
+import { COMMON_VARIABLE_TYPE_REG } from './constant';
 class ParseYaml {
   private doc: Document.Parsed;
   private yamlJson: any;
-  constructor(yamlPath: string) {
-    const file = fs.readFileSync(yamlPath, 'utf8');
-    this.doc = YAML.parseDocument(file);
+  constructor(data: string) {
+    this.doc = YAML.parseDocument(data);
     this.yamlJson = this.doc.contents.toJSON();
   }
   init() {
@@ -55,13 +52,13 @@ class ParseYaml {
     const regResult = item.value.match(COMMON_VARIABLE_TYPE_REG);
     if (regResult) {
       const realValue = get(this.yamlJson, regResult[1]);
-      item.value = realValue;
+      item.value = YAML.createNode(realValue);
     }
   }
 }
 
-function parseYaml(yamlPath: string) {
-  return new ParseYaml(yamlPath).init();
+function parseYaml(data: string) {
+  return new ParseYaml(data).init();
 }
 
 export default parseYaml;
