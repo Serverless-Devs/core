@@ -19,6 +19,10 @@ vars: # 全局变量
   service:
     name: hello-world-service
     description: 'hello world by serverless devs'
+  methods:
+    - GET
+    - POSTx
+  methods2: 'sme'
 
 services:
   helloworld: # 业务名称/模块名称
@@ -48,13 +52,12 @@ services:
           type: http
           config:
             authType: anonymous
-            methods:
-              - GET
-              - POST
+            methods: ${vars.methods}
+           
       customDomains:
         - domainName: auto
           protocol: HTTP
           routeConfigs:
             - path: /*
               methods:
-                - GET
+                - ${vars.methods2}

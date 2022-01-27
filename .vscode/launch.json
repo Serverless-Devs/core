@@ -9,7 +9,7 @@
             "type": "node",
             "request": "launch",
             "runtimeExecutable": "ts-node",
-            "runtimeArgs": ["yaml/index.ts"],
+            "runtimeArgs": ["yaml/parseYaml.ts"],
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}/test/fixtures",
             "skipFiles": ["<node_internals>/**"]
