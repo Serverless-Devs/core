@@ -18,7 +18,9 @@
 - [modifyProps](#modifyProps)：修改 `s.yml` 文件的 `prop` 属性
 - [installDependency](#installDependency)：安装依赖
 - [getYamlContent](#getYamlContent)：获取文件内容
-- [execCommand](#execCommand)：解析 yaml，提供函数的部署能力等
+- [execCommand](#execCommand)：解析 s.yaml，提供函数的部署能力等
+- [parseYaml](#parseYaml)：解析 s.yaml 里的变量
+- [modifyYaml](#modifyYaml)：修改 s.yaml, 对变量进行重新赋值
 
 ## request
 
@@ -556,14 +558,43 @@ getYamlContent('s.yaml');
 ```typescript
 import * as core from '@serverless-devs/core';
 
-(async () => {
-  const data = await core.execCommand({
-    syaml: 's.yaml',
-    serverName: 'helloworld',
-    method: 'deploy',
-    args: ['-y', '--use-local'],
-  });
+const data = await core.execCommand({
+  syaml: 's.yaml',
+  serverName: 'helloworld',
+  method: 'deploy',
+  args: ['-y', '--use-local'],
+});
 
-  console.log(data);
-})();
+console.log(data);
+```
+
+## parseYaml
+
+`parseYaml(data)`接口，解析 s.yaml 里的变量
+
+- data 参数必填， s.yaml 文件的内容
+
+```typescript
+import * as core from '@serverless-devs/core';
+import fs from 'fs-extra';
+
+const data = fs.readFileSync('s.yaml', 'utf8');
+const res = core.parseYaml(data);
+console.log(res);
+```
+
+## modifyYaml
+
+`modifyYaml(json, yamlData)`接口，修改 s.yaml, 对变量进行重新赋值
+
+- json 参数必填，修改后的数据
+- yamlData 参数必填，s.yaml 文件的内容
+
+```typescript
+import * as core from '@serverless-devs/core';
+import fs from 'fs-extra';
+
+const data = fs.readFileSync('s.yaml', 'utf8');
+const res = core.parseYaml(json, data);
+console.log(res);
 ```
