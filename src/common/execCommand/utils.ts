@@ -28,7 +28,7 @@ export function getProjectConfig(
   const provider = data.provider || configs.provider;
   const access = data.access || configs.access;
   return assign({}, data, {
-    access: globalArgs.access || access,
+    access: globalArgs?.access || access,
     provider,
     appName: configs.name,
     serviceName,
