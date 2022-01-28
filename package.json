@@ -1,6 +1,6 @@
 {
   "name": "@serverless-devs/core",
-  "version": "0.1.29-beta.4",
+  "version": "0.1.29-beta.5",
   "description": "Serverless Devs Tool Core Component",
   "keywords": [
     "Serverless",
@@ -55,8 +55,7 @@
     "jest": "^27.4.6",
     "ts-jest": "^27.1.2",
     "ts-node": "^10.4.0",
-    "typescript": "^4.1.3",
-    "yaml": "^1.10.2"
+    "typescript": "^4.1.3"
   },
   "husky": {
     "hooks": {
@@ -96,6 +95,7 @@
     "prettyjson": "^1.2.1",
     "readline": "^1.3.0",
     "rimraf": "^3.0.2",
-    "semver": "^7.3.5"
+    "semver": "^7.3.5",
+    "yaml": "^1.10.2"
   }
 }
