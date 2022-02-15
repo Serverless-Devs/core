@@ -27,15 +27,19 @@ class ModifyYaml {
     return this.doc.toString();
   }
 
+  createNode(item: any, val: any) {
+    if (val) {
+      item.value = YAML.createNode(val);
+    }
+  }
+
   iteratorVars(item: Pair | YAMLMap | Scalar, preKey: string) {
     if (item instanceof Pair) {
       if (item.value.type === 'MAP') {
         preKey += '.';
         for (const obj of item.value.items) {
           const findObj = find(this.variableList, (o) => o.key === preKey + obj.key.value);
-          if (findObj) {
-            obj.value = YAML.createNode(findObj.value);
-          }
+          this.createNode(obj, get(findObj, 'value'));
         }
       }
     }
@@ -70,24 +74,32 @@ class ModifyYaml {
     }
   }
   setPairValue(item: Pair, preKey: string) {
-    if (isBoolean(item.value.value) || isNumber(item.value.value)) return;
+    if (isBoolean(item.value.value) || isNumber(item.value.value)) {
+      this.createNode(item, get(this.data, preKey));
+      return;
+    }
     const regResult = item.value.value.match(COMMON_VARIABLE_TYPE_REG);
     if (regResult) {
-      this.variableList.push({
+      return this.variableList.push({
         key: regResult[1],
         value: get(this.data, preKey),
       });
     }
+    this.createNode(item, get(this.data, preKey));
   }
   setScalarValue(item: Scalar, preKey: string) {
-    if (isBoolean(item.value) || isNumber(item.value)) return;
+    if (isBoolean(item.value) || isNumber(item.value)) {
+      this.createNode(item, get(this.data, preKey));
+      return;
+    }
     const regResult = item.value.match(COMMON_VARIABLE_TYPE_REG);
     if (regResult) {
-      this.variableList.push({
+      return this.variableList.push({
         key: regResult[1],
         value: get(this.data, preKey),
       });
     }
+    this.createNode(item, get(this.data, preKey));
   }
 }
 
