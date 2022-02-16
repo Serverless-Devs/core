@@ -80,10 +80,13 @@ class ModifyYaml {
     }
     const regResult = item.value.value.match(COMMON_VARIABLE_TYPE_REG);
     if (regResult) {
-      return this.variableList.push({
-        key: regResult[1],
-        value: get(this.data, preKey),
-      });
+      const value = get(this.data, preKey);
+      value &&
+        this.variableList.push({
+          key: regResult[1],
+          value,
+        });
+      return;
     }
     this.createNode(item, get(this.data, preKey));
   }
@@ -94,10 +97,13 @@ class ModifyYaml {
     }
     const regResult = item.value.match(COMMON_VARIABLE_TYPE_REG);
     if (regResult) {
-      return this.variableList.push({
-        key: regResult[1],
-        value: get(this.data, preKey),
-      });
+      const value = get(this.data, preKey);
+      value &&
+        this.variableList.push({
+          key: regResult[1],
+          value,
+        });
+      return;
     }
     this.createNode(item, get(this.data, preKey));
   }
