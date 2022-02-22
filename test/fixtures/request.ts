@@ -1,5 +1,5 @@
 // import { request } from '../../lib';
-// import got from '@xsahxl/got';
+// import got from '@serverless-devs/got';
 
 // async function test() {
 //   const result = await request('http://domain.devsapp.cn/token', {

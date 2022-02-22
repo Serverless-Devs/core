@@ -3,7 +3,7 @@ import { get, isEmpty } from 'lodash';
 const archiveType = require('archive-type');
 const decompress = require('decompress');
 const getStream = require('get-stream');
-const got = require('@xsahxl/got');
+const got = require('@serverless-devs/got');
 const pEvent = require('p-event');
 import chalk from 'chalk';
 import EventEmitter from 'events';

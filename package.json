@@ -82,7 +82,7 @@
     "fs-extra": "^10.0.0",
     "get-stream": "^4.1.0",
     "getmac": "^5.20.0",
-    "@xsahxl/got": "^8.3.2",
+    "@serverless-devs/got": "^8.3.2",
     "ignore": "^5.1.8",
     "inquirer": "^8.2.0",
     "ip": "^1.1.5",
