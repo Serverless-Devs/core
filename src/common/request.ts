@@ -1,4 +1,4 @@
-import got from 'got';
+import got from '@xsahxl/got';
 import _ from 'lodash';
 import spinner from './spinner';
 import { logger } from '../logger';

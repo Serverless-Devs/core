@@ -1,5 +1,5 @@
 // import { request } from '../../lib';
-// import got from 'got';
+// import got from '@xsahxl/got';
 
 // async function test() {
 //   const result = await request('http://domain.devsapp.cn/token', {

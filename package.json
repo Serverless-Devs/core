@@ -1,6 +1,6 @@
 {
   "name": "@serverless-devs/core",
-  "version": "0.1.29-beta.7",
+  "version": "0.1.29-beta.8",
   "description": "Serverless Devs Tool Core Component",
   "keywords": [
     "Serverless",
@@ -29,7 +29,7 @@
     "prebuild": "rimraf lib && rimraf dist",
     "build:s": "npm run prebuild && npx tsc && cp -r ./src/daemon ./lib",
     "postbuild:s": "npm run esbuild && cp -r ./src/daemon ./dist",
-    "esbuild": "esbuild lib/index.js --bundle --log-level=error --minify --platform=node --format=cjs --target=node10.4 --external:electron --outfile=dist/index.js",
+    "esbuild": "esbuild lib/index.js --bundle --log-level=error --minify --platform=node --format=cjs --target=node10.4 --outfile=dist/index.js",
     "build:npm": "npm run prebuild && npx tsc && cp -r ./src/daemon ./lib",
     "postbuild:npm": "cp -r ./lib ./dist",
     "test:cov": "jest --coverage",
@@ -82,7 +82,7 @@
     "fs-extra": "^10.0.0",
     "get-stream": "^4.1.0",
     "getmac": "^5.20.0",
-    "got": "^8.3.2",
+    "@xsahxl/got": "^8.3.2",
     "ignore": "^5.1.8",
     "inquirer": "^8.2.0",
     "ip": "^1.1.5",

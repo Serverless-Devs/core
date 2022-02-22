@@ -37,8 +37,8 @@ async function test() {
   // const fc = await loadComponent('devsapp/springboot');
   // process.env.skipPrompt = 'true';
   process.env.core_load_serverless_devs_component = 'devsapp/fc-info@dev;xsahxl/fc-deploy@0.0.55'
-  const fc = await loadComponent('devsapp/fc-core');
-  console.log(fc.formatterOutput);
+  const fc = await loadComponent('devsapp/fc');
+  console.log(fc);
 }
 
 test();
