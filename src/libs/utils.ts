@@ -88,17 +88,16 @@ export function sleep(timer: number) {
 
 async function validateTemplateFile(spath: string): Promise<boolean> {
   if (isEmpty(spath)) return false;
+  const filename = path.basename(spath);
+  let data: any = {};
   if (endsWith('json')) {
-    const data = fs.readJSONSync(spath);
-    return data.hasOwnProperty('edition');
+    data = fs.readJSONSync(spath);
   }
 
   if (endsWith(spath, 'yaml') || endsWith(spath, 'yml')) {
     try {
-      const data = await getYamlContent(spath);
-      return data && data.hasOwnProperty('edition');
+      data = await getYamlContent(spath);
     } catch (error) {
-      const filename = path.basename(spath);
       throw new Error(
         JSON.stringify({
           message: `${filename} format is incorrect`,
@@ -109,6 +108,15 @@ async function validateTemplateFile(spath: string): Promise<boolean> {
       );
     }
   }
+  if (['1.0.0', '2.0.0'].includes(data.edition)) {
+    return true;
+  }
+  throw new Error(
+    JSON.stringify({
+      message: `The edtion field in the ${filename} file is incorrect.`,
+      tips: `Please check the edtion field of ${filename}, you can specify it as 1.0.0 or 2.0.0.`,
+    }),
+  );
 }
 
 export async function getTemplatePath(spath: string = '') {
