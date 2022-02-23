@@ -1,7 +1,7 @@
 import { IComponentConfig, IInputs, IProjectConfig } from '../interface';
 import { getRootHome, getSetConfig, getYamlContent, makeUnderLine } from '../../../libs';
 import path from 'path';
-import { getCredential } from '../../credential';
+import { getCredential, getCredentialFromEnv } from '../../credential';
 import { getActions, getInputs } from '../utils';
 import Hook from './hook';
 import { loadComponent } from '../../load';
@@ -27,6 +27,10 @@ class ComponentExec {
     if (data[projectConfig.access]) {
       const credentials = await getCredential(projectConfig.access);
       this.projectConfig = assign({}, projectConfig, { credentials });
+    }
+    const accessFromEnv = await getCredentialFromEnv(projectConfig.access);
+    if (accessFromEnv) {
+      this.projectConfig = assign({}, projectConfig, { credentials: accessFromEnv });
     }
   }
   async init() {

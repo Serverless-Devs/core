@@ -139,6 +139,7 @@ export async function getCredentialFromEnv(access: string) {
       SecurityToken: get(process, 'env.SecurityToken'),
     });
   }
+  require('dotenv').config();
   const serverlessDevsAccessFromEnv = getServerlessDevsAccessFromEnv(access);
   if (serverlessDevsAccessFromEnv) {
     return trim(serverlessDevsAccessFromEnv);
