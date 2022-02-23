@@ -126,11 +126,16 @@ async function getCredentialWithAccess(access?: string, ...args: any[]) {
 }
 
 export async function getCredentialFromEnv(access: string) {
+  require('dotenv').config();
   const AccountKeyIDFromEnv = get(process, 'env.AccessKeyID');
   const AccessKeySecretFromEnv = get(process, 'env.AccessKeySecret');
   const AccountIDFromEnv = get(process, 'env.AccountID');
-
-  if (AccountKeyIDFromEnv && AccessKeySecretFromEnv && AccountIDFromEnv) {
+  if (
+    AccountKeyIDFromEnv &&
+    AccessKeySecretFromEnv &&
+    AccountIDFromEnv &&
+    process.env.serverless_devs_temp_argv !== '["config","get"]'
+  ) {
     return trim({
       Alias: get(process, 'env.AccessKeySecret', 'default'),
       AccountID: AccountIDFromEnv,
@@ -139,7 +144,6 @@ export async function getCredentialFromEnv(access: string) {
       SecurityToken: get(process, 'env.SecurityToken'),
     });
   }
-  require('dotenv').config();
   const serverlessDevsAccessFromEnv = getServerlessDevsAccessFromEnv(access);
   if (serverlessDevsAccessFromEnv) {
     return trim(serverlessDevsAccessFromEnv);
