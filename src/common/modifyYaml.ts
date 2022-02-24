@@ -1,6 +1,6 @@
 import YAML, { Document } from 'yaml';
 import { YAMLMap, Pair, Scalar } from 'yaml/types';
-import { isBoolean, isNumber, get, find } from 'lodash';
+import { isBoolean, isNumber, get, find, isEmpty } from 'lodash';
 import { COMMON_VARIABLE_TYPE_REG } from './constant';
 
 class ModifyYaml {
@@ -74,7 +74,7 @@ class ModifyYaml {
     }
   }
   setPairValue(item: Pair, preKey: string) {
-    if (isBoolean(item.value.value) || isNumber(item.value.value)) {
+    if (isBoolean(item.value.value) || isNumber(item.value.value) || isEmpty(item.value.value)) {
       this.createNode(item, get(this.data, preKey));
       return;
     }
@@ -91,7 +91,7 @@ class ModifyYaml {
     this.createNode(item, get(this.data, preKey));
   }
   setScalarValue(item: Scalar, preKey: string) {
-    if (isBoolean(item.value) || isNumber(item.value)) {
+    if (isBoolean(item.value) || isNumber(item.value) || isEmpty(item.value)) {
       this.createNode(item, get(this.data, preKey));
       return;
     }

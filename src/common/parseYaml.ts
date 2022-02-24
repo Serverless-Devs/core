@@ -1,6 +1,6 @@
 import YAML, { Document } from 'yaml';
 import { YAMLMap, Pair, Scalar } from 'yaml/types';
-import { isBoolean, isNumber, get } from 'lodash';
+import { isBoolean, isNumber, get, isEmpty } from 'lodash';
 import { COMMON_VARIABLE_TYPE_REG } from './constant';
 class ParseYaml {
   private doc: Document.Parsed;
@@ -40,18 +40,19 @@ class ParseYaml {
     }
   }
   setPairValue(item: Pair) {
-    if (isBoolean(item.value.value) || isNumber(item.value.value)) return;
+    if (isBoolean(item.value.value) || isNumber(item.value.value) || isEmpty(item.value.value))
+      return;
     const regResult = item.value.value.match(COMMON_VARIABLE_TYPE_REG);
     if (regResult) {
-      const realValue = get(this.yamlJson, regResult[1]);
+      const realValue = get(this.yamlJson, regResult[1], regResult[0]);
       item.value = YAML.createNode(realValue);
     }
   }
   setScalarValue(item: Scalar) {
-    if (isBoolean(item.value) || isNumber(item.value)) return;
+    if (isBoolean(item.value) || isNumber(item.value) || isEmpty(item.value)) return;
     const regResult = item.value.match(COMMON_VARIABLE_TYPE_REG);
     if (regResult) {
-      const realValue = get(this.yamlJson, regResult[1]);
+      const realValue = get(this.yamlJson, regResult[1], regResult[0]);
       item.value = YAML.createNode(realValue);
     }
   }
