@@ -86,15 +86,27 @@ export function sleep(timer: number) {
   });
 }
 
+function checkEdition(data, filename) {
+  if (['1.0.0', '2.0.0'].includes(get(data, 'edition'))) {
+    return true;
+  }
+  throw new Error(
+    JSON.stringify({
+      message: `The edtion field in the ${filename} file is incorrect.`,
+      tips: `Please check the edtion field of ${filename}, you can specify it as 1.0.0 or 2.0.0.`,
+    }),
+  );
+}
 async function validateTemplateFile(spath: string): Promise<boolean> {
   if (!fs.existsSync(spath)) return false;
   const filename = path.basename(spath);
-  let data: any = {};
   if (endsWith('json')) {
-    data = fs.readJSONSync(spath);
+    const data = fs.readJSONSync(spath);
+    return checkEdition(data, filename);
   }
 
   if (endsWith(spath, 'yaml') || endsWith(spath, 'yml')) {
+    let data = {};
     try {
       data = await getYamlContent(spath);
     } catch (error) {
@@ -107,16 +119,8 @@ async function validateTemplateFile(spath: string): Promise<boolean> {
         }),
       );
     }
+    return checkEdition(data, filename);
   }
-  if (['1.0.0', '2.0.0'].includes(get(data, 'edition'))) {
-    return true;
-  }
-  throw new Error(
-    JSON.stringify({
-      message: `The edtion field in the ${filename} file is incorrect.`,
-      tips: `Please check the edtion field of ${filename}, you can specify it as 1.0.0 or 2.0.0.`,
-    }),
-  );
 }
 
 export async function getTemplatePath(spath: string = '') {
@@ -125,6 +129,8 @@ export async function getTemplatePath(spath: string = '') {
   const cwd = process.cwd();
   const sYamlPath = path.join(cwd, 's.yaml');
   if (await validateTemplateFile(sYamlPath)) return sYamlPath;
+  const sYmlPath = path.join(cwd, 's.yml');
+  if (await validateTemplateFile(sYmlPath)) return sYmlPath;
   const sJsonPath = path.join(cwd, 's.json');
   if (await validateTemplateFile(sJsonPath)) return sJsonPath;
   throw new Error(
