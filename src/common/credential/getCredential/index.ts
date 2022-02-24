@@ -1,7 +1,7 @@
 import inquirer from 'inquirer';
 import getAccess from './getAccess';
 import setCredential from '../setCredential';
-import { get } from 'lodash';
+import { get, keys, filter } from 'lodash';
 import os from 'os';
 import path from 'path';
 import { getYamlContent, getRootHome } from '../../../libs';
@@ -125,7 +125,7 @@ async function getCredentialWithAccess(access?: string, ...args: any[]) {
   return trim(result);
 }
 
-export async function getCredentialFromEnv(access: string) {
+export async function getCredentialFromEnv(access?: string) {
   require('dotenv').config();
   const AccountKeyIDFromEnv = get(process, 'env.AccessKeyID');
   const AccessKeySecretFromEnv = get(process, 'env.AccessKeySecret');
@@ -149,5 +149,19 @@ export async function getCredentialFromEnv(access: string) {
     return trim(serverlessDevsAccessFromEnv);
   }
 }
+
+export const getCredentialAliasList = async () => {
+  let accessList = [];
+  const accessInfo = await getYamlContent(path.join(getRootHome(), 'access.yaml'));
+  if (accessInfo) {
+    accessList = keys(accessInfo);
+  }
+  const data = await getCredentialFromEnv();
+  if (data) {
+    accessList = filter(accessList, (o) => o !== data.Alias);
+    accessList.push(data.Alias);
+  }
+  return accessList;
+};
 
 export default getCredential;

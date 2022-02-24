@@ -9,7 +9,7 @@ import path from 'path';
 import downloadRequest from '../downloadRequest';
 import fs from 'fs-extra';
 import inquirer from 'inquirer';
-import { get } from 'lodash';
+import { get, isEmpty } from 'lodash';
 import rimraf from 'rimraf';
 import installDependency from '../installDependency';
 import {
@@ -19,6 +19,8 @@ import {
   S_CURRENT,
   getSetConfig,
 } from '../../libs';
+import { getCredentialAliasList } from '../credential';
+import { replaceFun, getYamlPath, getTemplatekey } from './utils';
 
 interface IParams {
   source: string;
@@ -33,6 +35,28 @@ async function tryfun(f: Promise<any>) {
   } catch (error) {
     // ignore error, 不抛出错误，需要寻找不同的源
   }
+}
+
+async function preInit({ temporaryPath, applicationPath }) {
+  try {
+    const baseChildComponent = await require(path.join(temporaryPath, 'hook'));
+    const tempObj = {
+      tempPath: temporaryPath,
+      targetPath: applicationPath,
+    };
+    await baseChildComponent.preInit(tempObj);
+  } catch (e) {}
+}
+
+async function postInit({ temporaryPath, applicationPath }) {
+  try {
+    const baseChildComponent = await require(path.join(temporaryPath, 'hook'));
+    const tempObj = {
+      tempPath: temporaryPath,
+      targetPath: applicationPath,
+    };
+    await baseChildComponent.postInit(tempObj);
+  } catch (e) {}
 }
 
 async function loadServerless(params: IParams) {
@@ -84,25 +108,91 @@ async function handleDecompressFile({ zipball_url, applicationPath, name }) {
     extract: true,
     strip: 1,
   });
-  const hasPublishYaml = await getYamlContent(path.resolve(temporaryPath, 'publish.yaml'));
-  // preInit
-  try {
-    const baseChildComponent = await require(path.join(temporaryPath, 'hook'));
-    const tempObj = {
-      tempPath: temporaryPath,
-      targetPath: applicationPath,
-    };
-    await baseChildComponent.preInit(tempObj);
-    process.env[`${applicationPath}-post-init`] = JSON.stringify(tempObj);
-  } catch (e) {}
-  if (hasPublishYaml) {
+  preInit({ temporaryPath, applicationPath });
+  const publishYamlData = await getYamlContent(path.resolve(temporaryPath, 'publish.yaml'));
+  if (publishYamlData) {
     fs.copySync(`${temporaryPath}/src`, applicationPath);
     rimraf.sync(temporaryPath);
+    await initSconfig({ publishYamlData, applicationPath });
+    await initEnvConfig(applicationPath);
   } else {
     fs.moveSync(`${temporaryPath}`, applicationPath);
   }
   await needInstallDependency(applicationPath);
+  postInit({ temporaryPath, applicationPath });
   return applicationPath;
+}
+
+async function initEnvConfig(appPath: string) {
+  const envExampleFilePath = path.resolve(appPath, '.env.example');
+  if (!fs.existsSync(envExampleFilePath)) return;
+  const envConfig = fs.readFileSync(envExampleFilePath, 'utf-8');
+  const templateKeys = getTemplatekey(envConfig);
+  if (templateKeys.length === 0) return;
+  const promptOption = templateKeys.map((item) => {
+    const { name, desc } = item;
+    return {
+      type: 'input',
+      message: `please input ${desc || name}:`,
+      name,
+    };
+  });
+  const result = await inquirer.prompt(promptOption);
+  const newEnvConfig = replaceFun(envConfig, result);
+  fs.unlink(envExampleFilePath);
+  fs.writeFileSync(path.resolve(appPath, '.env'), newEnvConfig, 'utf-8');
+}
+
+async function initSconfig({ publishYamlData, applicationPath }) {
+  const properties = get(publishYamlData, 'Parameters.properties');
+  const requiredList = get(publishYamlData, 'Parameters.required');
+  if (properties) {
+    const promptList = [];
+    for (const key in properties) {
+      const ele = properties[key];
+      if (ele.enum) {
+        promptList.push({
+          type: 'list',
+          name: key,
+          message: ele.description,
+          choices: ele.enum,
+          default: ele.default,
+        });
+      } else if (ele.type === 'string') {
+        promptList.push({
+          type: 'input',
+          message: ele.description,
+          name: key,
+          default: ele.default,
+          validate(input) {
+            if (requiredList.includes(key)) {
+              return input.length > 0 ? true : 'value cannot be empty.';
+            }
+            return true;
+          },
+        });
+      }
+    }
+    const credentialAliasList = await getCredentialAliasList();
+    const obj = isEmpty(credentialAliasList)
+      ? {
+          type: 'confirm',
+          name: 'access',
+          message: 'create credential?',
+          default: true,
+        }
+      : {
+          type: 'list',
+          name: 'access',
+          message: 'please select credential alias',
+          choices: credentialAliasList,
+        };
+    promptList.push(obj);
+    const result = await inquirer.prompt(promptList);
+    const spath = getYamlPath(applicationPath, 's');
+    const sYamlData = fs.readFileSync(spath, 'utf-8');
+    fs.writeFileSync(spath, replaceFun(sYamlData, result), 'utf-8');
+  }
 }
 
 async function needInstallDependency(cwd: string) {
