@@ -4,7 +4,7 @@
 
 import * as fs from 'fs-extra';
 import { IGlobalParams } from '../interface';
-import { isEmpty, trim, startsWith, assign, endsWith } from 'lodash';
+import { isEmpty, trim, startsWith, assign, endsWith, get } from 'lodash';
 import minimist from 'minimist';
 import chalk from 'chalk';
 import path from 'path';
@@ -87,7 +87,7 @@ export function sleep(timer: number) {
 }
 
 async function validateTemplateFile(spath: string): Promise<boolean> {
-  if (isEmpty(spath)) return false;
+  if (!fs.existsSync(spath)) return false;
   const filename = path.basename(spath);
   let data: any = {};
   if (endsWith('json')) {
@@ -108,7 +108,7 @@ async function validateTemplateFile(spath: string): Promise<boolean> {
       );
     }
   }
-  if (['1.0.0', '2.0.0'].includes(data.edition)) {
+  if (['1.0.0', '2.0.0'].includes(get(data, 'edition'))) {
     return true;
   }
   throw new Error(
