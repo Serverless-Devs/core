@@ -146,8 +146,8 @@ async function initEnvConfig(appPath: string) {
 async function initSconfig({ publishYamlData, applicationPath }) {
   const properties = get(publishYamlData, 'Parameters.properties');
   const requiredList = get(publishYamlData, 'Parameters.required');
+  const promptList = [];
   if (properties) {
-    const promptList = [];
     for (const key in properties) {
       const ele = properties[key];
       if (ele.enum) {
@@ -173,26 +173,26 @@ async function initSconfig({ publishYamlData, applicationPath }) {
         });
       }
     }
-    const credentialAliasList = await getCredentialAliasList();
-    const obj = isEmpty(credentialAliasList)
-      ? {
-          type: 'confirm',
-          name: 'access',
-          message: 'create credential?',
-          default: true,
-        }
-      : {
-          type: 'list',
-          name: 'access',
-          message: 'please select credential alias',
-          choices: credentialAliasList,
-        };
-    promptList.push(obj);
-    const result = await inquirer.prompt(promptList);
-    const spath = getYamlPath(applicationPath, 's');
-    const sYamlData = fs.readFileSync(spath, 'utf-8');
-    fs.writeFileSync(spath, replaceFun(sYamlData, result), 'utf-8');
   }
+  const credentialAliasList = await getCredentialAliasList();
+  const obj = isEmpty(credentialAliasList)
+    ? {
+        type: 'confirm',
+        name: 'access',
+        message: 'create credential?',
+        default: true,
+      }
+    : {
+        type: 'list',
+        name: 'access',
+        message: 'please select credential alias',
+        choices: credentialAliasList,
+      };
+  promptList.push(obj);
+  const result = await inquirer.prompt(promptList);
+  const spath = getYamlPath(applicationPath, 's');
+  const sYamlData = fs.readFileSync(spath, 'utf-8');
+  fs.writeFileSync(spath, replaceFun(sYamlData, result), 'utf-8');
 }
 
 async function needInstallDependency(cwd: string) {
