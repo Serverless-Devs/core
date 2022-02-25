@@ -16,14 +16,4 @@ export { default as parseYaml } from './parseYaml';
 export { default as modifyYaml } from './modifyYaml';
 export { default as execCommand } from './execCommand';
 export { default as ignoreWalk } from './ignoreWalk';
-export class CatchableError extends Error {
-  constructor(tips, message?: string) {
-    super(
-      JSON.stringify({
-        message,
-        tips,
-      }),
-    );
-    this.name = 'CatchableError';
-  }
-}
+export { CatchableError } from './error';
