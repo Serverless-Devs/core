@@ -8,7 +8,7 @@ import { isEmpty, trim, startsWith, assign, endsWith, get } from 'lodash';
 import minimist from 'minimist';
 import chalk from 'chalk';
 import path from 'path';
-import getYamlContent from './getYamlContent';
+import yaml from 'js-yaml';
 
 export const makeUnderLine = (text: string) => {
   const matchs = text.match(/http[s]?:\/\/[^\s|,]+/);
@@ -86,29 +86,13 @@ export function sleep(timer: number) {
   });
 }
 
-function checkEdition(data, filename) {
-  if (['1.0.0', '2.0.0'].includes(get(data, 'edition'))) {
-    return true;
-  }
-  throw new Error(
-    JSON.stringify({
-      message: `The edtion field in the ${filename} file is incorrect.`,
-      tips: `Please check the edtion field of ${filename}, you can specify it as 1.0.0 or 2.0.0.`,
-    }),
-  );
-}
 async function validateTemplateFile(spath: string): Promise<boolean> {
   if (!fs.existsSync(spath)) return false;
   const filename = path.basename(spath);
-  if (endsWith('json')) {
-    const data = fs.readJSONSync(spath);
-    return checkEdition(data, filename);
-  }
-
   if (endsWith(spath, 'yaml') || endsWith(spath, 'yml')) {
     let data = {};
     try {
-      data = await getYamlContent(spath);
+      data = await yaml.load(fs.readFileSync(spath, 'utf8'));
     } catch (error) {
       throw new Error(
         JSON.stringify({
@@ -119,7 +103,15 @@ async function validateTemplateFile(spath: string): Promise<boolean> {
         }),
       );
     }
-    return checkEdition(data, filename);
+    if (['1.0.0', '2.0.0'].includes(get(data, 'edition'))) {
+      return true;
+    }
+    throw new Error(
+      JSON.stringify({
+        message: `The edtion field in the ${filename} file is incorrect.`,
+        tips: `Please check the edtion field of ${filename}, you can specify it as 1.0.0 or 2.0.0.`,
+      }),
+    );
   }
 }
 
@@ -131,8 +123,6 @@ export async function getTemplatePath(spath: string = '') {
   if (await validateTemplateFile(sYamlPath)) return sYamlPath;
   const sYmlPath = path.join(cwd, 's.yml');
   if (await validateTemplateFile(sYmlPath)) return sYmlPath;
-  const sJsonPath = path.join(cwd, 's.json');
-  if (await validateTemplateFile(sJsonPath)) return sJsonPath;
   throw new Error(
     JSON.stringify({
       message: 'the s.yaml/s.yml file was not found.',

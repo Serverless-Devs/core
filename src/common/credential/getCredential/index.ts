@@ -137,7 +137,7 @@ export async function getCredentialFromEnv(access?: string) {
     process.env.serverless_devs_temp_argv !== '["config","get"]'
   ) {
     return trim({
-      Alias: get(process, 'env.AccessKeySecret', 'default'),
+      Alias: 'default_serverless_devs_access',
       AccountID: AccountIDFromEnv,
       AccessKeyID: AccountKeyIDFromEnv,
       AccessKeySecret: AccessKeySecretFromEnv,
