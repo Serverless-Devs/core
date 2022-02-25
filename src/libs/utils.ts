@@ -33,7 +33,7 @@ export function getServerlessDevsTempArgv(): any {
 }
 
 export function getGlobalArgs(args: string[]): IGlobalParams {
-  if (isEmpty(args)) return;
+  if (isEmpty(args)) return { _: [] };
   const newArgs = [];
   const temp = {};
   const _argsObj = [];
