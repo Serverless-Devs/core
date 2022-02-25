@@ -9,7 +9,7 @@ import path from 'path';
 import downloadRequest from '../downloadRequest';
 import fs from 'fs-extra';
 import inquirer from 'inquirer';
-import { get, isEmpty } from 'lodash';
+import { get, isEmpty, sortBy } from 'lodash';
 import rimraf from 'rimraf';
 import installDependency from '../installDependency';
 import {
@@ -109,7 +109,7 @@ async function handleDecompressFile({ zipball_url, applicationPath, name }) {
     strip: 1,
   });
   preInit({ temporaryPath, applicationPath });
-  const publishYamlData = await getYamlContent(path.resolve(temporaryPath, 'publish.yaml'));
+  const publishYamlData = await getYamlContent(path.join(temporaryPath, 'publish.yaml'));
   if (publishYamlData) {
     fs.copySync(`${temporaryPath}/src`, applicationPath);
     rimraf.sync(temporaryPath);
@@ -148,24 +148,33 @@ async function initSconfig({ publishYamlData, applicationPath }) {
   const requiredList = get(publishYamlData, 'Parameters.required');
   const promptList = [];
   if (properties) {
+    const rangeLeft = [];
+    const rangeRight = [];
     for (const key in properties) {
       const ele = properties[key];
-      if (ele.enum) {
+      const newEle = { ...ele, _key: key };
+      'x-range' in ele ? rangeLeft.push(newEle) : rangeRight.push(newEle);
+    }
+
+    const rangeList = sortBy(rangeLeft, (o) => o['x-range']).concat(rangeRight);
+    for (const item of rangeList) {
+      const name = item._key;
+      if (item.enum) {
         promptList.push({
           type: 'list',
-          name: key,
-          message: ele.description,
-          choices: ele.enum,
-          default: ele.default,
+          name,
+          message: item.description,
+          choices: item.enum,
+          default: item.default,
         });
-      } else if (ele.type === 'string') {
+      } else if (item.type === 'string') {
         promptList.push({
           type: 'input',
-          message: ele.description,
-          name: key,
-          default: ele.default,
+          message: item.description,
+          name,
+          default: item.default,
           validate(input) {
-            if (requiredList.includes(key)) {
+            if (requiredList.includes(name)) {
               return input.length > 0 ? true : 'value cannot be empty.';
             }
             return true;
