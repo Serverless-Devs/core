@@ -22,6 +22,7 @@ export { default as semver } from 'semver';
 export { default as ip } from 'ip';
 export { default as ansiEscapes } from 'ansi-escapes';
 export { default as ignore } from 'ignore';
+export { default as minimatch } from 'minimatch';
 export { default as archiver } from 'archiver';
 export { default as tableLayout } from 'table-layout';
 export { default as httpx } from 'httpx';
