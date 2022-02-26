@@ -1,50 +1,86 @@
 import YAML, { Document } from 'yaml';
 import { YAMLMap, Pair, Scalar } from 'yaml/types';
-import { isBoolean, isNumber, get, find, isEmpty } from 'lodash';
+import { get, find, isEmpty, merge } from 'lodash';
 import { COMMON_VARIABLE_TYPE_REG } from './constant';
 
 class ModifyYaml {
   private doc: Document.Parsed;
   private data: object;
+  private globalKeys: { [key: string]: any }[] = [];
   private variableList: { key: string; value: any }[] = [];
   constructor(json: object, yamlData: string) {
     this.doc = YAML.parseDocument(yamlData);
-    this.data = json;
+    this.data = merge(this.doc.toJSON(), json);
   }
   init() {
-    const { contents } = this.doc;
-    if (contents instanceof YAMLMap) {
-      const { items } = contents;
-      //  收集变量 variableList
+    const newDoc = YAML.parseDocument(YAML.stringify(this.data));
+    const { contents: oldContents } = this.doc;
+    this.setKey(newDoc, this.doc);
+
+    if (oldContents instanceof YAMLMap) {
+      const { items } = oldContents;
       for (const item of items) {
         this.iteratorPair(item, item.key.value);
       }
-      //  对变量进行重新赋值
+    }
+    const { contents: newContents } = newDoc;
+    this.setKey(newContents, oldContents);
+    if (newContents instanceof YAMLMap) {
+      const { items } = newContents;
       for (const item of items) {
-        this.iteratorVars(item, item.key.value);
+        this.setComment(item, item.key.value);
+        // 对变量进行重新赋值
+        this.setVariablePair(item, item.key.value);
       }
     }
-    return this.doc.toString();
+    return newDoc.toString();
   }
 
-  createNode(item: any, val: any) {
-    if (val) {
-      item.value = YAML.createNode(val);
-    }
+  addKey(item: Pair | YAMLMap | Scalar, key: string) {
+    const findObj = find(this.globalKeys, (o) => o.key === key);
+    if (findObj) return;
+    this.globalKeys.push({
+      key,
+      comment: item.comment,
+      commentBefore: item.commentBefore,
+      range: item.range,
+      spaceBefore: item.spaceBefore,
+    });
   }
-
-  iteratorVars(item: Pair | YAMLMap | Scalar, preKey: string) {
+  setKey(newVal, oldVal) {
+    if (isEmpty(oldVal)) return;
+    newVal.comment = oldVal.comment;
+    newVal.commentBefore = oldVal.commentBefore;
+    newVal.range = oldVal.range;
+    newVal.spaceBefore = oldVal.spaceBefore;
+  }
+  setComment(item: Pair | YAMLMap, preKey: string) {
+    const findObj = find(this.globalKeys, (o) => o.key === preKey);
+    this.setKey(item, findObj);
     if (item instanceof Pair) {
       if (item.value.type === 'MAP') {
         preKey += '.';
         for (const obj of item.value.items) {
-          const findObj = find(this.variableList, (o) => o.key === preKey + obj.key.value);
-          this.createNode(obj, get(findObj, 'value'));
+          this.setComment(obj, preKey + obj.key.value);
+        }
+      }
+      if (item.value.type === 'SEQ') {
+        for (const index in item.value.items) {
+          const obj = item.value.items[index];
+          this.setComment(obj, preKey + `[${index}]`);
         }
       }
     }
+    if (item instanceof YAMLMap) {
+      preKey += '.';
+      for (const obj of item.items) {
+        this.setComment(obj, preKey + obj.key.value);
+      }
+    }
   }
+
   iteratorPair(item: Pair | YAMLMap | Scalar, preKey: string) {
+    this.addKey(item, preKey);
     if (item instanceof Pair) {
       if (item.value.type === 'MAP') {
         preKey += '.';
@@ -60,7 +96,7 @@ class ModifyYaml {
         }
         return;
       }
-      this.setPairValue(item, preKey);
+      this.getPairValue(item, preKey);
     }
     if (item instanceof YAMLMap) {
       preKey += '.';
@@ -70,42 +106,66 @@ class ModifyYaml {
     }
 
     if (item instanceof Scalar) {
-      this.setScalarValue(item, preKey);
+      this.getScalarValue(item, preKey);
     }
   }
-  setPairValue(item: Pair, preKey: string) {
-    if (isBoolean(item.value.value) || isNumber(item.value.value) || isEmpty(item.value.value)) {
-      this.createNode(item, get(this.data, preKey));
-      return;
+  setVariablePair(item: Pair | YAMLMap, preKey: string) {
+    this.setVariable(item, preKey);
+    if (item instanceof Pair) {
+      if (item.value.type === 'MAP') {
+        preKey += '.';
+        for (const obj of item.value.items) {
+          this.setVariablePair(obj, preKey + obj.key.value);
+        }
+        return;
+      }
+      if (item.value.type === 'SEQ') {
+        for (const index in item.value.items) {
+          const obj = item.value.items[index];
+          this.setVariablePair(obj, preKey + `[${index}]`);
+        }
+        return;
+      }
     }
-    const regResult = item.value.value.match(COMMON_VARIABLE_TYPE_REG);
-    if (regResult) {
-      const value = get(this.data, preKey);
-      value &&
-        this.variableList.push({
-          key: regResult[1],
-          value,
-        });
-      return;
+    if (item instanceof YAMLMap) {
+      preKey += '.';
+      for (const obj of item.items) {
+        this.setVariablePair(obj, preKey + obj.key.value);
+      }
     }
-    this.createNode(item, get(this.data, preKey));
   }
-  setScalarValue(item: Scalar, preKey: string) {
-    if (isBoolean(item.value) || isNumber(item.value) || isEmpty(item.value)) {
-      this.createNode(item, get(this.data, preKey));
-      return;
-    }
-    const regResult = item.value.match(COMMON_VARIABLE_TYPE_REG);
+  matchVariable(value: string) {
+    if (typeof value !== 'string') return;
+    return value.match(COMMON_VARIABLE_TYPE_REG);
+  }
+  addVariable(key: string, value: any) {
+    const findObj = find(this.variableList, (o) => o.key === key);
+    if (findObj) return;
+    this.variableList.push({ key, value });
+  }
+  getPairValue(item: Pair, preKey: string) {
+    const regResult = this.matchVariable(item.value.value);
     if (regResult) {
+      this.addVariable(preKey, regResult[0]);
       const value = get(this.data, preKey);
-      value &&
-        this.variableList.push({
-          key: regResult[1],
-          value,
-        });
-      return;
+      // newJson 新值（非merge来的变量）
+      !this.matchVariable(value) && this.addVariable(regResult[1], value);
     }
-    this.createNode(item, get(this.data, preKey));
+  }
+  setVariable(item: any, preKey: string) {
+    const findObj = find(this.variableList, (o) => o.key === preKey);
+    if (findObj) {
+      item.value = YAML.createNode(findObj.value);
+    }
+  }
+  getScalarValue(item: Scalar, preKey: string) {
+    const regResult = this.matchVariable(item.value);
+    if (regResult) {
+      this.addVariable(preKey, regResult[0]);
+      const value = get(this.data, preKey);
+      // newJson 新值（非merge来的变量）
+      !this.matchVariable(value) && this.addVariable(regResult[1], value);
+    }
   }
 }
 

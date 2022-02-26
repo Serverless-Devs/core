@@ -15,7 +15,7 @@
             "skipFiles": ["<node_internals>/**"]
         },
         {
-            "name": "Debug Devs222",
+            "name": "modifyYaml",
             "type": "node",
             "request": "launch",
             "runtimeExecutable": "ts-node",
