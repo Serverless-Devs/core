@@ -6,6 +6,7 @@ import { ProgressService, ProgressType } from '@serverless-devs/s-progress-bar';
 import path from 'path';
 import ignore from 'ignore';
 import readline from 'readline';
+import { IgnoreOptions, ignoreZip } from './ignore-zip';
 const processCwd = process.cwd();
 
 const isWindows = process.platform === 'win32';
@@ -18,7 +19,13 @@ interface Options {
   outputFilePath?: string;
 }
 
-async function zip(options: Options) {
+
+async function zip(options: Options | IgnoreOptions) {
+  // 如果 options 包含 exclude，则还是使用之前的逻辑，否则使用新的逻辑
+  if (!('exclude' in options)) {
+    return await ignoreZip(options); // 新方法
+  }
+
   const { codeUri, exclude, include, outputFileName, outputFilePath = './' } = options;
 
   let fileName: string;
