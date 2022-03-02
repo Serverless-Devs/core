@@ -20,6 +20,7 @@ export interface IGlobalArgs {
   debug?: boolean;
   skipActions?: boolean;
   access?: string;
+  env?: string;
 }
 export interface IComponentConfig {
   projectConfig: IProjectConfig;

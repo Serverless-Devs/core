@@ -1,8 +1,8 @@
 import { IComponentConfig, IInputs, IProjectConfig } from '../interface';
-import { getRootHome, getSetConfig, getYamlContent, makeUnderLine } from '../../../libs';
+import { getRootHome, getSetConfig, getYamlContent } from '../../../libs';
 import path from 'path';
 import { getCredential, getCredentialFromEnv } from '../../credential';
-import { getActions, getInputs } from '../utils';
+import { getActions, getInputs, humanWarning } from '../utils';
 import Hook from './hook';
 import { loadComponent } from '../../load';
 import { DEFAULT_REGIRSTRY, IRegistry } from '../../constant';
@@ -133,12 +133,7 @@ class ComponentExec {
     } else {
       // 方法不存在，进行警告，但是并不会报错，最终的exit code为0；
       const tips = `Please check the component ${this.projectConfig.component} has the ${method} method. Serverless Devs documents：https://github.com/Serverless-Devs/Serverless-Devs/blob/master/docs/zh/command`;
-      logger.log(
-        `\n${chalk.hex('#000').bgYellow('WARNING:')}\n======================\n${makeUnderLine(
-          tips,
-        )}\n`,
-        'yellow',
-      );
+      humanWarning(tips);
       logger.log(chalk.grey(`The [${method}] command was not found.\n`));
     }
   }

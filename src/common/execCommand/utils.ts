@@ -1,21 +1,15 @@
 import { isEmpty, get, assign, keys, split, filter, join, includes } from 'lodash';
 import path from 'path';
 import { IProjectConfig, IActionHook, IInputs, IGlobalArgs } from './interface';
-import { getYamlContent } from '../../libs';
+import { makeUnderLine } from '../../libs';
+import { logger } from '../../logger';
+import chalk from 'chalk';
 
-export async function setupEnv(templateFile: string) {
-  const spath = path.dirname(templateFile);
-  require('dotenv').config({ path: path.join(spath, '.env') });
-  const data = await getYamlContent(templateFile);
-  const { services } = data;
-  for (const key in services) {
-    const element = services[key];
-    let codeUri = get(element, 'props.function.codeUri');
-    if (codeUri) {
-      codeUri = path.isAbsolute(codeUri) ? codeUri : path.join(spath, codeUri);
-      require('dotenv').config({ path: path.join(codeUri, '.env') });
-    }
-  }
+export function humanWarning(tips: string) {
+  logger.log(
+    `\n${chalk.hex('#000').bgYellow('WARNING:')}\n======================\n${makeUnderLine(tips)}\n`,
+    'yellow',
+  );
 }
 
 export function getProjectConfig(

@@ -9,20 +9,46 @@
             "type": "node",
             "request": "launch",
             "runtimeExecutable": "ts-node",
-            "runtimeArgs": ["yaml/parseYaml.ts"],
+            "runtimeArgs": [
+                "yaml/parseYaml.ts"
+            ],
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}/test/fixtures",
-            "skipFiles": ["<node_internals>/**"]
+            "skipFiles": [
+                "<node_internals>/**"
+            ]
         },
         {
             "name": "modifyYaml",
             "type": "node",
             "request": "launch",
             "runtimeExecutable": "ts-node",
-            "runtimeArgs": ["yaml/modifyYaml.ts"],
+            "runtimeArgs": [
+                "yaml/modifyYaml.ts"
+            ],
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}/test/fixtures",
-            "skipFiles": ["<node_internals>/**"]
+            "skipFiles": [
+                "<node_internals>/**"
+            ]
+        },
+        {
+            "name": "s deploy",
+            "type": "node",
+            "request": "launch",
+            "runtimeExecutable": "/Users/shihuali/workspace/s/bin/s",
+            "runtimeArgs": [
+                "deploy",
+                "-y",
+                "--use-local",
+                "--env",
+                "prod"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/test/fixtures/start-fc-http-nodejs12",
+            "skipFiles": [
+                "<node_internals>/**"
+            ]
         }
     ]
 }

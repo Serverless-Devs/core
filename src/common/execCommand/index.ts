@@ -2,8 +2,8 @@ import Parse from './parse';
 import { isEmpty, get, isNil, keys } from 'lodash';
 import { logger } from '../../logger';
 import Analysis from './analysis';
-import { getProjectConfig, setupEnv } from './utils';
-import { getTemplatePath } from '../../libs';
+import { getProjectConfig } from './utils';
+import { getTemplatePath, getTemplatePathWithEnv } from './getTemplatePath';
 import ComponentExec from './component';
 import { IGlobalArgs } from './interface';
 
@@ -21,9 +21,9 @@ class ExecCommand {
     this.configs = configs;
   }
   async init() {
-    const { syaml, serverName } = this.configs;
-    const spath = await getTemplatePath(syaml);
-    await setupEnv(spath);
+    const { syaml, serverName, globalArgs = {} } = this.configs;
+    const originSpath = await getTemplatePath(syaml);
+    const spath = await getTemplatePathWithEnv({ spath: originSpath, env: globalArgs.env });
     const parse = new Parse(spath);
     const parsedObj = await parse.init();
     await this.warnEnvironmentVariables(parsedObj.realVariables);
@@ -35,11 +35,11 @@ class ExecCommand {
       return await this.serviceOnlyOne({
         realVariables: parsedObj.realVariables,
         serverName: serverName || tempCustomerCommandName,
-        spath,
+        spath: originSpath,
         specifyService: Boolean(serverName),
       });
     }
-    return await this.serviceWithMany({ executeOrderList, parse, spath });
+    return await this.serviceWithMany({ executeOrderList, parse, spath: originSpath });
   }
   private async serviceOnlyOne({ realVariables, serverName, spath, specifyService }) {
     const { method, args, globalArgs } = this.configs;
@@ -119,4 +119,4 @@ async function execCommand(configs: IConfigs) {
   return await new ExecCommand(configs).init();
 }
 
-export default execCommand;
+export { execCommand, getTemplatePath };

@@ -4,11 +4,9 @@
 
 import * as fs from 'fs-extra';
 import { IGlobalParams } from '../interface';
-import { isEmpty, trim, startsWith, assign, endsWith, get } from 'lodash';
+import { isEmpty, trim, startsWith, assign } from 'lodash';
 import minimist from 'minimist';
 import chalk from 'chalk';
-import path from 'path';
-import yaml from 'js-yaml';
 
 export const makeUnderLine = (text: string) => {
   const matchs = text.match(/http[s]?:\/\/[^\s|,]+/);
@@ -61,7 +59,7 @@ export function getGlobalArgs(args: string[]): IGlobalParams {
       help: 'h',
       version: 'v',
     },
-    string: ['access', 'template'],
+    string: ['access', 'template', 'env'],
     boolean: ['debug', 'skip-actions', 'help', 'version'],
   });
   return assign({ _argsObj }, data, temp);
@@ -84,49 +82,4 @@ export function sleep(timer: number) {
   return new Promise((resolve) => {
     setTimeout(() => resolve(true), timer);
   });
-}
-
-async function validateTemplateFile(spath: string): Promise<boolean> {
-  if (!fs.existsSync(spath)) return false;
-  const filename = path.basename(spath);
-  if (endsWith(spath, 'yaml') || endsWith(spath, 'yml')) {
-    let data = {};
-    try {
-      data = await yaml.load(fs.readFileSync(spath, 'utf8'));
-    } catch (error) {
-      throw new Error(
-        JSON.stringify({
-          message: `${filename} format is incorrect`,
-          tips: `Please check the configuration of ${filename}, Serverless Devs' Yaml specification document can refer to：${chalk.underline(
-            'https://github.com/Serverless-Devs/Serverless-Devs/blob/master/docs/zh/yaml.md',
-          )}`,
-        }),
-      );
-    }
-    if (['1.0.0', '2.0.0'].includes(get(data, 'edition'))) {
-      return true;
-    }
-    throw new Error(
-      JSON.stringify({
-        message: `The edtion field in the ${filename} file is incorrect.`,
-        tips: `Please check the edtion field of ${filename}, you can specify it as 1.0.0 or 2.0.0.`,
-      }),
-    );
-  }
-}
-
-export async function getTemplatePath(spath: string = '') {
-  const filePath = path.isAbsolute(spath) ? spath : path.resolve(spath);
-  if (await validateTemplateFile(filePath)) return filePath;
-  const cwd = process.cwd();
-  const sYamlPath = path.join(cwd, 's.yaml');
-  if (await validateTemplateFile(sYamlPath)) return sYamlPath;
-  const sYmlPath = path.join(cwd, 's.yml');
-  if (await validateTemplateFile(sYmlPath)) return sYmlPath;
-  throw new Error(
-    JSON.stringify({
-      message: 'the s.yaml/s.yml file was not found.',
-      tips: 'Please check if the s.yaml/s.yml file exists, you can also specify it with -t.',
-    }),
-  );
 }

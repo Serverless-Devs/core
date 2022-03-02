@@ -14,6 +14,6 @@ export { default as report } from './report';
 export { default as publishHelp } from './publishHelp';
 export { default as parseYaml } from './parseYaml';
 export { default as modifyYaml } from './modifyYaml';
-export { default as execCommand } from './execCommand';
+export * from './execCommand';
 export { default as ignoreWalk } from './ignoreWalk';
 export { CatchableError } from './error';

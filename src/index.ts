@@ -30,3 +30,4 @@ export { default as pEvent } from 'p-event';
 export { default as got } from '@serverless-devs/got';
 export { default as lodash } from 'lodash';
 export { default as popCore } from '@alicloud/pop-core';
+export { default as extend2 } from 'extend2';

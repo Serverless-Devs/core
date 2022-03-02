@@ -554,6 +554,7 @@ getYamlContent('s.yaml');
   - debug 参数选填, 是否开启 debug 模式。
   - skipActions 参数选填, 是否跳过 actions 模块。
   - access 参数选填, 指定密钥进行操作。
+  - env 参数选填, 指定当前的运行环境。
 
 ```typescript
 import * as core from '@serverless-devs/core';

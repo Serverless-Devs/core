@@ -51,6 +51,7 @@
     "@types/minimist": "^1.2.2",
     "@types/rimraf": "^3.0.0",
     "esbuild": "^0.14.10",
+    "extend2": "^1.0.1",
     "husky": "^6.0.0",
     "jest": "^27.4.6",
     "ts-jest": "^27.1.2",
@@ -69,6 +70,7 @@
   "gitHead": "aec19d7a89cb711f0a246ecf77e79d3668fcb8da",
   "dependencies": {
     "@alicloud/pop-core": "^1.7.10",
+    "@serverless-devs/got": "^8.3.2",
     "@serverless-devs/s-progress-bar": "^0.0.8",
     "ansi-escapes": "^4.3.2",
     "archive-type": "^4.0.0",
@@ -82,7 +84,6 @@
     "fs-extra": "^10.0.0",
     "get-stream": "^4.1.0",
     "getmac": "^5.20.0",
-    "@serverless-devs/got": "^8.3.2",
     "ignore": "^5.1.8",
     "inquirer": "^8.2.0",
     "ip": "^1.1.5",
