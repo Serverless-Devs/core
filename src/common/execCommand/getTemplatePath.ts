@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs-extra';
 import { getYamlContent, getConfig } from '../../libs';
-import { isEmpty, endsWith, get } from 'lodash';
+import { isEmpty, endsWith, get, includes, isPlainObject, find, merge } from 'lodash';
 import yaml from 'js-yaml';
 import chalk from 'chalk';
 import extend2 from 'extend2';
@@ -64,13 +64,57 @@ export async function getTemplatePathWithEnv(config: { spath: string; env?: stri
   const sdir = path.dirname(config.spath);
   const tempEnvYamlPath = path.join(sdir, `s.${tempEnv}.yaml`);
   const tempEnvYamlData = await getYamlContent(tempEnvYamlPath);
+  // 文件不存在
   if (isEmpty(tempEnvYamlData)) {
-    humanWarning('xxx');
+    humanWarning(`s.${tempEnv}.yaml/s.${tempEnv}.yml file was not found.`);
+    return config.spath;
   }
-  const extend2Data = extend2(true, await getYamlContent(config.spath), tempEnvYamlData);
+  const { a, b } = transforData(await getYamlContent(config.spath), tempEnvYamlData);
+  const extend2Data = extend2(true, a, b);
   const tempPath = path.join(sdir, '.s', `s.${tempEnv}.yaml`);
+  fs.ensureFileSync(tempPath);
   fs.writeFileSync(tempPath, yaml.dump(extend2Data));
   return tempPath;
+}
+
+function transforData(a, b) {
+  const newObj = {};
+  const tmpArr = [];
+  for (const key in b) {
+    if (includes(key, '.')) {
+      tmpArr.push({
+        key,
+        value: b[key],
+      });
+    } else {
+      newObj[key] = b[key];
+    }
+  }
+  function deepCopy(oldVal: any, parentStr = '') {
+    const findObj = find(tmpArr, (o) => o.key === parentStr);
+    let obj = oldVal;
+    if (findObj) {
+      obj = obj.constructor === Array ? findObj.value : merge(oldVal, findObj.value);
+    }
+    let result: any = obj.constructor === Array ? [] : {};
+    if (typeof obj === 'object') {
+      if (isPlainObject(obj)) {
+        if (parentStr !== '') {
+          parentStr = `${parentStr}.`;
+        }
+      }
+      for (const i in obj) {
+        let val = obj[i];
+        const tmpStr = isPlainObject(obj) ? `${parentStr}${i}` : `${parentStr}[${i}]`;
+        result[i] = typeof val === 'object' ? deepCopy(val, tmpStr) : val;
+      }
+    } else {
+      result = obj;
+    }
+    return result;
+  }
+
+  return { a: deepCopy(a), b: newObj };
 }
 
 export async function getTemplatePath(spath: string = '') {
