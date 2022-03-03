@@ -61,7 +61,11 @@ async function setupEnv(templateFile: string) {
   }
 }
 
-export async function getTemplatePathWithEnv(config: { spath: string; env?: string }) {
+export async function getTemplatePathWithEnv(config: {
+  spath: string;
+  env?: string;
+  warn?: boolean;
+}) {
   await setupEnv(config.spath);
   let tempEnv: string = config.env;
   if (isEmpty(tempEnv)) {
@@ -76,7 +80,8 @@ export async function getTemplatePathWithEnv(config: { spath: string; env?: stri
   const tempEnvYamlData = await getYamlContent(tempEnvYamlPath);
   // 文件不存在
   if (isEmpty(tempEnvYamlData)) {
-    humanWarning(`s.${tempEnv}.yaml/s.${tempEnv}.yml file was not found.`);
+    get(config, 'warn', true) &&
+      humanWarning(`s.${tempEnv}.yaml/s.${tempEnv}.yml file was not found.`);
     return config.spath;
   }
   const { a, b } = await transforData(await getYamlContent(config.spath), tempEnvYamlData);
