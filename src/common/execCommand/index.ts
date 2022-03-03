@@ -119,4 +119,4 @@ async function execCommand(configs: IConfigs) {
   return await new ExecCommand(configs).init();
 }
 
-export { execCommand, getTemplatePath };
+export { execCommand, getTemplatePath, getTemplatePathWithEnv };
