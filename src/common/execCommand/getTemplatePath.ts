@@ -1,7 +1,17 @@
 import path from 'path';
 import fs from 'fs-extra';
 import { getYamlContent, getConfig } from '../../libs';
-import { isEmpty, endsWith, get, includes, isPlainObject, find, merge } from 'lodash';
+import {
+  isEmpty,
+  endsWith,
+  get,
+  includes,
+  isPlainObject,
+  find,
+  merge,
+  isArray,
+  isString,
+} from 'lodash';
 import yaml from 'js-yaml';
 import chalk from 'chalk';
 import extend2 from 'extend2';
@@ -69,7 +79,7 @@ export async function getTemplatePathWithEnv(config: { spath: string; env?: stri
     humanWarning(`s.${tempEnv}.yaml/s.${tempEnv}.yml file was not found.`);
     return config.spath;
   }
-  const { a, b } = transforData(await getYamlContent(config.spath), tempEnvYamlData);
+  const { a, b } = await transforData(await getYamlContent(config.spath), tempEnvYamlData);
   const extend2Data = extend2(true, a, b);
   const tempPath = path.join(sdir, '.s', `s.${tempEnv}.yaml`);
   fs.ensureFileSync(tempPath);
@@ -77,7 +87,7 @@ export async function getTemplatePathWithEnv(config: { spath: string; env?: stri
   return tempPath;
 }
 
-function transforData(a, b) {
+async function transforData(a, b) {
   const newObj = {};
   const tmpArr = [];
   for (const key in b) {
@@ -86,7 +96,7 @@ function transforData(a, b) {
         key,
         value: b[key],
       });
-    } else {
+    } else if (key !== 'extends') {
       newObj[key] = b[key];
     }
   }
@@ -114,7 +124,21 @@ function transforData(a, b) {
     return result;
   }
 
-  return { a: deepCopy(a), b: newObj };
+  return { a: deepCopy(a), b: extend2(true, await extendsYaml(b.extends), newObj) };
+}
+
+async function extendsYaml(data: string | string[]) {
+  if (isEmpty(data)) return;
+  let tmp = {};
+  if (isArray(data)) {
+    for (const item of data) {
+      tmp = extend2(true, tmp, await getYamlContent(item));
+    }
+  }
+  if (isString(data)) {
+    tmp = await getYamlContent(data);
+  }
+  return tmp;
 }
 
 export async function getTemplatePath(spath: string = '') {
