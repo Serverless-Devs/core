@@ -7,6 +7,7 @@ const {
   getRootHome,
   ip,
   getCommand,
+  lodash: _,
 } = require('../index');
 const path = require('path');
 const fs = require('fs');
@@ -48,7 +49,7 @@ async function getSYaml(templateFile) {
   const { services } = template;
   for (const key in services) {
     const element = services[key];
-    let environmentVariables = get(element, 'props.function.environmentVariables');
+    let environmentVariables = _.get(element, 'props.function.environmentVariables');
     if (environmentVariables) {
       for (const key1 in environmentVariables) {
         environmentVariables[key1] = '***';
