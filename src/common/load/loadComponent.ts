@@ -12,7 +12,7 @@ import { RegistryEnum, IRegistry, FC_COMPONENT } from '../constant';
 import { getComponentVersion } from './utils';
 import downloadRequest from '../downloadRequest';
 import installDependency from '../installDependency';
-import { get, find } from 'lodash';
+import { get, find, isEmpty } from 'lodash';
 import { downLoadDesCore } from './loadDevsCore';
 import { execDaemonWithTTL } from '../../execDaemon';
 
@@ -230,6 +230,9 @@ async function loadRemoteComponent(source: string, registry?: IRegistry, params?
 }
 
 async function loadComponent(source: string, registry?: IRegistry, params?: any) {
+  if (isEmpty(source)) {
+    throw new Error('Please check the value of source in loadComponent function.');
+  }
   // 本地调试
   if (fs.existsSync(source)) {
     return await buildComponentInstance(source, params);

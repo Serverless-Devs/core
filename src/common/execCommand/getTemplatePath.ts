@@ -16,6 +16,7 @@ import yaml from 'js-yaml';
 import chalk from 'chalk';
 import extend2 from 'extend2';
 import { humanWarning } from './utils';
+import parseYaml from '../parseYaml';
 
 async function validateTemplateFile(spath: string): Promise<boolean> {
   if (!fs.existsSync(spath)) return false;
@@ -84,8 +85,8 @@ export async function getTemplatePathWithEnv(config: {
       humanWarning(`s.${tempEnv}.yaml/s.${tempEnv}.yml file was not found.`);
     return config.spath;
   }
-  const { a, b } = await transforData(await getYamlContent(config.spath), tempEnvYamlData);
-  const extend2Data = extend2(true, a, b);
+  const doc = await parseYaml(fs.readFileSync(config.spath, 'utf8'));
+  const extend2Data = await transforData(doc, tempEnvYamlData);
   const tempPath = path.join(sdir, '.s', `s.${tempEnv}.yaml`);
   fs.ensureFileSync(tempPath);
   fs.writeFileSync(tempPath, yaml.dump(extend2Data));
@@ -128,8 +129,8 @@ async function transforData(a, b) {
     }
     return result;
   }
-
-  return { a: deepCopy(a), b: extend2(true, await extendsYaml(b.extends), newObj) };
+  const result = extend2(true, a, extend2(true, await extendsYaml(b.extends), newObj));
+  return deepCopy(result);
 }
 
 async function extendsYaml(data: string | string[]) {
@@ -137,11 +138,14 @@ async function extendsYaml(data: string | string[]) {
   let tmp = {};
   if (isArray(data)) {
     for (const item of data) {
-      tmp = extend2(true, tmp, await getYamlContent(item));
+      if (isString(item) && fs.existsSync(item)) {
+        const doc = await parseYaml(fs.readFileSync(item, 'utf8'));
+        tmp = extend2(true, tmp, doc);
+      }
     }
   }
-  if (isString(data)) {
-    tmp = await getYamlContent(data);
+  if (isString(data) && fs.existsSync(data)) {
+    tmp = await parseYaml(fs.readFileSync(data, 'utf8'));
   }
   return tmp;
 }
