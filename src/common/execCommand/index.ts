@@ -3,7 +3,7 @@ import { isEmpty, get, isNil, keys } from 'lodash';
 import { logger } from '../../logger';
 import Analysis from './analysis';
 import { getProjectConfig } from './utils';
-import { getTemplatePath, getTemplatePathWithEnv } from './getTemplatePath';
+import { getTemplatePath, transforYamlPath } from './getTemplatePath';
 import ComponentExec from './component';
 import { IGlobalArgs } from './interface';
 
@@ -21,9 +21,9 @@ class ExecCommand {
     this.configs = configs;
   }
   async init() {
-    const { syaml, serverName, globalArgs = {} } = this.configs;
+    const { syaml, serverName } = this.configs;
     const originSpath = await getTemplatePath(syaml);
-    const spath = await getTemplatePathWithEnv({ spath: originSpath, env: globalArgs.env });
+    const spath = await transforYamlPath(originSpath);
     const parse = new Parse(spath);
     const parsedObj = await parse.init();
     await this.warnEnvironmentVariables(parsedObj.realVariables);
@@ -119,4 +119,4 @@ async function execCommand(configs: IConfigs) {
   return await new ExecCommand(configs).init();
 }
 
-export { execCommand, getTemplatePath, getTemplatePathWithEnv };
+export { execCommand, getTemplatePath, transforYamlPath };

@@ -1,50 +1,25 @@
 import path from 'path';
 import fs from 'fs-extra';
-import { getYamlContent, getConfig } from '../../libs';
-import {
-  isEmpty,
-  endsWith,
-  get,
-  includes,
-  isPlainObject,
-  find,
-  merge,
-  isArray,
-  isString,
-} from 'lodash';
+import { getYamlContent } from '../../libs';
+import { isEmpty, get, includes, isPlainObject, find, merge, isArray, isString } from 'lodash';
 import yaml from 'js-yaml';
 import chalk from 'chalk';
 import extend2 from 'extend2';
 import { humanWarning } from './utils';
 import parseYaml from '../parseYaml';
 
-async function validateTemplateFile(spath: string): Promise<boolean> {
-  if (!fs.existsSync(spath)) return false;
+async function checkEdition(spath: string) {
   const filename = path.basename(spath);
-  if (endsWith(spath, 'yaml') || endsWith(spath, 'yml')) {
-    let data = {};
-    try {
-      data = await yaml.load(fs.readFileSync(spath, 'utf8'));
-    } catch (error) {
-      throw new Error(
-        JSON.stringify({
-          message: `${filename} format is incorrect`,
-          tips: `Please check the configuration of ${filename}, Serverless Devs' Yaml specification document can refer to：${chalk.underline(
-            'https://github.com/Serverless-Devs/Serverless-Devs/blob/master/docs/zh/yaml.md',
-          )}`,
-        }),
-      );
-    }
-    if (['1.0.0', '2.0.0'].includes(get(data, 'edition'))) {
-      return true;
-    }
-    throw new Error(
-      JSON.stringify({
-        message: `The edtion field in the ${filename} file is incorrect.`,
-        tips: `Please check the edtion field of ${filename}, you can specify it as 1.0.0 or 2.0.0.`,
-      }),
-    );
+  const data = await getYamlContent(spath);
+  if (['1.0.0', '2.0.0'].includes(get(data, 'edition'))) {
+    return spath;
   }
+  throw new Error(
+    JSON.stringify({
+      message: `The edtion field in the ${filename} file is incorrect.`,
+      tips: `Please check the edtion field of ${filename}, you can specify it as 1.0.0 or 2.0.0.`,
+    }),
+  );
 }
 
 async function setupEnv(templateFile: string) {
@@ -60,37 +35,6 @@ async function setupEnv(templateFile: string) {
       require('dotenv').config({ path: path.join(codeUri, '.env') });
     }
   }
-}
-
-export async function getTemplatePathWithEnv(config: {
-  spath: string;
-  env?: string;
-  warn?: boolean;
-}) {
-  await setupEnv(config.spath);
-  let tempEnv: string = config.env;
-  if (isEmpty(tempEnv)) {
-    tempEnv = process.env['SERVERLESS_DEVS_ENV'];
-  }
-  if (isEmpty(tempEnv)) {
-    tempEnv = getConfig('env');
-  }
-  if (isEmpty(tempEnv)) return config.spath;
-  const sdir = path.dirname(config.spath);
-  const tempEnvYamlPath = path.join(sdir, `s.${tempEnv}.yaml`);
-  const tempEnvYamlData = await getYamlContent(tempEnvYamlPath);
-  // 文件不存在
-  if (isEmpty(tempEnvYamlData)) {
-    get(config, 'warn', true) &&
-      humanWarning(`s.${tempEnv}.yaml/s.${tempEnv}.yml file was not found.`);
-    return config.spath;
-  }
-  const doc = await parseYaml(fs.readFileSync(config.spath, 'utf8'));
-  const extend2Data = await transforData(doc, tempEnvYamlData);
-  const tempPath = path.join(sdir, '.s', `s.${tempEnv}.yaml`);
-  fs.ensureFileSync(tempPath);
-  fs.writeFileSync(tempPath, yaml.dump(extend2Data));
-  return tempPath;
 }
 
 async function transforData(a, b) {
@@ -129,35 +73,84 @@ async function transforData(a, b) {
     }
     return result;
   }
-  const result = extend2(true, a, extend2(true, await extendsYaml(b.extends), newObj));
+  const result = extend2(true, a, newObj);
   return deepCopy(result);
 }
 
-async function extendsYaml(data: string | string[]) {
+async function isYamlFile(filePath: string, options: { warn?: boolean } = {}) {
+  const { warn = true } = options;
+  if (typeof filePath !== 'string') {
+    return false;
+  }
+  if (fs.existsSync(filePath)) {
+    const arr = ['.yaml', '.yaml'];
+    if (arr.includes(path.extname(filePath))) {
+      try {
+        await yaml.load(fs.readFileSync(filePath, 'utf8'));
+        return true;
+      } catch (error) {
+        const filename = path.basename(filePath);
+        throw new Error(
+          JSON.stringify({
+            message: `${filename} format is incorrect`,
+            tips: `Please check the configuration of ${filename}, Serverless Devs' Yaml specification document can refer to：${chalk.underline(
+              'https://github.com/Serverless-Devs/Serverless-Devs/blob/master/docs/zh/yaml.md',
+            )}`,
+          }),
+        );
+      }
+    }
+    return false;
+  }
+  warn && humanWarning(`${filePath} file was not found.`);
+  return false;
+}
+
+async function extendsYaml(data: string | string[], options) {
   if (isEmpty(data)) return;
   let tmp = {};
   if (isArray(data)) {
     for (const item of data) {
-      if (isString(item) && fs.existsSync(item)) {
+      const bol = await isYamlFile(item, options);
+      if (bol) {
         const doc = await parseYaml(fs.readFileSync(item, 'utf8'));
         tmp = extend2(true, tmp, doc);
       }
     }
   }
-  if (isString(data) && fs.existsSync(data)) {
-    tmp = await parseYaml(fs.readFileSync(data, 'utf8'));
+
+  if (isString(data)) {
+    const bol = await isYamlFile(data, options);
+    if (bol) {
+      tmp = await parseYaml(fs.readFileSync(data, 'utf8'));
+    }
   }
   return tmp;
 }
 
+export async function transforYamlPath(spath: string = '', options?: { warn?: boolean }) {
+  await isYamlFile(spath, options);
+  await setupEnv(spath);
+  const data = await getYamlContent(spath);
+  if (isEmpty(data?.extends)) {
+    return checkEdition(spath);
+  }
+  const tmp = await extendsYaml(data.extends, options);
+  const extend2Data = await transforData(tmp, data);
+  const tempPath = path.join(path.dirname(spath), '.s', path.basename(spath));
+  fs.ensureFileSync(tempPath);
+  fs.writeFileSync(tempPath, yaml.dump(extend2Data));
+  return checkEdition(tempPath);
+}
+
 export async function getTemplatePath(spath: string = '') {
   const filePath = path.isAbsolute(spath) ? spath : path.resolve(spath);
-  if (await validateTemplateFile(filePath)) return filePath;
+  if (fs.existsSync(filePath)) return filePath;
   const cwd = process.cwd();
   const sYamlPath = path.join(cwd, 's.yaml');
-  if (await validateTemplateFile(sYamlPath)) return sYamlPath;
+  if (fs.existsSync(sYamlPath)) return sYamlPath;
   const sYmlPath = path.join(cwd, 's.yml');
-  if (await validateTemplateFile(sYmlPath)) return sYmlPath;
+  if (fs.existsSync(sYmlPath)) return sYmlPath;
   throw new Error(
     JSON.stringify({
       message: 'the s.yaml/s.yml file was not found.',

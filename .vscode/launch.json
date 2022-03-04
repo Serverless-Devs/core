@@ -41,8 +41,11 @@
                 "deploy",
                 "-y",
                 "--use-local",
-                "--env",
-                "prod"
+                "-t",
+                "s.prod.yaml",
+                "--debug",
+                "-a",
+                "test"
             ],
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}/test/fixtures/start-fc-http-nodejs12",
