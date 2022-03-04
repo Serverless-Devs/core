@@ -6,7 +6,8 @@ import os from 'os';
 import path from 'path';
 import fs from 'fs-extra';
 import minimist from 'minimist';
-import _ from 'lodash';
+import { includes } from 'lodash';
+import getYamlContent from './getYamlContent';
 
 const semver = require('semver');
 
@@ -14,17 +15,8 @@ const USER_HOME = os.homedir();
 
 // debug模式
 export const isDebugMode = () => {
-  function getDebugFromEnv() {
-    const temp_params = _.get(process, 'env.temp_params');
-    if (temp_params) {
-      const temp = temp_params.split(' ');
-      const debugList = temp.filter((item) => item === '--debug');
-      return debugList.length > 0;
-    }
-  }
-
   const args = minimist(process.argv.slice(2));
-  return args.debug || getDebugFromEnv();
+  return args.debug;
 };
 
 // s工具的家目录
@@ -39,7 +31,7 @@ export function getCicdEnv() {
 }
 
 export function isCiCdEnv() {
-  return _.includes(['cloud_shell', 'yunxiao', 'github', 'gitlab', 'jenkins'], getCicdEnv());
+  return includes(['cloud_shell', 'yunxiao', 'github', 'gitlab', 'jenkins'], getCicdEnv());
 }
 
 export function formatWorkspacePath(val: string) {
@@ -53,6 +45,13 @@ export function getConfig(key?: string, defaultValue?: any) {
     const val = key ? data[key] : data;
     return val || defaultValue;
   }
+}
+
+export async function getSetConfig(key: string, defaultValue?: any) {
+  const setConfigPath = path.join(getRootHome(), 'set-config.yml');
+  const res = await getYamlContent(setConfigPath);
+  if (!res) return defaultValue;
+  return res[key];
 }
 
 export function setConfig(key: string, value: any) {
@@ -111,8 +110,7 @@ export const getSComponentPath = () => path.join(getRootHome(), 'components');
 
 export const getCommand = () => {
   try {
-    const serverless_devs_temp_argv = JSON.parse(process.env['serverless_devs_temp_argv']);
-    const command = serverless_devs_temp_argv.slice(2);
+    const command = JSON.parse(process.env['serverless_devs_temp_argv']);
     return command ? `s ${command.join(' ')}` : undefined;
   } catch (error) {}
 };

@@ -1,4 +1,3 @@
-import { S_CURRENT } from '../../libs/common';
 import {
   getGithubReleases,
   getGithubReleasesLatest,
@@ -7,15 +6,21 @@ import {
 } from './service';
 import { RegistryEnum } from '../constant';
 import path from 'path';
-import { getSetConfig } from './utils';
 import downloadRequest from '../downloadRequest';
-import getYamlContent from '../getYamlContent';
 import fs from 'fs-extra';
 import inquirer from 'inquirer';
-import { get } from 'lodash';
+import { get, isEmpty, sortBy } from 'lodash';
 import rimraf from 'rimraf';
 import installDependency from '../installDependency';
-import { readJsonFile, getServerlessDevsTempArgv } from '../../libs/utils';
+import {
+  readJsonFile,
+  getServerlessDevsTempArgv,
+  getYamlContent,
+  S_CURRENT,
+  getSetConfig,
+} from '../../libs';
+import { getCredentialAliasList } from '../credential';
+import { replaceFun, getYamlPath, getTemplatekey } from './utils';
 
 interface IParams {
   source: string;
@@ -30,6 +35,28 @@ async function tryfun(f: Promise<any>) {
   } catch (error) {
     // ignore error, 不抛出错误，需要寻找不同的源
   }
+}
+
+async function preInit({ temporaryPath, applicationPath }) {
+  try {
+    const baseChildComponent = await require(path.join(temporaryPath, 'hook'));
+    const tempObj = {
+      tempPath: temporaryPath,
+      targetPath: applicationPath,
+    };
+    await baseChildComponent.preInit(tempObj);
+  } catch (e) {}
+}
+
+async function postInit({ temporaryPath, applicationPath }) {
+  try {
+    const baseChildComponent = await require(path.join(temporaryPath, 'hook'));
+    const tempObj = {
+      tempPath: temporaryPath,
+      targetPath: applicationPath,
+    };
+    await baseChildComponent.postInit(tempObj);
+  } catch (e) {}
 }
 
 async function loadServerless(params: IParams) {
@@ -81,25 +108,100 @@ async function handleDecompressFile({ zipball_url, applicationPath, name }) {
     extract: true,
     strip: 1,
   });
-  const hasPublishYaml = await getYamlContent(path.resolve(temporaryPath, 'publish.yaml'));
-  // preInit
-  try {
-    const baseChildComponent = await require(path.join(temporaryPath, 'hook'));
-    const tempObj = {
-      tempPath: temporaryPath,
-      targetPath: applicationPath,
-    };
-    await baseChildComponent.preInit(tempObj);
-    process.env[`${applicationPath}-post-init`] = JSON.stringify(tempObj);
-  } catch (e) {}
-  if (hasPublishYaml) {
+  preInit({ temporaryPath, applicationPath });
+  const publishYamlData = await getYamlContent(path.join(temporaryPath, 'publish.yaml'));
+  if (publishYamlData) {
     fs.copySync(`${temporaryPath}/src`, applicationPath);
     rimraf.sync(temporaryPath);
+    await initSconfig({ publishYamlData, applicationPath });
+    await initEnvConfig(applicationPath);
   } else {
     fs.moveSync(`${temporaryPath}`, applicationPath);
   }
   await needInstallDependency(applicationPath);
+  postInit({ temporaryPath, applicationPath });
   return applicationPath;
+}
+
+async function initEnvConfig(appPath: string) {
+  const envExampleFilePath = path.resolve(appPath, '.env.example');
+  if (!fs.existsSync(envExampleFilePath)) return;
+  const envConfig = fs.readFileSync(envExampleFilePath, 'utf-8');
+  const templateKeys = getTemplatekey(envConfig);
+  if (templateKeys.length === 0) return;
+  const promptOption = templateKeys.map((item) => {
+    const { name, desc } = item;
+    return {
+      type: 'input',
+      message: `please input ${desc || name}:`,
+      name,
+    };
+  });
+  const result = await inquirer.prompt(promptOption);
+  const newEnvConfig = replaceFun(envConfig, result);
+  fs.unlink(envExampleFilePath);
+  fs.writeFileSync(path.resolve(appPath, '.env'), newEnvConfig, 'utf-8');
+}
+
+async function initSconfig({ publishYamlData, applicationPath }) {
+  const properties = get(publishYamlData, 'Parameters.properties');
+  const requiredList = get(publishYamlData, 'Parameters.required');
+  const promptList = [];
+  if (properties) {
+    const rangeLeft = [];
+    const rangeRight = [];
+    for (const key in properties) {
+      const ele = properties[key];
+      const newEle = { ...ele, _key: key };
+      'x-range' in ele ? rangeLeft.push(newEle) : rangeRight.push(newEle);
+    }
+
+    const rangeList = sortBy(rangeLeft, (o) => o['x-range']).concat(rangeRight);
+    for (const item of rangeList) {
+      const name = item._key;
+      if (item.enum) {
+        promptList.push({
+          type: 'list',
+          name,
+          message: item.description,
+          choices: item.enum,
+          default: item.default,
+        });
+      } else if (item.type === 'string') {
+        promptList.push({
+          type: 'input',
+          message: item.description,
+          name,
+          default: item.default,
+          validate(input) {
+            if (requiredList.includes(name)) {
+              return input.length > 0 ? true : 'value cannot be empty.';
+            }
+            return true;
+          },
+        });
+      }
+    }
+  }
+  const credentialAliasList = await getCredentialAliasList();
+  const obj = isEmpty(credentialAliasList)
+    ? {
+        type: 'confirm',
+        name: 'access',
+        message: 'create credential?',
+        default: true,
+      }
+    : {
+        type: 'list',
+        name: 'access',
+        message: 'please select credential alias',
+        choices: credentialAliasList,
+      };
+  promptList.push(obj);
+  const result = await inquirer.prompt(promptList);
+  const spath = getYamlPath(applicationPath, 's');
+  const sYamlData = fs.readFileSync(spath, 'utf-8');
+  fs.writeFileSync(spath, replaceFun(sYamlData, result), 'utf-8');
 }
 
 async function needInstallDependency(cwd: string) {
@@ -109,8 +211,7 @@ async function needInstallDependency(cwd: string) {
     return await tryfun(installDependency({ cwd, production: false }));
   }
   const tempArgv = getServerlessDevsTempArgv();
-  if (tempArgv.find((i) => i === '--force-creation')) return;
-
+  if (tempArgv['force-creation']) return true;
   const res = await inquirer.prompt([
     {
       type: 'confirm',
@@ -127,7 +228,7 @@ async function needInstallDependency(cwd: string) {
 async function checkFileExists(filePath: string, fileName: string) {
   if (process.env.skipPrompt) return true;
   const tempArgv = getServerlessDevsTempArgv();
-  if (tempArgv.find((i) => i === '--force-creation')) return true;
+  if (tempArgv['force-creation']) return true;
   if (fs.existsSync(filePath)) {
     const res = await inquirer.prompt([
       {

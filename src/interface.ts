@@ -1,3 +1,4 @@
+import { ParsedArgs } from 'minimist';
 export interface IInputs {
   properties?: any;
   credentials?: any;
@@ -15,19 +16,11 @@ export interface IInputs {
   };
 }
 
-export interface IV1Inputs {
-  Properties?: any;
-  Credentials?: any;
-  Project?: {
-    ProjectName?: string;
-    Component?: string;
-    Provider?: string;
-    AccessAlias?: string;
-  };
-  Command?: string;
-  Args?: string;
-  State?: object;
-  Path?: {
-    ConfigPath?: string;
-  };
+export interface IGlobalParams extends ParsedArgs {
+  access?: string;
+  template?: string;
+  help?: boolean;
+  version?: boolean;
+  debug?: boolean;
+  'skip-actions'?: boolean;
 }

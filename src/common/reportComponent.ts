@@ -1,4 +1,3 @@
-import report from './report';
 export interface IReportComponent {
   uid: string;
   command: string;
@@ -6,10 +5,7 @@ export interface IReportComponent {
 }
 
 async function reportComponent(componentName: string, options: IReportComponent) {
-  report({
-    type: 'action',
-    content: `${componentName}||${JSON.stringify(options)}||${options.uid}`,
-  });
+  // 组件不在进行上报，暂时将此方法置空
 }
 
 export default reportComponent;

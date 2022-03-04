@@ -1,4 +1,3 @@
-import { underline } from 'chalk';
 export { default as request } from './request';
 export { default as downloadRequest } from './downloadRequest';
 export { default as reportComponent } from './reportComponent';
@@ -11,25 +10,10 @@ export * from './credential';
 export { getState, setState } from './state';
 export { default as modifyProps } from './modifyProps';
 export { default as installDependency } from './installDependency';
-export { default as getYamlContent } from './getYamlContent';
 export { default as report } from './report';
 export { default as publishHelp } from './publishHelp';
-export const makeUnderLine = (text: string) => {
-  const matchs = text.match(/http[s]?:\/\/[^\s]+/);
-  if (matchs) {
-    return text.replace(matchs[0], underline(matchs[0]));
-  } else {
-    return text;
-  }
-};
-export class CatchableError extends Error {
-  constructor(tips, message?: string) {
-    super(
-      JSON.stringify({
-        message,
-        tips,
-      }),
-    );
-    this.name = 'CatchableError';
-  }
-}
+export { default as parseYaml } from './parseYaml';
+export { default as modifyYaml } from './modifyYaml';
+export * from './execCommand';
+export { default as ignoreWalk } from './ignoreWalk';
+export { CatchableError } from './error';

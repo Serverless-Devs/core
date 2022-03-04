@@ -1,12 +1,11 @@
 import inquirer from 'inquirer';
 import getAccess from './getAccess';
 import setCredential from '../setCredential';
-import { get } from 'lodash';
+import { get, keys, filter } from 'lodash';
 import os from 'os';
 import path from 'path';
-import getYamlContent from '../../getYamlContent';
-import { logger, getServerlessDevsTempArgv } from '../../../libs/utils';
-import { getRootHome } from '../../../libs/common';
+import { getYamlContent, getRootHome } from '../../../libs';
+import { logger } from '../../../logger';
 import chalk from 'chalk';
 import { transformInputs, trim, getServerlessDevsAccessFromEnv } from './utils';
 
@@ -66,22 +65,9 @@ function formatValue(content: any, alias: string) {
 async function getCredentialWithAccess(access?: string, ...args: any[]) {
   const accessAlias = access || 'default';
   // 从环境变量获取
-  const AccountKeyIDFromEnv = get(process, 'env.AccessKeyID');
-  const AccessKeySecretFromEnv = get(process, 'env.AccessKeySecret');
-  const AccountIDFromEnv = get(process, 'env.AccountID');
-
-  if (AccountKeyIDFromEnv && AccessKeySecretFromEnv && AccountIDFromEnv) {
-    return trim({
-      Alias: get(process, 'env.AccessKeySecret', 'default'),
-      AccountID: AccountIDFromEnv,
-      AccessKeyID: AccountKeyIDFromEnv,
-      AccessKeySecret: AccessKeySecretFromEnv,
-      SecurityToken: get(process, 'env.SecurityToken'),
-    });
-  }
-  const serverlessDevsAccessFromEnv = getServerlessDevsAccessFromEnv(access);
-  if (serverlessDevsAccessFromEnv) {
-    return trim(serverlessDevsAccessFromEnv);
+  const data = await getCredentialFromEnv(access);
+  if (data) {
+    return data;
   }
 
   const accessContent = await getAccess(accessAlias);
@@ -94,9 +80,6 @@ async function getCredentialWithAccess(access?: string, ...args: any[]) {
     logger.debug(`access information: ${JSON.stringify(result, null, 2)}`);
     return trim(result);
   }
-  const argv = getServerlessDevsTempArgv();
-  if (argv[2] === 'config' && argv[3] === 'get') return;
-  if (argv[2] === 'init') return;
 
   const userInfo = await getYamlContent(path.join(getRootHome(), 'access.yaml'));
 
@@ -141,5 +124,44 @@ async function getCredentialWithAccess(access?: string, ...args: any[]) {
   logger.debug(`access information: ${JSON.stringify(result, null, 2)}`);
   return trim(result);
 }
+
+export async function getCredentialFromEnv(access?: string) {
+  require('dotenv').config();
+  const AccountKeyIDFromEnv = get(process, 'env.AccessKeyID');
+  const AccessKeySecretFromEnv = get(process, 'env.AccessKeySecret');
+  const AccountIDFromEnv = get(process, 'env.AccountID');
+  if (
+    AccountKeyIDFromEnv &&
+    AccessKeySecretFromEnv &&
+    AccountIDFromEnv &&
+    process.env.serverless_devs_temp_argv !== '["config","get"]'
+  ) {
+    return trim({
+      Alias: 'default_serverless_devs_access',
+      AccountID: AccountIDFromEnv,
+      AccessKeyID: AccountKeyIDFromEnv,
+      AccessKeySecret: AccessKeySecretFromEnv,
+      SecurityToken: get(process, 'env.SecurityToken'),
+    });
+  }
+  const serverlessDevsAccessFromEnv = getServerlessDevsAccessFromEnv(access);
+  if (serverlessDevsAccessFromEnv) {
+    return trim(serverlessDevsAccessFromEnv);
+  }
+}
+
+export const getCredentialAliasList = async () => {
+  let accessList = [];
+  const accessInfo = await getYamlContent(path.join(getRootHome(), 'access.yaml'));
+  if (accessInfo) {
+    accessList = keys(accessInfo);
+  }
+  const data = await getCredentialFromEnv();
+  if (data) {
+    accessList = filter(accessList, (o) => o !== data.Alias);
+    accessList.push(data.Alias);
+  }
+  return accessList;
+};
 
 export default getCredential;

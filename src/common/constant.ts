@@ -1,4 +1,4 @@
-export type Registry =
+export type IRegistry =
   | 'http://registry.devsapp.cn/simple'
   | 'https://api.github.com/repos'
   | 'http://registry.serverlessfans.cn/simple';
@@ -8,6 +8,8 @@ export enum RegistryEnum {
   serverlessOld = 'http://registry.serverlessfans.cn/simple',
   serverless = 'http://registry.devsapp.cn/simple',
 }
+
+export const DEFAULT_REGIRSTRY = 'http://registry.devsapp.cn/simple';
 
 export const FC_COMPONENT = [
   'domain',
@@ -19,4 +21,7 @@ export const FC_COMPONENT = [
   'fc-deploy',
   'fc-info',
   'fc-plan',
+  'oss',
 ];
+
+export const COMMON_VARIABLE_TYPE_REG = new RegExp(/\$\{(.*)\}/, 'i');

@@ -13,6 +13,6 @@ download
 *slow-spec.ts
 lib
 dist
-.vscode
 .s.lock
 website-base/
+.s

@@ -1,0 +1,9 @@
+# services:
+#   fc-deploy-test:
+#     props:
+#       service:
+#         name: fc-service-prod
+#         tracingConfig: Enable
+
+services.fc-deploy-test.props.service:
+  name: fc-service-pro-new

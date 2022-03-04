@@ -1,6 +1,6 @@
 import fs from 'fs-extra';
 import path from 'path';
-import { getSComponentPath } from '../../libs/common';
+import { getSComponentPath, getSetConfig } from '../../libs';
 import {
   buildComponentInstance,
   getGithubReleases,
@@ -8,11 +8,11 @@ import {
   getServerlessReleases,
   getServerlessReleasesLatest,
 } from './service';
-import { RegistryEnum, Registry, FC_COMPONENT } from '../constant';
-import { getSetConfig, getComponentVersion } from './utils';
+import { RegistryEnum, IRegistry, FC_COMPONENT } from '../constant';
+import { getComponentVersion } from './utils';
 import downloadRequest from '../downloadRequest';
 import installDependency from '../installDependency';
-import { get, find } from 'lodash';
+import { get, find, isEmpty } from 'lodash';
 import { downLoadDesCore } from './loadDevsCore';
 import { execDaemonWithTTL } from '../../execDaemon';
 
@@ -183,7 +183,7 @@ async function loadGithubWithNoVersion({ provider, name, componentName }) {
   return componentPath;
 }
 
-async function loadType(source: string, registry?: Registry, params?: any) {
+async function loadType(source: string, registry?: IRegistry, params?: any) {
   if (registry === RegistryEnum.serverless || registry === RegistryEnum.serverlessOld) {
     return await loadServerless(source, params);
   }
@@ -197,7 +197,7 @@ function isComponent(result) {
   return !!result;
 }
 
-async function loadRemoteComponent(source: string, registry?: Registry, params?: any) {
+async function loadRemoteComponent(source: string, registry?: IRegistry, params?: any) {
   let result: any;
   if (registry) {
     result = await loadType(source, registry, params);
@@ -229,7 +229,10 @@ async function loadRemoteComponent(source: string, registry?: Registry, params?:
   }
 }
 
-async function loadComponent(source: string, registry?: Registry, params?: any) {
+async function loadComponent(source: string, registry?: IRegistry, params?: any) {
+  if (isEmpty(source)) {
+    throw new Error('Please check the value of source in loadComponent function.');
+  }
   // 本地调试
   if (fs.existsSync(source)) {
     return await buildComponentInstance(source, params);

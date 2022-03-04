@@ -1,8 +1,8 @@
 node_modules
+lib
 docs
 test
 src
-lib
 jest.config.ts
 jest.setup.ts
 lerna.json

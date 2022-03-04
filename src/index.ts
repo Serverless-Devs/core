@@ -1,11 +1,11 @@
 process.setMaxListeners(0);
 (process as any).noDeprecation = true;
 
-export { IV1Inputs, IInputs } from './interface';
+export { IInputs } from './interface';
 export { Logger, ILogger } from './logger';
 export { HLogger } from './decorator';
 export * from './common';
-export * from './libs/common';
+export * from './libs';
 export { default as unzip } from 'decompress';
 export { default as chalk } from 'chalk';
 export { default as colors } from 'chalk';
@@ -22,10 +22,12 @@ export { default as semver } from 'semver';
 export { default as ip } from 'ip';
 export { default as ansiEscapes } from 'ansi-escapes';
 export { default as ignore } from 'ignore';
+export { default as minimatch } from 'minimatch';
 export { default as archiver } from 'archiver';
 export { default as tableLayout } from 'table-layout';
 export { default as httpx } from 'httpx';
 export { default as pEvent } from 'p-event';
-export { default as got } from 'got';
+export { default as got } from '@serverless-devs/got';
 export { default as lodash } from 'lodash';
 export { default as popCore } from '@alicloud/pop-core';
+export { default as extend2 } from 'extend2';

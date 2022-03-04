@@ -1,9 +1,8 @@
 import fs from 'fs-extra';
 import path from 'path';
 import yaml from 'js-yaml';
-import { merge } from '../libs/utils';
-import getYamlContent from './getYamlContent';
-import { S_CURRENT_HOME } from '../libs/common';
+import { merge } from 'lodash';
+import { S_CURRENT_HOME, getYamlContent } from '../libs';
 
 async function modifyProps(component: string, options: object, sPath: string) {
   if (!component || !sPath) {
