@@ -24,7 +24,7 @@ class ComponentExec {
     const accessPath = path.join(getRootHome(), 'access.yaml');
     const data = await getYamlContent(accessPath);
     // 密钥存在 才去获取密钥信息
-    if (data[projectConfig.access]) {
+    if (get(data, projectConfig.access)) {
       const credentials = await getCredential(projectConfig.access);
       this.projectConfig = assign({}, projectConfig, { credentials });
     }
