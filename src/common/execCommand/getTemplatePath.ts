@@ -144,8 +144,9 @@ export async function transforYamlPath(spath: string = '', options?: { warn?: bo
 }
 
 export async function getTemplatePath(spath: string = '') {
-  const filePath = path.isAbsolute(spath) ? spath : path.resolve(spath);
-  if (fs.existsSync(filePath)) return filePath;
+  if (fs.existsSync(spath)) {
+    return path.isAbsolute(spath) ? spath : path.resolve(spath);
+  }
   const cwd = process.cwd();
   const sYamlPath = path.join(cwd, 's.yaml');
   if (fs.existsSync(sYamlPath)) return sYamlPath;
