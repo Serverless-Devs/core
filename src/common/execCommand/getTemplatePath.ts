@@ -56,7 +56,7 @@ async function transforData(a, b) {
     if (findObj) {
       obj = obj.constructor === Array ? findObj.value : merge(oldVal, findObj.value);
     }
-    let result: any = obj.constructor === Array ? [] : {};
+    let result: any = isArray(obj) ? [] : {};
     if (typeof obj === 'object') {
       if (isPlainObject(obj)) {
         if (parentStr !== '') {
