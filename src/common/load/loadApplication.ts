@@ -9,7 +9,7 @@ import path from 'path';
 import downloadRequest from '../downloadRequest';
 import fs from 'fs-extra';
 import inquirer from 'inquirer';
-import { get, isEmpty, sortBy } from 'lodash';
+import _, { get, isEmpty, sortBy } from 'lodash';
 import rimraf from 'rimraf';
 import installDependency from '../installDependency';
 import {
@@ -43,6 +43,9 @@ async function preInit({ temporaryPath, applicationPath }) {
     const tempObj = {
       tempPath: temporaryPath,
       targetPath: applicationPath,
+      downloadRequest: downloadRequest,
+      fse: fs,
+      lodash: _,
     };
     await baseChildComponent.preInit(tempObj);
   } catch (e) {}
@@ -54,6 +57,9 @@ async function postInit({ temporaryPath, applicationPath }) {
     const tempObj = {
       tempPath: temporaryPath,
       targetPath: applicationPath,
+      downloadRequest: downloadRequest,
+      fse: fs,
+      lodash: _,
     };
     await baseChildComponent.postInit(tempObj);
   } catch (e) {}
@@ -108,7 +114,7 @@ async function handleDecompressFile({ zipball_url, applicationPath, name }) {
     extract: true,
     strip: 1,
   });
-  preInit({ temporaryPath, applicationPath });
+  await preInit({ temporaryPath, applicationPath });
   const publishYamlData = await getYamlContent(path.join(temporaryPath, 'publish.yaml'));
   if (publishYamlData) {
     fs.copySync(`${temporaryPath}/src`, applicationPath);
@@ -119,7 +125,7 @@ async function handleDecompressFile({ zipball_url, applicationPath, name }) {
     fs.moveSync(`${temporaryPath}`, applicationPath);
   }
   await needInstallDependency(applicationPath);
-  postInit({ temporaryPath, applicationPath });
+  await postInit({ temporaryPath, applicationPath });
   return applicationPath;
 }
 
