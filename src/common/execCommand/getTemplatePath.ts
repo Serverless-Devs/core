@@ -1,12 +1,11 @@
 import path from 'path';
 import fs from 'fs-extra';
 import { getYamlContent } from '../../libs';
-import { isEmpty, get, includes, isPlainObject, find, merge, isArray, isString } from 'lodash';
+import { isEmpty, get, isArray, isString, omit } from 'lodash';
 import yaml from 'js-yaml';
 import chalk from 'chalk';
 import extend2 from 'extend2';
 import { humanWarning } from './utils';
-import parseYaml from '../parseYaml';
 
 async function checkEdition(spath: string) {
   const filename = path.basename(spath);
@@ -35,46 +34,6 @@ async function setupEnv(templateFile: string) {
       require('dotenv').config({ path: path.join(codeUri, '.env') });
     }
   }
-}
-
-async function transforData(a, b) {
-  const newObj = {};
-  const tmpArr = [];
-  for (const key in b) {
-    if (includes(key, '.')) {
-      tmpArr.push({
-        key,
-        value: b[key],
-      });
-    } else if (key !== 'extends') {
-      newObj[key] = b[key];
-    }
-  }
-  function deepCopy(oldVal: any, parentStr = '') {
-    const findObj = find(tmpArr, (o) => o.key === parentStr);
-    let obj = oldVal;
-    if (findObj) {
-      obj = obj.constructor === Array ? findObj.value : merge(oldVal, findObj.value);
-    }
-    let result: any = isArray(obj) ? [] : {};
-    if (typeof obj === 'object') {
-      if (isPlainObject(obj)) {
-        if (parentStr !== '') {
-          parentStr = `${parentStr}.`;
-        }
-      }
-      for (const i in obj) {
-        let val = obj[i];
-        const tmpStr = isPlainObject(obj) ? `${parentStr}${i}` : `${parentStr}[${i}]`;
-        result[i] = typeof val === 'object' ? deepCopy(val, tmpStr) : val;
-      }
-    } else {
-      result = obj;
-    }
-    return result;
-  }
-  const result = extend2(true, a, newObj);
-  return deepCopy(result);
 }
 
 async function isYamlFile(filePath: string, options: { warn?: boolean } = {}) {
@@ -113,7 +72,7 @@ async function extendsYaml(data: string | string[], options) {
     for (const item of data) {
       const bol = await isYamlFile(item, options);
       if (bol) {
-        const doc = await parseYaml(fs.readFileSync(item, 'utf8'));
+        const doc = await getYamlContent(item);
         tmp = extend2(true, tmp, doc);
       }
     }
@@ -122,7 +81,7 @@ async function extendsYaml(data: string | string[], options) {
   if (isString(data)) {
     const bol = await isYamlFile(data, options);
     if (bol) {
-      tmp = await parseYaml(fs.readFileSync(data, 'utf8'));
+      tmp = await getYamlContent(data);
     }
   }
   return tmp;
@@ -136,7 +95,7 @@ export async function transforYamlPath(spath: string = '', options?: { warn?: bo
     return checkEdition(spath);
   }
   const tmp = await extendsYaml(data.extends, options);
-  const extend2Data = await transforData(tmp, data);
+  const extend2Data = extend2(true, tmp, omit(data, 'extends'));
   const tempPath = path.join(path.dirname(spath), '.s', path.basename(spath));
   fs.ensureFileSync(tempPath);
   fs.writeFileSync(tempPath, yaml.dump(extend2Data));
