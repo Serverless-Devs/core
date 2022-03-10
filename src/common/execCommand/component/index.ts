@@ -48,9 +48,9 @@ class ComponentExec {
     });
     const params = globalArgs?.skipActions ? [] : actions;
     this.hook = new Hook(params);
-    this.hook.executePreHook();
+    await this.hook.executePreHook();
     const outPutData = await this.executeCommand();
-    this.hook.executeAfterHook();
+    await this.hook.executeAfterHook();
     return outPutData;
   }
   private async executeCommand() {

@@ -63,6 +63,10 @@ function formatDebugData(data: string) {
     AccessKeySecrets.forEach((index) => {
       data = data.slice(0, index + 22) + '*'.repeat(24) + data.slice(index + 22 + 24);
     });
+    const SecretAccessKey = searchStr(data, 'SecretAccessKey');
+    SecretAccessKey.forEach((index) => {
+      data = data.slice(0, index + 22) + '*'.repeat(30) + data.slice(index + 22 + 30);
+    });
     return data;
   } catch (error) {
     return data;

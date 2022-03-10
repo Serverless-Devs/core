@@ -33,20 +33,25 @@ export function getServerlessDevsTempArgv(): any {
 export function getGlobalArgs(args: string[]): IGlobalParams {
   if (isEmpty(args)) return { _: [] };
   const newArgs = [];
-  const temp = {};
   const _argsObj = [];
   let lastVal: string;
+  let nextRemove: boolean;
   for (const index in args) {
     const val = trim(args[index]);
-    // 将参数放到_argsObj
+    // 将参数放到_argsObj, - 或者 -- 开头
     if (startsWith(val, '-') || _argsObj.length > 0) {
       _argsObj.push(val);
     }
-    // 对包含空格的参数 单独处理
+    if (nextRemove) {
+      nextRemove = false;
+      continue;
+    }
     if (/\s/.test(val) && startsWith(lastVal, '-')) {
-      const key = lastVal.slice(startsWith(lastVal, '--') ? 2 : 1);
-      temp[key] = val;
+      // 对包含空格的参数 单独处理
       newArgs.pop();
+    } else if (startsWith(val, '-') && !startsWith(val, '--') && val.length > 2) {
+      // 对类似 -la 的参数 单独处理
+      nextRemove = true;
     } else {
       newArgs.push(val);
     }
@@ -62,7 +67,7 @@ export function getGlobalArgs(args: string[]): IGlobalParams {
     string: ['access', 'template', 'env'],
     boolean: ['debug', 'skip-actions', 'help', 'version'],
   });
-  return assign({ _argsObj }, data, temp);
+  return assign({ _argsObj }, data);
 }
 
 export function readJsonFile(filePath: string) {

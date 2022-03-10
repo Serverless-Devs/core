@@ -21,7 +21,8 @@ class ParseYaml {
   }
   iteratorPair(item: Pair | YAMLMap | Scalar) {
     if (item instanceof Pair) {
-      if (item.value.type === 'MAP' || item.value.type === 'SEQ') {
+      const type = get(item, 'value.type');
+      if (type === 'MAP' || type === 'SEQ') {
         for (const obj of item.value.items) {
           this.iteratorPair(obj);
         }
@@ -40,9 +41,9 @@ class ParseYaml {
     }
   }
   setPairValue(item: Pair) {
-    if (isBoolean(item.value.value) || isNumber(item.value.value) || isEmpty(item.value.value))
-      return;
-    const regResult = item.value.value.match(COMMON_VARIABLE_TYPE_REG);
+    const value = get(item, 'value.value');
+    if (isBoolean(value) || isNumber(value) || isEmpty(value)) return;
+    const regResult = value.match(COMMON_VARIABLE_TYPE_REG);
     if (regResult) {
       const realValue = get(this.yamlJson, regResult[1], regResult[0]);
       item.value = YAML.createNode(realValue);

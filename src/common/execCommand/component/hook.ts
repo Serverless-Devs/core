@@ -38,11 +38,7 @@ class Hook {
   private async commandExecute(configs: IActionHook) {
     const execPath = configs.path;
     if (fs.existsSync(execPath) && fs.lstatSync(execPath).isDirectory()) {
-      try {
-        execa.sync(configs.run, { cwd: execPath, stdio: 'inherit', shell: true });
-      } catch (error) {
-        throw new Error(`Action: [${configs.run}] run error.`);
-      }
+      execa.sync(configs.run, { cwd: execPath, stdio: 'inherit', shell: true });
     }
   }
 }
