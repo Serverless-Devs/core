@@ -25,7 +25,9 @@ class ExecCommand {
     const originSpath = await getTemplatePath(syaml);
     const spath = await transforYamlPath(originSpath);
     const parse = new Parse(spath);
-    const parsedObj = await parse.init();
+    let parsedObj = await parse.init();
+    // 兼容vars下的魔法变量，需再次解析
+    parsedObj = await parse.init(parsedObj.realVariables);
     await this.warnEnvironmentVariables(parsedObj.realVariables);
     const analysis = new Analysis(parsedObj.realVariables, parsedObj.dependenciesMap);
     const executeOrderList = analysis.getProjectOrder();

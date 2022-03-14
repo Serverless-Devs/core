@@ -52,6 +52,35 @@
             "skipFiles": [
                 "<node_internals>/**"
             ]
+        },
+        {
+            "name": "s -h",
+            "type": "node",
+            "request": "launch",
+            "runtimeExecutable": "/Users/shihuali/workspace/s/bin/s",
+            "runtimeArgs": [
+                "-h",
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/test/fixtures/start-fc-http-nodejs12",
+            "skipFiles": [
+                "<node_internals>/**"
+            ]
+        },
+        {
+            "name": "s init",
+            "type": "node",
+            "request": "launch",
+            "runtimeExecutable": "/Users/shihuali/workspace/s/bin/s",
+            "runtimeArgs": [
+                "init",
+                "start-django"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/test/fixtures/.s",
+            "skipFiles": [
+                "<node_internals>/**"
+            ]
         }
     ]
 }

@@ -9,6 +9,7 @@ import path from 'path';
 import downloadRequest from '../downloadRequest';
 import fs from 'fs-extra';
 import inquirer from 'inquirer';
+import chalk from 'chalk';
 import _, { get, isEmpty, sortBy } from 'lodash';
 import rimraf from 'rimraf';
 import installDependency from '../installDependency';
@@ -21,6 +22,7 @@ import {
 } from '../../libs';
 import { getCredentialAliasList } from '../credential';
 import { replaceFun, getYamlPath, getTemplatekey } from './utils';
+const gray = chalk.hex('#8c8d91');
 
 interface IParams {
   source: string;
@@ -169,15 +171,17 @@ async function initSconfig({ publishYamlData, applicationPath }) {
         promptList.push({
           type: 'list',
           name,
-          message: item.description,
+          prefix: item.description ? `${gray(item.description)}\n${chalk.green('?')}` : undefined,
+          message: item.title,
           choices: item.enum,
           default: item.default,
         });
       } else if (item.type === 'string') {
         promptList.push({
           type: 'input',
-          message: item.description,
+          message: item.title,
           name,
+          prefix: item.description ? `${gray(item.description)}\n${chalk.green('?')}` : undefined,
           default: item.default,
           validate(input) {
             if (requiredList.includes(name)) {
