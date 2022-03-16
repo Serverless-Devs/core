@@ -40,9 +40,7 @@ export function replaceFun(str, obj) {
     for (let i = 0; i < arr.length; i++) {
       let keyContent = arr[i].replace(/{{|}}/g, '');
       let realKey = trim(keyContent.split('|')[0]);
-      if (obj[realKey]) {
-        str = str.replace(arr[i], obj[realKey]);
-      }
+      str = str.replace(arr[i], obj[realKey]);
     }
   }
   return str;

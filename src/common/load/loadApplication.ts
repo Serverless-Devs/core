@@ -152,6 +152,8 @@ async function initEnvConfig(appPath: string) {
 }
 
 async function initSconfig({ publishYamlData, applicationPath }) {
+  const tempArgv = getServerlessDevsTempArgv();
+  if (tempArgv['force-creation']) return;
   const properties = get(publishYamlData, 'Parameters.properties');
   const requiredList = get(publishYamlData, 'Parameters.required');
   const promptList = [];

@@ -74,7 +74,8 @@
             "runtimeExecutable": "/Users/shihuali/workspace/s/bin/s",
             "runtimeArgs": [
                 "init",
-                "start-django"
+                "cdn-backup-source",
+                "--force-creation"
             ],
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}/test/fixtures/.s",
