@@ -22,6 +22,7 @@ import {
 } from '../../libs';
 import { getCredentialAliasList } from '../credential';
 import { replaceFun, getYamlPath, getTemplatekey } from './utils';
+import parse from './parse';
 const gray = chalk.hex('#8c8d91');
 
 interface IParams {
@@ -121,7 +122,10 @@ async function handleDecompressFile({ zipball_url, applicationPath, name }) {
   if (publishYamlData) {
     fs.copySync(`${temporaryPath}/src`, applicationPath);
     rimraf.sync(temporaryPath);
-    await initSconfig({ publishYamlData, applicationPath });
+    const tempArgv = getServerlessDevsTempArgv();
+    tempArgv['parameters']
+      ? await initSconfigWithParam({ applicationPath })
+      : await initSconfig({ publishYamlData, applicationPath });
     await initEnvConfig(applicationPath);
   } else {
     fs.moveSync(`${temporaryPath}`, applicationPath);
@@ -152,8 +156,6 @@ async function initEnvConfig(appPath: string) {
 }
 
 async function initSconfig({ publishYamlData, applicationPath }) {
-  const tempArgv = getServerlessDevsTempArgv();
-  if (tempArgv['force-creation']) return;
   const properties = get(publishYamlData, 'Parameters.properties');
   const requiredList = get(publishYamlData, 'Parameters.required');
   const promptList = [];
@@ -213,7 +215,23 @@ async function initSconfig({ publishYamlData, applicationPath }) {
   const result = await inquirer.prompt(promptList);
   const spath = getYamlPath(applicationPath, 's');
   const sYamlData = fs.readFileSync(spath, 'utf-8');
-  fs.writeFileSync(spath, replaceFun(sYamlData, result), 'utf-8');
+  const newData = parse(result, sYamlData);
+  fs.writeFileSync(spath, newData, 'utf-8');
+}
+
+async function initSconfigWithParam({ applicationPath }) {
+  const spath = getYamlPath(applicationPath, 's');
+  const sYamlData = fs.readFileSync(spath, 'utf-8');
+  const tempArgv = getServerlessDevsTempArgv();
+  let result = {};
+  try {
+    result = JSON.parse(tempArgv['parameters']);
+  } catch (error) {
+    throw new Error('--parameters format error');
+  }
+
+  const newData = parse({ ...result, _appName: tempArgv['appName'] }, sYamlData);
+  fs.writeFileSync(spath, newData, 'utf-8');
 }
 
 async function needInstallDependency(cwd: string) {
@@ -223,7 +241,7 @@ async function needInstallDependency(cwd: string) {
     return await tryfun(installDependency({ cwd, production: false }));
   }
   const tempArgv = getServerlessDevsTempArgv();
-  if (tempArgv['force-creation']) return true;
+  if (tempArgv['parameters']) return true;
   const res = await inquirer.prompt([
     {
       type: 'confirm',
@@ -240,7 +258,7 @@ async function needInstallDependency(cwd: string) {
 async function checkFileExists(filePath: string, fileName: string) {
   if (process.env.skipPrompt) return true;
   const tempArgv = getServerlessDevsTempArgv();
-  if (tempArgv['force-creation']) return true;
+  if (tempArgv['parameters']) return true;
   if (fs.existsSync(filePath)) {
     const res = await inquirer.prompt([
       {
