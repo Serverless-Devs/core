@@ -46,24 +46,14 @@ class ParseYaml {
   setPairValue(item: Pair) {
     const value = get(item, 'value.value');
     const regResult = defaultTagRE.exec(value);
-    if (regResult) {
-      const realValue = get(
-        this.newJson,
-        trim(regResult[1]),
-        regResult[0] === '{{ access }}' ? 'default' : '',
-      );
-      item.value = YAML.createNode(realValue);
+    if (regResult && this.newJson.hasOwnProperty(trim(regResult[1]))) {
+      item.value = YAML.createNode(this.newJson[trim(regResult[1])]);
     }
   }
   setScalarValue(item: Scalar) {
     const regResult = defaultTagRE.exec(item.value);
-    if (regResult) {
-      const realValue = get(
-        this.newJson,
-        trim(regResult[1]),
-        regResult[0] === '{{ access }}' ? 'default' : '',
-      );
-      item.value = YAML.createNode(realValue);
+    if (regResult && this.newJson.hasOwnProperty(trim(regResult[1]))) {
+      item.value = YAML.createNode(this.newJson[trim(regResult[1])]);
     }
   }
 }

@@ -10,7 +10,7 @@ import downloadRequest from '../downloadRequest';
 import fs from 'fs-extra';
 import inquirer from 'inquirer';
 import chalk from 'chalk';
-import _, { get, isEmpty, sortBy } from 'lodash';
+import _, { get, isEmpty, sortBy, includes } from 'lodash';
 import rimraf from 'rimraf';
 import installDependency from '../installDependency';
 import {
@@ -124,7 +124,7 @@ async function handleDecompressFile({ zipball_url, applicationPath, name }) {
     rimraf.sync(temporaryPath);
     const tempArgv = getServerlessDevsTempArgv();
     tempArgv['parameters']
-      ? await initSconfigWithParam({ applicationPath })
+      ? await initSconfigWithParam({ publishYamlData, applicationPath })
       : await initSconfig({ publishYamlData, applicationPath });
     await initEnvConfig(applicationPath);
   } else {
@@ -188,7 +188,7 @@ async function initSconfig({ publishYamlData, applicationPath }) {
           prefix: item.description ? `${gray(item.description)}\n${chalk.green('?')}` : undefined,
           default: item.default,
           validate(input) {
-            if (requiredList.includes(name)) {
+            if (includes(requiredList, name)) {
               return input.length > 0 ? true : 'value cannot be empty.';
             }
             return true;
@@ -219,7 +219,7 @@ async function initSconfig({ publishYamlData, applicationPath }) {
   fs.writeFileSync(spath, newData, 'utf-8');
 }
 
-async function initSconfigWithParam({ applicationPath }) {
+async function initSconfigWithParam({ publishYamlData, applicationPath }) {
   const spath = getYamlPath(applicationPath, 's');
   const sYamlData = fs.readFileSync(spath, 'utf-8');
   const tempArgv = getServerlessDevsTempArgv();
@@ -229,8 +229,23 @@ async function initSconfigWithParam({ applicationPath }) {
   } catch (error) {
     throw new Error('--parameters format error');
   }
+  const properties = get(publishYamlData, 'Parameters.properties');
+  const requiredList = get(publishYamlData, 'Parameters.required', []);
+  const newObj = {};
+  if (properties) {
+    for (const key in properties) {
+      const ele = properties[key];
+      if (result.hasOwnProperty(key)) {
+        newObj[key] = result[key];
+      } else if (ele.hasOwnProperty('default')) {
+        newObj[key] = ele.default;
+      } else if (includes(requiredList, key)) {
+        throw new Error(`${key} parameter is required.`);
+      }
+    }
+  }
 
-  const newData = parse({ ...result, _appName: tempArgv['appName'] }, sYamlData);
+  const newData = parse({ ...newObj, _appName: tempArgv['appName'] }, sYamlData);
   fs.writeFileSync(spath, newData, 'utf-8');
 }
 
