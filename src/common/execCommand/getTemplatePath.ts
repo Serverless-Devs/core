@@ -40,7 +40,7 @@ async function isYamlFile(filePath: string) {
   if (!fs.existsSync(filePath)) {
     throw new Error(`${filePath} file was not found.`);
   }
-  const arr = ['.yaml', '.yaml'];
+  const arr = ['.yaml', '.yml'];
   if (!arr.includes(path.extname(filePath))) {
     throw new Error(`${filePath} file should be yaml or yml file.`);
   }
