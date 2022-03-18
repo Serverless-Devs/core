@@ -29,7 +29,7 @@ export function getProjectConfig(
   });
 }
 
-export function getCurrentPath(p: string, spath: string) {
+export function getCurrentPath(p: string = './', spath: string) {
   if (path.isAbsolute(p)) return p;
   const dir = path.dirname(spath);
   return p ? path.join(dir, p) : dir;
