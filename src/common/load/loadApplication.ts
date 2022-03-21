@@ -10,7 +10,7 @@ import downloadRequest from '../downloadRequest';
 import fs from 'fs-extra';
 import inquirer from 'inquirer';
 import chalk from 'chalk';
-import _, { get, isEmpty, sortBy, includes } from 'lodash';
+import _, { get, isEmpty, sortBy, includes, indexOf } from 'lodash';
 import rimraf from 'rimraf';
 import installDependency from '../installDependency';
 import {
@@ -122,8 +122,7 @@ async function handleDecompressFile({ zipball_url, applicationPath, name }) {
   if (publishYamlData) {
     fs.copySync(`${temporaryPath}/src`, applicationPath);
     rimraf.sync(temporaryPath);
-    const tempArgv = getServerlessDevsTempArgv();
-    tempArgv['parameters']
+    process.argv.includes('--parameters')
       ? await initSconfigWithParam({ publishYamlData, applicationPath })
       : await initSconfig({ publishYamlData, applicationPath });
     await initEnvConfig(applicationPath);
@@ -225,7 +224,8 @@ async function initSconfigWithParam({ publishYamlData, applicationPath }) {
   const tempArgv = getServerlessDevsTempArgv();
   let result = {};
   try {
-    result = JSON.parse(tempArgv['parameters']);
+    const index = indexOf(process.argv, '--parameters');
+    result = JSON.parse(process.argv[index + 1]);
   } catch (error) {
     throw new Error('--parameters format error');
   }
@@ -245,7 +245,8 @@ async function initSconfigWithParam({ publishYamlData, applicationPath }) {
     }
   }
 
-  const newData = parse({ ...newObj, _appName: tempArgv['appName'] }, sYamlData);
+  const accessObj = tempArgv['access'] ? { access: tempArgv['access'] } : {};
+  const newData = parse({ ...newObj, _appName: tempArgv['appName'], ...accessObj }, sYamlData);
   fs.writeFileSync(spath, newData, 'utf-8');
 }
 
@@ -255,8 +256,7 @@ async function needInstallDependency(cwd: string) {
   if (process.env.skipPrompt) {
     return await tryfun(installDependency({ cwd, production: false }));
   }
-  const tempArgv = getServerlessDevsTempArgv();
-  if (tempArgv['parameters']) return true;
+  if (process.argv.includes('--parameters')) return true;
   const res = await inquirer.prompt([
     {
       type: 'confirm',
@@ -272,8 +272,7 @@ async function needInstallDependency(cwd: string) {
 
 async function checkFileExists(filePath: string, fileName: string) {
   if (process.env.skipPrompt) return true;
-  const tempArgv = getServerlessDevsTempArgv();
-  if (tempArgv['parameters']) return true;
+  if (process.argv.includes('--parameters')) return true;
   if (fs.existsSync(filePath)) {
     const res = await inquirer.prompt([
       {
