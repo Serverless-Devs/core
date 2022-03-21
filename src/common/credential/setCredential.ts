@@ -8,6 +8,7 @@ import { logger } from '../../logger';
 import getAccountId from './getAccountId';
 import spinner from '../spinner';
 import { isEmpty } from 'lodash';
+import chalk from 'chalk';
 
 const Crypto = require('crypto-js');
 
@@ -215,7 +216,14 @@ async function setCredential(...args: any[]) {
         const data: any = await getAccountId(info);
         info.AccountID = data.AccountId;
       } catch (error) {
-        throw new Error('alibaba');
+        throw new Error(
+          JSON.stringify({
+            message: 'You are configuring an incorrect Alibaba Cloud SecretKey.',
+            tips: `Please check the accuracy of Alibaba Cloud SecretKey. documents: ${chalk.underline(
+              'https://github.com/Serverless-Devs/Serverless-Devs/blob/master/docs/zh/default_provider_config/alibabacloud.md',
+            )}`,
+          }),
+        );
       }
     }
 

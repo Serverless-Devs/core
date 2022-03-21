@@ -20,7 +20,7 @@ import {
   S_CURRENT,
   getSetConfig,
 } from '../../libs';
-import { getCredentialAliasList } from '../credential';
+import { getCredentialAliasList, setCredential } from '../credential';
 import { replaceFun, getYamlPath, getTemplatekey } from './utils';
 import parse from './parse';
 const gray = chalk.hex('#8c8d91');
@@ -196,6 +196,8 @@ async function initSconfig({ publishYamlData, applicationPath }) {
       }
     }
   }
+  const spath = getYamlPath(applicationPath, 's');
+  if (isEmpty(spath)) return;
   const credentialAliasList = await getCredentialAliasList();
   const obj = isEmpty(credentialAliasList)
     ? {
@@ -212,7 +214,10 @@ async function initSconfig({ publishYamlData, applicationPath }) {
       };
   promptList.push(obj);
   const result = await inquirer.prompt(promptList);
-  const spath = getYamlPath(applicationPath, 's');
+  if (isEmpty(credentialAliasList)) {
+    const data = await setCredential();
+    result.access = data?.Alias;
+  }
   const sYamlData = fs.readFileSync(spath, 'utf-8');
   const newData = parse(result, sYamlData);
   fs.writeFileSync(spath, newData, 'utf-8');
@@ -220,6 +225,7 @@ async function initSconfig({ publishYamlData, applicationPath }) {
 
 async function initSconfigWithParam({ publishYamlData, applicationPath }) {
   const spath = getYamlPath(applicationPath, 's');
+  if (isEmpty(spath)) return;
   const sYamlData = fs.readFileSync(spath, 'utf-8');
   const tempArgv = getServerlessDevsTempArgv();
   let result = {};
