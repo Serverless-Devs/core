@@ -358,7 +358,12 @@ async function loadApplication(
   if (appPath) return appPath;
 
   if (!appPath) {
-    throw new Error(`No ${source} app found, please make sure the app name or source is correct`);
+    throw new Error(
+      JSON.stringify({
+        message: `No ${source} app found.`,
+        tips: 'Please make sure the app name or source is correct.',
+      }),
+    );
   }
 }
 
