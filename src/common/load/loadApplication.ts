@@ -10,7 +10,7 @@ import downloadRequest from '../downloadRequest';
 import fs from 'fs-extra';
 import inquirer from 'inquirer';
 import chalk from 'chalk';
-import _, { get, isEmpty, sortBy } from 'lodash';
+import _, { get, isEmpty, sortBy, includes, indexOf } from 'lodash';
 import rimraf from 'rimraf';
 import installDependency from '../installDependency';
 import {
@@ -20,8 +20,9 @@ import {
   S_CURRENT,
   getSetConfig,
 } from '../../libs';
-import { getCredentialAliasList } from '../credential';
+import { getCredentialAliasList, setCredential } from '../credential';
 import { replaceFun, getYamlPath, getTemplatekey } from './utils';
+import parse from './parse';
 const gray = chalk.hex('#8c8d91');
 
 interface IParams {
@@ -121,7 +122,9 @@ async function handleDecompressFile({ zipball_url, applicationPath, name }) {
   if (publishYamlData) {
     fs.copySync(`${temporaryPath}/src`, applicationPath);
     rimraf.sync(temporaryPath);
-    await initSconfig({ publishYamlData, applicationPath });
+    process.argv.includes('--parameters')
+      ? await initSconfigWithParam({ publishYamlData, applicationPath })
+      : await initSconfig({ publishYamlData, applicationPath });
     await initEnvConfig(applicationPath);
   } else {
     fs.moveSync(`${temporaryPath}`, applicationPath);
@@ -184,7 +187,7 @@ async function initSconfig({ publishYamlData, applicationPath }) {
           prefix: item.description ? `${gray(item.description)}\n${chalk.green('?')}` : undefined,
           default: item.default,
           validate(input) {
-            if (requiredList.includes(name)) {
+            if (includes(requiredList, name)) {
               return input.length > 0 ? true : 'value cannot be empty.';
             }
             return true;
@@ -193,6 +196,8 @@ async function initSconfig({ publishYamlData, applicationPath }) {
       }
     }
   }
+  const spath = getYamlPath(applicationPath, 's');
+  if (isEmpty(spath)) return;
   const credentialAliasList = await getCredentialAliasList();
   const obj = isEmpty(credentialAliasList)
     ? {
@@ -209,9 +214,46 @@ async function initSconfig({ publishYamlData, applicationPath }) {
       };
   promptList.push(obj);
   const result = await inquirer.prompt(promptList);
-  const spath = getYamlPath(applicationPath, 's');
+  if (isEmpty(credentialAliasList)) {
+    const data = await setCredential();
+    result.access = data?.Alias;
+  }
   const sYamlData = fs.readFileSync(spath, 'utf-8');
-  fs.writeFileSync(spath, replaceFun(sYamlData, result), 'utf-8');
+  const newData = parse(result, sYamlData);
+  fs.writeFileSync(spath, newData, 'utf-8');
+}
+
+async function initSconfigWithParam({ publishYamlData, applicationPath }) {
+  const spath = getYamlPath(applicationPath, 's');
+  if (isEmpty(spath)) return;
+  const sYamlData = fs.readFileSync(spath, 'utf-8');
+  const tempArgv = getServerlessDevsTempArgv();
+  let result = {};
+  try {
+    const index = indexOf(process.argv, '--parameters');
+    result = JSON.parse(process.argv[index + 1]);
+  } catch (error) {
+    throw new Error('--parameters format error');
+  }
+  const properties = get(publishYamlData, 'Parameters.properties');
+  const requiredList = get(publishYamlData, 'Parameters.required', []);
+  const newObj = {};
+  if (properties) {
+    for (const key in properties) {
+      const ele = properties[key];
+      if (result.hasOwnProperty(key)) {
+        newObj[key] = result[key];
+      } else if (ele.hasOwnProperty('default')) {
+        newObj[key] = ele.default;
+      } else if (includes(requiredList, key)) {
+        throw new Error(`${key} parameter is required.`);
+      }
+    }
+  }
+
+  const accessObj = tempArgv['access'] ? { access: tempArgv['access'] } : {};
+  const newData = parse({ ...newObj, _appName: tempArgv['appName'], ...accessObj }, sYamlData);
+  fs.writeFileSync(spath, newData, 'utf-8');
 }
 
 async function needInstallDependency(cwd: string) {
@@ -220,8 +262,7 @@ async function needInstallDependency(cwd: string) {
   if (process.env.skipPrompt) {
     return await tryfun(installDependency({ cwd, production: false }));
   }
-  const tempArgv = getServerlessDevsTempArgv();
-  if (tempArgv['force-creation']) return true;
+  if (process.argv.includes('--parameters')) return true;
   const res = await inquirer.prompt([
     {
       type: 'confirm',
@@ -237,8 +278,7 @@ async function needInstallDependency(cwd: string) {
 
 async function checkFileExists(filePath: string, fileName: string) {
   if (process.env.skipPrompt) return true;
-  const tempArgv = getServerlessDevsTempArgv();
-  if (tempArgv['force-creation']) return true;
+  if (process.argv.includes('--parameters')) return true;
   if (fs.existsSync(filePath)) {
     const res = await inquirer.prompt([
       {
@@ -318,7 +358,12 @@ async function loadApplication(
   if (appPath) return appPath;
 
   if (!appPath) {
-    throw new Error(`No ${source} app found, please make sure the app name or source is correct`);
+    throw new Error(
+      JSON.stringify({
+        message: `No ${source} app found.`,
+        tips: 'Please make sure the app name or source is correct.',
+      }),
+    );
   }
 }
 
