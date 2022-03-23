@@ -19,6 +19,20 @@
             ]
         },
         {
+            "name": "downloadRequest",
+            "type": "node",
+            "request": "launch",
+            "runtimeExecutable": "ts-node",
+            "runtimeArgs": [
+                "downloadRequest.ts"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/test/fixtures",
+            "skipFiles": [
+                "<node_internals>/**"
+            ]
+        },
+        {
             "name": "modifyYaml",
             "type": "node",
             "request": "launch",
@@ -74,8 +88,7 @@
             "runtimeExecutable": "/Users/shihuali/workspace/s/bin/s",
             "runtimeArgs": [
                 "init",
-                "cdn-backup-source",
-                "--force-creation"
+                "strapi",
             ],
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}/test/fixtures/.s",
