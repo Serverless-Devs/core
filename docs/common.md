@@ -108,28 +108,6 @@ function test_request_hint() {
 downloadRequest(url, outDir, { extract: true, strip: 1 });
 ```
 
-## report
-
-`report`接口，用于组件的部分数据上报。
-
-示例代码：
-
-```typescript
-const { reportComponent, HLogger, ILogger } = require('@serverless-devs/core');
-
-class ReportDemo {
-  @HLogger('S-CORE') logger: ILogger;
-  async component() {
-    await reportComponent('website', {
-      command: 'deploy',
-      uid: '123435',
-      remark: 'test',
-    });
-    this.logger.info('成功上报');
-  }
-}
-```
-
 ## loadComponent
 
 `loadComponent`接口是 `load` 方法的`别名`，用于加载组件，加载后的组件会下载到 `~/.s/components` 目录下面

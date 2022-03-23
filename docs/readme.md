@@ -90,7 +90,6 @@ class LoggerDemo {
 
 - [common](./common.md): 通用接口
     - [request](./common.md#request)/[downloadRequest](./common.md#downloadrequest): HTTP 请求
-    - [report](./common.md#report) : 组件上报/错误上报
     - [loadComponent](./common.md#loadComponent) : 组件加载
     - [loadApplication](./common.md#loadApplication) : 应用加载
     - [spinner](./common.md#spinner) : 状态展示
