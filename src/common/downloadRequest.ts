@@ -68,25 +68,31 @@ export default async (url: string, dest: string, options: IOptions = {}) => {
     const { filePath, spin } = await download(url, dest, options);
     if (extract) {
       let timer;
-      try {
-        let num = 0;
-        timer = setInterval(() => {
-          const str = '.'.repeat(num);
-          num++;
-          if (num > 3) {
-            num = 0;
+      let num = 0;
+      timer = setInterval(() => {
+        const str = '.'.repeat(num);
+        num++;
+        if (num > 3) {
+          num = 0;
+        }
+        spin.text = filename ? `${filename} file unzipping${str}` : `file unzipping${str}`;
+      }, 300);
+      // node-v12.22.1: end of central directory record signature not found
+      for (let index = 0; index < 3; index++) {
+        try {
+          await decompress(filePath, dest, restOpts);
+          clearInterval(timer);
+          await fs.unlink(filePath);
+          const text = 'file decompression completed';
+          spin.succeed(filename ? `${filename} ${text}` : text);
+          break;
+        } catch (error) {
+          if (index === 2) {
+            clearInterval(timer);
+            spin.stop();
+            throw error;
           }
-          spin.text = filename ? `${filename} file unzipping${str}` : `file unzipping${str}`;
-        }, 300);
-        await decompress(filePath, dest, restOpts);
-        clearInterval(timer);
-        await fs.unlink(filePath);
-        const text = 'file decompression completed';
-        spin.succeed(filename ? `${filename} ${text}` : text);
-      } catch (error) {
-        clearInterval(timer);
-        spin.stop();
-        throw error;
+        }
       }
     } else {
       spin.succeed();
