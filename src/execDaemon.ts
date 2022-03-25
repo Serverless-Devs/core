@@ -1,6 +1,7 @@
 import path from 'path';
 import { spawn } from 'child_process';
 import fs from 'fs-extra';
+import execa from 'execa';
 const TTL = 10 * 60 * 1000;
 
 interface IConfig {
@@ -15,6 +16,16 @@ function readJsonFile(filePath: string) {
     const data = fs.readFileSync(filePath, 'utf8');
     return JSON.parse(data);
   }
+}
+
+export function exec(filename: string, args: string, config) {
+  const filePath = path.join(__dirname, 'daemon', filename);
+  if (!fs.existsSync(filePath)) return;
+  execa.sync(`${process.execPath} ${filePath} ${args}`, {
+    stdio: 'inherit',
+    env: { ...process.env, ...config },
+    shell: true,
+  });
 }
 
 export function execDaemon(filename: string, config?: IConfig) {

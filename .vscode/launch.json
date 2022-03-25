@@ -47,6 +47,20 @@
             ]
         },
         {
+            "name": "commandParse.ts",
+            "type": "node",
+            "request": "launch",
+            "runtimeExecutable": "ts-node",
+            "runtimeArgs": [
+                "commandParse.ts"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/test/fixtures",
+            "skipFiles": [
+                "<node_internals>/**"
+            ]
+        },
+        {
             "name": "s deploy",
             "type": "node",
             "request": "launch",
@@ -55,11 +69,6 @@
                 "deploy",
                 "-y",
                 "--use-local",
-                "-t",
-                "s.prod.yaml",
-                "--debug",
-                "-a",
-                "test"
             ],
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}/test/fixtures/start-fc-http-nodejs12",

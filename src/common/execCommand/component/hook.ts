@@ -1,34 +1,44 @@
-import fs from 'fs';
+import fs from 'fs-extra';
 import { logger } from '../../../logger';
-import { IActionHook } from '../interface';
+import { IActionHook, IInputs } from '../interface';
 import execa from 'execa';
+import { exec } from '../../../execDaemon';
+import path from 'path';
+import { get, isEmpty } from 'lodash';
+import { getGlobalArgs } from '../../../libs';
+import { loadComponent } from '../../load';
+import { throwError } from '../utils';
+import chalk from 'chalk';
 
 class Hook {
   private preHooks: IActionHook[] = [];
   private afterHooks: IActionHook[] = [];
+  private output: any;
 
-  constructor(hooks: IActionHook[] = []) {
+  constructor(hooks: IActionHook[] = [], private inputs: IInputs) {
     for (const hook of hooks) {
       hook.pre ? this.preHooks.push(hook) : this.afterHooks.push(hook);
     }
   }
-
   async executePreHook() {
+    let temp;
     if (this.preHooks.length > 0) {
       logger.info('Start the pre-action');
       for (const hook of this.preHooks) {
-        logger.info(`Action: ${hook.run || hook.plugin}`);
-        await this.commandExecute(hook);
+        logger.info(`Action: ${hook.value}`);
+        temp = await this.commandExecute(hook);
       }
       logger.info('End the pre-action');
     }
+    return temp;
   }
 
-  async executeAfterHook() {
+  async executeAfterHook({ output }) {
     if (this.afterHooks.length > 0) {
+      this.output = output;
       logger.info('Start the after-action');
       for (const hook of this.afterHooks) {
-        logger.info(`Action: ${hook.run || hook.plugin}`);
+        logger.info(`Action: ${hook.value}`);
         await this.commandExecute(hook);
       }
       logger.info('End the after-action');
@@ -36,10 +46,60 @@ class Hook {
   }
 
   private async commandExecute(configs: IActionHook) {
-    const execPath = configs.path;
-    if (fs.existsSync(execPath) && fs.lstatSync(execPath).isDirectory()) {
-      execa.sync(configs.run, { cwd: execPath, stdio: 'inherit', shell: true });
+    if (configs.type === 'run') {
+      const execPath = configs.path;
+      if (fs.existsSync(execPath) && fs.lstatSync(execPath).isDirectory()) {
+        execa.sync(configs.value, { cwd: execPath, stdio: 'inherit', shell: true });
+      }
     }
+
+    if (configs.type === 'component') {
+      const filePath = path.join(
+        path.dirname(get(this.inputs, 'path.configPath')),
+        '.s',
+        `${get(this.inputs, 'project.projectName')}-action-data.json`,
+      );
+      fs.ensureFileSync(filePath);
+      exec('action.js', configs.value, { filePath });
+      return await this.execComponent({ filePath });
+    }
+  }
+
+  private async execComponent({ filePath }) {
+    const newJson = fs.readJSONSync(filePath);
+    const { _: rawData, _argsObj } = getGlobalArgs(newJson.argv.slice(2));
+    const [componentName, method] = rawData;
+    if (isEmpty(method)) return;
+    const instance = await loadComponent(componentName);
+
+    if (instance[method]) {
+      // 方法存在，执行报错，退出码101
+      try {
+        const newInputs = {
+          ...this.inputs,
+          args: _argsObj.join(' '),
+          argsObj: _argsObj,
+          output: this.output,
+        };
+        this.output = await instance[method](newInputs);
+        return this.output;
+      } catch (error) {
+        throwError({
+          error,
+          serviceName: get(this.inputs, 'project.projectName'),
+        });
+      }
+    }
+    // 方法不存在，此时系统将会认为是未找到组件方法，系统的exit code为100；
+    throw new Error(
+      JSON.stringify({
+        code: 100,
+        message: `The [${method}] command was not found.`,
+        tips: `Please check the component ${componentName} has the ${method} method. Serverless Devs documents：${chalk.underline(
+          'https://github.com/Serverless-Devs/Serverless-Devs/blob/master/docs/zh/command',
+        )}`,
+      }),
+    );
   }
 }
 
