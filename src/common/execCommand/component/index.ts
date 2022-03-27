@@ -56,27 +56,30 @@ class ComponentExec {
     this.hook = new Hook(params, inputs);
 
     const preHookOutData = await this.hook.executePreHook();
-    const outPutData = await this.executeCommand({ output: preHookOutData });
+    const outPutData = await this.executeCommand(preHookOutData);
     await this.hook.executeAfterHook({ output: outPutData });
     return outPutData;
   }
-  private async executeCommand({ output }) {
+  private async executeCommand(payload: { type: 'component' | 'plugin'; data: any }) {
     const { method, spath, args, serverName } = this.config;
 
-    const inputs = getInputs(this.projectConfig, {
-      method,
-      args,
-      spath,
-      serverName,
-      output,
-    });
+    const inputs =
+      payload.type === 'plugin'
+        ? payload.data
+        : getInputs(this.projectConfig, {
+            method,
+            args,
+            spath,
+            serverName,
+            output: payload.data,
+          });
 
     this.debugForJest(inputs, { method });
 
     const registry: IRegistry = await getSetConfig('registry', DEFAULT_REGIRSTRY);
     const instance = await loadComponent(this.projectConfig.component, registry);
     const res = await this.invokeMethod(instance, inputs);
-    return res && JSON.parse(JSON.stringify(res));
+    return typeof res === 'object' ? JSON.parse(JSON.stringify(res)) : res;
   }
   private debugForJest(inputs, { method }) {
     if (process.env['serverless-devs-debug'] === 'true') {

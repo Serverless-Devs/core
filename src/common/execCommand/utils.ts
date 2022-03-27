@@ -37,8 +37,9 @@ export function getCurrentPath(p: string = './', spath: string) {
 
 export function getActions(configs: IProjectConfig, { method, spath }): IActionHook[] {
   function validate(hook: IActionHook): IActionType {
-    if ('run' in hook && !('component' in hook)) return 'run';
-    if ('component' in hook && !('run' in hook)) return 'component';
+    if ('run' in hook && !('component' in hook) && !('plugin' in hook)) return 'run';
+    if ('component' in hook && !('run' in hook) && !('plugin' in hook)) return 'component';
+    if ('plugin' in hook && !('run' in hook) && !('component' in hook)) return 'plugin';
     throw new Error(
       JSON.stringify({
         message: 'actions configuration is incorrect.',
@@ -64,11 +65,23 @@ export function getActions(configs: IProjectConfig, { method, spath }): IActionH
             pre: start === 'pre' ? true : false,
           };
           hooks.push(obj);
-        } else if (type === 'component') {
+        }
+
+        if (type === 'component') {
           const obj = {
             type,
             value: hookDetail[type],
             pre: start === 'pre' ? true : false,
+          };
+          hooks.push(obj);
+        }
+
+        if (type === 'plugin') {
+          const obj = {
+            type,
+            value: hookDetail[type],
+            pre: start === 'pre' ? true : false,
+            args: hookDetail.args,
           };
           hooks.push(obj);
         }

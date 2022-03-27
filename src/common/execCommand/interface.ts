@@ -31,12 +31,13 @@ export interface IComponentConfig {
   specifyService?: boolean;
 }
 
-export type IActionType = 'run' | 'component';
+export type IActionType = 'run' | 'component' | 'plugin';
 export interface IActionHook {
   type: IActionType;
   value: string;
   pre: boolean;
   path?: string;
+  args?: string;
 }
 
 export interface IInputs {

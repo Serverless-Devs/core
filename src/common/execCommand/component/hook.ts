@@ -61,7 +61,20 @@ class Hook {
       );
       fs.ensureFileSync(filePath);
       exec('action.js', configs.value, { filePath });
-      return await this.execComponent({ filePath });
+      const result = await this.execComponent({ filePath });
+      return {
+        type: configs.type,
+        data: result,
+      };
+    }
+
+    if (configs.type === 'plugin') {
+      const instance = await loadComponent(configs.value);
+      const result = await instance(this.inputs, configs.args);
+      return {
+        type: configs.type,
+        data: result,
+      };
     }
   }
 
