@@ -4,7 +4,7 @@ import { IActionHook, IInputs } from '../interface';
 import execa from 'execa';
 import { exec } from '../../../execDaemon';
 import path from 'path';
-import { get, isEmpty } from 'lodash';
+import { filter, get, isEmpty, join, includes } from 'lodash';
 import { getGlobalArgs } from '../../../libs';
 import { loadComponent } from '../../load';
 import { throwError } from '../utils';
@@ -66,19 +66,19 @@ class Hook {
   }
 
   private async execComponent({ filePath }) {
-    const newJson = fs.readJSONSync(filePath);
-    const { _: rawData, _argsObj } = getGlobalArgs(newJson.argv.slice(2));
+    const { argv } = fs.readJSONSync(filePath);
+    const { _: rawData } = getGlobalArgs(argv.slice(2));
     const [componentName, method] = rawData;
+    const argsObj = filter(argv.slice(2), (o) => !includes([componentName, method], o));
     if (isEmpty(method)) return;
     const instance = await loadComponent(componentName);
-
     if (instance[method]) {
       // 方法存在，执行报错，退出码101
       try {
         const newInputs = {
           ...this.inputs,
-          args: _argsObj.join(' '),
-          argsObj: _argsObj,
+          args: join(argsObj, ' '),
+          argsObj,
           output: this.output,
         };
         this.output = await instance[method](newInputs);
