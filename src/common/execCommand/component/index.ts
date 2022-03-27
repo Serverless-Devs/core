@@ -64,14 +64,14 @@ class ComponentExec {
     const { method, spath, args, serverName } = this.config;
 
     const inputs =
-      payload.type === 'plugin'
-        ? payload.data
+      get(payload, 'type') === 'plugin'
+        ? get(payload, 'data')
         : getInputs(this.projectConfig, {
             method,
             args,
             spath,
             serverName,
-            output: payload.data,
+            output: get(payload, 'data'),
           });
 
     this.debugForJest(inputs, { method });
