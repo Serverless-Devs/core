@@ -19,12 +19,40 @@
             ]
         },
         {
+            "name": "downloadRequest",
+            "type": "node",
+            "request": "launch",
+            "runtimeExecutable": "ts-node",
+            "runtimeArgs": [
+                "downloadRequest.ts"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/test/fixtures",
+            "skipFiles": [
+                "<node_internals>/**"
+            ]
+        },
+        {
             "name": "modifyYaml",
             "type": "node",
             "request": "launch",
             "runtimeExecutable": "ts-node",
             "runtimeArgs": [
                 "yaml/modifyYaml.ts"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/test/fixtures",
+            "skipFiles": [
+                "<node_internals>/**"
+            ]
+        },
+        {
+            "name": "commandParse.ts",
+            "type": "node",
+            "request": "launch",
+            "runtimeExecutable": "ts-node",
+            "runtimeArgs": [
+                "commandParse.ts"
             ],
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}/test/fixtures",
@@ -41,11 +69,6 @@
                 "deploy",
                 "-y",
                 "--use-local",
-                "-t",
-                "s.prod.yaml",
-                "--debug",
-                "-a",
-                "test"
             ],
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}/test/fixtures/start-fc-http-nodejs12",
@@ -74,8 +97,7 @@
             "runtimeExecutable": "/Users/shihuali/workspace/s/bin/s",
             "runtimeArgs": [
                 "init",
-                "cdn-backup-source",
-                "--force-creation"
+                "strapi",
             ],
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}/test/fixtures/.s",

@@ -2,7 +2,7 @@ import { IComponentConfig, IInputs, IProjectConfig } from '../interface';
 import { getRootHome, getSetConfig, getYamlContent } from '../../../libs';
 import path from 'path';
 import { getCredential, getCredentialFromEnv } from '../../credential';
-import { getActions, getInputs, humanWarning } from '../utils';
+import { getActions, getInputs, humanWarning, throwError } from '../utils';
 import Hook from './hook';
 import { loadComponent } from '../../load';
 import { DEFAULT_REGIRSTRY, IRegistry } from '../../constant';
@@ -14,7 +14,7 @@ import { get } from 'lodash';
 
 class ComponentExec {
   protected hook: Hook;
-  projectConfig: IProjectConfig;
+  private projectConfig: IProjectConfig;
 
   constructor(private config: IComponentConfig) {
     this.projectConfig = config.projectConfig;
@@ -34,7 +34,7 @@ class ComponentExec {
     }
   }
   async init() {
-    const { method, spath, globalArgs } = this.config;
+    const { method, spath, globalArgs, args, serverName } = this.config;
     await this.handleCredentials();
     const AccountID = get(this.projectConfig, 'credentials.AccountID');
     report({
@@ -46,29 +46,40 @@ class ComponentExec {
       method,
       spath,
     });
-    const params = globalArgs?.skipActions ? [] : actions;
-    this.hook = new Hook(params);
-    await this.hook.executePreHook();
-    const outPutData = await this.executeCommand();
-    await this.hook.executeAfterHook();
-    return outPutData;
-  }
-  private async executeCommand() {
-    const { method, spath, args, serverName } = this.config;
-
     const inputs = getInputs(this.projectConfig, {
       method,
       args,
       spath,
       serverName,
     });
+    const params = globalArgs?.skipActions ? [] : actions;
+    this.hook = new Hook(params, inputs);
+
+    const preHookOutData = await this.hook.executePreHook();
+    const outPutData = await this.executeCommand(preHookOutData);
+    await this.hook.executeAfterHook({ output: outPutData });
+    return outPutData;
+  }
+  private async executeCommand(payload: { type: 'component' | 'plugin'; data: any }) {
+    const { method, spath, args, serverName } = this.config;
+
+    const inputs =
+      get(payload, 'type') === 'plugin'
+        ? get(payload, 'data')
+        : getInputs(this.projectConfig, {
+            method,
+            args,
+            spath,
+            serverName,
+            output: get(payload, 'data'),
+          });
 
     this.debugForJest(inputs, { method });
 
     const registry: IRegistry = await getSetConfig('registry', DEFAULT_REGIRSTRY);
     const instance = await loadComponent(this.projectConfig.component, registry);
     const res = await this.invokeMethod(instance, inputs);
-    return res && JSON.parse(JSON.stringify(res));
+    return typeof res === 'object' ? JSON.parse(JSON.stringify(res)) : res;
   }
   private debugForJest(inputs, { method }) {
     if (process.env['serverless-devs-debug'] === 'true') {
@@ -99,7 +110,7 @@ class ComponentExec {
           const result = await instance[method](inputs);
           return result;
         } catch (error) {
-          this.throwError({
+          throwError({
             error,
             serviceName: this.projectConfig.serviceName,
           });
@@ -125,7 +136,7 @@ class ComponentExec {
         const result = await instance[method](inputs);
         return result;
       } catch (error) {
-        this.throwError({
+        throwError({
           error,
           serviceName: this.projectConfig.serviceName,
         });
@@ -135,34 +146,6 @@ class ComponentExec {
       const tips = `Please check the component ${this.projectConfig.component} has the ${method} method. Serverless Devs documents：https://github.com/Serverless-Devs/Serverless-Devs/blob/master/docs/zh/command`;
       humanWarning(tips);
       logger.log(chalk.grey(`The [${method}] command was not found.\n`));
-    }
-  }
-  throwError(params: { error: any; serviceName: string }) {
-    const { error, serviceName } = params;
-
-    let jsonMsg;
-    try {
-      jsonMsg = JSON.parse(error.message);
-    } catch (error) {}
-
-    if (jsonMsg && jsonMsg.tips) {
-      throw new Error(
-        JSON.stringify({
-          code: 101,
-          message: jsonMsg.message,
-          tips: jsonMsg.tips,
-          prefix: `Project ${serviceName} failed to execute:`,
-        }),
-      );
-    } else {
-      throw new Error(
-        JSON.stringify({
-          code: 101,
-          message: error.message,
-          stack: error.stack,
-          prefix: `Project ${serviceName} failed to execute:`,
-        }),
-      );
     }
   }
 }

@@ -10,26 +10,23 @@ import downloadRequest from '../downloadRequest';
 import fs from 'fs-extra';
 import inquirer from 'inquirer';
 import chalk from 'chalk';
-import _, { get, isEmpty, sortBy, includes, indexOf } from 'lodash';
+import _, { get, isEmpty, sortBy, includes, omit } from 'lodash';
 import rimraf from 'rimraf';
 import installDependency from '../installDependency';
-import {
-  readJsonFile,
-  getServerlessDevsTempArgv,
-  getYamlContent,
-  S_CURRENT,
-  getSetConfig,
-} from '../../libs';
+import { readJsonFile, getYamlContent, S_CURRENT, getSetConfig } from '../../libs';
 import { getCredentialAliasList, setCredential } from '../credential';
 import { replaceFun, getYamlPath, getTemplatekey } from './utils';
 import parse from './parse';
 const gray = chalk.hex('#8c8d91');
 
 interface IParams {
-  source: string;
-  registry?: string;
-  target?: string;
-  name?: string;
+  source: string; // 组件名称
+  registry?: string; // 源
+  target?: string; // 下载目录路径
+  name?: string; // 下载文件的命名
+  parameters?: object; // s.yaml文件接收的入参
+  appName?: string; // s.yaml文件里的项目名称
+  access?: string; // s.yaml文件里的密钥
 }
 
 async function tryfun(f: Promise<any>) {
@@ -87,7 +84,12 @@ async function loadServerless(params: IParams) {
   }
   // 优先设置函数参数接收的name，如果没有在设置 source 里的 name
   const applicationPath = path.resolve(params.target, params.name || name);
-  return handleDecompressFile({ zipball_url, applicationPath, name: params.name || name });
+  return handleDecompressFile({
+    ...params,
+    zipball_url,
+    applicationPath,
+    name: params.name || name,
+  });
 }
 
 async function loadGithub(params: IParams) {
@@ -107,10 +109,15 @@ async function loadGithub(params: IParams) {
     zipball_url = result.zipball_url;
   }
   const applicationPath = path.resolve(params.target, params.name || name);
-  return handleDecompressFile({ zipball_url, applicationPath, name: params.name || name });
+  return handleDecompressFile({
+    ...params,
+    zipball_url,
+    applicationPath,
+    name: params.name || name,
+  });
 }
-async function handleDecompressFile({ zipball_url, applicationPath, name }) {
-  const answer = await checkFileExists(applicationPath, name);
+async function handleDecompressFile({ zipball_url, applicationPath, name, ...restOpts }) {
+  const answer = await checkFileExists(applicationPath, name, restOpts);
   if (!answer) return applicationPath;
   const temporaryPath = `${applicationPath}${new Date().getTime()}`;
   await downloadRequest(zipball_url, temporaryPath, {
@@ -122,14 +129,14 @@ async function handleDecompressFile({ zipball_url, applicationPath, name }) {
   if (publishYamlData) {
     fs.copySync(`${temporaryPath}/src`, applicationPath);
     rimraf.sync(temporaryPath);
-    process.argv.includes('--parameters')
-      ? await initSconfigWithParam({ publishYamlData, applicationPath })
+    restOpts.parameters
+      ? await initSconfigWithParam({ ...restOpts, publishYamlData, applicationPath })
       : await initSconfig({ publishYamlData, applicationPath });
     await initEnvConfig(applicationPath);
   } else {
     fs.moveSync(`${temporaryPath}`, applicationPath);
   }
-  await needInstallDependency(applicationPath);
+  await needInstallDependency(applicationPath, restOpts);
   await postInit({ temporaryPath, applicationPath });
   return applicationPath;
 }
@@ -223,18 +230,11 @@ async function initSconfig({ publishYamlData, applicationPath }) {
   fs.writeFileSync(spath, newData, 'utf-8');
 }
 
-async function initSconfigWithParam({ publishYamlData, applicationPath }) {
+async function initSconfigWithParam({ publishYamlData, applicationPath, ...restOpts }) {
   const spath = getYamlPath(applicationPath, 's');
   if (isEmpty(spath)) return;
   const sYamlData = fs.readFileSync(spath, 'utf-8');
-  const tempArgv = getServerlessDevsTempArgv();
-  let result = {};
-  try {
-    const index = indexOf(process.argv, '--parameters');
-    result = JSON.parse(process.argv[index + 1]);
-  } catch (error) {
-    throw new Error('--parameters format error');
-  }
+  let result = restOpts.parameters;
   const properties = get(publishYamlData, 'Parameters.properties');
   const requiredList = get(publishYamlData, 'Parameters.required', []);
   const newObj = {};
@@ -251,18 +251,18 @@ async function initSconfigWithParam({ publishYamlData, applicationPath }) {
     }
   }
 
-  const accessObj = tempArgv['access'] ? { access: tempArgv['access'] } : {};
-  const newData = parse({ ...newObj, _appName: tempArgv['appName'], ...accessObj }, sYamlData);
+  const accessObj = restOpts.access ? { access: restOpts['access'] } : {};
+  const newData = parse({ ...newObj, _appName: restOpts['appName'], ...accessObj }, sYamlData);
   fs.writeFileSync(spath, newData, 'utf-8');
 }
 
-async function needInstallDependency(cwd: string) {
+async function needInstallDependency(cwd: string, restOpts) {
   const packageInfo: any = readJsonFile(path.resolve(cwd, 'package.json'));
   if (!packageInfo || !get(packageInfo, 'autoInstall', true)) return;
   if (process.env.skipPrompt) {
     return await tryfun(installDependency({ cwd, production: false }));
   }
-  if (process.argv.includes('--parameters')) return true;
+  if (restOpts?.parameters) return true;
   const res = await inquirer.prompt([
     {
       type: 'confirm',
@@ -276,9 +276,9 @@ async function needInstallDependency(cwd: string) {
   }
 }
 
-async function checkFileExists(filePath: string, fileName: string) {
+async function checkFileExists(filePath: string, fileName: string, restOpts) {
   if (process.env.skipPrompt) return true;
-  if (process.argv.includes('--parameters')) return true;
+  if (restOpts?.parameters) return true;
   if (fs.existsSync(filePath)) {
     const res = await inquirer.prompt([
       {
@@ -325,6 +325,8 @@ async function loadApplication(
   let registry: string;
   let target: string;
   let name: string;
+  let restOpts = {};
+
   if (typeof oldsource === 'string') {
     source = oldsource;
     registry = oldregistry;
@@ -334,6 +336,7 @@ async function loadApplication(
     registry = oldsource.registry;
     target = oldsource.target || S_CURRENT;
     name = oldsource.name;
+    restOpts = omit(oldsource, ['source', 'registry', 'target', 'name']);
   }
 
   if (registry) {
@@ -344,17 +347,23 @@ async function loadApplication(
   }
   let appPath: string;
   if (registry) {
-    appPath = await loadType({ source, registry, target, name });
+    appPath = await loadType({ source, registry, target, name, ...restOpts });
     if (appPath) return appPath;
   }
   const registryFromSetConfig = await getSetConfig('registry');
   if (registryFromSetConfig) {
-    appPath = await loadType({ source, registry: registryFromSetConfig, target, name });
+    appPath = await loadType({
+      source,
+      registry: registryFromSetConfig,
+      target,
+      name,
+      ...restOpts,
+    });
     if (appPath) return appPath;
   }
-  appPath = await loadServerless({ source, target, name });
+  appPath = await loadServerless({ source, target, name, ...restOpts });
   if (appPath) return appPath;
-  appPath = await loadGithub({ source, target, name });
+  appPath = await loadGithub({ source, target, name, ...restOpts });
   if (appPath) return appPath;
 
   if (!appPath) {

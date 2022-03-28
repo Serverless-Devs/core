@@ -30,11 +30,14 @@ export interface IComponentConfig {
   globalArgs: IGlobalArgs;
   specifyService?: boolean;
 }
+
+export type IActionType = 'run' | 'component' | 'plugin';
 export interface IActionHook {
-  run: string;
+  type: IActionType;
+  value: string;
   pre: boolean;
   path?: string;
-  plugin?: string;
+  args?: string;
 }
 
 export interface IInputs {
@@ -53,4 +56,5 @@ export interface IInputs {
   path: {
     configPath: string;
   };
+  output: any;
 }
