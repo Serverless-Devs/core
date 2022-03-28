@@ -1,3 +1,3 @@
 module.exports = {
-  DEFAULT_CORE_VERSION: '0.1.33',
+  DEFAULT_CORE_VERSION: 'dev',
 };
