@@ -11,6 +11,7 @@ import { assign, toString } from 'lodash';
 import { logger } from '../../../logger';
 import report from '../../report';
 import { get } from 'lodash';
+import { ALIYUN_CLI } from '../../constant';
 
 class ComponentExec {
   protected hook: Hook;
@@ -21,6 +22,11 @@ class ComponentExec {
   }
   private async handleCredentials() {
     const { projectConfig } = this.config;
+    if (projectConfig.access === ALIYUN_CLI) {
+      return (this.projectConfig = assign({}, projectConfig, {
+        credentials: await getCredential(projectConfig.access),
+      }));
+    }
     const accessPath = path.join(getRootHome(), 'access.yaml');
     const data = await getYamlContent(accessPath);
     // 密钥存在 才去获取密钥信息

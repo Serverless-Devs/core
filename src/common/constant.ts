@@ -1,3 +1,6 @@
+import os from 'os';
+import path from 'path';
+
 export type IRegistry =
   | 'http://registry.devsapp.cn/simple'
   | 'https://api.github.com/repos'
@@ -25,3 +28,7 @@ export const FC_COMPONENT = [
 ];
 
 export const COMMON_VARIABLE_TYPE_REG = new RegExp(/\$\{(.*)\}/, 'i');
+
+export const ALIYUN_CLI = '${aliyun-cli}';
+
+export const ALIYUN_CONFIG_FILE = path.join(os.homedir(), '.aliyun', 'config.json');

@@ -1,13 +1,17 @@
 import inquirer from 'inquirer';
 import getAccess from './getAccess';
 import setCredential from '../setCredential';
-import { get, keys, filter } from 'lodash';
+import { get, keys, filter, find, concat } from 'lodash';
 import os from 'os';
 import path from 'path';
-import { getYamlContent, getRootHome } from '../../../libs';
+import { getYamlContent, getRootHome, getConfig, setConfig } from '../../../libs';
 import { logger } from '../../../logger';
 import chalk from 'chalk';
 import { transformInputs, trim, getServerlessDevsAccessFromEnv } from './utils';
+import { ALIYUN_CLI, ALIYUN_CONFIG_FILE } from '../../constant';
+import Acc from '@serverless-devs/acc/commands/run';
+import fs from 'fs-extra';
+import getAccountId from '../getAccountId';
 
 const Crypto = require('crypto-js');
 
@@ -37,9 +41,53 @@ async function getCredential(...args: any[]) {
     access = first;
     params = second ? [second, ...rest] : [];
   }
-  const result = await getCredentialWithAccess(access, ...params);
+
+  let result;
+  console.log(access, 'access');
+  if (access === ALIYUN_CLI) {
+    result = await getAcc();
+  } else {
+    result = await getCredentialWithAccess(access, ...params);
+  }
+
   transformInputs(inputs, result);
   return result;
+}
+
+async function getAcc() {
+  const configPath = process.env.ALIBABACLOUD_CONFIG || ALIYUN_CONFIG_FILE;
+  if (fs.existsSync(configPath)) {
+    let accData;
+    try {
+      accData = await new Acc().run([]);
+    } catch (error) {
+      logger.debug(error);
+    }
+    if (accData?.AccessKeyID && accData?.AccessKeySecret) {
+      const stockData = getConfig('acc');
+      const findObj = find(stockData, (o) => o.AccessKeyID === accData.AccessKeyID);
+      if (findObj) {
+        return {
+          ...accData,
+          AccountID: findObj.AccountId,
+          Alias: ALIYUN_CLI,
+        };
+      }
+      const info: any = await getAccountId(accData);
+      const tmp = [
+        {
+          AccountId: info.AccountId,
+          AccessKeyID: accData.AccessKeyID,
+        },
+      ];
+      setConfig('acc', stockData ? concat(stockData, tmp) : tmp);
+      return {
+        ...accData,
+        AccountID: info.AccountId,
+        Alias: ALIYUN_CLI,
+      };
+    }
+  }
 }
 
 function formatValue(content: any, alias: string) {
