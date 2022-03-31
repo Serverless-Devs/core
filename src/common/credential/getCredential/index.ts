@@ -43,7 +43,6 @@ async function getCredential(...args: any[]) {
   }
 
   let result;
-  console.log(access, 'access');
   if (access === ALIYUN_CLI) {
     result = await getAcc();
   } else {
