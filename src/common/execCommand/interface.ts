@@ -1,3 +1,4 @@
+import Parse from './parse';
 export interface IProjectConfig {
   component: string;
   props: object;
@@ -29,6 +30,7 @@ export interface IComponentConfig {
   serverName: string;
   globalArgs: IGlobalArgs;
   specifyService?: boolean;
+  parse: Parse;
 }
 
 export type IActionType = 'run' | 'component' | 'plugin';

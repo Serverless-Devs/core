@@ -153,7 +153,7 @@ export default class Parse {
   }
 
   async init(obj?: object): Promise<{ realVariables: any; dependenciesMap: any }> {
-    const val = obj ? merge(this.parsedObj, obj) : this.parsedObj;
+    const val = obj ? merge({}, this.parsedObj, obj) : this.parsedObj;
     this.generateMagicVariables(val);
     const realVariables = this.replaceVariable(val);
     return { realVariables, dependenciesMap: this.dependenciesMap };

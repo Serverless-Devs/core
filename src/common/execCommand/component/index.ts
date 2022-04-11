@@ -40,7 +40,7 @@ class ComponentExec {
     }
   }
   async init() {
-    const { method, spath, globalArgs, args, serverName } = this.config;
+    const { method, spath, args, serverName } = this.config;
     await this.handleCredentials();
     const AccountID = get(this.projectConfig, 'credentials.AccountID');
     report({
@@ -48,23 +48,38 @@ class ComponentExec {
       // TODO: 后续 可以最后一个 AccountID 删除以及sls加工数据格式。为了不影响现在的数据上报，暂时保持以前的数据格式
       content: `${this.projectConfig.component}||${AccountID}||${AccountID}`,
     });
-    const actions = getActions(this.projectConfig, {
-      method,
-      spath,
-    });
+
     const inputs = getInputs(this.projectConfig, {
       method,
       args,
       spath,
       serverName,
     });
-    const params = globalArgs?.skipActions ? [] : actions;
-    this.hook = new Hook(params, inputs);
+    this.hook = new Hook(inputs);
 
-    const preHookOutData = await this.hook.executePreHook();
-    const outPutData = await this.executeCommand(preHookOutData);
-    await this.hook.executeAfterHook({ output: outPutData });
-    return outPutData;
+    const preHookOutData = await this.hook.init(await this.getNewActions({})).executePreHook();
+    const output = await this.executeCommand(preHookOutData);
+    await this.hook.init(await this.getNewActions({ output })).executeAfterHook({ output });
+    return output;
+  }
+  private async getNewActions({ output }: { output?: any }) {
+    const { method, spath, serverName, globalArgs } = this.config;
+    const that = {
+      name: serverName,
+      access: this.projectConfig.access,
+      actions: this.projectConfig.actions,
+      component: this.projectConfig.component,
+      props: this.projectConfig.props,
+      output,
+    };
+    const tempData = { this: that };
+    const { realVariables } = await this.config.parse.init(tempData);
+    this.projectConfig.actions = get(realVariables, ['services', serverName, 'actions']);
+    const actions = getActions(this.projectConfig, {
+      method,
+      spath,
+    });
+    return globalArgs?.skipActions ? [] : actions;
   }
   private async executeCommand(payload: { type: 'component' | 'plugin'; data: any }) {
     const { method, spath, args, serverName } = this.config;
