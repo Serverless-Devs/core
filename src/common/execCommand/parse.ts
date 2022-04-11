@@ -4,6 +4,7 @@ import { merge } from 'lodash';
 import { getCurrentPath } from './utils';
 import path from 'path';
 import yaml from 'js-yaml';
+import { ICredentials } from './interface';
 
 const COMMON_VARIABLE_TYPE_REG = new RegExp(/\$\{(.*)\}/, 'i');
 const SPECIALL_VARIABLE_TYPE_REG = new RegExp(/(.*)\((.*)\)/, 'i');
@@ -14,6 +15,7 @@ export default class Parse {
   private parsedObj: any = {};
   private dependenciesMap: { [key: string]: any } = {};
   private globalJsonKeyMap: any = {};
+  private credentials: ICredentials;
 
   constructor(protected spath: string) {
     if (fs.existsSync(spath)) {
@@ -58,6 +60,9 @@ export default class Parse {
 
     if (type === 'Fun' && (funName === 'File' || funName === 'file')) {
       return this.getFileObj(funVariable);
+    }
+    if (type === 'Fun' && funName === 'config') {
+      return this.credentials ? this.credentials[funVariable] : '${' + variableName + '}';
     }
     return result;
   }
@@ -152,6 +157,9 @@ export default class Parse {
     return variable;
   }
 
+  setCredentials(val: ICredentials) {
+    this.credentials = val;
+  }
   async init(obj?: object): Promise<{ realVariables: any; dependenciesMap: any }> {
     const val = obj ? merge({}, this.parsedObj, obj) : this.parsedObj;
     this.generateMagicVariables(val);

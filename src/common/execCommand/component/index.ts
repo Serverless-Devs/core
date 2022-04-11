@@ -49,6 +49,8 @@ class ComponentExec {
       content: `${this.projectConfig.component}||${AccountID}||${AccountID}`,
     });
 
+    const newActions = await this.getNewActions({});
+
     const inputs = getInputs(this.projectConfig, {
       method,
       args,
@@ -57,7 +59,7 @@ class ComponentExec {
     });
     this.hook = new Hook(inputs);
 
-    const preHookOutData = await this.hook.init(await this.getNewActions({})).executePreHook();
+    const preHookOutData = await this.hook.init(newActions).executePreHook();
     const output = await this.executeCommand(preHookOutData);
     await this.hook.init(await this.getNewActions({ output })).executeAfterHook({ output });
     return output;
@@ -73,8 +75,10 @@ class ComponentExec {
       output,
     };
     const tempData = { this: that };
+    this.config.parse.setCredentials(this.projectConfig.credentials);
     const { realVariables } = await this.config.parse.init(tempData);
     this.projectConfig.actions = get(realVariables, ['services', serverName, 'actions']);
+    this.projectConfig.props = get(realVariables, ['services', serverName, 'props']);
     const actions = getActions(this.projectConfig, {
       method,
       spath,
