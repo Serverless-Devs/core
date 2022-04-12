@@ -1,3 +1,5 @@
+const { setConfig } = require('../index');
+
 (async () => {
-  console.log(JSON.stringify(process.argv));
+  setConfig('actionComponentArgv', process.argv);
 })();

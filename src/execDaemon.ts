@@ -1,6 +1,8 @@
 import path from 'path';
-import { spawn, exec } from 'child_process';
+import { spawn } from 'child_process';
 import fs from 'fs-extra';
+import execa from 'execa';
+import { getConfig } from './libs';
 const TTL = 10 * 60 * 1000;
 
 interface IConfig {
@@ -17,38 +19,14 @@ function readJsonFile(filePath: string) {
   }
 }
 
-function onFinish(cp) {
-  return new Promise((resolve) => {
-    const stdout = [];
-    const stderr = [];
-
-    cp.stdout.on('data', (chunk) => {
-      stdout.push(chunk);
-    });
-
-    cp.stderr.on('data', (chunk) => {
-      stderr.push(chunk);
-    });
-
-    cp.on('exit', (code) => {
-      resolve({
-        code: code,
-        stdout: Buffer.concat(stdout),
-        stderr: Buffer.concat(stderr),
-      });
-    });
-  });
-}
-
 export async function execAction(filename: string, args: string) {
   const filePath = path.join(__dirname, 'daemon', filename);
   if (!fs.existsSync(filePath)) return;
-  const cp = exec(`${process.execPath} ${filePath} ${args}`, {
-    encoding: null,
+  execa.sync(`${process.execPath} ${filePath} ${args}`, {
+    stdio: 'ignore',
+    shell: true,
   });
-  const result: any = await onFinish(cp);
-  const stdout = result.stdout.toString();
-  return JSON.parse(stdout);
+  return getConfig('actionComponentArgv');
 }
 
 export function execDaemon(filename: string, config?: IConfig) {
