@@ -81,7 +81,7 @@ class Hook {
   }
 
   private async execComponent({ argv }) {
-    const { _: rawData } = getGlobalArgs(argv.slice(2));
+    const { _: rawData } = getGlobalArgs(argv);
     const [componentName, method] = rawData;
     const argsObj = filter(argv.slice(2), (o) => !includes([componentName, method], o));
     if (isEmpty(method)) return;
