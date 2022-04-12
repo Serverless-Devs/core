@@ -5,8 +5,8 @@ import { getCurrentPath } from './utils';
 import path from 'path';
 import yaml from 'js-yaml';
 import { ICredentials } from './interface';
+import { COMMON_VARIABLE_TYPE_REG } from '../constant';
 
-const COMMON_VARIABLE_TYPE_REG = new RegExp(/\$\{(.*)\}/, 'i');
 const SPECIALL_VARIABLE_TYPE_REG = new RegExp(/(.*)\((.*)\)/, 'i');
 
 const OTHER_BASIC_DATA_TYPE = ['[object Number]', '[object Boolean]'];
@@ -99,35 +99,40 @@ export default class Parse {
     if (Object.prototype.toString.call(objValue) === '[object String]') {
       const regResult = objValue.match(COMMON_VARIABLE_TYPE_REG);
       if (regResult) {
-        const matchResult = regResult[1]; // get match result like projectName.key.variable
-        const variableObj = {
-          variableName: matchResult,
-          type: 'Literal',
-          funName: null,
-          funVariable: '',
-        };
-        const funMatchResult = matchResult.match(SPECIALL_VARIABLE_TYPE_REG);
-        if (funMatchResult) {
-          variableObj.funName = funMatchResult[1];
-          variableObj.funVariable = funMatchResult[2];
-          variableObj.type = 'Fun';
-        } else {
-          let topKeyDependenciesMap = this.dependenciesMap[topKey];
-          if (!topKeyDependenciesMap) {
-            topKeyDependenciesMap = {};
+        let tmp = objValue;
+        for (const iterator of regResult) {
+          const matchResult = iterator.replace(COMMON_VARIABLE_TYPE_REG, '$1'); // get match result like projectName.key.variable
+          const variableObj = {
+            variableName: matchResult,
+            type: 'Literal',
+            funName: null,
+            funVariable: '',
+          };
+          const funMatchResult = matchResult.match(SPECIALL_VARIABLE_TYPE_REG);
+          if (funMatchResult) {
+            variableObj.funName = funMatchResult[1];
+            variableObj.funVariable = funMatchResult[2];
+            variableObj.type = 'Fun';
+          } else {
+            let topKeyDependenciesMap = this.dependenciesMap[topKey];
+            if (!topKeyDependenciesMap) {
+              topKeyDependenciesMap = {};
+            }
+            const dependProjName = matchResult.split('.')[0];
+            topKeyDependenciesMap[dependProjName] = 1; // Dependent priority
+            this.dependenciesMap[topKey] = topKeyDependenciesMap;
           }
-          const dependProjName = matchResult.split('.')[0];
-          topKeyDependenciesMap[dependProjName] = 1; // Dependent priority
-          this.dependenciesMap[topKey] = topKeyDependenciesMap;
+
+          let realValue = startsWith(matchResult, 'env.')
+            ? get(process, matchResult)
+            : this.findVariableValue(variableObj);
+
+          tmp =
+            Object.prototype.toString.call(realValue) === '[object String]'
+              ? tmp.replace(iterator, realValue)
+              : realValue;
         }
-
-        let realValue = startsWith(matchResult, 'env.')
-          ? get(process, matchResult)
-          : this.findVariableValue(variableObj);
-
-        return Object.prototype.toString.call(realValue) === '[object String]'
-          ? objValue.replace(COMMON_VARIABLE_TYPE_REG, realValue)
-          : realValue;
+        return tmp;
       }
 
       if (!this.dependenciesMap[topKey] || Object.keys(this.dependenciesMap[topKey]).length == 0) {

@@ -27,7 +27,7 @@ export const FC_COMPONENT = [
   'oss',
 ];
 
-export const COMMON_VARIABLE_TYPE_REG = new RegExp(/\$\{(.*)\}/, 'i');
+export const COMMON_VARIABLE_TYPE_REG = new RegExp(/\$\{([\w\.-]*)?\}/g);
 
 export const ALIYUN_CLI = '${aliyun-cli}';
 
