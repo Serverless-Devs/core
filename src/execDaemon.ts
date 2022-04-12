@@ -23,7 +23,7 @@ export async function execAction(filename: string, args: string) {
   const filePath = path.join(__dirname, 'daemon', filename);
   if (!fs.existsSync(filePath)) return;
   execa.sync(`${process.execPath} ${filePath} ${args}`, {
-    stdio: 'ignore',
+    stdio: 'inherit',
     shell: true,
   });
   return getConfig('actionComponentArgv');
