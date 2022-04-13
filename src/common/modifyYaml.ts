@@ -1,7 +1,9 @@
 import YAML, { Document } from 'yaml';
 import { YAMLMap, Pair, Scalar } from 'yaml/types';
 import { get, find, isEmpty, merge } from 'lodash';
-import { COMMON_VARIABLE_TYPE_REG } from './constant';
+// import { COMMON_VARIABLE_TYPE_REG } from './constant';
+// TODO: 对于拼接的变量如何更改
+const COMMON_VARIABLE_TYPE_REG = new RegExp(/\$\{(.*)\}/, 'i');
 
 class ModifyYaml {
   private doc: Document.Parsed;

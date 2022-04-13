@@ -10,7 +10,7 @@ import downloadRequest from '../downloadRequest';
 import fs from 'fs-extra';
 import inquirer from 'inquirer';
 import chalk from 'chalk';
-import _, { get, isEmpty, sortBy, includes, omit } from 'lodash';
+import _, { get, isEmpty, sortBy, includes, omit, map, concat } from 'lodash';
 import rimraf from 'rimraf';
 import installDependency from '../installDependency';
 import { readJsonFile, getYamlContent, S_CURRENT, getSetConfig } from '../../libs';
@@ -205,25 +205,38 @@ async function initSconfig({ publishYamlData, applicationPath }) {
   }
   const spath = getYamlPath(applicationPath, 's');
   if (isEmpty(spath)) return;
-  const credentialAliasList = await getCredentialAliasList();
-  const obj = isEmpty(credentialAliasList)
-    ? {
-        type: 'confirm',
-        name: 'access',
-        message: 'create credential?',
-        default: true,
-      }
-    : {
-        type: 'list',
-        name: 'access',
-        message: 'please select credential alias',
-        choices: credentialAliasList,
-      };
-  promptList.push(obj);
-  const result = await inquirer.prompt(promptList);
+  const credentialAliasList = map(await getCredentialAliasList(), (o) => ({
+    name: o,
+    value: o,
+  }));
+  let result: any = {};
   if (isEmpty(credentialAliasList)) {
-    const data = await setCredential();
-    result.access = data?.Alias;
+    promptList.push({
+      type: 'confirm',
+      name: 'access',
+      message: 'create credential?',
+      default: true,
+    });
+    result = await inquirer.prompt(promptList);
+    if (result?.access) {
+      const data = await setCredential();
+      result.access = data?.Alias;
+    }
+  } else {
+    promptList.push({
+      type: 'list',
+      name: 'access',
+      message: 'please select credential alias',
+      choices: concat(credentialAliasList, {
+        name: 'configure later.',
+        value: false,
+      }),
+    });
+    result = await inquirer.prompt(promptList);
+  }
+
+  if (result?.access === false) {
+    result.access = '{{ access }}';
   }
   const sYamlData = fs.readFileSync(spath, 'utf-8');
   const newData = parse(result, sYamlData);

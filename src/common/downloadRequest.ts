@@ -29,26 +29,28 @@ async function download(url: string, dest: string, options: IOptions = {}) {
       const filePath = path.join(dest, filename);
       if (res.statusCode === 200) {
         const file = fs.createWriteStream(filePath);
-        const spin = spinner(`Downloading: [${chalk.green(decodeURIComponent(uri.pathname))}]`);
-        let downloaded = 0;
-        res
-          .on('data', (chunk) => {
-            file.write(chunk);
-            downloaded += chunk.length;
-            const tips = len
-              ? `${downloaded}/${len} ${((100.0 * downloaded) / len).toFixed(2)}%`
-              : `${parseInt(String(downloaded / 1024), 10)}KB`;
-            spin.text = `Downloading: [${chalk.green(decodeURIComponent(uri.pathname))}] ${tips}`;
-          })
-          .on('end', () => {
-            file.end();
-            resolve({ filePath, spin });
-          })
-          .on('error', (err) => {
-            file.destroy();
-            spin.fail();
-            fs.unlink(dest, () => reject(err));
-          });
+        file.on('open', () => {
+          const spin = spinner(`Downloading: [${chalk.green(decodeURIComponent(uri.pathname))}]`);
+          let downloaded = 0;
+          res
+            .on('data', (chunk) => {
+              file.write(chunk);
+              downloaded += chunk.length;
+              const tips = len
+                ? `${downloaded}/${len} ${((100.0 * downloaded) / len).toFixed(2)}%`
+                : `${parseInt(String(downloaded / 1024), 10)}KB`;
+              spin.text = `Downloading: [${chalk.green(decodeURIComponent(uri.pathname))}] ${tips}`;
+            })
+            .on('end', () => {
+              file.end();
+              resolve({ filePath, spin });
+            })
+            .on('error', (err) => {
+              file.destroy();
+              spin.fail();
+              fs.unlink(dest, () => reject(err));
+            });
+        });
       } else if (res.statusCode === 302 || res.statusCode === 301) {
         // Recursively follow redirects, only a 200 will resolve.
         download(res.headers.location, dest, options).then((val) => resolve(val));

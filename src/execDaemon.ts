@@ -48,7 +48,12 @@ export async function execAction(filename: string, args: string) {
   });
   const result: any = await onFinish(cp);
   const stdout = result.stdout.toString();
-  return JSON.parse(stdout);
+  try {
+    const data = JSON.parse(stdout);
+    return data.slice(2);
+  } catch (error) {
+    return args.split(' ');
+  }
 }
 
 export function execDaemon(filename: string, config?: IConfig) {

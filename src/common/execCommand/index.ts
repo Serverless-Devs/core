@@ -17,6 +17,7 @@ interface IConfigs {
 
 class ExecCommand {
   private configs: IConfigs;
+  private parse: Parse;
   constructor(configs: IConfigs) {
     this.configs = configs;
   }
@@ -24,10 +25,10 @@ class ExecCommand {
     const { syaml, serverName } = this.configs;
     const originSpath = await getTemplatePath(syaml);
     const spath = await transforYamlPath(originSpath);
-    const parse = new Parse(spath);
-    let parsedObj = await parse.init();
+    this.parse = new Parse(spath);
+    let parsedObj = await this.parse.init();
     // 兼容vars下的魔法变量，需再次解析
-    parsedObj = await parse.init(parsedObj.realVariables);
+    parsedObj = await this.parse.init(parsedObj.realVariables);
     await this.warnEnvironmentVariables(parsedObj.realVariables);
     const analysis = new Analysis(parsedObj.realVariables, parsedObj.dependenciesMap);
     const executeOrderList = analysis.getProjectOrder();
@@ -41,7 +42,7 @@ class ExecCommand {
         specifyService: Boolean(serverName),
       });
     }
-    return await this.serviceWithMany({ executeOrderList, parse, spath: originSpath });
+    return await this.serviceWithMany({ executeOrderList, spath: originSpath });
   }
   private async serviceOnlyOne({ realVariables, serverName, spath, specifyService }) {
     const { method, args, globalArgs } = this.configs;
@@ -54,6 +55,7 @@ class ExecCommand {
       serverName,
       globalArgs,
       specifyService,
+      parse: this.parse, // 如果actions模块包含魔法变量，需要再次解析
     }).init();
     const result = { [serverName]: outPutData };
     keys(outPutData).length === 0
@@ -62,7 +64,7 @@ class ExecCommand {
     return result;
   }
 
-  private async serviceWithMany({ executeOrderList, parse, spath }) {
+  private async serviceWithMany({ executeOrderList, spath }) {
     const { method, args, globalArgs } = this.configs;
     logger.info(
       `It is detected that your project has the following projects < ${executeOrderList.join(
@@ -74,7 +76,7 @@ class ExecCommand {
     const tempData = { services: {} };
     for (const serverName of executeOrderList) {
       logger.info(`Start executing project ${serverName}`);
-      const parsedObj = await parse.init(tempData);
+      const parsedObj = await this.parse.clearGlobalKey('this').init(tempData);
       const projectConfig = getProjectConfig(parsedObj.realVariables, serverName, globalArgs);
       const outputData = await new ComponentExec({
         projectConfig,
@@ -83,6 +85,7 @@ class ExecCommand {
         spath,
         serverName,
         globalArgs,
+        parse: this.parse,
       }).init();
       tempData.services[serverName] = { output: outputData };
       result[serverName] = outputData;

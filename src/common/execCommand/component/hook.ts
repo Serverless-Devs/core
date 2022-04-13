@@ -13,11 +13,14 @@ class Hook {
   private preHooks: IActionHook[] = [];
   private afterHooks: IActionHook[] = [];
   private output: any;
-
-  constructor(hooks: IActionHook[] = [], private inputs: IInputs) {
+  constructor(private inputs: IInputs) {}
+  init(hooks: IActionHook[] = []) {
+    this.preHooks = [];
+    this.afterHooks = [];
     for (const hook of hooks) {
       hook.pre ? this.preHooks.push(hook) : this.afterHooks.push(hook);
     }
+    return this;
   }
   async executePreHook() {
     let temp;
@@ -63,7 +66,13 @@ class Hook {
 
     if (configs.type === 'plugin') {
       const instance = await loadComponent(configs.value);
-      const result = await instance(this.inputs, configs.args);
+      const result = await instance(
+        {
+          ...this.inputs,
+          output: this.output,
+        },
+        configs.args,
+      );
       return {
         type: configs.type,
         data: result,
@@ -72,7 +81,7 @@ class Hook {
   }
 
   private async execComponent({ argv }) {
-    const { _: rawData } = getGlobalArgs(argv.slice(2));
+    const { _: rawData } = getGlobalArgs(argv);
     const [componentName, method] = rawData;
     const argsObj = filter(argv.slice(2), (o) => !includes([componentName, method], o));
     if (isEmpty(method)) return;

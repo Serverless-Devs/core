@@ -45,16 +45,28 @@ class ParseYaml {
     if (isBoolean(value) || isNumber(value) || isEmpty(value)) return;
     const regResult = value.match(COMMON_VARIABLE_TYPE_REG);
     if (regResult) {
-      const realValue = get(this.yamlJson, regResult[1], regResult[0]);
-      item.value = YAML.createNode(realValue);
+      const tmp = this.getRealValue(value, regResult);
+      item.value = YAML.createNode(tmp);
     }
+  }
+  getRealValue(value, regResult) {
+    let tmp = value;
+    for (const iterator of regResult) {
+      const realValue = get(
+        this.yamlJson,
+        iterator.replace(COMMON_VARIABLE_TYPE_REG, '$1'),
+        iterator,
+      );
+      tmp = typeof realValue === 'string' ? tmp.replace(iterator, realValue) : realValue;
+    }
+    return tmp;
   }
   setScalarValue(item: Scalar) {
     if (isBoolean(item.value) || isNumber(item.value) || isEmpty(item.value)) return;
     const regResult = item.value.match(COMMON_VARIABLE_TYPE_REG);
     if (regResult) {
-      const realValue = get(this.yamlJson, regResult[1], regResult[0]);
-      item.value = YAML.createNode(realValue);
+      const tmp = this.getRealValue(item.value, regResult);
+      item.value = YAML.createNode(tmp);
     }
   }
 }

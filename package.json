@@ -1,6 +1,6 @@
 {
   "name": "@serverless-devs/core",
-  "version": "0.1.33",
+  "version": "0.1.34",
   "description": "Serverless Devs Tool Core Component",
   "keywords": [
     "Serverless",
@@ -70,6 +70,7 @@
   "gitHead": "aec19d7a89cb711f0a246ecf77e79d3668fcb8da",
   "dependencies": {
     "@alicloud/pop-core": "^1.7.10",
+    "@serverless-devs/acc": "^1.0.2",
     "@serverless-devs/got": "^8.3.2",
     "@serverless-devs/s-progress-bar": "^0.0.8",
     "ansi-escapes": "^4.3.2",
@@ -92,7 +93,7 @@
     "js-yaml": "^4.1.0",
     "lodash": "^4.17.21",
     "minimatch": "^5.0.0",
-    "minimist": "^1.2.5",
+    "minimist": "^1.2.6",
     "ora": "^5.3.0",
     "p-event": "^2.1.0",
     "prettyjson": "^1.2.1",
