@@ -76,7 +76,7 @@ class ExecCommand {
     const tempData = { services: {} };
     for (const serverName of executeOrderList) {
       logger.info(`Start executing project ${serverName}`);
-      const parsedObj = await this.parse.init(tempData);
+      const parsedObj = await this.parse.clearGlobalKey('this').init(tempData);
       const projectConfig = getProjectConfig(parsedObj.realVariables, serverName, globalArgs);
       const outputData = await new ComponentExec({
         projectConfig,

@@ -1,6 +1,5 @@
 import * as fs from 'fs-extra';
-import { startsWith, get } from 'lodash';
-import { merge } from 'lodash';
+import { startsWith, get, merge } from 'lodash';
 import { getCurrentPath } from './utils';
 import path from 'path';
 import yaml from 'js-yaml';
@@ -164,6 +163,16 @@ export default class Parse {
 
   setCredentials(val: ICredentials) {
     this.credentials = val;
+  }
+  clearGlobalKey(val: string) {
+    const tmp = {};
+    for (const key in this.globalJsonKeyMap) {
+      if (!startsWith(key, val)) {
+        tmp[key] = this.globalJsonKeyMap[key];
+      }
+    }
+    this.globalJsonKeyMap = tmp;
+    return this;
   }
   async init(obj?: object): Promise<{ realVariables: any; dependenciesMap: any }> {
     const val = obj ? merge({}, this.parsedObj, obj) : this.parsedObj;
