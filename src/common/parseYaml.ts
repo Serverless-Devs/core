@@ -65,8 +65,7 @@ class ParseYaml {
     if (isBoolean(item.value) || isNumber(item.value) || isEmpty(item.value)) return;
     const regResult = item.value.match(COMMON_VARIABLE_TYPE_REG);
     if (regResult) {
-      const tmp = this.getRealValue(item.value, regResult);
-      item.value = YAML.createNode(tmp);
+      item.value = this.getRealValue(item.value, regResult);
     }
   }
 }

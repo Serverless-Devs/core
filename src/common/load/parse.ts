@@ -53,7 +53,7 @@ class ParseYaml {
   setScalarValue(item: Scalar) {
     const regResult = defaultTagRE.exec(item.value);
     if (regResult && this.newJson.hasOwnProperty(trim(regResult[1]))) {
-      item.value = YAML.createNode(this.newJson[trim(regResult[1])]);
+      item.value = this.newJson[trim(regResult[1])];
     }
   }
 }
