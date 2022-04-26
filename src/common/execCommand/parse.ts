@@ -174,6 +174,9 @@ export default class Parse {
     this.globalJsonKeyMap = tmp;
     return this;
   }
+  getGlobalMagic() {
+    return this.globalJsonKeyMap;
+  }
   async init(obj?: object): Promise<{ realVariables: any; dependenciesMap: any }> {
     const val = obj ? merge({}, this.parsedObj, obj) : this.parsedObj;
     this.generateMagicVariables(val);
