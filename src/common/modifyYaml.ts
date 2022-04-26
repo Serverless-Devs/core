@@ -1,38 +1,36 @@
 import YAML, { Document } from 'yaml';
 import { YAMLMap, Pair, Scalar } from 'yaml/types';
-import { get, find, isEmpty, merge } from 'lodash';
-// import { COMMON_VARIABLE_TYPE_REG } from './constant';
-// TODO: 对于拼接的变量如何更改
-const COMMON_VARIABLE_TYPE_REG = new RegExp(/\$\{(.*)\}/, 'i');
+import { find, isEmpty } from 'lodash';
+import extend2 from 'extend2';
 
 class ModifyYaml {
   private doc: Document.Parsed;
   private data: object;
   private globalKeys: { [key: string]: any }[] = [];
-  private variableList: { key: string; value: any }[] = [];
   constructor(json: object, yamlData: string) {
     this.doc = YAML.parseDocument(yamlData);
-    this.data = merge(this.doc.toJSON(), json);
+    // 新的json和原有的yaml数据进行合并，拿到一个最全的数据
+    this.data = extend2(true, this.doc.toJSON(), json);
   }
   init() {
     const newDoc = YAML.parseDocument(YAML.stringify(this.data));
     const { contents: oldContents } = this.doc;
     this.setKey(newDoc, this.doc);
 
+    // 对老的yaml收集注释信息等
     if (oldContents instanceof YAMLMap) {
       const { items } = oldContents;
       for (const item of items) {
         this.iteratorPair(item, item.key.value);
       }
     }
+    // 对新的数据设置注释信息等
     const { contents: newContents } = newDoc;
     this.setKey(newContents, oldContents);
     if (newContents instanceof YAMLMap) {
       const { items } = newContents;
       for (const item of items) {
         this.setComment(item, item.key.value);
-        // 对变量进行重新赋值
-        this.setVariablePair(item, item.key.value);
       }
     }
     return newDoc.toString();
@@ -98,75 +96,12 @@ class ModifyYaml {
         }
         return;
       }
-      this.getPairValue(item, preKey);
     }
     if (item instanceof YAMLMap) {
       preKey += '.';
       for (const obj of item.items) {
         this.iteratorPair(obj, preKey + obj.key.value);
       }
-    }
-
-    if (item instanceof Scalar) {
-      this.getScalarValue(item, preKey);
-    }
-  }
-  setVariablePair(item: Pair | YAMLMap, preKey: string) {
-    this.setVariable(item, preKey);
-    if (item instanceof Pair) {
-      if (item.value.type === 'MAP') {
-        preKey += '.';
-        for (const obj of item.value.items) {
-          this.setVariablePair(obj, preKey + obj.key.value);
-        }
-        return;
-      }
-      if (item.value.type === 'SEQ') {
-        for (const index in item.value.items) {
-          const obj = item.value.items[index];
-          this.setVariablePair(obj, preKey + `[${index}]`);
-        }
-        return;
-      }
-    }
-    if (item instanceof YAMLMap) {
-      preKey += '.';
-      for (const obj of item.items) {
-        this.setVariablePair(obj, preKey + obj.key.value);
-      }
-    }
-  }
-  matchVariable(value: string) {
-    if (typeof value !== 'string') return;
-    return value.match(COMMON_VARIABLE_TYPE_REG);
-  }
-  addVariable(key: string, value: any) {
-    const findObj = find(this.variableList, (o) => o.key === key);
-    if (findObj) return;
-    this.variableList.push({ key, value });
-  }
-  getPairValue(item: Pair, preKey: string) {
-    const regResult = this.matchVariable(item.value.value);
-    if (regResult) {
-      this.addVariable(preKey, regResult[0]);
-      const value = get(this.data, preKey);
-      // newJson 新值（非merge来的变量）
-      !this.matchVariable(value) && this.addVariable(regResult[1], value);
-    }
-  }
-  setVariable(item: any, preKey: string) {
-    const findObj = find(this.variableList, (o) => o.key === preKey);
-    if (findObj) {
-      item.value = YAML.createNode(findObj.value);
-    }
-  }
-  getScalarValue(item: Scalar, preKey: string) {
-    const regResult = this.matchVariable(item.value);
-    if (regResult) {
-      this.addVariable(preKey, regResult[0]);
-      const value = get(this.data, preKey);
-      // newJson 新值（非merge来的变量）
-      !this.matchVariable(value) && this.addVariable(regResult[1], value);
     }
   }
 }
