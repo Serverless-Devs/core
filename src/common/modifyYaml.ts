@@ -70,6 +70,10 @@ class ModifyYaml {
           this.setComment(obj, preKey + `[${index}]`);
         }
       }
+      if (item.value.type === 'PLAIN') {
+        this.setComment(item.value, preKey + '.value');
+        return;
+      }
     }
     if (item instanceof YAMLMap) {
       preKey += '.';
@@ -94,6 +98,10 @@ class ModifyYaml {
           const obj = item.value.items[index];
           this.iteratorPair(obj, preKey + `[${index}]`);
         }
+        return;
+      }
+      if (item.value.type === 'PLAIN') {
+        this.iteratorPair(item.value, preKey + '.value');
         return;
       }
     }
