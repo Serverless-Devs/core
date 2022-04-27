@@ -383,7 +383,7 @@ async function loadApplication(
     throw new Error(
       JSON.stringify({
         message: `No ${source} app found.`,
-        tips: 'Please make sure the app name or source is correct.',
+        tips: 'Please make sure the app name or source is correct, you can get applications on Serverless Regsitry: https://registry.serverless-devs.com',
       }),
     );
   }
