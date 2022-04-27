@@ -2,12 +2,12 @@ import fs from 'fs-extra';
 import { logger } from '../../../logger';
 import { IActionHook, IInputs } from '../interface';
 import execa from 'execa';
-import { execAction } from '../../../execDaemon';
 import { filter, get, isEmpty, join, includes } from 'lodash';
 import { getGlobalArgs } from '../../../libs';
 import { loadComponent } from '../../load';
 import { throwError } from '../utils';
 import chalk from 'chalk';
+import stringArgv from 'string-argv';
 
 class Hook {
   private preHooks: IActionHook[] = [];
@@ -56,7 +56,7 @@ class Hook {
     }
 
     if (configs.type === 'component') {
-      const argv = await execAction('action.js', configs.value);
+      const argv = stringArgv(configs.value);
       const result = await this.execComponent({ argv });
       return {
         type: configs.type,

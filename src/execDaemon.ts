@@ -1,5 +1,5 @@
 import path from 'path';
-import { spawn, exec } from 'child_process';
+import { spawn } from 'child_process';
 import fs from 'fs-extra';
 const TTL = 10 * 60 * 1000;
 
@@ -14,45 +14,6 @@ function readJsonFile(filePath: string) {
   if (fs.existsSync(filePath)) {
     const data = fs.readFileSync(filePath, 'utf8');
     return JSON.parse(data);
-  }
-}
-
-function onFinish(cp) {
-  return new Promise((resolve) => {
-    const stdout = [];
-    const stderr = [];
-
-    cp.stdout.on('data', (chunk) => {
-      stdout.push(chunk);
-    });
-
-    cp.stderr.on('data', (chunk) => {
-      stderr.push(chunk);
-    });
-
-    cp.on('exit', (code) => {
-      resolve({
-        code: code,
-        stdout: Buffer.concat(stdout),
-        stderr: Buffer.concat(stderr),
-      });
-    });
-  });
-}
-
-export async function execAction(filename: string, args: string) {
-  const filePath = path.join(__dirname, 'daemon', filename);
-  if (!fs.existsSync(filePath)) return;
-  const cp = exec(`${process.execPath} ${filePath} ${args}`, {
-    encoding: null,
-  });
-  const result: any = await onFinish(cp);
-  const stdout = result.stdout.toString();
-  try {
-    const data = JSON.parse(stdout);
-    return data.slice(2);
-  } catch (error) {
-    return args.split(' ');
   }
 }
 
