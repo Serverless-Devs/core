@@ -16,7 +16,7 @@ export default class Parse {
   private globalJsonKeyMap: any = {};
   private credentials: ICredentials;
 
-  constructor(protected spath: string) {
+  constructor(protected spath?: string) {
     if (fs.existsSync(spath)) {
       try {
         this.parsedObj = this.getFileObj(spath);
@@ -176,6 +176,10 @@ export default class Parse {
   }
   getGlobalMagic() {
     return this.globalJsonKeyMap;
+  }
+  beforeInit(value: object) {
+    this.parsedObj = value;
+    return this;
   }
   async init(obj?: object): Promise<{ realVariables: any; dependenciesMap: any }> {
     const val = obj ? merge({}, this.parsedObj, obj) : this.parsedObj;
