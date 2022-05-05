@@ -76,7 +76,21 @@ function formatDebugData(data: string) {
 const gray = chalk.hex('#8c8d91');
 const red = chalk.hex('#fd5750');
 
-const time = () => new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
+function fill0(value: number) {
+  return value < 10 ? `0${value}` : value;
+}
+
+function time() {
+  const date = new Date();
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  const hour = date.getHours();
+  const minute = date.getMinutes();
+  const second = date.getSeconds();
+  return `${year}-${fill0(month)}-${fill0(day)} ${fill0(hour)}:${fill0(minute)}:${fill0(second)}`;
+}
+
 const getName = (name) => (name ? ` [${name}]` : '');
 
 export class Logger {
