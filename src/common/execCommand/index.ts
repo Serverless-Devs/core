@@ -1,5 +1,5 @@
 import Parse from './parse';
-import { isEmpty, get, isNil, keys } from 'lodash';
+import { isEmpty, get, isNil, keys, isPlainObject } from 'lodash';
 import { logger } from '../../logger';
 import Analysis from './analysis';
 import { getProjectConfig } from './utils';
@@ -12,6 +12,7 @@ interface IConfigs {
   serverName?: string;
   method: string;
   args?: string[];
+  env: object;
   globalArgs?: IGlobalArgs;
 }
 
@@ -20,6 +21,12 @@ class ExecCommand {
   private parse: Parse;
   constructor(configs: IConfigs) {
     this.configs = configs;
+    const { env } = configs;
+    if (isPlainObject(env)) {
+      for (const key in env) {
+        process.env[key] = env[key];
+      }
+    }
   }
   async init() {
     const { syaml, serverName } = this.configs;
