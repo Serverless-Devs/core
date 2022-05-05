@@ -83,7 +83,9 @@ class ComponentExec {
       method,
       spath,
     });
-    return globalArgs?.skipActions ? [] : actions;
+    const useActions = globalArgs?.skipActions || globalArgs?.help;
+    // actions 的解析动作包含了 config 魔法变量
+    return useActions ? [] : actions;
   }
   private async executeCommand(payload: { type: 'component' | 'plugin'; data: any }) {
     const { method, spath, args, serverName } = this.config;
