@@ -528,6 +528,7 @@ getYamlContent('s.yaml');
 - config.serverName 参数选填，指定服务进行操作。
 - config.method 参数必填，组件调用的方法名称，比如 deploy, remove 等。
 - config.args 参数选填，对应 `process.argv.slice(2)`。
+- config.env 参数选填，设置环境变量。
 - config.globalArgs 参数选填：
   - debug 参数选填, 是否开启 debug 模式。
   - skipActions 参数选填, 是否跳过 actions 模块。
