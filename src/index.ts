@@ -2,7 +2,7 @@ process.setMaxListeners(0);
 (process as any).noDeprecation = true;
 
 export { IInputs } from './interface';
-export { Logger, ILogger } from './logger';
+export { Logger, ILogger, makeLogFile } from './logger';
 export { HLogger } from './decorator';
 export * from './common';
 export * from './libs';

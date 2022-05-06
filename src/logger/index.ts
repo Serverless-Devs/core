@@ -1,10 +1,12 @@
 import chalk from 'chalk';
+import path from 'path';
 const prettyjson = require('prettyjson');
 import ansiEscapes from 'ansi-escapes';
 import ora, { Ora } from 'ora';
-import { isDebugMode, getLogPath } from '../libs';
+import { isDebugMode, getRootHome, getPid } from '../libs';
 import { isFunction } from 'lodash';
 import fs from 'fs-extra';
+import { execDaemon } from '../execDaemon';
 // CLI Colors
 const white = (str) => `${str}\n`;
 
@@ -38,6 +40,17 @@ interface ITaskOptions {
   task: Function;
   enabled?: Function;
 }
+
+const getLogPath = () => {
+  const logDirPath = process.env['serverless_devs_log_path'] || path.join(getRootHome(), 'logs');
+  return path.join(logDirPath, `${process.env['serverless_devs_trace_id']}.log`);
+};
+
+export const makeLogFile = () => {
+  process.env['serverless_devs_trace_id'] = `${getPid()}${Date.now()}`;
+  fs.ensureFileSync(getLogPath());
+  execDaemon('logger.js');
+};
 
 function searchStr(data: string, str: string) {
   const arr = [];

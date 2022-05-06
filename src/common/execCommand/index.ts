@@ -1,12 +1,11 @@
 import Parse from './parse';
 import { isEmpty, get, isNil, keys, isPlainObject } from 'lodash';
-import { logger } from '../../logger';
+import { logger, makeLogFile } from '../../logger';
 import Analysis from './analysis';
 import { getProjectConfig } from './utils';
 import { getTemplatePath, transforYamlPath } from './getTemplatePath';
 import ComponentExec from './component';
 import { IGlobalArgs } from './interface';
-import { makeLogFile } from '../../libs';
 
 interface IConfigs {
   syaml?: string;

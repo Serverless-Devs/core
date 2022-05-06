@@ -123,13 +123,3 @@ export const getPid = () => {
     return 'unknown';
   }
 };
-
-export const getLogPath = () => {
-  const logDirPath = process.env['serverless_devs_log_path'] || path.join(getRootHome(), 'logs');
-  return path.join(logDirPath, `${process.env['serverless_devs_trace_id']}.log`);
-};
-
-export const makeLogFile = () => {
-  process.env['serverless_devs_trace_id'] = `${getPid()}${Date.now()}`;
-  fs.ensureFileSync(getLogPath());
-};
