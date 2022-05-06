@@ -6,6 +6,7 @@ import { getProjectConfig } from './utils';
 import { getTemplatePath, transforYamlPath } from './getTemplatePath';
 import ComponentExec from './component';
 import { IGlobalArgs } from './interface';
+import { makeLogFile } from '../../libs';
 
 interface IConfigs {
   syaml?: string;
@@ -27,6 +28,8 @@ class ExecCommand {
         process.env[key] = env[key];
       }
     }
+    // 写入日志的时候，先确保创建了日志文件
+    makeLogFile();
   }
   async init() {
     const { syaml, serverName } = this.configs;

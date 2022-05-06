@@ -8,6 +8,7 @@ import fs from 'fs-extra';
 import minimist from 'minimist';
 import { includes } from 'lodash';
 import getYamlContent from './getYamlContent';
+import getMAC from 'getmac';
 
 const semver = require('semver');
 
@@ -113,4 +114,22 @@ export const getCommand = () => {
     const command = JSON.parse(process.env['serverless_devs_temp_argv']);
     return command ? `s ${command.join(' ')}` : undefined;
   } catch (error) {}
+};
+
+export const getPid = () => {
+  try {
+    return getMAC().replace(/:/g, '');
+  } catch (error) {
+    return 'unknown';
+  }
+};
+
+export const getLogPath = () => {
+  const logDirPath = process.env['serverless_devs_log_path'] || path.join(getRootHome(), 'logs');
+  return path.join(logDirPath, `${process.env['serverless_devs_trace_id']}.log`);
+};
+
+export const makeLogFile = () => {
+  process.env['serverless_devs_trace_id'] = `${getPid()}${Date.now()}`;
+  fs.ensureFileSync(getLogPath());
 };

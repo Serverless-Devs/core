@@ -2,9 +2,9 @@ import chalk from 'chalk';
 const prettyjson = require('prettyjson');
 import ansiEscapes from 'ansi-escapes';
 import ora, { Ora } from 'ora';
-import { isDebugMode } from '../libs';
+import { isDebugMode, getLogPath } from '../libs';
 import { isFunction } from 'lodash';
-
+import fs from 'fs-extra';
 // CLI Colors
 const white = (str) => `${str}\n`;
 
@@ -93,6 +93,11 @@ function time() {
 
 const getName = (name) => (name ? ` [${name}]` : '');
 
+function strip(value: string) {
+  const reg = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
+  return typeof value === 'string' ? `\n${value.replace(reg, '')}` : `\n${value}`;
+}
+
 export class Logger {
   spinner: Ora;
   context: string;
@@ -100,47 +105,66 @@ export class Logger {
     this.context = getName(context);
   }
   static log(message: any, color?: LogColor) {
+    fs.appendFileSync(getLogPath(), strip(message));
     return process.stdout.write(`${color ? chalk[color](message) : message}\n`);
   }
 
   static debug(name: string, data) {
+    const tmp = formatDebugData(data);
+    const newData = `${gray(`[${time()}] [DEBUG]${getName(name)} - `)}${tmp}`;
+    fs.appendFileSync(getLogPath(), strip(newData));
     if (isDebugMode()) {
-      console.log(`${gray(`[${time()}] [DEBUG]${getName(name)} - `)}${data}`);
+      console.log(newData);
     }
   }
 
   static info(name: string, data) {
-    console.log(`${chalk.green(`[${time()}] [INFO]${getName(name)} - `)}${data}`);
+    const newData = `${chalk.green(`[${time()}] [INFO]${getName(name)} - `)}${data}`;
+    fs.appendFileSync(getLogPath(), strip(newData));
+    console.log(newData);
   }
 
   static warn(name: string, data) {
-    console.log(`${chalk.yellow(`[${time()}] [WARN]${getName(name)} - `)}${data}`);
+    const newData = `${chalk.yellow(`[${time()}] [WARN]${getName(name)} - `)}${data}`;
+    fs.appendFileSync(getLogPath(), strip(newData));
+    console.log(newData);
   }
 
   static error(name: string, data) {
-    console.log(`${chalk.red(`[${time()}] [ERROR]${getName(name)} - `)}${data}`);
+    const newData = `${chalk.red(`[${time()}] [ERROR]${getName(name)} - `)}${data}`;
+    fs.appendFileSync(getLogPath(), strip(newData));
+    console.log(newData);
   }
   log(message: any, color?: LogColor) {
+    fs.appendFileSync(getLogPath(), strip(message));
     return process.stdout.write(`${color ? chalk[color](message) : message}\n`);
   }
 
   debug(data) {
+    const tmp = formatDebugData(data);
+    const newData = `${gray(`[${time()}] [DEBUG]${this.context} - `)}${tmp}`;
+    fs.appendFileSync(getLogPath(), strip(newData));
     if (isDebugMode()) {
-      data = formatDebugData(data);
-      console.log(`${gray(`[${time()}] [DEBUG]${this.context} - `)}${data}`);
+      console.log(newData);
     }
   }
 
   info(data) {
-    console.log(`${chalk.green(`[${time()}] [INFO]${this.context} - `)}${data}`);
+    const newData = `${chalk.green(`[${time()}] [INFO]${this.context} - `)}${data}`;
+    fs.appendFileSync(getLogPath(), strip(newData));
+    console.log(newData);
   }
 
   warn(data) {
-    console.log(`${chalk.yellow(`[${time()}] [WARN]${this.context} - `)}${data}`);
+    const newData = `${chalk.yellow(`[${time()}] [WARN]${this.context} - `)}${data}`;
+    fs.appendFileSync(getLogPath(), strip(newData));
+    console.log(newData);
   }
 
   error(data) {
-    console.log(`${chalk.red(`[${time()}] [ERROR]${this.context} - `)}${data}`);
+    const newData = `${chalk.red(`[${time()}] [ERROR]${this.context} - `)}${data}`;
+    fs.appendFileSync(getLogPath(), strip(newData));
+    console.log(newData);
   }
 
   output(outputs, indent = 0) {
