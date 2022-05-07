@@ -1,6 +1,6 @@
 import YAML, { Document } from 'yaml';
 import { YAMLMap, Pair, Scalar } from 'yaml/types';
-import { find, isEmpty } from 'lodash';
+import { find, isEmpty, get } from 'lodash';
 import extend2 from 'extend2';
 
 class ModifyYaml {
@@ -11,6 +11,9 @@ class ModifyYaml {
     this.doc = YAML.parseDocument(yamlData);
     // 新的json和原有的yaml数据进行合并，拿到一个最全的数据
     this.data = extend2(true, this.doc.toJSON(), json);
+    if (get(json, 'vars')) {
+      this.data = { ...this.data, vars: get(json, 'vars') };
+    }
   }
   init() {
     const newDoc = YAML.parseDocument(YAML.stringify(this.data));
