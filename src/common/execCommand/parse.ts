@@ -125,11 +125,12 @@ export default class Parse {
           let realValue = startsWith(matchResult, 'env.')
             ? get(process, matchResult)
             : this.findVariableValue(variableObj);
-
-          tmp =
-            Object.prototype.toString.call(realValue) === '[object String]'
-              ? tmp.replace(iterator, realValue)
-              : realValue;
+          if (realValue) {
+            tmp =
+              Object.prototype.toString.call(realValue) === '[object String]'
+                ? tmp.replace(iterator, realValue)
+                : realValue;
+          }
         }
         return tmp;
       }
