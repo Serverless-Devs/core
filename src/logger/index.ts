@@ -3,7 +3,7 @@ import path from 'path';
 const prettyjson = require('prettyjson');
 import ansiEscapes from 'ansi-escapes';
 import ora, { Ora } from 'ora';
-import { isDebugMode, getRootHome, getPid } from '../libs';
+import { isDebugMode, getRootHome, getPid, isCiCdEnv } from '../libs';
 import { isFunction } from 'lodash';
 import fs from 'fs-extra';
 import { execDaemon } from '../execDaemon';
@@ -42,14 +42,27 @@ interface ITaskOptions {
 }
 
 const getLogPath = () => {
-  const logDirPath = process.env['serverless_devs_log_path'] || path.join(getRootHome(), 'logs');
+  const serverless_devs_log_path = process.env['serverless_devs_log_path'];
+  if (serverless_devs_log_path) {
+    if (fs.existsSync(serverless_devs_log_path)) {
+      const stat = fs.statSync(serverless_devs_log_path);
+      if (stat.isFile()) return serverless_devs_log_path;
+      if (isCiCdEnv()) return;
+      return path.join(serverless_devs_log_path, `${process.env['serverless_devs_trace_id']}.log`);
+    }
+  }
+  if (isCiCdEnv()) return;
+  const logDirPath = path.join(getRootHome(), 'logs');
+  fs.ensureDirSync(logDirPath);
   return path.join(logDirPath, `${process.env['serverless_devs_trace_id']}.log`);
 };
 
 export const makeLogFile = () => {
   process.env['serverless_devs_trace_id'] = `${getPid()}${Date.now()}`;
-  fs.ensureFileSync(getLogPath());
-  execDaemon('logger.js');
+  const filePath = getLogPath();
+  if (filePath) {
+    execDaemon('logger.js');
+  }
 };
 
 function searchStr(data: string, str: string) {
@@ -111,6 +124,13 @@ function strip(value: string) {
   return typeof value === 'string' ? `\n${value.replace(reg, '')}` : `\n${value}`;
 }
 
+function logWrite(data) {
+  const filePath = getLogPath();
+  if (filePath) {
+    fs.appendFileSync(filePath, strip(data));
+  }
+}
+
 export class Logger {
   spinner: Ora;
   context: string;
@@ -118,14 +138,14 @@ export class Logger {
     this.context = getName(context);
   }
   static log(message: any, color?: LogColor) {
-    fs.appendFileSync(getLogPath(), strip(message));
+    logWrite(message);
     return process.stdout.write(`${color ? chalk[color](message) : message}\n`);
   }
 
   static debug(name: string, data) {
     const tmp = formatDebugData(data);
     const newData = `${gray(`[${time()}] [DEBUG]${getName(name)} - `)}${tmp}`;
-    fs.appendFileSync(getLogPath(), strip(newData));
+    logWrite(newData);
     if (isDebugMode()) {
       console.log(newData);
     }
@@ -133,30 +153,30 @@ export class Logger {
 
   static info(name: string, data) {
     const newData = `${chalk.green(`[${time()}] [INFO]${getName(name)} - `)}${data}`;
-    fs.appendFileSync(getLogPath(), strip(newData));
+    logWrite(newData);
     console.log(newData);
   }
 
   static warn(name: string, data) {
     const newData = `${chalk.yellow(`[${time()}] [WARN]${getName(name)} - `)}${data}`;
-    fs.appendFileSync(getLogPath(), strip(newData));
+    logWrite(newData);
     console.log(newData);
   }
 
   static error(name: string, data) {
     const newData = `${chalk.red(`[${time()}] [ERROR]${getName(name)} - `)}${data}`;
-    fs.appendFileSync(getLogPath(), strip(newData));
+    logWrite(newData);
     console.log(newData);
   }
   log(message: any, color?: LogColor) {
-    fs.appendFileSync(getLogPath(), strip(message));
+    logWrite(message);
     return process.stdout.write(`${color ? chalk[color](message) : message}\n`);
   }
 
   debug(data) {
     const tmp = formatDebugData(data);
     const newData = `${gray(`[${time()}] [DEBUG]${this.context} - `)}${tmp}`;
-    fs.appendFileSync(getLogPath(), strip(newData));
+    logWrite(newData);
     if (isDebugMode()) {
       console.log(newData);
     }
@@ -164,19 +184,19 @@ export class Logger {
 
   info(data) {
     const newData = `${chalk.green(`[${time()}] [INFO]${this.context} - `)}${data}`;
-    fs.appendFileSync(getLogPath(), strip(newData));
+    logWrite(newData);
     console.log(newData);
   }
 
   warn(data) {
     const newData = `${chalk.yellow(`[${time()}] [WARN]${this.context} - `)}${data}`;
-    fs.appendFileSync(getLogPath(), strip(newData));
+    logWrite(newData);
     console.log(newData);
   }
 
   error(data) {
     const newData = `${chalk.red(`[${time()}] [ERROR]${this.context} - `)}${data}`;
-    fs.appendFileSync(getLogPath(), strip(newData));
+    logWrite(newData);
     console.log(newData);
   }
 
