@@ -12,7 +12,7 @@ interface IConfigs {
   serverName?: string;
   method: string;
   args?: string[];
-  env: object;
+  env?: object;
   globalArgs?: IGlobalArgs;
 }
 
