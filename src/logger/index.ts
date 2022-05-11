@@ -128,7 +128,7 @@ function strip(value: string) {
 function logWrite(data) {
   const filePath = getLogPath();
   if (filePath) {
-    (process as any).serverless_devs_log_file.write(strip(data));
+    (process as any).serverless_devs_log_file?.write(strip(data));
   }
 }
 
