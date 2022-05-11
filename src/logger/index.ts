@@ -61,7 +61,6 @@ export const makeLogFile = () => {
   process.env['serverless_devs_trace_id'] = `${getPid()}${Date.now()}`;
   const filePath = getLogPath();
   if (filePath) {
-    (process as any).serverless_devs_log_file = fs.createWriteStream(filePath);
     execDaemon('logger.js');
   }
 };
@@ -128,7 +127,8 @@ function strip(value: string) {
 function logWrite(data) {
   const filePath = getLogPath();
   if (filePath) {
-    (process as any).serverless_devs_log_file?.write(strip(data));
+    const instance = fs.createWriteStream(filePath, { flags: 'a' });
+    instance.write(strip(data));
   }
 }
 
