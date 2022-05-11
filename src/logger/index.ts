@@ -7,7 +7,6 @@ import { isDebugMode, getRootHome, getPid, isCiCdEnv } from '../libs';
 import { isFunction } from 'lodash';
 import fs from 'fs-extra';
 import { execDaemon } from '../execDaemon';
-import store from './store';
 // CLI Colors
 const white = (str) => `${str}\n`;
 
@@ -62,7 +61,7 @@ export const makeLogFile = () => {
   process.env['serverless_devs_trace_id'] = `${getPid()}${Date.now()}`;
   const filePath = getLogPath();
   if (filePath) {
-    store.setCreateWriteStreamInstacne(fs.createWriteStream(filePath));
+    (process as any).serverless_devs_log_file = fs.createWriteStream(filePath);
     execDaemon('logger.js');
   }
 };
@@ -129,7 +128,7 @@ function strip(value: string) {
 function logWrite(data) {
   const filePath = getLogPath();
   if (filePath) {
-    store.createWriteStreamInstacne.write(strip(data));
+    (process as any).serverless_devs_log_file.write(strip(data));
   }
 }
 
