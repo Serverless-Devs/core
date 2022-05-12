@@ -47,6 +47,20 @@
             ]
         },
         {
+            "name": "execCommand",
+            "type": "node",
+            "request": "launch",
+            "runtimeExecutable": "ts-node",
+            "runtimeArgs": [
+                "execCommand.ts"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/test/fixtures",
+            "skipFiles": [
+                "<node_internals>/**"
+            ]
+        },
+        {
             "name": "commandParse.ts",
             "type": "node",
             "request": "launch",
