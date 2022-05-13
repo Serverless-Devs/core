@@ -1,24 +1,52 @@
 import path from 'path';
 import fs from 'fs-extra';
 import { getYamlContent } from '../../libs';
-import { isEmpty, get, omit, first } from 'lodash';
+import { isEmpty, get, omit, first, isPlainObject } from 'lodash';
 import yaml from 'js-yaml';
 import chalk from 'chalk';
 import extend2 from 'extend2';
 import parseYaml from '../parseYaml';
 
-async function checkEdition(spath: string) {
+async function checkYaml(spath: string) {
   const filename = path.basename(spath);
   const data = await getYamlContent(spath);
-  if (['1.0.0', '2.0.0'].includes(get(data, 'edition'))) {
-    return spath;
+  // 校验 edition 字段
+  if (!['1.0.0', '2.0.0'].includes(get(data, 'edition'))) {
+    throw new Error(
+      JSON.stringify({
+        message: `The edtion field in the ${filename} file is incorrect.`,
+        tips: `Please check the edtion field of ${filename}, you can specify it as 1.0.0 or 2.0.0.`,
+      }),
+    );
   }
-  throw new Error(
-    JSON.stringify({
-      message: `The edtion field in the ${filename} file is incorrect.`,
-      tips: `Please check the edtion field of ${filename}, you can specify it as 1.0.0 or 2.0.0.`,
-    }),
-  );
+  const services = get(data, 'services');
+  // 校验 services 字段
+  if (!isPlainObject(services)) {
+    throw new Error(
+      JSON.stringify({
+        message: `The services field in the ${filename} file is incorrect.`,
+        tips: `Please check the services field of ${filename}, documents: ${chalk.underline(
+          'https://docs.serverless-devs.com/fc/yaml/readme',
+        )}.`,
+      }),
+    );
+  }
+
+  // 校验 component 字段
+  for (const key in services) {
+    const ele = services[key];
+    if (isEmpty(ele.component)) {
+      throw new Error(
+        JSON.stringify({
+          message: `The component field in ${key} service is incorrect.`,
+          tips: `Please check the component field in ${key} service, documents: ${chalk.underline(
+            'https://docs.serverless-devs.com/fc/yaml/readme',
+          )}.`,
+        }),
+      );
+    }
+  }
+  return spath;
 }
 
 async function setupEnv(templateFile: string) {
@@ -80,7 +108,7 @@ export async function transforYamlPath(spath: string = '') {
   const data = await parseYaml(fs.readFileSync(spath, 'utf-8'));
   // 兼容 extends 只取第一个即可
   if (isEmpty(data?.extends) && isEmpty(data?.extend)) {
-    return checkEdition(spath);
+    return checkYaml(spath);
   }
   const dotspath = path.join(path.dirname(spath), '.s', path.basename(spath));
   fs.ensureFileSync(dotspath);
@@ -88,7 +116,7 @@ export async function transforYamlPath(spath: string = '') {
   const tmp = await extendsYaml(dotspath, data);
   const extend2Data = extend2(true, tmp, omit(data, ['extends', 'extend']));
   fs.writeFileSync(dotspath, yaml.dump(extend2Data));
-  return checkEdition(dotspath);
+  return checkYaml(dotspath);
 }
 
 export async function getTemplatePath(spath: string = '') {
