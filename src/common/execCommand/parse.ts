@@ -16,7 +16,7 @@ export default class Parse {
   private globalJsonKeyMap: any = {};
   private credentials: ICredentials;
 
-  constructor(protected spath: string) {
+  constructor(protected spath?: string) {
     if (fs.existsSync(spath)) {
       try {
         this.parsedObj = this.getFileObj(spath);
@@ -125,11 +125,12 @@ export default class Parse {
           let realValue = startsWith(matchResult, 'env.')
             ? get(process, matchResult)
             : this.findVariableValue(variableObj);
-
-          tmp =
-            Object.prototype.toString.call(realValue) === '[object String]'
-              ? tmp.replace(iterator, realValue)
-              : realValue;
+          if (realValue) {
+            tmp =
+              Object.prototype.toString.call(realValue) === '[object String]'
+                ? tmp.replace(iterator, realValue)
+                : realValue;
+          }
         }
         return tmp;
       }
@@ -172,6 +173,13 @@ export default class Parse {
       }
     }
     this.globalJsonKeyMap = tmp;
+    return this;
+  }
+  getGlobalMagic() {
+    return this.globalJsonKeyMap;
+  }
+  beforeInit(value: object) {
+    this.parsedObj = value;
     return this;
   }
   async init(obj?: object): Promise<{ realVariables: any; dependenciesMap: any }> {

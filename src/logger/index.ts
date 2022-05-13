@@ -1,10 +1,12 @@
 import chalk from 'chalk';
+import path from 'path';
 const prettyjson = require('prettyjson');
 import ansiEscapes from 'ansi-escapes';
 import ora, { Ora } from 'ora';
-import { isDebugMode } from '../libs';
+import { isDebugMode, getRootHome, getPid, isCiCdEnv } from '../libs';
 import { isFunction } from 'lodash';
-
+import fs from 'fs-extra';
+import { execDaemon } from '../execDaemon';
 // CLI Colors
 const white = (str) => `${str}\n`;
 
@@ -38,6 +40,30 @@ interface ITaskOptions {
   task: Function;
   enabled?: Function;
 }
+
+const getLogPath = () => {
+  const serverless_devs_log_path = process.env['serverless_devs_log_path'];
+  if (serverless_devs_log_path) {
+    if (fs.existsSync(serverless_devs_log_path)) {
+      const stat = fs.statSync(serverless_devs_log_path);
+      if (stat.isFile()) return serverless_devs_log_path;
+      if (isCiCdEnv()) return;
+      return path.join(serverless_devs_log_path, `${process.env['serverless_devs_trace_id']}.log`);
+    }
+  }
+  if (isCiCdEnv()) return;
+  const logDirPath = path.join(getRootHome(), 'logs');
+  fs.ensureDirSync(logDirPath);
+  return path.join(logDirPath, `${process.env['serverless_devs_trace_id']}.log`);
+};
+
+export const makeLogFile = () => {
+  process.env['serverless_devs_trace_id'] = `${getPid()}${Date.now()}`;
+  const filePath = getLogPath();
+  if (filePath) {
+    execDaemon('logger.js');
+  }
+};
 
 function searchStr(data: string, str: string) {
   const arr = [];
@@ -76,8 +102,37 @@ function formatDebugData(data: string) {
 const gray = chalk.hex('#8c8d91');
 const red = chalk.hex('#fd5750');
 
-const time = () => new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
+function fill0(value: number) {
+  return value < 10 ? `0${value}` : value;
+}
+
+function time() {
+  const date = new Date();
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  const hour = date.getHours();
+  const minute = date.getMinutes();
+  const second = date.getSeconds();
+  return `${year}-${fill0(month)}-${fill0(day)} ${fill0(hour)}:${fill0(minute)}:${fill0(second)}`;
+}
+
 const getName = (name) => (name ? ` [${name}]` : '');
+
+function strip(value: string) {
+  const reg = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
+  return typeof value === 'string' ? `\n${value.replace(reg, '')}` : `\n${value}`;
+}
+
+function logWrite(data) {
+  const filePath = getLogPath();
+  if (filePath) {
+    const instance = fs.createWriteStream(filePath, { flags: 'a' });
+    instance.on('open', () => {
+      instance.write(strip(data));
+    });
+  }
+}
 
 export class Logger {
   spinner: Ora;
@@ -86,47 +141,70 @@ export class Logger {
     this.context = getName(context);
   }
   static log(message: any, color?: LogColor) {
+    logWrite(message);
     return process.stdout.write(`${color ? chalk[color](message) : message}\n`);
   }
 
   static debug(name: string, data) {
+    const tmp = formatDebugData(data);
+    const newData = `${gray(`[${time()}] [DEBUG]${getName(name)} - `)}${tmp}`;
+    if (process.env['serverless_devs_log_debug'] !== 'false') {
+      logWrite(newData);
+    }
     if (isDebugMode()) {
-      console.log(`${gray(`[${time()}] [DEBUG]${getName(name)} - `)}${data}`);
+      console.log(newData);
     }
   }
 
   static info(name: string, data) {
-    console.log(`${chalk.green(`[${time()}] [INFO]${getName(name)} - `)}${data}`);
+    const newData = `${chalk.green(`[${time()}] [INFO]${getName(name)} - `)}${data}`;
+    logWrite(newData);
+    console.log(newData);
   }
 
   static warn(name: string, data) {
-    console.log(`${chalk.yellow(`[${time()}] [WARN]${getName(name)} - `)}${data}`);
+    const newData = `${chalk.yellow(`[${time()}] [WARN]${getName(name)} - `)}${data}`;
+    logWrite(newData);
+    console.log(newData);
   }
 
   static error(name: string, data) {
-    console.log(`${chalk.red(`[${time()}] [ERROR]${getName(name)} - `)}${data}`);
+    const newData = `${chalk.red(`[${time()}] [ERROR]${getName(name)} - `)}${data}`;
+    logWrite(newData);
+    console.log(newData);
   }
   log(message: any, color?: LogColor) {
+    logWrite(message);
     return process.stdout.write(`${color ? chalk[color](message) : message}\n`);
   }
 
   debug(data) {
+    const tmp = formatDebugData(data);
+    const newData = `${gray(`[${time()}] [DEBUG]${this.context} - `)}${tmp}`;
+    if (process.env['serverless_devs_log_debug'] !== 'false') {
+      logWrite(newData);
+    }
     if (isDebugMode()) {
-      data = formatDebugData(data);
-      console.log(`${gray(`[${time()}] [DEBUG]${this.context} - `)}${data}`);
+      console.log(newData);
     }
   }
 
   info(data) {
-    console.log(`${chalk.green(`[${time()}] [INFO]${this.context} - `)}${data}`);
+    const newData = `${chalk.green(`[${time()}] [INFO]${this.context} - `)}${data}`;
+    logWrite(newData);
+    console.log(newData);
   }
 
   warn(data) {
-    console.log(`${chalk.yellow(`[${time()}] [WARN]${this.context} - `)}${data}`);
+    const newData = `${chalk.yellow(`[${time()}] [WARN]${this.context} - `)}${data}`;
+    logWrite(newData);
+    console.log(newData);
   }
 
   error(data) {
-    console.log(`${chalk.red(`[${time()}] [ERROR]${this.context} - `)}${data}`);
+    const newData = `${chalk.red(`[${time()}] [ERROR]${this.context} - `)}${data}`;
+    logWrite(newData);
+    console.log(newData);
   }
 
   output(outputs, indent = 0) {

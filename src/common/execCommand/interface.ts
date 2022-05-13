@@ -19,6 +19,7 @@ export interface ICredentials {
 
 export interface IGlobalArgs {
   debug?: boolean;
+  help?: boolean; // help下也需要skipActions
   skipActions?: boolean;
   access?: string;
 }

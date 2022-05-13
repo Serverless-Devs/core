@@ -38,9 +38,7 @@ async function init() {
       JSON.stringify({ version: lockFileInfo.version, currentTimestamp: now }, null, 2),
     );
   }
-  const filename = path.join(provider, `${name}@${tag_name}`);
   await downloadRequest(zipball_url, componentPath, {
-    filename,
     extract: true,
     strip: 1,
   });

@@ -1,6 +1,6 @@
 import Parse from './parse';
-import { isEmpty, get, isNil, keys } from 'lodash';
-import { logger } from '../../logger';
+import { isEmpty, get, isNil, keys, isPlainObject } from 'lodash';
+import { logger, makeLogFile } from '../../logger';
 import Analysis from './analysis';
 import { getProjectConfig } from './utils';
 import { getTemplatePath, transforYamlPath } from './getTemplatePath';
@@ -12,6 +12,7 @@ interface IConfigs {
   serverName?: string;
   method: string;
   args?: string[];
+  env?: object;
   globalArgs?: IGlobalArgs;
 }
 
@@ -20,6 +21,14 @@ class ExecCommand {
   private parse: Parse;
   constructor(configs: IConfigs) {
     this.configs = configs;
+    const { env } = configs;
+    if (isPlainObject(env)) {
+      for (const key in env) {
+        process.env[key] = env[key];
+      }
+    }
+    // 写入日志的时候，先确保创建了日志文件
+    makeLogFile();
   }
   async init() {
     const { syaml, serverName } = this.configs;

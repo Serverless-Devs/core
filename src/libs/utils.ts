@@ -7,6 +7,7 @@ import { IGlobalParams } from '../interface';
 import { isEmpty, trim, startsWith, assign } from 'lodash';
 import minimist from 'minimist';
 import chalk from 'chalk';
+import net from 'net';
 
 export const makeUnderLine = (text: string) => {
   const matchs = text.match(/http[s]?:\/\/[^\s|,]+/);
@@ -86,5 +87,23 @@ export function writeJsonFile(filePath: string, data: any) {
 export function sleep(timer: number) {
   return new Promise((resolve) => {
     setTimeout(() => resolve(true), timer);
+  });
+}
+
+export function getAvailablePort(port: number = 3000) {
+  const server = net.createServer().listen(port);
+  return new Promise((resolve, reject) => {
+    server.on('listening', () => {
+      server.close();
+      resolve(port);
+    });
+
+    server.on('error', (err: any) => {
+      if (err.code === 'EADDRINUSE') {
+        resolve(getAvailablePort(port + 1));
+      } else {
+        reject(err);
+      }
+    });
   });
 }

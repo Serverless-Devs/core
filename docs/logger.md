@@ -10,6 +10,8 @@
   - [log 方法](#log方法)
   - [task 方法](#task方法)
 
+> 注意：日志写入文件的默认路径是：工作目录（`s set workspace`）下的 `logs`， 您也可以设置 环境变量 `serverless_devs_log_path` 更改写入文件的默认路径
+
 ## 基础使用
 
 ### 类使用方式
