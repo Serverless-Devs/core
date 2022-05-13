@@ -43,18 +43,21 @@ interface ITaskOptions {
 
 const getLogPath = () => {
   const serverless_devs_log_path = process.env['serverless_devs_log_path'];
+  const serverless_devs_trace_id = process.env['serverless_devs_trace_id'];
   if (serverless_devs_log_path) {
     if (fs.existsSync(serverless_devs_log_path)) {
       const stat = fs.statSync(serverless_devs_log_path);
       if (stat.isFile()) return serverless_devs_log_path;
       if (isCiCdEnv()) return;
-      return path.join(serverless_devs_log_path, `${process.env['serverless_devs_trace_id']}.log`);
+      return path.join(serverless_devs_log_path, `${serverless_devs_trace_id}.log`);
     }
   }
   if (isCiCdEnv()) return;
   const logDirPath = path.join(getRootHome(), 'logs');
   fs.ensureDirSync(logDirPath);
-  return path.join(logDirPath, `${process.env['serverless_devs_trace_id']}.log`);
+  if (serverless_devs_trace_id) {
+    return path.join(logDirPath, `${serverless_devs_trace_id}.log`);
+  }
 };
 
 export const makeLogFile = () => {
