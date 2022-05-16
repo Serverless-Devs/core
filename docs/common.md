@@ -574,7 +574,6 @@ console.log(res);
 import * as core from '@serverless-devs/core';
 import fs from 'fs-extra';
 
-const data = fs.readFileSync('s.yaml', 'utf8');
-const res = core.parseYaml(json, data);
-console.log(res);
+const data = fs.readFileSync('yaml/s.yaml', 'utf8');
+const doc = core.modifyYaml(newJson, data)
 ```
