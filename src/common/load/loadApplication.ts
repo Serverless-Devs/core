@@ -108,7 +108,7 @@ class LoadApplication {
     }
     // 优先设置函数参数接收的name，如果没有在设置 source 里的 name
     const newName = this.config.name || name;
-    const applicationPath = path.join(this.config.target, newName);
+    const applicationPath = path.resolve(this.config.target, newName);
     return this.handleDecompressFile({
       zipball_url,
       applicationPath,
@@ -347,9 +347,6 @@ async function loadApplication(
     config.access = oldsource.access;
   }
 
-  config.target = path.isAbsolute(config.target)
-    ? config.target
-    : path.join(process.cwd(), config.target);
   const instance = new LoadApplication(config);
 
   if (config.registry) {
