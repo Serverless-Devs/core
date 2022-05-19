@@ -15,5 +15,6 @@ export { default as publishHelp } from './publishHelp';
 export { default as parseYaml } from './parseYaml';
 export { default as modifyYaml } from './modifyYaml';
 export * from './execCommand';
+export * from './constant';
 export { default as ignoreWalk } from './ignoreWalk';
 export { CatchableError } from './error';
