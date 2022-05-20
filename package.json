@@ -101,6 +101,7 @@
     "rimraf": "^3.0.2",
     "semver": "^7.3.5",
     "string-argv": "^0.3.1",
+    "table-layout": "^3.0.0",
     "yaml": "^1.10.2"
   }
 }
