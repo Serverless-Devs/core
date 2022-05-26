@@ -9,6 +9,7 @@ import minimist from 'minimist';
 import { includes } from 'lodash';
 import getYamlContent from './getYamlContent';
 import getMAC from 'getmac';
+import yaml from 'js-yaml';
 
 const semver = require('semver');
 
@@ -78,6 +79,18 @@ export function setConfig(key: string, value: any) {
   } else {
     fs.ensureFileSync(sJsonPath);
     fs.writeJsonSync(sJsonPath, { [key]: value });
+  }
+}
+
+export async function setConfigYaml(key: string, value: any) {
+  const filePath = path.join(getRootHome(), 'set-config.yml');
+  const data = await getYamlContent(filePath);
+  if (data) {
+    data[key] = value;
+    fs.writeFileSync(filePath, yaml.dump(data));
+  } else {
+    fs.ensureFileSync(filePath);
+    fs.writeFileSync(filePath, yaml.dump({ [key]: value }));
   }
 }
 
