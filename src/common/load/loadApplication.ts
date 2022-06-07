@@ -279,7 +279,8 @@ class LoadApplication {
       result.access = '{{ access }}';
     }
     const sYamlData = fs.readFileSync(spath, 'utf-8');
-    const newData = parse(result, sYamlData);
+    let newData = parse({ appName: this.config.appName }, sYamlData);
+    newData = replaceFun(newData, result);
     fs.writeFileSync(spath, newData, 'utf-8');
   }
   async initSconfigWithParam({ publishYamlData, applicationPath }) {
@@ -303,7 +304,12 @@ class LoadApplication {
       }
     }
     const accessObj = this.config.access ? { access: this.config.access } : {};
-    const newData = parse({ ...newObj, _appName: this.config.appName, ...accessObj }, sYamlData);
+    let newData = parse({ appName: this.config.appName }, sYamlData);
+    newData = replaceFun(newData, {
+      ...newObj,
+      ...accessObj,
+    });
+
     fs.writeFileSync(spath, newData, 'utf-8');
   }
   async checkFileExists(filePath: string, fileName: string) {
