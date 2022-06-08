@@ -21,7 +21,7 @@ export async function getComponentVersion(
       componentNames.push(n);
       obj[n] = v;
     }
-    const key = `${provider}/${name}`;
+    const key = provider === '.' ? `devsapp/${name}` : `${provider}/${name}`;
     if (find(componentNames, (v) => v === key)) {
       return [name, obj[key]];
     }
