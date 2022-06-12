@@ -1,5 +1,7 @@
-import {getTemplatePath} from "../../../src";
+import {getTemplatePath, transforYamlPath} from "../../../src";
 import fs from "fs-extra";
+import * as os from "os";
+import * as path from "path";
 
 describe("getTemplatePath", () => {
 
@@ -32,5 +34,30 @@ describe("getTemplatePath", () => {
     expect(s.endsWith("yml")).toBeTruthy();
 
     fs.removeSync("s.yml");
+  });
+});
+
+describe("transforYamlPath", () => {
+  let s: string;
+
+  beforeEach(() => {
+    s = path.resolve(os.tmpdir(), "/transforYamlPath/s.yaml");
+    fs.ensureFileSync(s);
+    fs.writeFileSync(s, "services:");
+  });
+
+  afterEach(function () {
+    fs.removeSync(s);
+  });
+
+  it("should invoke checkYaml() when 'extends' and 'extend' properties not exists", async () => {
+    try {
+      await transforYamlPath(s);
+    } catch (e) {
+      console.warn(e);
+      let msg = JSON.parse(e.message);
+      let message: string = msg.message;
+      expect(message.includes("The edition field")).toBeTruthy();
+    }
   });
 });
