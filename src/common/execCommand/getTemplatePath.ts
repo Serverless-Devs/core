@@ -14,8 +14,8 @@ async function checkYaml(spath: string) {
   if (!['1.0.0', '2.0.0'].includes(get(data, 'edition'))) {
     throw new Error(
       JSON.stringify({
-        message: `The edtion field in the ${filename} file is incorrect.`,
-        tips: `Please check the edtion field of ${filename}, you can specify it as 1.0.0 or 2.0.0.`,
+        message: `The edition field in the ${filename} file is incorrect.`,
+        tips: `Please check the edition field of ${filename}, you can specify it as 1.0.0 or 2.0.0.`,
       }),
     );
   }
