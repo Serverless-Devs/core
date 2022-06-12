@@ -39,22 +39,25 @@ describe("getTemplatePath", () => {
 
 describe("transforYamlPath", () => {
   let s: string;
+  let sProd: string;
 
   beforeEach(() => {
     s = path.resolve(os.tmpdir(), "/transforYamlPath/s.yaml");
     fs.ensureFileSync(s);
-    fs.writeFileSync(s, "services:");
+    sProd = path.resolve(os.tmpdir(), "/transforYamlPath/s-prod.yaml");
+    fs.ensureFileSync(sProd);
   });
 
   afterEach(function () {
     fs.removeSync(s);
+    fs.removeSync(sProd);
   });
 
   it("should invoke checkYaml() when 'extends' and 'extend' properties not exists", async () => {
+    fs.writeFileSync(s, "services:");
     try {
       await transforYamlPath(s);
     } catch (e) {
-      console.warn(e);
       let msg = JSON.parse(e.message);
       let message: string = msg.message;
       expect(message.includes("The edition field")).toBeTruthy();
