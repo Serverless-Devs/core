@@ -87,10 +87,17 @@ async function isYamlFile(filePath: string) {
   }
 }
 
-async function extendsYaml(dotspath: string, data: any) {
+async function extendsYaml(spath: string, dotspath: string, data: any) {
   const extendsPath = data?.extends ? first(data.extends) : undefined;
-  const yamlPath = data?.extend ? data.extend : extendsPath;
+  let yamlPath = data?.extend ? data.extend : extendsPath;
   if (isEmpty(yamlPath)) return;
+
+  if (!path.isAbsolute(yamlPath)) {
+    let dirname = path.dirname(spath);
+    let fixedPath = path.resolve(dirname, yamlPath);
+    if (fs.existsSync(fixedPath)) yamlPath = fixedPath;
+  }
+
   await isYamlFile(yamlPath);
   if (data?.vars) {
     const doc = await getYamlContent(yamlPath);
@@ -113,7 +120,7 @@ export async function transforYamlPath(spath: string = '') {
   const dotspath = path.join(path.dirname(spath), '.s', path.basename(spath));
   fs.ensureFileSync(dotspath);
 
-  const tmp = await extendsYaml(dotspath, data);
+  const tmp = await extendsYaml(spath, dotspath, data);
   const extend2Data = extend2(true, tmp, omit(data, ['extends', 'extend']));
   fs.writeFileSync(dotspath, yaml.dump(extend2Data));
   return checkYaml(dotspath);
