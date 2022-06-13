@@ -81,6 +81,26 @@ describe("transforYamlPath", () => {
       await withVars(relativePath);
     });
 
+    it("should works when extend ./s.yaml (relative path according to s-prod.yaml)", async () => {
+      let relativePath = "./s.yaml";
+      await withoutVars(relativePath);
+    });
+
+    it("should works when having vars and extend ./s.yaml (relative path according to s-prod.yaml)", async () => {
+      let relativePath = "./s.yaml";
+      await withVars(relativePath);
+    });
+
+    it("should works when extend s.yaml (relative path according to s-prod.yaml)", async () => {
+      let relativePath = "s.yaml";
+      await withoutVars(relativePath);
+    });
+
+    it("should works when having vars and extend s.yaml (relative path according to s-prod.yaml)l", async () => {
+      let relativePath = "s.yaml";
+      await withVars(relativePath);
+    });
+
     async function withoutVars(relativePath: string) {
       let sProdContent = "extend: " + relativePath + "\r\n" +
         "services:";
