@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs-extra';
-import { getYamlContent } from '../../libs';
-import { isEmpty, get, omit, first, isPlainObject } from 'lodash';
+import {getYamlContent} from '../../libs';
+import {first, get, isEmpty, isPlainObject, omit} from 'lodash';
 import yaml from 'js-yaml';
 import chalk from 'chalk';
 import extend2 from 'extend2';
@@ -51,15 +51,15 @@ async function checkYaml(spath: string) {
 
 async function setupEnv(templateFile: string) {
   const spath = path.dirname(templateFile);
-  require('dotenv').config({ path: path.join(spath, '.env') });
+  require('dotenv').config({path: path.join(spath, '.env')});
   const data = await getYamlContent(templateFile);
-  const { services } = data;
+  const {services} = data;
   for (const key in services) {
     const element = services[key];
     let codeUri = get(element, 'props.function.codeUri');
     if (codeUri) {
       codeUri = path.isAbsolute(codeUri) ? codeUri : path.join(spath, codeUri);
-      require('dotenv').config({ path: path.join(codeUri, '.env') });
+      require('dotenv').config({path: path.join(codeUri, '.env')});
     }
   }
 }
@@ -94,7 +94,7 @@ async function extendsYaml(dotspath: string, data: any) {
   await isYamlFile(yamlPath);
   if (data?.vars) {
     const doc = await getYamlContent(yamlPath);
-    const newData = extend2(true, doc, { vars: data.vars });
+    const newData = extend2(true, doc, {vars: data.vars});
     fs.writeFileSync(dotspath, yaml.dump(newData));
     return await parseYaml(fs.readFileSync(dotspath, 'utf-8'));
   }
