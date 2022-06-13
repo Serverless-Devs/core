@@ -71,8 +71,18 @@ describe("transforYamlPath", () => {
 
     it("should works when extend with relative path according to cwd", async () => {
       let cwd = process.cwd();
-      let relativePathFromCwd = path.relative(cwd, s);
-      let sProdContent = "extend: " + relativePathFromCwd + "\r\n" +
+      let relativePath = path.relative(cwd, s);
+      await withoutVars(relativePath);
+    });
+
+    it("should works when having vars and extend with relative path according to cwd", async () => {
+      let cwd = process.cwd();
+      let relativePath = path.relative(cwd, s);
+      await withVars(relativePath);
+    });
+
+    async function withoutVars(relativePath: string) {
+      let sProdContent = "extend: " + relativePath + "\r\n" +
         "services:";
       fs.writeFileSync(sProd, sProdContent);
 
@@ -85,12 +95,10 @@ describe("transforYamlPath", () => {
       }
 
       expect(await getYamlContent(dotSProdYaml)).toStrictEqual({services: null});
-    });
+    }
 
-    it("should works when having vars and extend with relative path according to cwd", async () => {
-      let cwd = process.cwd();
-      let relativePathFromCwd = path.relative(cwd, s);
-      let sProdContent = "extend: " + relativePathFromCwd + "\r\n" +
+    async function withVars(relativePath: string) {
+      let sProdContent = "extend: " + relativePath + "\r\n" +
         "vars:\r\n" +
         "services:";
       fs.writeFileSync(sProd, sProdContent);
@@ -107,6 +115,7 @@ describe("transforYamlPath", () => {
         services: null,
         vars: null
       });
-    });
+    }
+
   });
 });
