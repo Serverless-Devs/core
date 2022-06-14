@@ -18,6 +18,7 @@ import { getCredentialAliasList, setCredential } from '../credential';
 import { replaceFun, getYamlPath, getTemplatekey } from './utils';
 import parse from './parse';
 const gray = chalk.hex('#8c8d91');
+var artTemplate = require('art-template');
 
 interface IParams {
   source: string; // 组件名称
@@ -278,15 +279,14 @@ class LoadApplication {
     if (result?.access === false) {
       result.access = '{{ access }}';
     }
-    const sYamlData = fs.readFileSync(spath, 'utf-8');
-    let newData = parse({ appName: this.config.appName }, sYamlData);
-    newData = replaceFun(newData, result);
+    artTemplate.defaults.extname = path.extname(spath);
+    let newData = artTemplate(spath, result);
+    newData = parse({ appName: this.config.appName }, newData);
     fs.writeFileSync(spath, newData, 'utf-8');
   }
   async initSconfigWithParam({ publishYamlData, applicationPath }) {
     const spath = getYamlPath(applicationPath, 's');
     if (isEmpty(spath)) return;
-    const sYamlData = fs.readFileSync(spath, 'utf-8');
     let result = this.config.parameters;
     const properties = get(publishYamlData, 'Parameters.properties');
     const requiredList = get(publishYamlData, 'Parameters.required', []);
@@ -304,12 +304,12 @@ class LoadApplication {
       }
     }
     const accessObj = this.config.access ? { access: this.config.access } : {};
-    let newData = parse({ appName: this.config.appName }, sYamlData);
-    newData = replaceFun(newData, {
+    artTemplate.defaults.extname = path.extname(spath);
+    let newData = artTemplate(spath, {
       ...newObj,
       ...accessObj,
     });
-
+    newData = parse({ appName: this.config.appName }, newData);
     fs.writeFileSync(spath, newData, 'utf-8');
   }
   async checkFileExists(filePath: string, fileName: string) {
