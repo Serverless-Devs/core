@@ -53,7 +53,7 @@ async function setupEnv(templateFile: string) {
   const spath = path.dirname(templateFile);
   const envPath = path.join(spath, '.env');
   if (fs.existsSync(envPath)) {
-    require('dotenv').config({ path: path.join(spath, '.env') });
+    require('dotenv').config({ path: envPath });
   }
   const data = await getYamlContent(templateFile);
   const services = get(data, 'services');
