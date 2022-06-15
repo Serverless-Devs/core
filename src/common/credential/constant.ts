@@ -24,121 +24,105 @@ export const providerCollection: any = {
   alibaba: [
     {
       type: 'input',
-      message: 'AccessKeyID',
+      message: 'AccessKeyID: ',
       name: 'AccessKeyID',
-      default: '', // 默认值
     },
     {
       type: 'input',
-      message: 'AccessKeySecret',
+      message: 'AccessKeySecret: ',
       name: 'AccessKeySecret',
-      default: '', // 默认值
     },
   ],
 
   aws: [
     {
       type: 'input',
-      message: 'AccessKeyID',
+      message: 'AccessKeyID: ',
       name: 'AccessKeyID',
-      default: '', // 默认值
     },
 
     {
       type: 'input',
-      message: 'SecretAccessKey',
+      message: 'SecretAccessKey: ',
       name: 'SecretAccessKey',
-      default: '', // 默认值
     },
   ],
 
   huawei: [
     {
       type: 'input',
-      message: 'AccessKeyID',
+      message: 'AccessKeyID: ',
       name: 'AccessKeyID',
-      default: '', // 默认值
     },
 
     {
       type: 'input',
-      message: 'SecretAccessKey',
+      message: 'SecretAccessKey: ',
       name: 'SecretAccessKey',
-      default: '', // 默认值
     },
   ],
 
   azure: [
     {
       type: 'input',
-      message: 'KeyVaultName',
+      message: 'KeyVaultName: ',
       name: 'KeyVaultName',
-      default: '', // 默认值
     },
 
     {
       type: 'input',
-      message: 'TenantID',
+      message: 'TenantID: ',
       name: 'TenantID',
-      default: '', // 默认值
     },
     {
       type: 'input',
-      message: 'ClentID',
+      message: 'ClentID: ',
       name: 'ClentID',
-      default: '', // 默认值
     },
 
     {
       type: 'input',
-      message: 'ClientSecret',
+      message: 'ClientSecret: ',
       name: 'ClientSecret',
-      default: '', // 默认值
     },
   ],
 
   baidu: [
     {
       type: 'input',
-      message: 'AccessKeyID',
+      message: 'AccessKeyID: ',
       name: 'AccessKeyID',
-      default: '', // 默认值
     },
 
     {
       type: 'input',
-      message: 'SecretAccessKey',
+      message: 'SecretAccessKey: ',
       name: 'SecretAccessKey',
-      default: '', // 默认值
     },
   ],
   google: [
     {
       type: 'input',
-      message: 'PrivateKeyData',
+      message: 'PrivateKeyData: ',
       name: 'PrivateKeyData',
-      default: '', // 默认值
     },
   ],
 
   tencent: [
     {
       type: 'input',
-      message: 'AccountID',
+      message: 'AccountID: ',
       name: 'AccountID',
-      default: '', // 默认值
     },
     {
       type: 'input',
-      message: 'SecretID',
+      message: 'SecretID: ',
       name: 'SecretID',
-      default: '', // 默认值
     },
     {
       type: 'input',
-      message: 'SecretKey',
+      message: 'SecretKey: ',
       name: 'SecretKey',
-      default: '', // 默认值
     },
   ],
 };

@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs-extra';
 import { getYamlContent } from '../../libs';
-import { isEmpty, get, omit, first, isPlainObject } from 'lodash';
+import { first, get, isEmpty, isPlainObject, omit } from 'lodash';
 import yaml from 'js-yaml';
 import chalk from 'chalk';
 import extend2 from 'extend2';
@@ -14,8 +14,8 @@ async function checkYaml(spath: string) {
   if (!['1.0.0', '2.0.0'].includes(get(data, 'edition'))) {
     throw new Error(
       JSON.stringify({
-        message: `The edtion field in the ${filename} file is incorrect.`,
-        tips: `Please check the edtion field of ${filename}, you can specify it as 1.0.0 or 2.0.0.`,
+        message: `The edition field in the ${filename} file is incorrect.`,
+        tips: `Please check the edition field of ${filename}, you can specify it as 1.0.0 or 2.0.0.`,
       }),
     );
   }
@@ -51,15 +51,20 @@ async function checkYaml(spath: string) {
 
 async function setupEnv(templateFile: string) {
   const spath = path.dirname(templateFile);
-  require('dotenv').config({ path: path.join(spath, '.env') });
+  const envPath = path.join(spath, '.env');
+  if (fs.existsSync(envPath)) {
+    require('dotenv').config({ path: envPath });
+  }
   const data = await getYamlContent(templateFile);
-  const { services } = data;
+  const services = get(data, 'services');
+  if (isEmpty(services)) return;
   for (const key in services) {
     const element = services[key];
     let codeUri = get(element, 'props.function.codeUri');
     if (codeUri) {
       codeUri = path.isAbsolute(codeUri) ? codeUri : path.join(spath, codeUri);
-      require('dotenv').config({ path: path.join(codeUri, '.env') });
+      const codeUriEnvPath = path.join(codeUri, '.env');
+      fs.existsSync(codeUriEnvPath) && require('dotenv').config({ path: codeUriEnvPath });
     }
   }
 }
@@ -87,10 +92,17 @@ async function isYamlFile(filePath: string) {
   }
 }
 
-async function extendsYaml(dotspath: string, data: any) {
+async function extendsYaml(spath: string, dotspath: string, data: any) {
   const extendsPath = data?.extends ? first(data.extends) : undefined;
-  const yamlPath = data?.extend ? data.extend : extendsPath;
+  let yamlPath = data?.extend ? data.extend : extendsPath;
   if (isEmpty(yamlPath)) return;
+
+  if (!path.isAbsolute(yamlPath)) {
+    let dirname = path.dirname(spath);
+    let fixedPath = path.resolve(dirname, yamlPath);
+    if (fs.existsSync(fixedPath)) yamlPath = fixedPath;
+  }
+
   await isYamlFile(yamlPath);
   if (data?.vars) {
     const doc = await getYamlContent(yamlPath);
@@ -113,7 +125,7 @@ export async function transforYamlPath(spath: string = '') {
   const dotspath = path.join(path.dirname(spath), '.s', path.basename(spath));
   fs.ensureFileSync(dotspath);
 
-  const tmp = await extendsYaml(dotspath, data);
+  const tmp = await extendsYaml(spath, dotspath, data);
   const extend2Data = extend2(true, tmp, omit(data, ['extends', 'extend']));
   fs.writeFileSync(dotspath, yaml.dump(extend2Data));
   return checkYaml(dotspath);

@@ -29,12 +29,12 @@ async function handleCustom(info: any) {
     const { key, value } = await inquirer.prompt([
       {
         type: 'input',
-        message: 'Please enter key',
+        message: 'Please enter key: ',
         name: 'key',
       },
       {
         type: 'input',
-        message: 'Please enter value',
+        message: 'Please enter value: ',
         name: 'value',
       },
     ]);
