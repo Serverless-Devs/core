@@ -7,7 +7,9 @@ import { getGlobalArgs } from '../../../libs';
 import { loadComponent } from '../../load';
 import { throwError } from '../utils';
 import chalk from 'chalk';
+import os from 'os';
 import stringArgv from 'string-argv';
+import { HumanWarning } from '../../error';
 
 class Hook {
   private preHooks: IActionHook[] = [];
@@ -51,7 +53,25 @@ class Hook {
     if (configs.type === 'run') {
       const execPath = configs.path;
       if (fs.existsSync(execPath) && fs.lstatSync(execPath).isDirectory()) {
-        execa.sync(configs.value, { cwd: execPath, stdio: 'inherit', shell: true });
+        try {
+          execa.sync(configs.value, {
+            cwd: execPath,
+            stdio: 'inherit',
+            shell: true,
+          });
+        } catch (error) {
+          if (os.platform() === 'win32') {
+            logger.info('Command run execution environment：CMD');
+            new HumanWarning({
+              warningMessage:
+                'Please check whether the actions section of yaml can be executed in the current environment.',
+            });
+          }
+          throwError({
+            error,
+            serviceName: get(this.inputs, 'project.projectName'),
+          });
+        }
       }
     }
 
