@@ -1,6 +1,6 @@
 {
   "name": "@serverless-devs/core",
-  "version": "0.1.39",
+  "version": "0.1.40",
   "description": "Serverless Devs Tool Core Component",
   "keywords": [
     "Serverless",
@@ -52,7 +52,6 @@
     "@types/lodash": "^4.14.178",
     "@types/minimist": "^1.2.2",
     "@types/rimraf": "^3.0.0",
-    "art-template": "^4.13.2",
     "esbuild": "^0.14.10",
     "husky": "^6.0.0",
     "jest": "^27.4.6",
@@ -78,6 +77,7 @@
     "ansi-escapes": "^4.3.2",
     "archive-type": "^4.0.0",
     "archiver": "^5.3.0",
+    "art-template": "^4.13.2",
     "chalk": "^4.1.0",
     "command-line-usage": "^6.1.1",
     "crypto-js": "^4.0.0",
