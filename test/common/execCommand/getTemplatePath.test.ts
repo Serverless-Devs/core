@@ -138,4 +138,35 @@ describe("transforYamlPath", () => {
     }
 
   });
+
+  it("should throws error when s.yaml contains duplicate key", (done) => {
+    fs.writeFileSync(s,
+      "\r\n" +
+      "  default:\r\n" +
+      "    props:\r\n" +
+      "      function:\r\n" +
+      "        environmentVariables:\r\n" +
+      "          duplicate-key: value1\r\n" +
+      "          duplicate-key: value2\r\n" +
+      "", {flag: "a" /* append */});
+
+    transforYamlPath(s)
+      .then(() => done("then() should not be invoked"))
+      .catch(error => {
+        let json = JSON.parse(error.message);
+        expect(json.message).toBeDefined();
+        expect(json.message).toContain("s.yaml format is incorrect");
+        expect(json.message).toContain("duplicated mapping key");
+        //     s.yaml format is incorrect: duplicated mapping key (7:11)
+        //
+        //      4 |       function:
+        //      5 |         environmentVariables:
+        //      6 |           duplicate-key: value1
+        //      7 |           duplicate-key: value2
+        //     ---------------^
+        // console.log(json.message);
+        expect(json.tips).toBeDefined();
+        done();
+      });
+  });
 });
