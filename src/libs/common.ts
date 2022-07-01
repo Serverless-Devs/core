@@ -36,6 +36,10 @@ export function isCiCdEnv() {
   return includes(['cloud_shell', 'yunxiao', 'github', 'gitlab', 'jenkins'], getCicdEnv());
 }
 
+export function useLocal() {
+  return process.env.default_serverless_devs_registry_mode === 'local';
+}
+
 export function formatWorkspacePath(val: string) {
   return val.replace(/~/, USER_HOME);
 }
