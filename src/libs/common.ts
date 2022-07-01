@@ -37,7 +37,7 @@ export function isCiCdEnv() {
 }
 
 export function useLocal() {
-  return process.env.serverless_devs_registry_mode === 'local';
+  return process.env.default_serverless_devs_registry_mode === 'local';
 }
 
 export function formatWorkspacePath(val: string) {
