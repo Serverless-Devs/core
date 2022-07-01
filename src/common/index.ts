@@ -17,4 +17,5 @@ export { default as modifyYaml } from './modifyYaml';
 export * from './execCommand';
 export * from './constant';
 export { default as ignoreWalk } from './ignoreWalk';
+export { default as getAccountByAccess } from './getAccountByAccess';
 export { CatchableError } from './error';

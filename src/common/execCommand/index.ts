@@ -6,6 +6,8 @@ import { getProjectConfig } from './utils';
 import { getTemplatePath, transforYamlPath } from './getTemplatePath';
 import ComponentExec from './component';
 import { IGlobalArgs } from './interface';
+import { execDaemon } from '../../execDaemon';
+import { useLocal } from '../../libs';
 
 interface IConfigs {
   syaml?: string;
@@ -41,6 +43,10 @@ class ExecCommand {
     await this.warnEnvironmentVariables(parsedObj.realVariables);
     const analysis = new Analysis(parsedObj.realVariables, parsedObj.dependenciesMap);
     const executeOrderList = analysis.getProjectOrder();
+    // 私有化部署不在进行上报数据
+    if (!useLocal()) {
+      execDaemon('reportTracker.js', { syaml: spath });
+    }
     // 只有一个服务，或者指定服务操作
     if (executeOrderList.length === 1 || serverName) {
       const tempCustomerCommandName = executeOrderList[0];
