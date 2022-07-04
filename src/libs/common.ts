@@ -10,6 +10,7 @@ import { includes } from 'lodash';
 import getYamlContent from './getYamlContent';
 import getMAC from 'getmac';
 import yaml from 'js-yaml';
+import _ from 'lodash';
 
 const semver = require('semver');
 
@@ -23,6 +24,9 @@ export const isDebugMode = () => {
 
 // s工具的家目录
 export function getCicdEnv() {
+  if (process.env.HOME === '/kaniko' && process.env.BUILD_IMAGE_ENV === 'fc-backend') {
+    return 'app_center';
+  }
   for (const key in process.env) {
     if (key.startsWith('CLOUDSHELL')) return 'cloud_shell';
     if (key.startsWith('PIPELINE')) return 'yunxiao';
@@ -33,7 +37,10 @@ export function getCicdEnv() {
 }
 
 export function isCiCdEnv() {
-  return includes(['cloud_shell', 'yunxiao', 'github', 'gitlab', 'jenkins'], getCicdEnv());
+  return includes(
+    ['app_center', 'cloud_shell', 'yunxiao', 'github', 'gitlab', 'jenkins'],
+    getCicdEnv(),
+  );
 }
 
 export function useLocal() {

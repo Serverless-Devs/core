@@ -12,7 +12,7 @@ const path = require('path');
 const fs = require('fs');
 
 async function init() {
-  const { CLI_VERSION, syaml } = process.env;
+  const { CLI_VERSION, access, syaml } = process.env;
   const core_version = await getCoreVersion();
   const os = getCicdEnv() || process.platform;
   const node_version = process.version;
@@ -21,7 +21,7 @@ async function init() {
   if (getCommand()) {
     url = `${url}&trackerName=${getCommand()}`;
   }
-  const mainUid = await getMainUid(syaml);
+  const mainUid = await getMainUid(access, syaml);
   if (mainUid) {
     url = `${url}&mainUid=${mainUid}`;
   }
@@ -33,11 +33,15 @@ function getCoreVersion() {
   return fs.existsSync(corePath) ? require(corePath).version : 'unknown';
 }
 
-async function getMainUid(syaml) {
+async function getMainUid(access, syaml) {
   try {
-    const data = await getYamlContent(syaml);
-    if (_.get(data, 'access')) {
-      const credentials = await getAccountByAccess(data.access);
+    let newAccess = access;
+    if (_.isEmpty(newAccess)) {
+      const data = await getYamlContent(syaml);
+      newAccess = _.get(data, 'access');
+    }
+    if (newAccess) {
+      const credentials = await getAccountByAccess(newAccess);
       return credentials.AccountID;
     }
   } catch (error) {}
