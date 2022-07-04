@@ -33,7 +33,7 @@ class ExecCommand {
     makeLogFile();
   }
   async init() {
-    const { syaml, serverName } = this.configs;
+    const { syaml, serverName, globalArgs = {} } = this.configs;
     const originSpath = await getTemplatePath(syaml);
     const spath = await transforYamlPath(originSpath);
     this.parse = new Parse(spath);
@@ -45,7 +45,7 @@ class ExecCommand {
     const executeOrderList = analysis.getProjectOrder();
     // 私有化部署不在进行上报数据
     if (!useLocal()) {
-      execDaemon('reportTracker.js', { syaml: spath });
+      execDaemon('reportTracker.js', { syaml: spath, access: globalArgs.access });
     }
     // 只有一个服务，或者指定服务操作
     if (executeOrderList.length === 1 || serverName) {
