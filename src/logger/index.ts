@@ -130,10 +130,7 @@ function strip(value: string) {
 function logWrite(data) {
   const filePath = getLogPath();
   if (filePath) {
-    const instance = fs.createWriteStream(filePath, { flags: 'a' });
-    instance.on('open', () => {
-      instance.write(strip(data));
-    });
+    fs.appendFileSync(filePath, strip(data))
   }
 }
 
