@@ -207,18 +207,25 @@ class LoadApplication {
     const requiredList = get(publishYamlData, 'Parameters.required');
     const promptList = [];
     if (properties) {
-      const rangeLeft = [];
-      const rangeRight = [];
+      let rangeList = [];
       for (const key in properties) {
         const ele = properties[key];
-        const newEle = { ...ele, _key: key };
-        'x-range' in ele ? rangeLeft.push(newEle) : rangeRight.push(newEle);
+        ele['_key'] = key;
+        rangeList.push(ele);
       }
-
-      const rangeList = sortBy(rangeLeft, (o) => o['x-range']).concat(rangeRight);
+      rangeList = sortBy(rangeList, (o) => o['x-range']);
       for (const item of rangeList) {
         const name = item._key;
-        if (item.enum) {
+        // 布尔类型
+        if (item.type === 'boolean') {
+          promptList.push({
+            type: 'confirm',
+            name,
+            message: item.description,
+            default: item.default,
+          });
+        } else if (item.enum) {
+          // 枚举类型
           promptList.push({
             type: 'list',
             name,
@@ -228,6 +235,7 @@ class LoadApplication {
             default: item.default,
           });
         } else if (item.type === 'string') {
+          // 字符串类型
           promptList.push({
             type: 'input',
             message: item.title,
