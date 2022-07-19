@@ -13,7 +13,7 @@ import chalk from 'chalk';
 import _, { get, isEmpty, sortBy, includes, map, concat } from 'lodash';
 import rimraf from 'rimraf';
 import installDependency from '../installDependency';
-import { readJsonFile, getYamlContent, S_CURRENT, getSetConfig } from '../../libs';
+import { readJsonFile, getYamlContent, S_CURRENT, getSetConfig, isYamlFile } from '../../libs';
 import { getCredentialAliasList, setCredential } from '../credential';
 import { replaceFun, getYamlPath, getTemplatekey } from './utils';
 import parse from './parse';
@@ -289,6 +289,10 @@ class LoadApplication {
     }
     artTemplate.defaults.extname = path.extname(spath);
     let newData = artTemplate(spath, result);
+    // art 语法需要先解析在验证yaml内容
+    fs.writeFileSync(spath, newData, 'utf-8');
+    // fix: Document with errors cannot be stringified
+    await isYamlFile(spath);
     newData = parse({ appName: this.config.appName }, newData);
     fs.writeFileSync(spath, newData, 'utf-8');
   }
@@ -317,6 +321,8 @@ class LoadApplication {
       ...newObj,
       ...accessObj,
     });
+    fs.writeFileSync(spath, newData, 'utf-8');
+    await isYamlFile(spath);
     newData = parse({ appName: this.config.appName }, newData);
     fs.writeFileSync(spath, newData, 'utf-8');
   }
