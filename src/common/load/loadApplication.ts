@@ -224,6 +224,14 @@ class LoadApplication {
             message: item.description,
             default: item.default,
           });
+        } else if (item.type === 'password') {
+          // 密码类型
+          promptList.push({
+            type: 'password',
+            name,
+            message: item.description,
+            default: item.default,
+          });
         } else if (item.enum) {
           // 枚举类型
           promptList.push({
@@ -234,8 +242,8 @@ class LoadApplication {
             choices: item.enum,
             default: item.default,
           });
-        } else if (item.type === 'string' || item.type === 'password') {
-          // 字符串类型 或者 密码类型
+        } else if (item.type === 'string') {
+          // 字符串类型
           promptList.push({
             type: 'input',
             message: item.title,
