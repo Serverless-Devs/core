@@ -13,7 +13,7 @@ import chalk from 'chalk';
 import _, { get, isEmpty, sortBy, includes, map, concat } from 'lodash';
 import rimraf from 'rimraf';
 import installDependency from '../installDependency';
-import { readJsonFile, getYamlContent, S_CURRENT, getSetConfig } from '../../libs';
+import { readJsonFile, getYamlContent, S_CURRENT, getSetConfig, isYamlFile } from '../../libs';
 import { getCredentialAliasList, setCredential } from '../credential';
 import { replaceFun, getYamlPath, getTemplatekey } from './utils';
 import parse from './parse';
@@ -207,18 +207,33 @@ class LoadApplication {
     const requiredList = get(publishYamlData, 'Parameters.required');
     const promptList = [];
     if (properties) {
-      const rangeLeft = [];
-      const rangeRight = [];
+      let rangeList = [];
       for (const key in properties) {
         const ele = properties[key];
-        const newEle = { ...ele, _key: key };
-        'x-range' in ele ? rangeLeft.push(newEle) : rangeRight.push(newEle);
+        ele['_key'] = key;
+        rangeList.push(ele);
       }
-
-      const rangeList = sortBy(rangeLeft, (o) => o['x-range']).concat(rangeRight);
+      rangeList = sortBy(rangeList, (o) => o['x-range']);
       for (const item of rangeList) {
         const name = item._key;
-        if (item.enum) {
+        // 布尔类型
+        if (item.type === 'boolean') {
+          promptList.push({
+            type: 'confirm',
+            name,
+            message: item.description,
+            default: item.default,
+          });
+        } else if (item.type === 'password') {
+          // 密码类型
+          promptList.push({
+            type: 'password',
+            name,
+            message: item.description,
+            default: item.default,
+          });
+        } else if (item.enum) {
+          // 枚举类型
           promptList.push({
             type: 'list',
             name,
@@ -228,6 +243,7 @@ class LoadApplication {
             default: item.default,
           });
         } else if (item.type === 'string') {
+          // 字符串类型
           promptList.push({
             type: 'input',
             message: item.title,
@@ -281,6 +297,10 @@ class LoadApplication {
     }
     artTemplate.defaults.extname = path.extname(spath);
     let newData = artTemplate(spath, result);
+    // art 语法需要先解析在验证yaml内容
+    fs.writeFileSync(spath, newData, 'utf-8');
+    // fix: Document with errors cannot be stringified
+    await isYamlFile(spath);
     newData = parse({ appName: this.config.appName }, newData);
     fs.writeFileSync(spath, newData, 'utf-8');
   }
@@ -309,6 +329,8 @@ class LoadApplication {
       ...newObj,
       ...accessObj,
     });
+    fs.writeFileSync(spath, newData, 'utf-8');
+    await isYamlFile(spath);
     newData = parse({ appName: this.config.appName }, newData);
     fs.writeFileSync(spath, newData, 'utf-8');
   }

@@ -7,6 +7,12 @@ import path from 'path';
 import { URL } from 'url';
 import decompress, { DecompressOptions } from 'decompress';
 import report from '../common/report';
+import commandExists from 'command-exists';
+import execa from 'execa';
+import stripDirs from 'strip-dirs';
+import walkSync from 'walk-sync';
+import rimraf from 'rimraf';
+
 export interface IOptions extends DecompressOptions {
   /**
    * If set to true, try extracting the file using decompress.
@@ -79,10 +85,34 @@ export default async (url: string, dest: string, options: IOptions = {}) => {
         }
         spin.text = filename ? `${filename} file unzipping${str}` : `file unzipping${str}`;
       }, 300);
+
+      let useSystemUnzip = false;
+      if (process.env['default_serverless_devs_system_unzip'] === 'true') {
+        useSystemUnzip = commandExists.sync('unzip');
+      }
+      const tmpDir = path.join(path.dirname(dest), `devsapp-package-${Date.now()}`);
       // node-v12.22.1: end of central directory record signature not found
       for (let index = 0; index < 3; index++) {
         try {
-          await decompress(filePath, dest, restOpts);
+          if (useSystemUnzip) {
+            if (restOpts?.strip) {
+              execa.sync('unzip', ['-d', tmpDir, '-o', filePath]);
+              const paths = walkSync(tmpDir);
+              for (const p of paths) {
+                const fillPath = path.join(tmpDir, p);
+                const stat = fs.statSync(fillPath);
+                if (stat.isFile()) {
+                  const stripPath = stripDirs(p, restOpts.strip);
+                  fs.moveSync(fillPath, path.join(dest, stripPath), { overwrite: true });
+                }
+              }
+              rimraf.sync(tmpDir);
+            } else {
+              execa.sync('unzip', ['-d', dest, '-o', filePath]);
+            }
+          } else {
+            await decompress(filePath, dest, restOpts);
+          }
           clearInterval(timer);
           await fs.unlink(filePath);
           const text = 'file decompression completed';
