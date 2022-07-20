@@ -234,8 +234,8 @@ class LoadApplication {
             choices: item.enum,
             default: item.default,
           });
-        } else if (item.type === 'string') {
-          // 字符串类型
+        } else if (item.type === 'string' || item.type === 'password') {
+          // 字符串类型 或者 密码类型
           promptList.push({
             type: 'input',
             message: item.title,
