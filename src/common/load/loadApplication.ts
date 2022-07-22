@@ -221,7 +221,8 @@ class LoadApplication {
           promptList.push({
             type: 'confirm',
             name,
-            message: item.description,
+            prefix: item.description ? `${gray(item.description)}\n${chalk.green('?')}` : undefined,
+            message: item.title,
             default: item.default,
           });
         } else if (item.type === 'password') {
@@ -229,7 +230,8 @@ class LoadApplication {
           promptList.push({
             type: 'password',
             name,
-            message: item.description,
+            prefix: item.description ? `${gray(item.description)}\n${chalk.green('?')}` : undefined,
+            message: item.title,
             default: item.default,
           });
         } else if (item.enum) {
