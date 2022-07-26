@@ -18,7 +18,7 @@ import { getCredentialAliasList, setCredential } from '../credential';
 import { replaceFun, getYamlPath, getTemplatekey } from './utils';
 import parse from './parse';
 const gray = chalk.hex('#8c8d91');
-var artTemplate = require('art-template');
+const artTemplate = require('art-template');
 
 interface IParams {
   source: string; // 组件名称
@@ -68,6 +68,7 @@ async function postInit({ temporaryPath, applicationPath }) {
 
 class LoadApplication {
   private config: IParams;
+  private temporaryPath: string;
   constructor(config: IParams) {
     this.config = config;
   }
@@ -144,6 +145,7 @@ class LoadApplication {
     const answer = await this.checkFileExists(applicationPath, name);
     if (!answer) return applicationPath;
     const temporaryPath = `${applicationPath}${new Date().getTime()}`;
+    this.temporaryPath = temporaryPath;
     await downloadRequest(zipball_url, temporaryPath, {
       extract: true,
       strip: 1,
@@ -152,10 +154,10 @@ class LoadApplication {
     const publishYamlData = await getYamlContent(path.join(temporaryPath, 'publish.yaml'));
     if (publishYamlData) {
       fs.copySync(`${temporaryPath}/src`, applicationPath);
-      rimraf.sync(temporaryPath);
       this.config.parameters
         ? await this.initSconfigWithParam({ publishYamlData, applicationPath })
         : await this.initSconfig({ publishYamlData, applicationPath });
+      rimraf.sync(temporaryPath);
       await this.initEnvConfig(applicationPath);
     } else {
       fs.moveSync(`${temporaryPath}`, applicationPath);
@@ -297,8 +299,7 @@ class LoadApplication {
     if (result?.access === false) {
       result.access = '{{ access }}';
     }
-    artTemplate.defaults.extname = path.extname(spath);
-    let newData = artTemplate(spath, result);
+    let newData = this.handleArtTemplate(spath, result);
     // art 语法需要先解析在验证yaml内容
     fs.writeFileSync(spath, newData, 'utf-8');
     // fix: Document with errors cannot be stringified
@@ -326,8 +327,7 @@ class LoadApplication {
       }
     }
     const accessObj = this.config.access ? { access: this.config.access } : {};
-    artTemplate.defaults.extname = path.extname(spath);
-    let newData = artTemplate(spath, {
+    let newData = this.handleArtTemplate(spath, {
       ...newObj,
       ...accessObj,
     });
@@ -335,6 +335,17 @@ class LoadApplication {
     await isYamlFile(spath);
     newData = parse({ appName: this.config.appName }, newData);
     fs.writeFileSync(spath, newData, 'utf-8');
+  }
+  handleArtTemplate(templatePath, data) {
+    artTemplate.defaults.extname = path.extname(templatePath);
+    const filterFilePath = path.join(this.temporaryPath, 'hook', 'filter.js');
+    if (fs.existsSync(filterFilePath)) {
+      const filterHook = require(filterFilePath);
+      for (const key in filterHook) {
+        artTemplate.defaults.imports[key] = filterHook[key];
+      }
+    }
+    return artTemplate(templatePath, data);
   }
   async checkFileExists(filePath: string, fileName: string) {
     if (process.env.skipPrompt) return true;
