@@ -227,7 +227,7 @@ class LoadApplication {
             message: item.title,
             default: item.default,
           });
-        } else if (item.type === 'password') {
+        } else if (item.type === 'secret') {
           // 密码类型
           promptList.push({
             type: 'password',
