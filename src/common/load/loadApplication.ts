@@ -4,16 +4,23 @@ import {
   getServerlessReleases,
   getServerlessReleasesLatest,
 } from './service';
-import { RegistryEnum } from '../constant';
+import { RegistryEnum, RANDOM_PATTERN } from '../constant';
 import path from 'path';
 import downloadRequest from '../downloadRequest';
 import fs from 'fs-extra';
 import inquirer from 'inquirer';
 import chalk from 'chalk';
-import _, { get, isEmpty, sortBy, includes, map, concat } from 'lodash';
+import _, { get, isEmpty, sortBy, includes, map, concat, replace, endsWith } from 'lodash';
 import rimraf from 'rimraf';
 import installDependency from '../installDependency';
-import { readJsonFile, getYamlContent, S_CURRENT, getSetConfig, isYamlFile } from '../../libs';
+import {
+  readJsonFile,
+  getYamlContent,
+  S_CURRENT,
+  getSetConfig,
+  isYamlFile,
+  generateRandom,
+} from '../../libs';
 import { getCredentialAliasList, setCredential } from '../credential';
 import { replaceFun, getYamlPath, getTemplatekey } from './utils';
 import parse from './parse';
@@ -253,7 +260,9 @@ class LoadApplication {
             message: item.title,
             name,
             prefix: item.description ? `${gray(item.description)}\n${chalk.green('?')}` : undefined,
-            default: item.default,
+            default: endsWith(item.default, RANDOM_PATTERN)
+              ? replace(item.default, RANDOM_PATTERN, generateRandom())
+              : item.default,
             validate(input) {
               if (includes(requiredList, name)) {
                 return input.length > 0 ? true : 'value cannot be empty.';

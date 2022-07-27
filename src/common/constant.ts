@@ -31,6 +31,8 @@ export const COMMON_VARIABLE_TYPE_REG = new RegExp(/\$\{(.*?)\}/, 'g');
 
 export const ALIYUN_CLI = '${aliyun-cli}';
 
+export const RANDOM_PATTERN = '${default-suffix}';
+
 export const ALIYUN_CONFIG_FILE = path.join(os.homedir(), '.aliyun', 'config.json');
 
 export const CONFIG_PROVIDERS = [

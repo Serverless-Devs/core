@@ -107,3 +107,8 @@ export function getAvailablePort(port: number = 3000) {
     });
   });
 }
+
+// 生成随机数
+export function generateRandom() {
+  return Math.random().toString(36).substring(2, 6);
+}
