@@ -58,21 +58,6 @@ async function preInit({ temporaryPath, applicationPath }) {
     await baseChildComponent.preInit(tempObj);
   } catch (e) {}
 }
-
-async function postInit({ temporaryPath, applicationPath }) {
-  try {
-    const baseChildComponent = await require(path.join(temporaryPath, 'hook'));
-    const tempObj = {
-      tempPath: temporaryPath,
-      targetPath: applicationPath,
-      downloadRequest: downloadRequest,
-      fse: fs,
-      lodash: _,
-    };
-    await baseChildComponent.postInit(tempObj);
-  } catch (e) {}
-}
-
 class LoadApplication {
   private config: IParams;
   private temporaryPath: string;
@@ -159,9 +144,10 @@ class LoadApplication {
     });
     await preInit({ temporaryPath, applicationPath });
     const publishYamlData = await getYamlContent(path.join(temporaryPath, 'publish.yaml'));
+    let tempParams = {};
     if (publishYamlData) {
       fs.copySync(`${temporaryPath}/src`, applicationPath);
-      this.config.parameters
+      tempParams = this.config.parameters
         ? await this.initSconfigWithParam({ publishYamlData, applicationPath })
         : await this.initSconfig({ publishYamlData, applicationPath });
       rimraf.sync(temporaryPath);
@@ -170,8 +156,26 @@ class LoadApplication {
       fs.moveSync(`${temporaryPath}`, applicationPath);
     }
     await this.needInstallDependency(applicationPath);
-    await postInit({ temporaryPath, applicationPath });
+    await this.postInit({ temporaryPath, applicationPath, params: tempParams });
     return applicationPath;
+  }
+  async postInit({ temporaryPath, applicationPath, params }) {
+    try {
+      const baseChildComponent = await require(path.join(temporaryPath, 'hook'));
+      const tempObj = {
+        tempPath: temporaryPath,
+        targetPath: applicationPath,
+        downloadRequest: downloadRequest,
+        fse: fs,
+        lodash: _,
+        artTemplate: (filePath: string) => {
+          const newPath = path.join(applicationPath, filePath);
+          const newData = this.handleArtTemplate(newPath, params);
+          fs.writeFileSync(newPath, newData, 'utf-8');
+        },
+      };
+      await baseChildComponent.postInit(tempObj);
+    } catch (e) {}
   }
   async needInstallDependency(cwd: string) {
     const packageInfo: any = readJsonFile(path.resolve(cwd, 'package.json'));
@@ -315,6 +319,7 @@ class LoadApplication {
     await isYamlFile(spath);
     newData = parse({ appName: this.config.appName }, newData);
     fs.writeFileSync(spath, newData, 'utf-8');
+    return result;
   }
   async initSconfigWithParam({ publishYamlData, applicationPath }) {
     const spath = getYamlPath(applicationPath, 's');
@@ -344,6 +349,10 @@ class LoadApplication {
     await isYamlFile(spath);
     newData = parse({ appName: this.config.appName }, newData);
     fs.writeFileSync(spath, newData, 'utf-8');
+    return {
+      ...newObj,
+      ...accessObj,
+    };
   }
   handleArtTemplate(templatePath, data) {
     artTemplate.defaults.extname = path.extname(templatePath);
