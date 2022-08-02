@@ -111,7 +111,7 @@
             "runtimeExecutable": "/Users/shihuali/workspace/s/bin/s",
             "runtimeArgs": [
                 "init",
-                "strapi",
+                "shltest",
             ],
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}/test/fixtures/.s",

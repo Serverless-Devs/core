@@ -4,21 +4,28 @@ import {
   getServerlessReleases,
   getServerlessReleasesLatest,
 } from './service';
-import { RegistryEnum } from '../constant';
+import { RegistryEnum, RANDOM_PATTERN } from '../constant';
 import path from 'path';
 import downloadRequest from '../downloadRequest';
 import fs from 'fs-extra';
 import inquirer from 'inquirer';
 import chalk from 'chalk';
-import _, { get, isEmpty, sortBy, includes, map, concat } from 'lodash';
+import _, { get, isEmpty, sortBy, includes, map, concat, replace, endsWith } from 'lodash';
 import rimraf from 'rimraf';
 import installDependency from '../installDependency';
-import { readJsonFile, getYamlContent, S_CURRENT, getSetConfig, isYamlFile } from '../../libs';
+import {
+  readJsonFile,
+  getYamlContent,
+  S_CURRENT,
+  getSetConfig,
+  isYamlFile,
+  generateRandom,
+} from '../../libs';
 import { getCredentialAliasList, setCredential } from '../credential';
 import { replaceFun, getYamlPath, getTemplatekey } from './utils';
 import parse from './parse';
 const gray = chalk.hex('#8c8d91');
-var artTemplate = require('art-template');
+const artTemplate = require('art-template');
 
 interface IParams {
   source: string; // 组件名称
@@ -51,23 +58,9 @@ async function preInit({ temporaryPath, applicationPath }) {
     await baseChildComponent.preInit(tempObj);
   } catch (e) {}
 }
-
-async function postInit({ temporaryPath, applicationPath }) {
-  try {
-    const baseChildComponent = await require(path.join(temporaryPath, 'hook'));
-    const tempObj = {
-      tempPath: temporaryPath,
-      targetPath: applicationPath,
-      downloadRequest: downloadRequest,
-      fse: fs,
-      lodash: _,
-    };
-    await baseChildComponent.postInit(tempObj);
-  } catch (e) {}
-}
-
 class LoadApplication {
   private config: IParams;
+  private temporaryPath: string;
   constructor(config: IParams) {
     this.config = config;
   }
@@ -144,25 +137,45 @@ class LoadApplication {
     const answer = await this.checkFileExists(applicationPath, name);
     if (!answer) return applicationPath;
     const temporaryPath = `${applicationPath}${new Date().getTime()}`;
+    this.temporaryPath = temporaryPath;
     await downloadRequest(zipball_url, temporaryPath, {
       extract: true,
       strip: 1,
     });
     await preInit({ temporaryPath, applicationPath });
     const publishYamlData = await getYamlContent(path.join(temporaryPath, 'publish.yaml'));
+    let tempParams = {};
     if (publishYamlData) {
       fs.copySync(`${temporaryPath}/src`, applicationPath);
-      rimraf.sync(temporaryPath);
-      this.config.parameters
+      tempParams = this.config.parameters
         ? await this.initSconfigWithParam({ publishYamlData, applicationPath })
         : await this.initSconfig({ publishYamlData, applicationPath });
+      rimraf.sync(temporaryPath);
       await this.initEnvConfig(applicationPath);
     } else {
       fs.moveSync(`${temporaryPath}`, applicationPath);
     }
     await this.needInstallDependency(applicationPath);
-    await postInit({ temporaryPath, applicationPath });
+    await this.postInit({ temporaryPath, applicationPath, params: tempParams });
     return applicationPath;
+  }
+  async postInit({ temporaryPath, applicationPath, params }) {
+    try {
+      const baseChildComponent = await require(path.join(temporaryPath, 'hook'));
+      const tempObj = {
+        tempPath: temporaryPath,
+        targetPath: applicationPath,
+        downloadRequest: downloadRequest,
+        fse: fs,
+        lodash: _,
+        artTemplate: (filePath: string) => {
+          const newPath = path.join(applicationPath, filePath);
+          const newData = this.handleArtTemplate(newPath, params);
+          fs.writeFileSync(newPath, newData, 'utf-8');
+        },
+      };
+      await baseChildComponent.postInit(tempObj);
+    } catch (e) {}
   }
   async needInstallDependency(cwd: string) {
     const packageInfo: any = readJsonFile(path.resolve(cwd, 'package.json'));
@@ -221,15 +234,17 @@ class LoadApplication {
           promptList.push({
             type: 'confirm',
             name,
-            message: item.description,
+            prefix: item.description ? `${gray(item.description)}\n${chalk.green('?')}` : undefined,
+            message: item.title,
             default: item.default,
           });
-        } else if (item.type === 'password') {
+        } else if (item.type === 'secret') {
           // 密码类型
           promptList.push({
             type: 'password',
             name,
-            message: item.description,
+            prefix: item.description ? `${gray(item.description)}\n${chalk.green('?')}` : undefined,
+            message: item.title,
             default: item.default,
           });
         } else if (item.enum) {
@@ -249,7 +264,9 @@ class LoadApplication {
             message: item.title,
             name,
             prefix: item.description ? `${gray(item.description)}\n${chalk.green('?')}` : undefined,
-            default: item.default,
+            default: endsWith(item.default, RANDOM_PATTERN)
+              ? replace(item.default, RANDOM_PATTERN, generateRandom())
+              : item.default,
             validate(input) {
               if (includes(requiredList, name)) {
                 return input.length > 0 ? true : 'value cannot be empty.';
@@ -295,14 +312,14 @@ class LoadApplication {
     if (result?.access === false) {
       result.access = '{{ access }}';
     }
-    artTemplate.defaults.extname = path.extname(spath);
-    let newData = artTemplate(spath, result);
+    let newData = this.handleArtTemplate(spath, result);
     // art 语法需要先解析在验证yaml内容
     fs.writeFileSync(spath, newData, 'utf-8');
     // fix: Document with errors cannot be stringified
     await isYamlFile(spath);
     newData = parse({ appName: this.config.appName }, newData);
     fs.writeFileSync(spath, newData, 'utf-8');
+    return result;
   }
   async initSconfigWithParam({ publishYamlData, applicationPath }) {
     const spath = getYamlPath(applicationPath, 's');
@@ -324,8 +341,7 @@ class LoadApplication {
       }
     }
     const accessObj = this.config.access ? { access: this.config.access } : {};
-    artTemplate.defaults.extname = path.extname(spath);
-    let newData = artTemplate(spath, {
+    let newData = this.handleArtTemplate(spath, {
       ...newObj,
       ...accessObj,
     });
@@ -333,6 +349,21 @@ class LoadApplication {
     await isYamlFile(spath);
     newData = parse({ appName: this.config.appName }, newData);
     fs.writeFileSync(spath, newData, 'utf-8');
+    return {
+      ...newObj,
+      ...accessObj,
+    };
+  }
+  handleArtTemplate(templatePath, data) {
+    artTemplate.defaults.extname = path.extname(templatePath);
+    const filterFilePath = path.join(this.temporaryPath, 'hook', 'filter.js');
+    if (fs.existsSync(filterFilePath)) {
+      const filterHook = require(filterFilePath);
+      for (const key in filterHook) {
+        artTemplate.defaults.imports[key] = filterHook[key];
+      }
+    }
+    return artTemplate(templatePath, data);
   }
   async checkFileExists(filePath: string, fileName: string) {
     if (process.env.skipPrompt) return true;
