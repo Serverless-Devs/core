@@ -12,8 +12,8 @@ async function getYamlContent(filePath: string) {
       return yaml.load(fs.readFileSync(filePath, 'utf8'));
     }
     const yamlPath = filePath.endsWith('yml')
-      ? filePath.replace('yml', 'yaml')
-      : filePath.replace('yaml', 'yml');
+      ? filePath.replace('.yml', '.yaml')
+      : filePath.replace('.yaml', '.yml');
     if (fs.existsSync(yamlPath)) {
       return yaml.load(fs.readFileSync(yamlPath, 'utf8'));
     }
