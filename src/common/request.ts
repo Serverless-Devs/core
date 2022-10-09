@@ -17,19 +17,6 @@ interface RequestOptions {
   [key: string]: any;
 }
 
-interface IErrorConfig {
-  requestUrl: string;
-  statusCode: string | number;
-  errorMsg: string;
-}
-
-export function reportError(config: IErrorConfig) {
-  report({
-    type: 'networkError',
-    content: `${config.requestUrl}||${config.statusCode}||${config.errorMsg}`,
-  });
-}
-
 export interface IDownloadOptions {
   /**
    * If set to true, try extracting the file using decompress.
@@ -103,10 +90,12 @@ async function request(url: string, options?: RequestOptions): Promise<any> {
     loading && vm.stop();
     if (!ignoreError) {
       spinner(e.message).fail();
-      reportError({
+      report({
+        type: 'networkError',
         requestUrl: url,
         statusCode: e.code,
-        errorMsg: e.message,
+        errorMessage: e.message,
+        errorStack: e.stack,
       });
       throw new Error(errorMessage(e.statusCode, e.message));
     }
@@ -117,25 +106,26 @@ async function request(url: string, options?: RequestOptions): Promise<any> {
   if (statusCode !== 200) {
     error && spinner(error).fail();
     if (!ignoreError) {
-      reportError({
+      report({
+        type: 'networkError',
         requestUrl: url,
         statusCode,
-        errorMsg: 'System exception',
+        errorMessage: 'System exception',
       });
       throw new Error(errorMessage(statusCode, 'System exception'));
     }
   } else if (body.Error) {
     error && spinner(error).fail();
     if (!ignoreError) {
-      reportError({
+      report({
+        type: 'networkError',
         requestUrl: url,
         statusCode: body.Error.Code,
-        errorMsg: body.Error.Message,
+        errorMessage: body.Error.Message,
       });
       throw new Error(errorMessage(body.Error.Code, body.Error.Message));
     }
   }
-
   success && spinner(success).succeed();
   return body.Response || body;
 }

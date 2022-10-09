@@ -9,7 +9,6 @@ import { DEFAULT_REGIRSTRY, IRegistry } from '../../constant';
 import chalk from 'chalk';
 import { assign, toString } from 'lodash';
 import { logger } from '../../../logger';
-import report from '../../report';
 import { get } from 'lodash';
 import { ALIYUN_CLI } from '../../constant';
 
@@ -42,15 +41,7 @@ class ComponentExec {
   async init() {
     const { method, spath, args, serverName } = this.config;
     await this.handleCredentials();
-    const AccountID = get(this.projectConfig, 'credentials.AccountID');
-    report({
-      type: 'action',
-      // TODO: 后续 可以最后一个 AccountID 删除以及sls加工数据格式。为了不影响现在的数据上报，暂时保持以前的数据格式
-      content: `${this.projectConfig.component}||${AccountID}||${AccountID}`,
-    });
-
     const newActions = await this.getNewActions({});
-
     const inputs = getInputs(this.projectConfig, {
       method,
       args,

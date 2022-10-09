@@ -1,41 +1,59 @@
 const {
   getMAC,
-  request,
+  got,
   getYamlContent,
   isDocker,
   getCicdEnv,
   getRootHome,
-  ip,
   getCommand,
   lodash: _,
 } = require('../index');
 const path = require('path');
 const fs = require('fs');
 const getmac = getMAC();
-const TypeError = ['jsError', 'networkError'];
 
 async function init() {
-  const { type, templateFile, traceId, CLI_VERSION } = process.env;
-  let { content } = process.env;
+  const {
+    type,
+    templateFile,
+    CLI_VERSION,
+    errorMessage,
+    errorStack,
+    traceId,
+    requestUrl,
+    statusCode,
+  } = process.env;
   const core_version = await getCoreVersion();
   const os = getCicdEnv() || process.platform;
   const node_version = process.version;
-  const time = 1;
   const pid = getmac.replace(/:/g, '_');
   const baseURL =
-    'http://dankun.ccc45d9d8e32b44eeac168caa1a2deead.cn-zhangjiakou.alicontainer.com/r.png';
-  let url = `${baseURL}?type=${type}&cli_version=${CLI_VERSION}&core_version=${core_version}&os=${os}&node_version=${node_version}&pid=${pid}&time=${time}&isDocker=${isDocker()}&ip=${ip.address()}`;
+    'http://cn-tracker.cn-heyuan.log.aliyuncs.com/logstores/serverless-devs-metric/track';
+  let url = `${baseURL}?APIVersion=0.6.0&type=${type}&cli_version=${CLI_VERSION}&core_version=${core_version}&node_version=${node_version}&os=${os}&isDocker=${isDocker()}&pid=${pid}`;
+  if (errorMessage) {
+    url = `${url}&errorMessage=${errorMessage}`;
+  }
+  if (errorStack) {
+    url = `${url}&errorStack=${errorStack}`;
+  }
+  if (requestUrl) {
+    url = `${url}&requestUrl=${requestUrl}`;
+  }
+  if (statusCode) {
+    url = `${url}&statusCode=${statusCode}`;
+  }
   if (traceId) {
     url = `${url}&traceId=${traceId}`;
   }
-  if (getCommand()) {
-    url = `${url}&command=${getCommand()}`;
+  const command = getCommand();
+  if (command) {
+    url = `${url}&command=${command}`;
   }
-  if (TypeError.includes(type) && fs.existsSync(templateFile)) {
-    const template = await getSYaml(templateFile);
-    content = `${content}||${JSON.stringify(template)}`;
+  const sYaml = await getSYaml(templateFile);
+  if (sYaml) {
+    url = `${url}&sYaml=${JSON.stringify(sYaml)}`;
   }
-  await request(url, { method: 'post', json: false, body: content, timeout: 3000 });
+  await got(url, { timeout: 3000 });
 }
 
 function getCoreVersion() {
@@ -44,19 +62,21 @@ function getCoreVersion() {
 }
 
 async function getSYaml(templateFile) {
-  const template = await getYamlContent(templateFile);
-  if (!template) return;
-  const { services } = template;
-  for (const key in services) {
-    const element = services[key];
-    let environmentVariables = _.get(element, 'props.function.environmentVariables');
-    if (environmentVariables) {
-      for (const key1 in environmentVariables) {
-        environmentVariables[key1] = '***';
+  try {
+    const template = await getYamlContent(templateFile);
+    if (!template) return;
+    const { services } = template;
+    for (const key in services) {
+      const element = services[key];
+      let environmentVariables = _.get(element, 'props.function.environmentVariables');
+      if (environmentVariables) {
+        for (const key1 in environmentVariables) {
+          environmentVariables[key1] = '***';
+        }
       }
     }
-  }
-  return template;
+    return template;
+  } catch (error) {}
 }
 
 (async () => {
