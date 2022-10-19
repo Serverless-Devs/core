@@ -356,6 +356,7 @@ class LoadApplication {
   }
   handleArtTemplate(templatePath, data) {
     artTemplate.defaults.extname = path.extname(templatePath);
+    artTemplate.defaults.escape = false;
     const filterFilePath = path.join(this.temporaryPath, 'hook', 'filter.js');
     if (fs.existsSync(filterFilePath)) {
       const filterHook = require(filterFilePath);
