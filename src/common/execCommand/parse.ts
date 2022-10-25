@@ -1,5 +1,5 @@
 import * as fs from 'fs-extra';
-import { startsWith, get, merge } from 'lodash';
+import { startsWith, get, merge, replace } from 'lodash';
 import { getCurrentPath } from './utils';
 import path from 'path';
 import yaml from 'js-yaml';
@@ -100,7 +100,7 @@ export default class Parse {
       if (regResult) {
         let tmp = objValue;
         for (const iterator of regResult) {
-          const matchResult = iterator.replace(COMMON_VARIABLE_TYPE_REG, '$1'); // get match result like projectName.key.variable
+          const matchResult = replace(iterator, COMMON_VARIABLE_TYPE_REG, '$1'); // get match result like projectName.key.variable
           const variableObj = {
             variableName: matchResult,
             type: 'Literal',
@@ -128,7 +128,7 @@ export default class Parse {
           if (realValue) {
             tmp =
               Object.prototype.toString.call(realValue) === '[object String]'
-                ? tmp.replace(iterator, realValue)
+                ? replace(tmp, iterator, realValue)
                 : realValue;
           }
         }
