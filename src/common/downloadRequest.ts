@@ -132,7 +132,10 @@ export default async (url: string, dest: string, options: IOptions = {}) => {
   } catch (error) {
     report({
       type: 'networkError',
-      content: `${url}||${error.code}||${error.message}`,
+      requestUrl: url,
+      statusCode: error.code,
+      errorMessage: error.message,
+      errorStack: error.stack,
     });
     throw error;
   }

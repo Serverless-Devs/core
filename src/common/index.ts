@@ -18,4 +18,5 @@ export * from './execCommand';
 export * from './constant';
 export { default as ignoreWalk } from './ignoreWalk';
 export { default as getAccountByAccess } from './getAccountByAccess';
+export { default as reportTracker } from './reportTracker';
 export { CatchableError } from './error';

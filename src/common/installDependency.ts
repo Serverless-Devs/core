@@ -42,7 +42,7 @@ const npmInstall = async (
       { cwd: baseDir, shell: true, stdio: get(options, 'stdio', 'ignore') },
     );
   } catch (error) {
-    report({ type: 'installError', content: `${error.message}||${error.stack}` });
+    report({ type: 'installError', errorMessage: error.message, errorStack: error.stack });
     const errmsg = (error && error.message) || error;
     console.log(` - npm install err ${errmsg}`);
   } finally {

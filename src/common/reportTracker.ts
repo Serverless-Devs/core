@@ -3,20 +3,19 @@ import path from 'path';
 import { getRootHome, getYamlContent, useLocal, isCiCdEnv } from '../libs';
 
 interface IConfig {
-  type: 'jsError' | 'networkError' | 'installError';
-  errorMessage: string;
-  errorStack?: string;
-  traceId?: string;
-  requestUrl?: string;
-  statusCode?: string | number;
+  trackerType: 'command' | 'init';
+  syaml?: string;
+  access?: string;
+  templateName?: string;
 }
 
-async function report(config: IConfig) {
+async function reportTracker(config: IConfig) {
   const data = await getYamlContent(path.join(getRootHome(), 'set-config.yml'));
   if (data?.analysis === 'disable') return;
+  // 私有化部署不在进行上报数据
   if (useLocal()) return;
   if (isCiCdEnv()) return;
-  execDaemon('report.js', config);
+  execDaemon('reportTracker.js', config);
 }
 
-export default report;
+export default reportTracker;
