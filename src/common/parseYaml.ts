@@ -1,6 +1,6 @@
 import YAML, { Document } from 'yaml';
 import { YAMLMap, Pair, Scalar } from 'yaml/types';
-import { isBoolean, isNumber, get, isEmpty } from 'lodash';
+import { isBoolean, isNumber, get, isEmpty, replace } from 'lodash';
 import { COMMON_VARIABLE_TYPE_REG } from './constant';
 class ParseYaml {
   private doc: Document.Parsed;
@@ -54,10 +54,10 @@ class ParseYaml {
     for (const iterator of regResult) {
       const realValue = get(
         this.yamlJson,
-        iterator.replace(COMMON_VARIABLE_TYPE_REG, '$1'),
+        replace(iterator, COMMON_VARIABLE_TYPE_REG, '$1'),
         iterator,
       );
-      tmp = typeof realValue === 'string' ? tmp.replace(iterator, realValue) : realValue;
+      tmp = typeof realValue === 'string' ? replace(tmp, iterator, realValue) : realValue;
     }
     return tmp;
   }
