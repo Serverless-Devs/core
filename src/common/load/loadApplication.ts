@@ -23,6 +23,8 @@ import {
 } from '../../libs';
 import { getCredentialAliasList, setCredential } from '../credential';
 import { replaceFun, getYamlPath, getTemplatekey } from './utils';
+import { execCommand } from '../execCommand';
+import { Logger } from '../../logger';
 import parse from './parse';
 const gray = chalk.hex('#8c8d91');
 const artTemplate = require('art-template');
@@ -54,6 +56,8 @@ async function preInit({ temporaryPath, applicationPath }) {
       downloadRequest: downloadRequest,
       fse: fs,
       lodash: _,
+      Logger,
+      execCommand,
     };
     await baseChildComponent.preInit(tempObj);
   } catch (e) {}
@@ -173,6 +177,8 @@ class LoadApplication {
           const newData = this.handleArtTemplate(newPath, params);
           fs.writeFileSync(newPath, newData, 'utf-8');
         },
+        Logger,
+        execCommand,
       };
       await baseChildComponent.postInit(tempObj);
     } catch (e) {}
