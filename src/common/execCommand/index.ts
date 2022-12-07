@@ -69,6 +69,10 @@ class ExecCommand {
       parse: this.parse, // 如果actions模块包含魔法变量，需要再次解析
     }).init();
     const result = { [serverName]: outPutData };
+    if (process.env['default_serverless_devs_auto_log'] === 'false') {
+      logger.log(`End of method: ${method}`, 'green');
+      return result;
+    }
     keys(outPutData).length === 0
       ? logger.log(`End of method: ${method}`, 'green')
       : logger.output(result);
@@ -101,6 +105,10 @@ class ExecCommand {
       tempData.services[serverName] = { output: outputData };
       result[serverName] = outputData;
       logger.info(`Project ${serverName} successfully to execute \n\t`);
+    }
+    if (process.env['default_serverless_devs_auto_log'] === 'false') {
+      logger.log(`End of method: ${method}`, 'green');
+      return result;
     }
     keys(result).length === 0
       ? logger.log(`End of method: ${method}`, 'green')
