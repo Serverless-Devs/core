@@ -74,7 +74,7 @@ function output({ info, accessAlias }) {
 function encrypt(info: any = {}) {
   const cloneInfo = Object.assign({}, info);
   Object.keys(cloneInfo).forEach((key) => {
-    const ciphertext = Crypto.AES.encrypt(cloneInfo[key], 'SecretKey123');
+    const ciphertext = Crypto.AES.encrypt(String(cloneInfo[key]), 'SecretKey123');
     cloneInfo[key] = ciphertext.toString();
   });
   return cloneInfo;
