@@ -1,6 +1,6 @@
 import path from 'path';
 import { spawn } from 'child_process';
-import { useLocal } from './libs';
+import { useLocal, isCiCdEnv } from './libs';
 import fs from 'fs-extra';
 const TTL = 10 * 60 * 1000;
 
@@ -31,6 +31,7 @@ export function execDaemon(filename: string, config?: IConfig) {
 
 export function execDaemonWithTTL(filename: string, config: IConfigWithTTL) {
   if (useLocal()) return;
+  if (isCiCdEnv()) return;
   const { lockPath } = config;
   const lockFileInfo = readJsonFile(lockPath);
   const now = Date.now();
