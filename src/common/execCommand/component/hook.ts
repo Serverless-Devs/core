@@ -93,6 +93,7 @@ class Hook {
         },
         configs.args,
       );
+      this.output = result;
       return {
         type: configs.type,
         data: result,
