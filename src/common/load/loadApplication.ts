@@ -235,12 +235,24 @@ class LoadApplication {
       rangeList = sortBy(rangeList, (o) => o['x-range']);
       for (const item of rangeList) {
         const name = item._key;
+        const prefix = item.description
+          ? `${gray(item.description)}\n${chalk.green('?')}`
+          : undefined;
+        const validate = (input) => {
+          if (isEmpty(input)) {
+            return includes(requiredList, name) ? 'value cannot be empty.' : true;
+          }
+          if (item.pattern) {
+            return new RegExp(item.pattern).test(input) ? true : item.description;
+          }
+          return true;
+        };
         // 布尔类型
         if (item.type === 'boolean') {
           promptList.push({
             type: 'confirm',
             name,
-            prefix: item.description ? `${gray(item.description)}\n${chalk.green('?')}` : undefined,
+            prefix,
             message: item.title,
             default: item.default,
           });
@@ -249,16 +261,17 @@ class LoadApplication {
           promptList.push({
             type: 'password',
             name,
-            prefix: item.description ? `${gray(item.description)}\n${chalk.green('?')}` : undefined,
+            prefix,
             message: item.title,
             default: item.default,
+            validate,
           });
         } else if (item.enum) {
           // 枚举类型
           promptList.push({
             type: 'list',
             name,
-            prefix: item.description ? `${gray(item.description)}\n${chalk.green('?')}` : undefined,
+            prefix,
             message: item.title,
             choices: item.enum,
             default: item.default,
@@ -269,16 +282,11 @@ class LoadApplication {
             type: 'input',
             message: item.title,
             name,
-            prefix: item.description ? `${gray(item.description)}\n${chalk.green('?')}` : undefined,
+            prefix,
             default: endsWith(item.default, RANDOM_PATTERN)
               ? replace(item.default, RANDOM_PATTERN, generateRandom())
               : item.default,
-            validate(input) {
-              if (includes(requiredList, name)) {
-                return input.length > 0 ? true : 'value cannot be empty.';
-              }
-              return true;
-            },
+            validate,
           });
         }
       }
