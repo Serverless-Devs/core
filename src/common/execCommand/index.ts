@@ -74,20 +74,24 @@ class ExecCommand {
       logger.log(`End of method: ${method}`, 'green');
       return result;
     }
-    const doOutput = () => {
-      if (globalArgs?.output === 'json') {
-        return logger.log(JSON.stringify(result, null, 2));
-      }
-      if (globalArgs?.output === 'raw') {
-        return logger.log(JSON.stringify(result));
-      }
-      if (globalArgs?.output === 'yaml') {
-        return logger.log(yaml.dump(result));
-      }
-      logger.output(result);
-    };
-    keys(outPutData).length === 0 ? logger.log(`End of method: ${method}`, 'green') : doOutput();
+    keys(outPutData).length === 0
+      ? logger.log(`End of method: ${method}`, 'green')
+      : this.doOutput(result);
     return result;
+  }
+
+  private doOutput(result) {
+    const { globalArgs } = this.configs;
+    if (globalArgs?.output === 'json') {
+      return logger.log(JSON.stringify(result, null, 2));
+    }
+    if (globalArgs?.output === 'raw') {
+      return logger.log(JSON.stringify(result));
+    }
+    if (globalArgs?.output === 'yaml') {
+      return logger.log(yaml.dump(result));
+    }
+    logger.output(result);
   }
 
   private async serviceWithMany({ executeOrderList, spath }) {
@@ -123,7 +127,7 @@ class ExecCommand {
     }
     keys(result).length === 0
       ? logger.log(`End of method: ${method}`, 'green')
-      : logger.output(result);
+      : this.doOutput(result);
     return result;
   }
 
