@@ -1,5 +1,5 @@
 import * as fs from 'fs-extra';
-import { startsWith, get, merge, replace } from 'lodash';
+import { startsWith, get, merge, replace, isNil } from 'lodash';
 import { getCurrentPath } from './utils';
 import path from 'path';
 import yaml from 'js-yaml';
@@ -44,11 +44,10 @@ export default class Parse {
     const { variableName, type, funName, funVariable } = variableObj;
     const result = '';
     if (type === 'Literal') {
-      return (
-        this.globalJsonKeyMap[variableName] ||
-        this.globalJsonKeyMap[`services.${variableName}`] ||
-        '${' + variableName + '}'
-      );
+      if (!isNil(this.globalJsonKeyMap[variableName])) return this.globalJsonKeyMap[variableName];
+      if (!isNil(this.globalJsonKeyMap[`services.${variableName}`]))
+        return this.globalJsonKeyMap[`services.${variableName}`];
+      return '${' + variableName + '}';
     }
     if (type === 'Fun' && (funName === 'Env' || funName === 'env')) {
       return process.env[funVariable];
@@ -125,7 +124,7 @@ export default class Parse {
           let realValue = startsWith(matchResult, 'env.')
             ? get(process, matchResult)
             : this.findVariableValue(variableObj);
-          if (realValue) {
+          if (!isNil(realValue)) {
             tmp =
               Object.prototype.toString.call(realValue) === '[object String]'
                 ? replace(tmp, iterator, realValue)
