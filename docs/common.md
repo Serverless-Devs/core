@@ -530,10 +530,15 @@ getYamlContent('s.yaml');
 - config.args 参数选填，对应 `process.argv.slice(2)`。
 - config.env 参数选填，设置环境变量。
 - config.globalArgs 参数选填：
-  - debug 参数选填, 是否开启 debug 模式。
-  - skipActions 参数选填, 是否跳过 actions 模块。
-  - access 参数选填, 指定密钥进行操作。
-  - help 参数选填, 显示帮助信息。
+  - debug 参数选填，是否开启 debug 模式。
+  - skipActions 参数选填，是否跳过 actions 模块。
+  - output 参数选填，指定输出模式.
+    - default，默认输出模式
+    - json，输出格式话的 json
+    - raw，输出未格式化的 json
+    - yaml 输出 yaml 模式
+  - access 参数选填，指定密钥进行操作。
+  - help 参数选填，显示帮助信息。
 
 ```typescript
 import * as core from '@serverless-devs/core';
@@ -575,5 +580,5 @@ import * as core from '@serverless-devs/core';
 import fs from 'fs-extra';
 
 const data = fs.readFileSync('yaml/s.yaml', 'utf8');
-const doc = core.modifyYaml(newJson, data)
+const doc = core.modifyYaml(newJson, data);
 ```

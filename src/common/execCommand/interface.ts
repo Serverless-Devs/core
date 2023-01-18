@@ -22,6 +22,7 @@ export interface IGlobalArgs {
   help?: boolean; // help下也需要skipActions
   skipActions?: boolean;
   access?: string;
+  output?: 'default' | 'json' | 'yaml' | 'raw';
 }
 export interface IComponentConfig {
   projectConfig: IProjectConfig;

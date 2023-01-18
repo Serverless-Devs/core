@@ -7,6 +7,7 @@ import { getTemplatePath, transforYamlPath } from './getTemplatePath';
 import ComponentExec from './component';
 import { IGlobalArgs } from './interface';
 import reportTracker from '../reportTracker';
+import yaml from 'js-yaml';
 
 interface IConfigs {
   syaml?: string;
@@ -73,9 +74,19 @@ class ExecCommand {
       logger.log(`End of method: ${method}`, 'green');
       return result;
     }
-    keys(outPutData).length === 0
-      ? logger.log(`End of method: ${method}`, 'green')
-      : logger.output(result);
+    const doOutput = () => {
+      if (globalArgs?.output === 'json') {
+        return logger.log(JSON.stringify(result, null, 2));
+      }
+      if (globalArgs?.output === 'raw') {
+        return logger.log(JSON.stringify(result));
+      }
+      if (globalArgs?.output === 'yaml') {
+        return logger.log(yaml.dump(result));
+      }
+      logger.output(result);
+    };
+    keys(outPutData).length === 0 ? logger.log(`End of method: ${method}`, 'green') : doOutput();
     return result;
   }
 

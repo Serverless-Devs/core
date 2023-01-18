@@ -64,6 +64,7 @@ export function getGlobalArgs(args: string[]): IGlobalParams {
       access: 'a',
       help: 'h',
       version: 'v',
+      output: 'o',
     },
     string: ['access', 'template', 'env'],
     boolean: ['debug', 'skip-actions', 'help', 'version'],
