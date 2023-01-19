@@ -24,8 +24,9 @@ import {
 import { getCredentialAliasList, setCredential } from '../credential';
 import { replaceFun, getYamlPath, getTemplatekey } from './utils';
 import { execCommand } from '../execCommand';
-import { Logger } from '../../logger';
+import { logger, Logger } from '../../logger';
 import parse from './parse';
+import { tryfun } from '../../libs';
 const gray = chalk.hex('#8c8d91');
 const artTemplate = require('art-template');
 
@@ -37,14 +38,6 @@ interface IParams {
   parameters?: object; // s.yaml文件接收的入参
   appName?: string; // s.yaml文件里的项目名称
   access?: string; // s.yaml文件里的密钥
-}
-
-async function tryfun(f: Promise<any>) {
-  try {
-    return await f;
-  } catch (error) {
-    // ignore error, 不抛出错误，需要寻找不同的源
-  }
 }
 
 async function preInit({ temporaryPath, applicationPath }) {
@@ -60,7 +53,9 @@ async function preInit({ temporaryPath, applicationPath }) {
       execCommand,
     };
     await baseChildComponent.preInit(tempObj);
-  } catch (e) {}
+  } catch (e) {
+    logger.debug(`preInit error: ${e}`);
+  }
 }
 class LoadApplication {
   private config: IParams;
@@ -94,13 +89,13 @@ class LoadApplication {
     const [name, version] = componentName.split('@');
     let zipball_url: string;
     if (version) {
-      const result = await tryfun(getServerlessReleases(provider, name));
+      const result = await tryfun(getServerlessReleases, provider, name);
       if (!result) return;
       const findObj = result.find((item) => item.tag_name === version);
       if (!findObj) return;
       zipball_url = findObj.zipball_url;
     } else {
-      const result = await tryfun(getServerlessReleasesLatest(provider, name));
+      const result = await tryfun(getServerlessReleasesLatest, provider, name);
       if (!get(result, 'zipball_url')) return;
       zipball_url = result.zipball_url;
     }
@@ -119,13 +114,13 @@ class LoadApplication {
     const [name, version] = componentName.split('@');
     let zipball_url: string;
     if (version) {
-      const result = await tryfun(getGithubReleases(user, name));
+      const result = await tryfun(getGithubReleases, user, name);
       if (!result) return;
       const findObj = result.find((item) => item.tag_name === version);
       if (!findObj) return;
       zipball_url = findObj.zipball_url;
     } else {
-      const result = await tryfun(getGithubReleasesLatest(user, name));
+      const result = await tryfun(getGithubReleasesLatest, user, name);
       if (!get(result, 'zipball_url')) return;
       zipball_url = result.zipball_url;
     }
@@ -181,13 +176,15 @@ class LoadApplication {
         execCommand,
       };
       await baseChildComponent.postInit(tempObj);
-    } catch (e) {}
+    } catch (e) {
+      logger.debug(`postInit error: ${e}`);
+    }
   }
   async needInstallDependency(cwd: string) {
     const packageInfo: any = readJsonFile(path.resolve(cwd, 'package.json'));
     if (!packageInfo || !get(packageInfo, 'autoInstall', true)) return;
     if (process.env.skipPrompt) {
-      return await tryfun(installDependency({ cwd, production: false }));
+      return await tryfun(installDependency, { cwd, production: false });
     }
     if (this.config.parameters) return true;
     const res = await inquirer.prompt([
@@ -199,7 +196,7 @@ class LoadApplication {
       },
     ]);
     if (res.confirm) {
-      await tryfun(installDependency({ cwd, production: false }));
+      await tryfun(installDependency, { cwd, production: false });
     }
   }
   async initEnvConfig(appPath: string) {

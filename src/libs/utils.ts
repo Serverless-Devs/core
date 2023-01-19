@@ -113,3 +113,9 @@ export function getAvailablePort(port: number = 3000) {
 export function generateRandom() {
   return Math.random().toString(36).substring(2, 6);
 }
+
+export const tryfun = async (fn, ...args) => {
+  try {
+    return await fn(...args);
+  } catch (ex) {}
+};
