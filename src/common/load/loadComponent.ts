@@ -15,14 +15,7 @@ import installDependency from '../installDependency';
 import { get, find, isEmpty } from 'lodash';
 import { downLoadDesCore } from './loadDevsCore';
 import { execDaemonWithTTL } from '../../execDaemon';
-
-async function tryfun(f: Promise<any>) {
-  try {
-    return await f;
-  } catch (error) {
-    // ignore error, 不抛出错误，需要寻找不同的源
-  }
-}
+import { tryfun } from '../../libs';
 
 async function preInit({ componentPath }) {
   try {
@@ -77,7 +70,7 @@ async function loadServerlessWithVersion({ provider, name, componentName, versio
   if (fs.existsSync(lockPath)) {
     return componentPath;
   }
-  const result = await tryfun(getServerlessReleases(provider, name));
+  const result = await tryfun(getServerlessReleases, provider, name);
   if (!result) return;
   const findObj = result.find((item) => item.tag_name === version);
   if (!findObj) return;
@@ -99,7 +92,7 @@ async function loadServerlessWithNoVersion({ provider, name, componentName, file
     });
     return componentPath;
   }
-  const result = await tryfun(getServerlessReleasesLatest(provider, name));
+  const result = await tryfun(getServerlessReleasesLatest, provider, name);
   if (!get(result, 'zipball_url')) return;
   const { zipball_url, tag_name } = result;
   await downloadComponent({ zipball_url, filename, componentPath, lockPath, version: tag_name });
@@ -145,7 +138,7 @@ async function loadGithubWithVersion({ provider, name, componentName, version })
   if (fs.existsSync(lockPath)) {
     return componentPath;
   }
-  const result = await tryfun(getGithubReleases(provider, name));
+  const result = await tryfun(getGithubReleases, provider, name);
   if (!result) return;
   const findObj = result.find((item) => item.tag_name === version);
   if (!findObj) return;
@@ -168,7 +161,7 @@ async function loadGithubWithNoVersion({ provider, name, componentName }) {
     });
     return componentPath;
   }
-  const result = await tryfun(getGithubReleasesLatest(provider, name));
+  const result = await tryfun(getGithubReleasesLatest, provider, name);
   if (!get(result, 'zipball_url')) return;
   let { zipball_url, tag_name } = result;
   // dev的tag有问题的，github下载地址重置
