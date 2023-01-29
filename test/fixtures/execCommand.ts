@@ -8,9 +8,12 @@ import { execCommand } from '../../src'
         env: {
             // serverless_devs_log_path: '/Users/shihuali/workspace/core/test/fs.log',
             // serverless_devs_log_debug: 'false',
-            default_serverless_devs_auto_log: 'false',
+            // default_serverless_devs_auto_log: 'false',
         },
-        method: 'deploy'
+        method: 'deploy',
+        globalArgs:{
+            debug: true,
+        }
     })
     console.log(data)
 
