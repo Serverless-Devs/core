@@ -1,5 +1,5 @@
 import Parse from './parse';
-import { isEmpty, get, isNil, keys, isPlainObject } from 'lodash';
+import { isEmpty, get, isNil, keys, isPlainObject, includes, filter } from 'lodash';
 import { logger, makeLogFile } from '../../logger';
 import Analysis from './analysis';
 import { getProjectConfig } from './utils';
@@ -155,7 +155,16 @@ class ExecCommand {
 }
 
 async function execCommand(configs: IConfigs) {
-  return await new ExecCommand(configs).init();
+  const lastArgv = process.argv;
+  const debug = get(configs, 'globalArgs.debug');
+  if (debug) {
+    !includes(process.argv, '--debug') && process.argv.push('--debug');
+  } else {
+    process.argv = filter(process.argv, (item) => item !== '--debug');
+  }
+  const res = await new ExecCommand(configs).init();
+  process.argv = lastArgv;
+  return res;
 }
 
 export { execCommand, getTemplatePath, transforYamlPath, Parse as ParseVariable };
