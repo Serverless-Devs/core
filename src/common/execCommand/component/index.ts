@@ -15,7 +15,7 @@ import { ALIYUN_CLI } from '../../constant';
 class ComponentExec {
   protected hook: Hook;
   private projectConfig: IProjectConfig;
-
+  private inputs: IInputs;
   constructor(private config: IComponentConfig) {
     this.projectConfig = config.projectConfig;
   }
@@ -39,6 +39,14 @@ class ComponentExec {
     }
   }
   async init() {
+    try {
+      const response = await this.doInit();
+      return { response, inputs: this.inputs, status: STATUS.SUCCESS };
+    } catch (error) {
+      return { response: error, inputs: this.inputs, status: STATUS.ERROR };
+    }
+  }
+  private async doInit() {
     const { method, spath, args, serverName } = this.config;
     await this.handleCredentials();
     const newActions = await this.getNewActions({});
@@ -51,11 +59,9 @@ class ComponentExec {
     this.hook = new Hook(inputs);
 
     const preHookOutData = await this.hook.init(newActions).executePreHook();
-    const res = await this.executeCommand(preHookOutData);
-    if (res.status === STATUS.ERROR) return res;
-    const output = get(res, 'response');
+    const output = await this.executeCommand(preHookOutData);
     await this.hook.init(await this.getNewActions({ output })).executeAfterHook({ output });
-    return res;
+    return output;
   }
   private async getNewActions({ output }: { output?: any }) {
     const { method, spath, serverName, globalArgs } = this.config;
@@ -83,7 +89,7 @@ class ComponentExec {
   private async executeCommand(payload: { type: 'component' | 'plugin'; data: any }) {
     const { method, spath, args, serverName, serviceList } = this.config;
 
-    const inputs =
+    this.inputs =
       get(payload, 'type') === 'plugin'
         ? get(payload, 'data')
         : getInputs(this.projectConfig, {
@@ -97,16 +103,8 @@ class ComponentExec {
 
     const registry: IRegistry = await getSetConfig('registry', DEFAULT_REGIRSTRY);
     const instance = await loadComponent(this.projectConfig.component, registry);
-    try {
-      const res = await this.invokeMethod(instance, inputs);
-      return {
-        response: typeof res === 'object' ? JSON.parse(JSON.stringify(res)) : res,
-        inputs,
-        status: STATUS.SUCCESS,
-      };
-    } catch (error) {
-      return { response: error, inputs, status: STATUS.ERROR };
-    }
+    const res = await this.invokeMethod(instance, this.inputs);
+    return typeof res === 'object' ? JSON.parse(JSON.stringify(res)) : res;
   }
   async invokeMethod(instance: any, inputs: IInputs) {
     const { method, specifyService } = this.config;

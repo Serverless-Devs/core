@@ -7,6 +7,7 @@ import {
   IGlobalArgs,
   IActionType,
   IServiceItem,
+  IGlobalActionValue,
 } from './interface';
 import { makeUnderLine } from '../../libs';
 import { logger } from '../../logger';
@@ -61,6 +62,7 @@ export function getActions(configs: IProjectConfig, { method, spath }): IActionH
   for (const actionKey of keyList) {
     const hookList = actions[actionKey];
     const [start, end] = split(actionKey, '-');
+    const action = start as IGlobalActionValue;
     if (end === method) {
       for (const hookDetail of hookList) {
         const type = validate(hookDetail);
@@ -70,7 +72,7 @@ export function getActions(configs: IProjectConfig, { method, spath }): IActionH
             value: hookDetail[type],
             path: getCurrentPath(hookDetail.path, spath),
             pre: start === 'pre' ? true : false,
-            action: start,
+            action,
           };
           hooks.push(obj);
         }
@@ -80,7 +82,7 @@ export function getActions(configs: IProjectConfig, { method, spath }): IActionH
             type,
             value: hookDetail[type],
             pre: start === 'pre' ? true : false,
-            action: start,
+            action,
           };
           hooks.push(obj);
         }
@@ -90,7 +92,7 @@ export function getActions(configs: IProjectConfig, { method, spath }): IActionH
             type,
             value: hookDetail[type],
             pre: start === 'pre' ? true : false,
-            action: start,
+            action,
             args: hookDetail.args,
           };
           hooks.push(obj);
@@ -128,8 +130,8 @@ export function getInputs(
   return inputs;
 }
 
-export function throwError(params: { error: any; serviceName: string }) {
-  const { error, serviceName } = params;
+export function throwError(params: { error: any; prefix?: string; serviceName?: string }) {
+  const { error, serviceName, prefix } = params;
 
   let jsonMsg;
   try {
@@ -142,7 +144,7 @@ export function throwError(params: { error: any; serviceName: string }) {
         code: 101,
         message: jsonMsg.message,
         tips: jsonMsg.tips,
-        prefix: `Project ${serviceName} failed to execute:`,
+        prefix: prefix || `Project ${serviceName} failed to execute:`,
       }),
     );
   } else {
@@ -151,7 +153,7 @@ export function throwError(params: { error: any; serviceName: string }) {
         code: 101,
         message: error.message,
         stack: error.stack,
-        prefix: `Project ${serviceName} failed to execute:`,
+        prefix: prefix || `Project ${serviceName} failed to execute:`,
       }),
     );
   }

@@ -5,8 +5,9 @@ import Analysis from './analysis';
 import { getProjectConfig, transformServiceList } from './utils';
 import { getTemplatePath, transforYamlPath } from './getTemplatePath';
 import ComponentExec from './component';
-import { IGlobalArgs, STATUS } from './interface';
+import { IGlobalArgs, STATUS, IGlobalAction, IRecord } from './interface';
 import reportTracker from '../reportTracker';
+import GlobalActions from './globalActions';
 import yaml from 'js-yaml';
 
 interface IConfigs {
@@ -21,6 +22,7 @@ interface IConfigs {
 class ExecCommand {
   private configs: IConfigs;
   private parse: Parse;
+  private globalActions: GlobalActions;
   constructor(configs: IConfigs) {
     this.configs = configs;
     const { env } = configs;
@@ -33,7 +35,7 @@ class ExecCommand {
     makeLogFile();
   }
   async init() {
-    const { syaml, serverName, globalArgs = {} } = this.configs;
+    const { syaml, serverName, globalArgs = {}, method } = this.configs;
     const originSpath = await getTemplatePath(syaml);
     const spath = await transforYamlPath(originSpath);
     this.parse = new Parse(spath);
@@ -41,6 +43,13 @@ class ExecCommand {
     // 兼容vars下的魔法变量，需再次解析
     parsedObj = await this.parse.init(parsedObj.realVariables);
     await this.warnEnvironmentVariables(parsedObj.realVariables);
+    this.globalActions = new GlobalActions({
+      realVariables: parsedObj.realVariables,
+      method,
+      spath,
+      globalArgs,
+    });
+    await this.globalActions.run(IGlobalAction.PRE);
     const analysis = new Analysis(parsedObj.realVariables, parsedObj.dependenciesMap);
     const executeOrderList = analysis.getProjectOrder();
     reportTracker({ trackerType: 'command', syaml: spath, access: globalArgs.access });
@@ -60,7 +69,7 @@ class ExecCommand {
   private async serviceOnlyOne({ realVariables, serverName, spath, specifyService }) {
     const { method, args, globalArgs } = this.configs;
     const projectConfig = getProjectConfig(realVariables, serverName, globalArgs);
-    const { response } = await new ComponentExec({
+    const { response, inputs, status } = await new ComponentExec({
       projectConfig,
       method,
       args,
@@ -70,6 +79,10 @@ class ExecCommand {
       specifyService,
       parse: this.parse, // 如果actions模块包含魔法变量，需要再次解析
     }).init();
+    const newObj = transformServiceList({ response, inputs, serverName });
+    this.globalActions.addInputs({ services: [{ ...newObj, status }], status });
+    const record = { status, error: response } as IRecord;
+    await this.doGlobalAction(record);
     const result = { [serverName]: response };
     if (process.env['default_serverless_devs_auto_log'] === 'false') {
       logger.log(`End of method: ${method}`, 'green');
@@ -95,6 +108,19 @@ class ExecCommand {
     logger.output(result);
   }
 
+  private async doGlobalAction(record: IRecord) {
+    if (record.status === STATUS.SUCCESS) {
+      await this.globalActions.run(IGlobalAction.SUCCESS);
+    }
+    if (record.status === STATUS.ERROR) {
+      await this.globalActions.run(IGlobalAction.FAIL);
+    }
+    await this.globalActions.run(IGlobalAction.COMPLETE);
+    if (record.status === STATUS.ERROR) {
+      throw record.error;
+    }
+  }
+
   private async serviceWithMany({ executeOrderList, spath }) {
     const { method, args, globalArgs } = this.configs;
     logger.info(
@@ -102,6 +128,8 @@ class ExecCommand {
         ',',
       )} > to be execute`,
     );
+    // 记录执行状态
+    const record = {} as IRecord;
     // 存储services
     const serviceList = [];
     const result = {};
@@ -121,17 +149,19 @@ class ExecCommand {
         parse: this.parse,
         serviceList,
       }).init();
-      if (status === STATUS.SUCCESS) {
-        const newObj = transformServiceList({ response, inputs, serverName });
-        serviceList.push({ ...newObj, status });
-        tempData.services[serverName] = { output: response };
-        result[serverName] = response;
-        logger.info(`Project ${serverName} successfully to execute \n\t`);
-      }
+      const newObj = transformServiceList({ response, inputs, serverName });
+      serviceList.push({ ...newObj, status });
+      record.status = status;
       if (status === STATUS.ERROR) {
-        throw response;
+        record.error = response;
+        break;
       }
+      tempData.services[serverName] = { output: response };
+      result[serverName] = response;
+      logger.info(`Project ${serverName} successfully to execute \n\t`);
     }
+    this.globalActions.addInputs({ services: serviceList, status: record.status });
+    await this.doGlobalAction(record);
     if (process.env['default_serverless_devs_auto_log'] === 'false') {
       logger.log(`End of method: ${method}`, 'green');
       return result;

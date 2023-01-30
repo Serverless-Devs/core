@@ -37,10 +37,26 @@ export interface IComponentConfig {
 }
 
 export type IActionType = 'run' | 'component' | 'plugin';
+
+export enum IGlobalAction {
+  PRE = 'pre',
+  SUCCESS = 'success',
+  FAIL = 'fail',
+  COMPLETE = 'complete',
+}
+
+export type IGlobalActionValue = `${IGlobalAction}`;
+
+export interface IRecord {
+  status: `${STATUS}`;
+  error: Error;
+}
+
 export interface IActionHook {
   type: IActionType;
   value: string;
   pre: boolean;
+  action: IGlobalActionValue;
   path?: string;
   args?: string;
 }
@@ -62,6 +78,18 @@ export interface IInputs {
     configPath: string;
   };
   output: any;
+}
+
+export interface IGlobalInputs {
+  credentials: ICredentials | undefined;
+  appName: string;
+  access: string;
+  command: string;
+  args: string;
+  argsObj: string[];
+  path: {
+    configPath: string;
+  };
 }
 
 export interface IServiceItem {
