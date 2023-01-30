@@ -1,4 +1,4 @@
-import { IComponentConfig, IInputs, IProjectConfig } from '../interface';
+import { IComponentConfig, IInputs, IProjectConfig, STATUS } from '../interface';
 import { getRootHome, getSetConfig, getYamlContent } from '../../../libs';
 import path from 'path';
 import { getCredential, getCredentialFromEnv } from '../../credential';
@@ -7,7 +7,7 @@ import Hook from './hook';
 import { loadComponent } from '../../load';
 import { DEFAULT_REGIRSTRY, IRegistry } from '../../constant';
 import chalk from 'chalk';
-import { assign, toString } from 'lodash';
+import { assign } from 'lodash';
 import { logger } from '../../../logger';
 import { get } from 'lodash';
 import { ALIYUN_CLI } from '../../constant';
@@ -51,9 +51,11 @@ class ComponentExec {
     this.hook = new Hook(inputs);
 
     const preHookOutData = await this.hook.init(newActions).executePreHook();
-    const output = await this.executeCommand(preHookOutData);
+    const res = await this.executeCommand(preHookOutData);
+    if (res.status === STATUS.ERROR) return res;
+    const output = get(res, 'response');
     await this.hook.init(await this.getNewActions({ output })).executeAfterHook({ output });
-    return output;
+    return res;
   }
   private async getNewActions({ output }: { output?: any }) {
     const { method, spath, serverName, globalArgs } = this.config;
@@ -79,7 +81,7 @@ class ComponentExec {
     return useActions ? [] : actions;
   }
   private async executeCommand(payload: { type: 'component' | 'plugin'; data: any }) {
-    const { method, spath, args, serverName } = this.config;
+    const { method, spath, args, serverName, serviceList } = this.config;
 
     const inputs =
       get(payload, 'type') === 'plugin'
@@ -89,33 +91,21 @@ class ComponentExec {
             args,
             spath,
             serverName,
+            serviceList,
             output: get(payload, 'data'),
           });
 
-    this.debugForJest(inputs, { method });
-
     const registry: IRegistry = await getSetConfig('registry', DEFAULT_REGIRSTRY);
     const instance = await loadComponent(this.projectConfig.component, registry);
-    const res = await this.invokeMethod(instance, inputs);
-    return typeof res === 'object' ? JSON.parse(JSON.stringify(res)) : res;
-  }
-  private debugForJest(inputs, { method }) {
-    if (process.env['serverless-devs-debug'] === 'true') {
-      const newInputs = assign({}, inputs);
-      const credentials = newInputs.credentials;
-      if (credentials) {
-        for (const key in credentials) {
-          const val = toString(credentials[key]);
-          const len = val.length;
-          newInputs.credentials[key] =
-            len > 6 ? val.slice(0, 3) + '*'.repeat(len - 6) + val.slice(len - 3) : val;
-        }
-      }
-      console.log(
-        `project:${this.projectConfig.serviceName} component:${
-          this.projectConfig.component
-        } method: ${method} inputs: ${JSON.stringify(newInputs, null, 2)} `,
-      );
+    try {
+      const res = await this.invokeMethod(instance, inputs);
+      return {
+        response: typeof res === 'object' ? JSON.parse(JSON.stringify(res)) : res,
+        inputs,
+        status: STATUS.SUCCESS,
+      };
+    } catch (error) {
+      return { response: error, inputs, status: STATUS.ERROR };
     }
   }
   async invokeMethod(instance: any, inputs: IInputs) {
