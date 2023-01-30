@@ -2,10 +2,10 @@ import Parse from './parse';
 import { isEmpty, get, isNil, keys, isPlainObject, includes, filter } from 'lodash';
 import { logger, makeLogFile } from '../../logger';
 import Analysis from './analysis';
-import { getProjectConfig } from './utils';
+import { getProjectConfig, transformServiceList } from './utils';
 import { getTemplatePath, transforYamlPath } from './getTemplatePath';
 import ComponentExec from './component';
-import { IGlobalArgs } from './interface';
+import { IGlobalArgs, STATUS } from './interface';
 import reportTracker from '../reportTracker';
 import yaml from 'js-yaml';
 
@@ -56,10 +56,11 @@ class ExecCommand {
     }
     return await this.serviceWithMany({ executeOrderList, spath: originSpath });
   }
+
   private async serviceOnlyOne({ realVariables, serverName, spath, specifyService }) {
     const { method, args, globalArgs } = this.configs;
     const projectConfig = getProjectConfig(realVariables, serverName, globalArgs);
-    const outPutData = await new ComponentExec({
+    const { response } = await new ComponentExec({
       projectConfig,
       method,
       args,
@@ -69,12 +70,12 @@ class ExecCommand {
       specifyService,
       parse: this.parse, // 如果actions模块包含魔法变量，需要再次解析
     }).init();
-    const result = { [serverName]: outPutData };
+    const result = { [serverName]: response };
     if (process.env['default_serverless_devs_auto_log'] === 'false') {
       logger.log(`End of method: ${method}`, 'green');
       return result;
     }
-    keys(outPutData).length === 0
+    keys(response).length === 0
       ? logger.log(`End of method: ${method}`, 'green')
       : this.doOutput(result);
     return result;
@@ -101,6 +102,8 @@ class ExecCommand {
         ',',
       )} > to be execute`,
     );
+    // 存储services
+    const serviceList = [];
     const result = {};
     // 临时存储output, 对yaml文件再次解析
     const tempData = { services: {} };
@@ -108,7 +111,7 @@ class ExecCommand {
       logger.info(`Start executing project ${serverName}`);
       const parsedObj = await this.parse.clearGlobalKey('this').init(tempData);
       const projectConfig = getProjectConfig(parsedObj.realVariables, serverName, globalArgs);
-      const outputData = await new ComponentExec({
+      const { response, inputs, status } = await new ComponentExec({
         projectConfig,
         method,
         args,
@@ -116,10 +119,18 @@ class ExecCommand {
         serverName,
         globalArgs,
         parse: this.parse,
+        serviceList,
       }).init();
-      tempData.services[serverName] = { output: outputData };
-      result[serverName] = outputData;
-      logger.info(`Project ${serverName} successfully to execute \n\t`);
+      if (status === STATUS.SUCCESS) {
+        const newObj = transformServiceList({ response, inputs, serverName });
+        serviceList.push({ ...newObj, status });
+        tempData.services[serverName] = { output: response };
+        result[serverName] = response;
+        logger.info(`Project ${serverName} successfully to execute \n\t`);
+      }
+      if (status === STATUS.ERROR) {
+        throw response;
+      }
     }
     if (process.env['default_serverless_devs_auto_log'] === 'false') {
       logger.log(`End of method: ${method}`, 'green');

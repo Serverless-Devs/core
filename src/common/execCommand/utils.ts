@@ -1,6 +1,13 @@
 import { isEmpty, get, assign, keys, split, filter, join, includes } from 'lodash';
 import path from 'path';
-import { IProjectConfig, IActionHook, IInputs, IGlobalArgs, IActionType } from './interface';
+import {
+  IProjectConfig,
+  IActionHook,
+  IInputs,
+  IGlobalArgs,
+  IActionType,
+  IServiceItem,
+} from './interface';
 import { makeUnderLine } from '../../libs';
 import { logger } from '../../logger';
 import chalk from 'chalk';
@@ -63,6 +70,7 @@ export function getActions(configs: IProjectConfig, { method, spath }): IActionH
             value: hookDetail[type],
             path: getCurrentPath(hookDetail.path, spath),
             pre: start === 'pre' ? true : false,
+            action: start,
           };
           hooks.push(obj);
         }
@@ -72,6 +80,7 @@ export function getActions(configs: IProjectConfig, { method, spath }): IActionH
             type,
             value: hookDetail[type],
             pre: start === 'pre' ? true : false,
+            action: start,
           };
           hooks.push(obj);
         }
@@ -81,6 +90,7 @@ export function getActions(configs: IProjectConfig, { method, spath }): IActionH
             type,
             value: hookDetail[type],
             pre: start === 'pre' ? true : false,
+            action: start,
             args: hookDetail.args,
           };
           hooks.push(obj);
@@ -93,7 +103,7 @@ export function getActions(configs: IProjectConfig, { method, spath }): IActionH
 
 export function getInputs(
   configs: IProjectConfig,
-  { method, args, spath, serverName, output }: any,
+  { method, args, spath, serverName, output, serviceList }: any,
 ): IInputs {
   const argsObj = filter(args, (o) => !includes([serverName, method], o));
   const inputs = {
@@ -112,6 +122,7 @@ export function getInputs(
     path: {
       configPath: spath,
     },
+    services: serviceList,
     output,
   };
   return inputs;
@@ -144,4 +155,15 @@ export function throwError(params: { error: any; serviceName: string }) {
       }),
     );
   }
+}
+
+export function transformServiceList({ response, inputs, serverName }): IServiceItem {
+  return {
+    serviceName: serverName,
+    component: get(inputs, 'project.component'),
+    access: get(inputs, 'project.access'),
+    credentials: get(inputs, 'credentials'),
+    props: get(inputs, 'props'),
+    output: response,
+  };
 }

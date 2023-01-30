@@ -33,6 +33,7 @@ export interface IComponentConfig {
   globalArgs: IGlobalArgs;
   specifyService?: boolean;
   parse: Parse;
+  serviceList?: IServiceItem[];
 }
 
 export type IActionType = 'run' | 'component' | 'plugin';
@@ -61,4 +62,18 @@ export interface IInputs {
     configPath: string;
   };
   output: any;
+}
+
+export interface IServiceItem {
+  serviceName: string;
+  component: string;
+  access: string;
+  credentials: ICredentials;
+  props: object;
+  output: any;
+}
+
+export enum STATUS {
+  SUCCESS = 'success',
+  ERROR = 'error',
 }
