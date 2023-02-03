@@ -91,6 +91,24 @@
             ]
         },
         {
+            "name": "global actions",
+            "type": "node",
+            "request": "launch",
+            "runtimeExecutable": "/Users/shihuali/workspace/s/bin/s",
+            "runtimeArgs": [
+                "deploy",
+                "-y",
+                "--use-local",
+                "-t",
+                "a.yaml"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/test/fixtures/start-fc-http-nodejs14",
+            "skipFiles": [
+                "<node_internals>/**"
+            ]
+        },
+        {
             "name": "s -h",
             "type": "node",
             "request": "launch",
