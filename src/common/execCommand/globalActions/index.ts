@@ -19,6 +19,7 @@ import { ALIYUN_CLI } from '../../constant';
 import { getCredential, getCredentialFromEnv } from '../../credential';
 import { getRootHome, getYamlContent } from '../../../libs';
 import path from 'path';
+import { execDaemon } from '../../../execDaemon';
 
 interface IConfig {
   realVariables: Record<string, any>;
@@ -82,6 +83,7 @@ class GlobalActions {
       await this.commandExecute(hook, type);
     }
     logger.info(`End the global ${type}-action`);
+    type === IGlobalAction.COMPLETE && (await this.tracker());
   }
 
   private async commandExecute(configs: IActionHook, type: IGlobalActionValue) {
@@ -117,6 +119,10 @@ class GlobalActions {
       const inputs: IGlobalInputs = await this.getInputs();
       await instance({ ...inputs, ...this.record }, configs.args);
     }
+  }
+  private async tracker() {
+    const inputs: IGlobalInputs = await this.getInputs();
+    execDaemon('tracker.js', { inputs: JSON.stringify({ ...inputs, ...this.record }) });
   }
 }
 
