@@ -75,6 +75,7 @@ class GlobalActions {
     }
   }
   async run(type: IGlobalActionValue) {
+    type === IGlobalAction.COMPLETE && (await this.tracker());
     const hooks = filter(this.actions, (item) => item.action === type);
     if (isEmpty(hooks)) return;
     logger.info(`Start the global ${type}-action`);
@@ -83,7 +84,6 @@ class GlobalActions {
       await this.commandExecute(hook, type);
     }
     logger.info(`End the global ${type}-action`);
-    type === IGlobalAction.COMPLETE && (await this.tracker());
   }
 
   private async commandExecute(configs: IActionHook, type: IGlobalActionValue) {
