@@ -5,7 +5,7 @@ import path from 'path';
 import yaml from 'js-yaml';
 import { ICredentials } from './interface';
 import { COMMON_VARIABLE_TYPE_REG } from '../constant';
-import { logger } from '../../logger';
+import { HumanWarning } from '../error';
 
 const SPECIALL_VARIABLE_TYPE_REG = new RegExp(/(.*)\((.*)\)/, 'i');
 
@@ -195,8 +195,8 @@ export default class Parse {
   }
   warnUnparsedField() {
     if (isEmpty(this.unparsedField)) return;
-    logger.warn(
-      `${this.unparsedField} was not parsed successfully and may not have caused an error.`,
-    );
+    new HumanWarning({
+      warningMessage: `${this.unparsedField} was not parsed successfully and may not have caused an error.`,
+    });
   }
 }
