@@ -83,6 +83,9 @@
                 "deploy",
                 "-y",
                 "--use-local",
+                "-t",
+                "d.yaml",
+                // "--debug"
             ],
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}/test/fixtures/start-fc-http-nodejs12",
