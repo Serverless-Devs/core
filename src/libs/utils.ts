@@ -119,3 +119,9 @@ export const tryfun = async (fn, ...args) => {
     return await fn(...args);
   } catch (ex) {}
 };
+
+export const isChinaUser = () => {
+  return new Intl.DateTimeFormat('en', { timeZoneName: 'long' })
+    .format()
+    .includes('China Standard Time');
+};
