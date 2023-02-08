@@ -34,6 +34,7 @@ export function getCicdEnv() {
     if (key.startsWith('GITLAB')) return 'gitlab';
     if (key.startsWith('JENKINS')) return 'jenkins';
   }
+  return process.platform;
 }
 
 export function isCiCdEnv() {

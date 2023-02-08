@@ -3,7 +3,7 @@ import path from 'path';
 const prettyjson = require('prettyjson');
 import ansiEscapes from 'ansi-escapes';
 import ora, { Ora } from 'ora';
-import { isDebugMode, getRootHome, getPid, isCiCdEnv } from '../libs';
+import { isDebugMode, getRootHome, getPid, isCiCdEnv, getCicdEnv } from '../libs';
 import { isFunction } from 'lodash';
 import fs from 'fs-extra';
 import { execDaemon } from '../execDaemon';
@@ -130,7 +130,7 @@ function strip(value: string) {
 function logWrite(data) {
   const filePath = getLogPath();
   if (filePath) {
-    fs.appendFileSync(filePath, strip(data))
+    fs.appendFileSync(filePath, strip(data));
   }
 }
 
@@ -239,7 +239,7 @@ export class Logger {
       }
       if (item.title && item.task) {
         const title = isFunction(item.title) ? item.title() : item.title;
-        if (isDebugMode()) {
+        if (isDebugMode() || getCicdEnv() === 'app_center') {
           this.log(gray(title));
           try {
             await item.task();

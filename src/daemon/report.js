@@ -24,7 +24,7 @@ async function init() {
     statusCode,
   } = process.env;
   const core_version = await getCoreVersion();
-  const os = getCicdEnv() || process.platform;
+  const os = getCicdEnv();
   const node_version = process.version;
   const pid = getmac.replace(/:/g, '_');
   const baseURL =
