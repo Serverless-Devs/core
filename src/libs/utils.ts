@@ -69,7 +69,7 @@ export function getGlobalArgs(args: string[]): IGlobalParams {
     string: ['access', 'template', 'env'],
     boolean: ['debug', 'skip-actions', 'help', 'version'],
   });
-  return assign({ _argsObj }, data);
+  return assign(minimist(args), { _argsObj }, data);
 }
 
 export function readJsonFile(filePath: string) {
