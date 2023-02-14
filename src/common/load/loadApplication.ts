@@ -147,12 +147,12 @@ class LoadApplication {
     let parameters = {};
     if (publishYamlData) {
       fs.copySync(`${temporaryPath}/src`, applicationPath);
+      await this.initEnvConfig(applicationPath);
       parameters = this.config.parameters
         ? await this.initSconfigWithParam({ publishYamlData, applicationPath })
         : await this.initSconfig({ publishYamlData, applicationPath });
       await this.postInit({ temporaryPath, applicationPath, parameters });
       rimraf.sync(temporaryPath);
-      await this.initEnvConfig(applicationPath);
     } else {
       await this.postInit({ temporaryPath, applicationPath, parameters });
       fs.moveSync(`${temporaryPath}`, applicationPath);
@@ -233,6 +233,7 @@ class LoadApplication {
     const properties = get(publishYamlData, 'Parameters.properties');
     const requiredList = get(publishYamlData, 'Parameters.required');
     const promptList = [];
+    const secretList = [];
     if (properties) {
       let rangeList = [];
       for (const key in properties) {
@@ -265,6 +266,7 @@ class LoadApplication {
             default: item.default,
           });
         } else if (item.type === 'secret') {
+          secretList.push(name);
           // 密码类型
           promptList.push({
             type: 'password',
@@ -333,6 +335,12 @@ class LoadApplication {
 
     if (result?.access === false) {
       result.access = '{{ access }}';
+    }
+    if (secretList.length > 0) {
+      const dotEnvPath = path.join(applicationPath, '.env');
+      fs.ensureFileSync(dotEnvPath);
+      const str = map(secretList, (o) => `\n${o}=${result[o]}`).join('');
+      fs.appendFileSync(dotEnvPath, str, 'utf-8');
     }
     return result;
   }
