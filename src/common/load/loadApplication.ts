@@ -143,10 +143,10 @@ class LoadApplication {
     });
     await preInit({ temporaryPath, applicationPath });
     const publishYamlData = await getYamlContent(path.join(temporaryPath, 'publish.yaml'));
-    let tempParams = {};
+    let parameters = {};
     if (publishYamlData) {
       fs.copySync(`${temporaryPath}/src`, applicationPath);
-      tempParams = this.config.parameters
+      parameters = this.config.parameters
         ? await this.initSconfigWithParam({ publishYamlData, applicationPath })
         : await this.initSconfig({ publishYamlData, applicationPath });
       rimraf.sync(temporaryPath);
@@ -155,10 +155,10 @@ class LoadApplication {
       fs.moveSync(`${temporaryPath}`, applicationPath);
     }
     await this.needInstallDependency(applicationPath);
-    await this.postInit({ temporaryPath, applicationPath, params: tempParams });
+    await this.postInit({ temporaryPath, applicationPath, parameters });
     return applicationPath;
   }
-  async postInit({ temporaryPath, applicationPath, params }) {
+  async postInit({ temporaryPath, applicationPath, parameters }) {
     try {
       const baseChildComponent = await require(path.join(temporaryPath, 'hook'));
       const tempObj = {
@@ -169,11 +169,12 @@ class LoadApplication {
         lodash: _,
         artTemplate: (filePath: string) => {
           const newPath = path.join(applicationPath, filePath);
-          const newData = this.handleArtTemplate(newPath, params);
+          const newData = this.handleArtTemplate(newPath, parameters);
           fs.writeFileSync(newPath, newData, 'utf-8');
         },
         Logger,
         execCommand,
+        parameters,
       };
       await baseChildComponent.postInit(tempObj);
     } catch (e) {
