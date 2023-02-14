@@ -10,7 +10,7 @@ import downloadRequest from '../downloadRequest';
 import fs from 'fs-extra';
 import inquirer from 'inquirer';
 import chalk from 'chalk';
-import _, { get, isEmpty, sortBy, includes, map, concat, replace, endsWith } from 'lodash';
+import _, { get, isEmpty, sortBy, includes, map, concat, replace, endsWith, keys } from 'lodash';
 import rimraf from 'rimraf';
 import installDependency from '../installDependency';
 import {
@@ -61,6 +61,7 @@ class LoadApplication {
   private config: IParams;
   private temporaryPath: string;
   private spath: string;
+  private secretList: string[] = [];
   constructor(config: IParams) {
     this.config = config;
   }
@@ -161,7 +162,7 @@ class LoadApplication {
     return applicationPath;
   }
   async postInit({ temporaryPath, applicationPath, parameters }) {
-    let response = {};
+    let response: any = {};
     try {
       const baseChildComponent = await require(path.join(temporaryPath, 'hook'));
       const tempObj = {
@@ -183,13 +184,31 @@ class LoadApplication {
     } catch (e) {
       logger.debug(`postInit error: ${e}`);
     }
-    let newData = this.handleArtTemplate(this.spath, { ...parameters, ...response });
+    // _custom_secret_list：postInit 里面的 secret 字段
+    const { _custom_secret_list, ...rest } = response;
+    const result = {
+      ...parameters,
+      ...rest,
+      ..._custom_secret_list,
+    };
+    let newData = this.handleArtTemplate(this.spath, result);
     // art 语法需要先解析在验证yaml内容
     fs.writeFileSync(this.spath, newData, 'utf-8');
     // fix: Document with errors cannot be stringified
     await isYamlFile(this.spath);
     newData = parse({ appName: this.config.appName }, newData);
     fs.writeFileSync(this.spath, newData, 'utf-8');
+
+    if (!isEmpty(_custom_secret_list)) {
+      this.secretList = concat(this.secretList, keys(_custom_secret_list));
+    }
+
+    if (this.secretList.length > 0) {
+      const dotEnvPath = path.join(applicationPath, '.env');
+      fs.ensureFileSync(dotEnvPath);
+      const str = map(this.secretList, (o) => `\n${o}=${result[o]}`).join('');
+      fs.appendFileSync(dotEnvPath, str, 'utf-8');
+    }
   }
   async needInstallDependency(cwd: string) {
     const packageInfo: any = readJsonFile(path.resolve(cwd, 'package.json'));
@@ -233,7 +252,6 @@ class LoadApplication {
     const properties = get(publishYamlData, 'Parameters.properties');
     const requiredList = get(publishYamlData, 'Parameters.required');
     const promptList = [];
-    const secretList = [];
     if (properties) {
       let rangeList = [];
       for (const key in properties) {
@@ -266,7 +284,7 @@ class LoadApplication {
             default: item.default,
           });
         } else if (item.type === 'secret') {
-          secretList.push(name);
+          this.secretList.push(name);
           // 密码类型
           promptList.push({
             type: 'password',
@@ -335,12 +353,6 @@ class LoadApplication {
 
     if (result?.access === false) {
       result.access = '{{ access }}';
-    }
-    if (secretList.length > 0) {
-      const dotEnvPath = path.join(applicationPath, '.env');
-      fs.ensureFileSync(dotEnvPath);
-      const str = map(secretList, (o) => `\n${o}=${result[o]}`).join('');
-      fs.appendFileSync(dotEnvPath, str, 'utf-8');
     }
     return result;
   }
