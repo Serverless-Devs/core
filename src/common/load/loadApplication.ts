@@ -185,7 +185,7 @@ class LoadApplication {
       logger.debug(`postInit error: ${e}`);
     }
     // _custom_secret_list：postInit 里面的 secret 字段
-    const { _custom_secret_list, ...rest } = response;
+    const { _custom_secret_list, ...rest } = response || {};
     const result = {
       ...parameters,
       ...rest,
