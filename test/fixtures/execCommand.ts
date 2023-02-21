@@ -1,9 +1,10 @@
 import { execCommand } from '../../src'
+import path from 'path'
 
 (async () => {
     const data = await execCommand({
         
-        syaml: '/Users/shihuali/workspace/a/start-fc-http-nodejs14/s.yaml',
+        syaml: path.join(__dirname, './start-fc-http-nodejs14/s_en.yaml'),
         args: ['-y', '--use-local'],
         env: {
             // serverless_devs_log_path: '/Users/shihuali/workspace/core/test/fs.log',
@@ -12,7 +13,7 @@ import { execCommand } from '../../src'
         },
         method: 'deploy',
         globalArgs:{
-            debug: true,
+            // debug: true,
         }
     })
     console.log(data)
