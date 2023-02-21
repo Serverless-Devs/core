@@ -12,6 +12,9 @@ import execa from 'execa';
 import stripDirs from 'strip-dirs';
 import walkSync from 'walk-sync';
 import rimraf from 'rimraf';
+import { getCicdEnv } from '../libs';
+import { logger } from '../logger';
+import { set } from 'lodash';
 
 export interface IOptions extends DecompressOptions {
   /**
@@ -36,7 +39,12 @@ async function download(url: string, dest: string, options: IOptions = {}) {
       if (res.statusCode === 200) {
         const file = fs.createWriteStream(filePath);
         file.on('open', () => {
-          const spin = spinner(`Downloading: [${chalk.green(decodeURIComponent(uri.pathname))}]`);
+          let spin: Ora;
+          if (getCicdEnv() === 'app_center') {
+            logger.log(chalk.gray('Downloading...'));
+          } else {
+            spin = spinner(`Downloading: [${chalk.green(decodeURIComponent(uri.pathname))}]`);
+          }
           let downloaded = 0;
           res
             .on('data', (chunk) => {
@@ -45,7 +53,11 @@ async function download(url: string, dest: string, options: IOptions = {}) {
               const tips = len
                 ? `${downloaded}/${len} ${((100.0 * downloaded) / len).toFixed(2)}%`
                 : `${parseInt(String(downloaded / 1024), 10)}KB`;
-              spin.text = `Downloading: [${chalk.green(decodeURIComponent(uri.pathname))}] ${tips}`;
+              set(
+                spin,
+                'text',
+                `Downloading: [${chalk.green(decodeURIComponent(uri.pathname))}] ${tips}`,
+              );
             })
             .on('end', () => {
               file.end();
@@ -53,7 +65,7 @@ async function download(url: string, dest: string, options: IOptions = {}) {
             })
             .on('error', (err) => {
               file.destroy();
-              spin.fail();
+              spin?.fail();
               fs.unlink(dest, () => reject(err));
             });
         });
@@ -83,7 +95,7 @@ export default async (url: string, dest: string, options: IOptions = {}) => {
         if (num > 3) {
           num = 0;
         }
-        spin.text = filename ? `${filename} file unzipping${str}` : `file unzipping${str}`;
+        set(spin, 'text', filename ? `${filename} file unzipping${str}` : `file unzipping${str}`);
       }, 300);
 
       let useSystemUnzip = false;
@@ -116,18 +128,21 @@ export default async (url: string, dest: string, options: IOptions = {}) => {
           clearInterval(timer);
           await fs.unlink(filePath);
           const text = 'file decompression completed';
-          spin.succeed(filename ? `${filename} ${text}` : text);
+          spin?.succeed(filename ? `${filename} ${text}` : text);
+          if (getCicdEnv() === 'app_center') {
+            logger.log('Downloading completed');
+          }
           break;
         } catch (error) {
           if (index === 2) {
             clearInterval(timer);
-            spin.stop();
+            spin?.stop();
             throw error;
           }
         }
       }
     } else {
-      spin.succeed();
+      spin?.succeed();
     }
   } catch (error) {
     report({

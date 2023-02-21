@@ -83,6 +83,9 @@
                 "deploy",
                 "-y",
                 "--use-local",
+                "-t",
+                "d.yaml",
+                // "--debug"
             ],
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}/test/fixtures/start-fc-http-nodejs12",
@@ -129,12 +132,16 @@
             "runtimeExecutable": "/Users/shihuali/workspace/s/bin/s",
             "runtimeArgs": [
                 "init",
-                "shltest",
+                "start-fc-event-java8",
+                "--parameters",
+                "{\"region\":\"cn-shenzhen\",\"serviceName\":\"fc-build-demo\"}",
+                "-d",
+                "start-fc-event-java8"
             ],
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}/test/fixtures/.s",
             "skipFiles": [
-                "<node_internals>/**"
+                "<node_internals>/**",
             ]
         }
     ]

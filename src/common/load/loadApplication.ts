@@ -10,7 +10,7 @@ import downloadRequest from '../downloadRequest';
 import fs from 'fs-extra';
 import inquirer from 'inquirer';
 import chalk from 'chalk';
-import _, { get, isEmpty, sortBy, includes, map, concat, replace, endsWith } from 'lodash';
+import _, { get, isEmpty, sortBy, includes, map, concat, replace, endsWith, keys } from 'lodash';
 import rimraf from 'rimraf';
 import installDependency from '../installDependency';
 import {
@@ -60,6 +60,8 @@ async function preInit({ temporaryPath, applicationPath }) {
 class LoadApplication {
   private config: IParams;
   private temporaryPath: string;
+  private spath: string;
+  private secretList: string[] = [];
   constructor(config: IParams) {
     this.config = config;
   }
@@ -143,22 +145,24 @@ class LoadApplication {
     });
     await preInit({ temporaryPath, applicationPath });
     const publishYamlData = await getYamlContent(path.join(temporaryPath, 'publish.yaml'));
-    let tempParams = {};
+    let parameters = {};
     if (publishYamlData) {
       fs.copySync(`${temporaryPath}/src`, applicationPath);
-      tempParams = this.config.parameters
+      await this.initEnvConfig(applicationPath);
+      parameters = this.config.parameters
         ? await this.initSconfigWithParam({ publishYamlData, applicationPath })
         : await this.initSconfig({ publishYamlData, applicationPath });
+      await this.postInit({ temporaryPath, applicationPath, parameters });
       rimraf.sync(temporaryPath);
-      await this.initEnvConfig(applicationPath);
     } else {
+      await this.postInit({ temporaryPath, applicationPath, parameters });
       fs.moveSync(`${temporaryPath}`, applicationPath);
     }
     await this.needInstallDependency(applicationPath);
-    await this.postInit({ temporaryPath, applicationPath, params: tempParams });
     return applicationPath;
   }
-  async postInit({ temporaryPath, applicationPath, params }) {
+  async postInit({ temporaryPath, applicationPath, parameters }) {
+    let response: any = {};
     try {
       const baseChildComponent = await require(path.join(temporaryPath, 'hook'));
       const tempObj = {
@@ -169,15 +173,41 @@ class LoadApplication {
         lodash: _,
         artTemplate: (filePath: string) => {
           const newPath = path.join(applicationPath, filePath);
-          const newData = this.handleArtTemplate(newPath, params);
+          const newData = this.handleArtTemplate(newPath, parameters);
           fs.writeFileSync(newPath, newData, 'utf-8');
         },
         Logger,
         execCommand,
+        parameters,
       };
-      await baseChildComponent.postInit(tempObj);
+      response = await baseChildComponent.postInit(tempObj);
     } catch (e) {
       logger.debug(`postInit error: ${e}`);
+    }
+    // _custom_secret_list：postInit 里面的 secret 字段
+    const { _custom_secret_list, ...rest } = response || {};
+    const result = {
+      ...parameters,
+      ...rest,
+      ..._custom_secret_list,
+    };
+    let newData = this.handleArtTemplate(this.spath, result);
+    // art 语法需要先解析在验证yaml内容
+    fs.writeFileSync(this.spath, newData, 'utf-8');
+    // fix: Document with errors cannot be stringified
+    await isYamlFile(this.spath);
+    newData = parse({ appName: this.config.appName }, newData);
+    fs.writeFileSync(this.spath, newData, 'utf-8');
+
+    if (!isEmpty(_custom_secret_list)) {
+      this.secretList = concat(this.secretList, keys(_custom_secret_list));
+    }
+
+    if (this.secretList.length > 0) {
+      const dotEnvPath = path.join(applicationPath, '.env');
+      fs.ensureFileSync(dotEnvPath);
+      const str = map(this.secretList, (o) => `\n${o}=${result[o]}`).join('');
+      fs.appendFileSync(dotEnvPath, str, 'utf-8');
     }
   }
   async needInstallDependency(cwd: string) {
@@ -254,6 +284,7 @@ class LoadApplication {
             default: item.default,
           });
         } else if (item.type === 'secret') {
+          this.secretList.push(name);
           // 密码类型
           promptList.push({
             type: 'password',
@@ -288,8 +319,8 @@ class LoadApplication {
         }
       }
     }
-    const spath = getYamlPath(applicationPath, 's');
-    if (isEmpty(spath)) return;
+    this.spath = getYamlPath(applicationPath, 's');
+    if (isEmpty(this.spath)) return;
     const credentialAliasList = map(await getCredentialAliasList(), (o) => ({
       name: o,
       value: o,
@@ -323,18 +354,11 @@ class LoadApplication {
     if (result?.access === false) {
       result.access = '{{ access }}';
     }
-    let newData = this.handleArtTemplate(spath, result);
-    // art 语法需要先解析在验证yaml内容
-    fs.writeFileSync(spath, newData, 'utf-8');
-    // fix: Document with errors cannot be stringified
-    await isYamlFile(spath);
-    newData = parse({ appName: this.config.appName }, newData);
-    fs.writeFileSync(spath, newData, 'utf-8');
     return result;
   }
   async initSconfigWithParam({ publishYamlData, applicationPath }) {
-    const spath = getYamlPath(applicationPath, 's');
-    if (isEmpty(spath)) return;
+    this.spath = getYamlPath(applicationPath, 's');
+    if (isEmpty(this.spath)) return;
     let result = this.config.parameters;
     const properties = get(publishYamlData, 'Parameters.properties');
     const requiredList = get(publishYamlData, 'Parameters.required', []);
@@ -352,14 +376,6 @@ class LoadApplication {
       }
     }
     const accessObj = this.config.access ? { access: this.config.access } : {};
-    let newData = this.handleArtTemplate(spath, {
-      ...newObj,
-      ...accessObj,
-    });
-    fs.writeFileSync(spath, newData, 'utf-8');
-    await isYamlFile(spath);
-    newData = parse({ appName: this.config.appName }, newData);
-    fs.writeFileSync(spath, newData, 'utf-8');
     return {
       ...newObj,
       ...accessObj,

@@ -1,10 +1,11 @@
 import * as fs from 'fs-extra';
-import { startsWith, get, merge, replace, isNil } from 'lodash';
+import { startsWith, get, merge, replace, isNil, includes, isEmpty } from 'lodash';
 import { getCurrentPath } from './utils';
 import path from 'path';
 import yaml from 'js-yaml';
 import { ICredentials } from './interface';
 import { COMMON_VARIABLE_TYPE_REG } from '../constant';
+import { HumanWarning } from '../error';
 
 const SPECIALL_VARIABLE_TYPE_REG = new RegExp(/(.*)\((.*)\)/, 'i');
 
@@ -15,6 +16,7 @@ export default class Parse {
   private dependenciesMap: { [key: string]: any } = {};
   private globalJsonKeyMap: any = {};
   private credentials: ICredentials;
+  private unparsedField: string[] = [];
 
   constructor(protected spath?: string) {
     if (fs.existsSync(spath)) {
@@ -47,7 +49,9 @@ export default class Parse {
       if (!isNil(this.globalJsonKeyMap[variableName])) return this.globalJsonKeyMap[variableName];
       if (!isNil(this.globalJsonKeyMap[`services.${variableName}`]))
         return this.globalJsonKeyMap[`services.${variableName}`];
-      return '${' + variableName + '}';
+      const newVariableName = `\${${variableName}}`;
+      !includes(this.unparsedField, newVariableName) && this.unparsedField.push(newVariableName);
+      return newVariableName;
     }
     if (type === 'Fun' && (funName === 'Env' || funName === 'env')) {
       return process.env[funVariable];
@@ -188,5 +192,11 @@ export default class Parse {
     this.generateMagicVariables(val);
     const realVariables = this.replaceVariable(val);
     return { realVariables, dependenciesMap: this.dependenciesMap };
+  }
+  warnUnparsedField() {
+    if (isEmpty(this.unparsedField)) return;
+    new HumanWarning({
+      warningMessage: `${this.unparsedField} was not parsed successfully and may not have caused an error.`,
+    });
   }
 }

@@ -39,8 +39,9 @@ class ExecCommand {
     const originSpath = await getTemplatePath(syaml);
     const spath = await transforYamlPath(originSpath);
     this.parse = new Parse(spath);
+    // 第一次解析
     let parsedObj = await this.parse.init();
-    // 兼容vars下的魔法变量，需再次解析
+    // 第二次解析 兼容vars下的魔法变量，需再次解析
     parsedObj = await this.parse.init(parsedObj.realVariables);
     await this.warnEnvironmentVariables(parsedObj.realVariables);
     this.globalActions = new GlobalActions({

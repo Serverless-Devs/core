@@ -75,7 +75,10 @@ class ComponentExec {
     };
     const tempData = { this: that };
     this.config.parse.setCredentials(this.projectConfig.credentials);
+    // 第三次解析， config 魔法变量
     const { realVariables } = await this.config.parse.init(tempData);
+    // 未成功解析的魔法变量进行提示
+    this.config.parse.warnUnparsedField();
     this.projectConfig.actions = get(realVariables, ['services', serverName, 'actions']);
     this.projectConfig.props = get(realVariables, ['services', serverName, 'props']);
     const actions = getActions(this.projectConfig, {
@@ -83,7 +86,6 @@ class ComponentExec {
       spath,
     });
     const useActions = globalArgs?.skipActions || globalArgs?.help;
-    // actions 的解析动作包含了 config 魔法变量
     return useActions ? [] : actions;
   }
   private async executeCommand(payload: { type: 'component' | 'plugin'; data: any }) {

@@ -12,24 +12,23 @@
 
 edition: 1.0.0
 name: hello-world-app
-access: 'sub'
+access: 'dankun'
 
-vars: # 全局变量
-  region: cn-hangzhou
-  service:
-    name: hello-world-service
-    description: 'hello world by serverless devs'
+# vars: # 全局变量
+#   service:
+#     name: hello-world-service
+#     description: 'hello world by serverless devs'
 
 services:
   helloworld: # 业务名称/模块名称
     component: fc
-    actions: # 自定义执行逻辑
-      pre-deploy: # 在deploy之前运行
-        - run: echo pre-deploy # 要运行的命令行
-          path: ./ # 命令行运行的路径
-      post-deploy: # 在deploy之后运行
-        - run: echo post-deploy # 要运行的命令行
-          path: ./ # 命令行运行的路径
+    # actions: # 自定义执行逻辑
+    #   pre-deploy: # 在deploy之前运行
+    #     - run: echo pre-deploy # 要运行的命令行
+    #       path: ./ # 命令行运行的路径
+    #   post-deploy: # 在deploy之后运行
+    #     - run: echo post-deploy # 要运行的命令行
+    #       path: ./ # 命令行运行的路径
     props: #  组件的属性值
       region: ${vars.region}
       service: ${vars.service}

@@ -61,6 +61,7 @@ export function getActions(configs: IProjectConfig, { method, spath }): IActionH
   const keyList = keys(actions);
   for (const actionKey of keyList) {
     const hookList = actions[actionKey];
+    if(isEmpty(hookList)) continue;
     const [start, end] = split(actionKey, '-');
     const action = start as IGlobalActionValue;
     if (end === method) {

@@ -69,7 +69,7 @@ export function getGlobalArgs(args: string[]): IGlobalParams {
     string: ['access', 'template', 'env'],
     boolean: ['debug', 'skip-actions', 'help', 'version'],
   });
-  return assign({ _argsObj }, data);
+  return assign(minimist(args), { _argsObj }, data);
 }
 
 export function readJsonFile(filePath: string) {
@@ -118,4 +118,10 @@ export const tryfun = async (fn, ...args) => {
   try {
     return await fn(...args);
   } catch (ex) {}
+};
+
+export const isChinaUser = () => {
+  return new Intl.DateTimeFormat('en', { timeZoneName: 'long' })
+    .format()
+    .includes('China Standard Time');
 };
