@@ -143,6 +143,20 @@
             "skipFiles": [
                 "<node_internals>/**",
             ]
+        },
+        {
+            "name": "s verify",
+            "type": "node",
+            "request": "launch",
+            "runtimeExecutable": "/Users/shihuali/workspace/s/bin/s",
+            "runtimeArgs": [
+                "verify",
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/test/fixtures/start-fc-event-nodejs14",
+            "skipFiles": [
+                "<node_internals>/**",
+            ]
         }
     ]
 }

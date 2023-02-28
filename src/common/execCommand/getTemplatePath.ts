@@ -69,42 +69,41 @@ async function setupEnv(templateFile: string) {
   }
 }
 
-async function extendsYaml(spath: string, dotspath: string, data: any) {
+async function extendsYaml(spath: string, dotspath: string) {
+  const data = await getYamlContent(spath);
   const extendsPath = data?.extends ? first(data.extends) : undefined;
-  let yamlPath = data?.extend ? data.extend : extendsPath;
-  if (isEmpty(yamlPath)) return;
+  let baseYamlPath = data?.extend ? data.extend : extendsPath;
+  if (isEmpty(baseYamlPath)) return;
 
-  if (!path.isAbsolute(yamlPath)) {
-    let dirname = path.dirname(spath);
-    let fixedPath = path.resolve(dirname, yamlPath);
-    if (fs.existsSync(fixedPath)) yamlPath = fixedPath;
+  if (!path.isAbsolute(baseYamlPath)) {
+    let fixedPath = path.resolve(path.dirname(spath), baseYamlPath);
+    if (fs.existsSync(fixedPath)) baseYamlPath = fixedPath;
   }
 
-  await isYamlFile(yamlPath);
-  if (data?.vars) {
-    const doc = await getYamlContent(yamlPath);
-    const newData = extend2(true, doc, { vars: data.vars });
-    fs.writeFileSync(dotspath, yaml.dump(newData));
-    return await parseYaml(fs.readFileSync(dotspath, 'utf-8'));
-  }
-  return await parseYaml(fs.readFileSync(yamlPath, 'utf-8'));
+  await isYamlFile(baseYamlPath);
+  // 解析base yaml
+  const baseYamlData = await parseYaml(fs.readFileSync(baseYamlPath, 'utf-8'));
+  // 只合并vars
+  const newData = extend2(true, {}, { vars: baseYamlData?.vars }, data);
+  fs.writeFileSync(dotspath, yaml.dump(newData));
+  // 解析yaml
+  const parsedData = await parseYaml(fs.readFileSync(dotspath, 'utf-8'));
+  // 合并base yaml
+  return extend2(true, {}, baseYamlData, parsedData);
 }
 
 export async function transforYamlPath(spath: string = '') {
   await isYamlFile(spath);
   await setupEnv(spath);
-
-  const data = await parseYaml(fs.readFileSync(spath, 'utf-8'));
+  const data = await getYamlContent(spath);
   // 兼容 extends 只取第一个即可
   if (isEmpty(data?.extends) && isEmpty(data?.extend)) {
     return checkYaml(spath);
   }
   const dotspath = path.join(path.dirname(spath), '.s', path.basename(spath));
   fs.ensureFileSync(dotspath);
-
-  const tmp = await extendsYaml(spath, dotspath, data);
-  const extend2Data = extend2(true, tmp, omit(data, ['extends', 'extend']));
-  fs.writeFileSync(dotspath, yaml.dump(extend2Data));
+  const newData = await extendsYaml(spath, dotspath);
+  fs.writeFileSync(dotspath, yaml.dump(omit(newData, ['extends', 'extend'])));
   return checkYaml(dotspath);
 }
 
