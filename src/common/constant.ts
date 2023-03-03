@@ -29,6 +29,8 @@ export const FC_COMPONENT = [
 
 export const COMMON_VARIABLE_TYPE_REG = new RegExp(/\$\{(.*?)\}/, 'g');
 
+export const SPECIALL_VARIABLE_TYPE_REG = new RegExp(/(.*)\((.*)\)/, 'i');
+
 export const ALIYUN_CLI = '${aliyun-cli}';
 
 export const RANDOM_PATTERN = '${default-suffix}';
