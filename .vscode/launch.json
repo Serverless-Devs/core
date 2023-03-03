@@ -78,7 +78,7 @@
             "name": "s deploy",
             "type": "node",
             "request": "launch",
-            "runtimeExecutable": "/Users/shihuali/workspace/s/bin/s",
+            "runtimeExecutable": "/Users/shihuali/workspace/devs/s/bin/s",
             "runtimeArgs": [
                 "deploy",
                 "-y",
@@ -97,13 +97,13 @@
             "name": "global actions",
             "type": "node",
             "request": "launch",
-            "runtimeExecutable": "/Users/shihuali/workspace/s/bin/s",
+            "runtimeExecutable": "/Users/shihuali/workspace/devs/s/bin/s",
             "runtimeArgs": [
                 "deploy",
                 "-y",
                 "--use-local",
-                "-t",
-                "a.yaml"
+                // "-t",
+                // "a.yaml"
             ],
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}/test/fixtures/start-fc-http-nodejs14",
@@ -115,7 +115,7 @@
             "name": "s -h",
             "type": "node",
             "request": "launch",
-            "runtimeExecutable": "/Users/shihuali/workspace/s/bin/s",
+            "runtimeExecutable": "/Users/shihuali/workspace/devs/s/bin/s",
             "runtimeArgs": [
                 "-h",
             ],
@@ -129,7 +129,7 @@
             "name": "s init",
             "type": "node",
             "request": "launch",
-            "runtimeExecutable": "/Users/shihuali/workspace/s/bin/s",
+            "runtimeExecutable": "/Users/shihuali/workspace/devs/s/bin/s",
             "runtimeArgs": [
                 "init",
                 "start-fc-event-java8",
@@ -148,9 +148,25 @@
             "name": "s verify",
             "type": "node",
             "request": "launch",
-            "runtimeExecutable": "/Users/shihuali/workspace/s/bin/s",
+            "runtimeExecutable": "/Users/shihuali/workspace/devs/s/bin/s",
             "runtimeArgs": [
                 "verify",
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/test/fixtures/start-fc-event-nodejs14",
+            "skipFiles": [
+                "<node_internals>/**",
+            ]
+        },
+        {
+            "name": "this.name",
+            "type": "node",
+            "request": "launch",
+            "runtimeExecutable": "/Users/shihuali/workspace/devs/s/bin/s",
+            "runtimeArgs": [
+                "deploy",
+                "-t",
+                "a.pre.yaml"
             ],
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}/test/fixtures/start-fc-event-nodejs14",

@@ -1,0 +1,6 @@
+extend: a.yaml
+
+vars:
+  service:
+    name: dankun-service-test
+    description: '函数计算样例'
