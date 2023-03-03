@@ -85,10 +85,11 @@ async function extendsYaml(spath: string, dotspath: string) {
   if (data?.vars) {
     const baseYamlData = await getYamlContent(baseYamlPath);
     const newData = extend2(true, {}, baseYamlData, { vars: data.vars });
-    fs.writeFileSync(baseYamlPath, yaml.dump(newData));
+    // 临时写到dotspath
+    fs.writeFileSync(dotspath, yaml.dump(newData));
   }
   // 解析base yaml
-  const baseYamlData = await parseYaml(fs.readFileSync(baseYamlPath, 'utf-8'));
+  const baseYamlData = await parseYaml(fs.readFileSync(dotspath, 'utf-8'));
   // 只合并vars
   const newData = extend2(true, {}, { vars: baseYamlData?.vars }, data);
   fs.writeFileSync(dotspath, yaml.dump(newData));
