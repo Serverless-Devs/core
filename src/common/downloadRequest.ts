@@ -41,7 +41,7 @@ async function download(url: string, dest: string, options: IOptions = {}) {
         file.on('open', () => {
           let spin: Ora;
           if (getCicdEnv() === 'app_center') {
-            logger.log(chalk.gray('Downloading...'));
+            logger.log(`Downloading[${chalk.green(decodeURIComponent(uri.pathname))}]...`);
           } else {
             spin = spinner(`Downloading: [${chalk.green(decodeURIComponent(uri.pathname))}]`);
           }
