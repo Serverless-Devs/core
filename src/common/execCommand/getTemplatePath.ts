@@ -81,6 +81,12 @@ async function extendsYaml(spath: string, dotspath: string) {
   }
 
   await isYamlFile(baseYamlPath);
+  // 解析base yaml之前，先合并vars
+  if (data?.vars) {
+    const baseYamlData = await getYamlContent(baseYamlPath);
+    const newData = extend2(true, {}, baseYamlData, { vars: data.vars });
+    fs.writeFileSync(baseYamlPath, yaml.dump(newData));
+  }
   // 解析base yaml
   const baseYamlData = await parseYaml(fs.readFileSync(baseYamlPath, 'utf-8'));
   // 只合并vars
