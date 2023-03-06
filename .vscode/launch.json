@@ -78,14 +78,14 @@
             "name": "s deploy",
             "type": "node",
             "request": "launch",
-            "runtimeExecutable": "/Users/shihuali/workspace/devs/s/bin/s",
+            "runtimeExecutable": "${userHome}/workspace/devs/s/bin/s",
             "runtimeArgs": [
                 "deploy",
                 "-y",
                 "--use-local",
                 "-t",
                 "d.yaml",
-                // "--debug"
+                "--debug"
             ],
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}/test/fixtures/start-fc-http-nodejs12",
@@ -97,13 +97,13 @@
             "name": "global actions",
             "type": "node",
             "request": "launch",
-            "runtimeExecutable": "/Users/shihuali/workspace/devs/s/bin/s",
+            "runtimeExecutable": "${userHome}/workspace/devs/s/bin/s",
             "runtimeArgs": [
                 "deploy",
                 "-y",
                 "--use-local",
-                // "-t",
-                // "a.yaml"
+                "-t",
+                "s.yaml"
             ],
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}/test/fixtures/start-fc-http-nodejs14",
@@ -115,7 +115,7 @@
             "name": "s -h",
             "type": "node",
             "request": "launch",
-            "runtimeExecutable": "/Users/shihuali/workspace/devs/s/bin/s",
+            "runtimeExecutable": "${userHome}/workspace/devs/s/bin/s",
             "runtimeArgs": [
                 "-h",
             ],
@@ -129,7 +129,7 @@
             "name": "s init",
             "type": "node",
             "request": "launch",
-            "runtimeExecutable": "/Users/shihuali/workspace/devs/s/bin/s",
+            "runtimeExecutable": "${userHome}/workspace/devs/s/bin/s",
             "runtimeArgs": [
                 "init",
                 "start-fc-event-java8",
@@ -148,7 +148,7 @@
             "name": "s verify",
             "type": "node",
             "request": "launch",
-            "runtimeExecutable": "/Users/shihuali/workspace/devs/s/bin/s",
+            "runtimeExecutable": "${userHome}/workspace/devs/s/bin/s",
             "runtimeArgs": [
                 "verify",
             ],
@@ -162,7 +162,7 @@
             "name": "this.name",
             "type": "node",
             "request": "launch",
-            "runtimeExecutable": "/Users/shihuali/workspace/devs/s/bin/s",
+            "runtimeExecutable": "${userHome}/workspace/devs/s/bin/s",
             "runtimeArgs": [
                 "deploy",
                 "-t",

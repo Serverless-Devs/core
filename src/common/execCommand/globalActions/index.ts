@@ -1,5 +1,5 @@
 import fs from 'fs-extra';
-import { getActions } from '../utils';
+import { getActions, getCurrentPath } from '../utils';
 import {
   IActionHook,
   IGlobalAction,
@@ -115,7 +115,9 @@ class GlobalActions {
     }
 
     if (configs.type === 'plugin') {
-      const instance = await loadComponent(configs.value);
+      const { spath } = this.config;
+      const newValue = getCurrentPath(configs.value, spath);
+      const instance = await loadComponent(fs.existsSync(newValue) ? newValue : configs.value);
       const inputs: IGlobalInputs = await this.getInputs();
       await instance({ ...inputs, ...this.record }, configs.args);
     }

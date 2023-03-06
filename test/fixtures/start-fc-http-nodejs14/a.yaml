@@ -30,19 +30,19 @@ vars: # 全局变量
 actions:
   pre-deploy:
     - run: echo pre-deploy
-    - plugin: /Users/shihuali/workspace/core/test/fixtures/start-fc-http-nodejs14/pluginA.js
+    - plugin: ./pluginA.js
       args:
         testKey: testValue
   success-deploy:
     - run: echo success-deploy
   complete-deploy:
     - run: echo complete-deploy
-    - plugin: /Users/shihuali/workspace/core/test/fixtures/start-fc-http-nodejs14/pluginA.js
+    - plugin: ./pluginA.js
       args:
         testKey: testValue
   fail-deploy:
     - run: echo fail-deploy
-    - plugin: /Users/shihuali/workspace/core/test/fixtures/start-fc-http-nodejs14/pluginA.js
+    - plugin: ./pluginA.js
       args:
         testKey: testValue
 
