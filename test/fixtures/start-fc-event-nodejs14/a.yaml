@@ -1,0 +1,55 @@
+edition: 1.0.0
+name: iyb-fc-demo
+access: default
+vars:
+  region: ${environment.region}
+  service:
+    name: dankun-service
+    description: 函数计算样例
+services:
+  iyb-fc-demo:
+    component: fc
+    props:
+      region: ${vars.region}
+      service: ${vars.service}
+      function:
+        name: iyb-fc-demo
+        description: 函数计算样例
+        codeUri: ./target/${this.name}.jar
+        runtime: java8
+        instanceType: e1
+        cpu: 1.2
+        memorySize: 1280
+        diskSize: 512
+        instanceConcurrency: 30
+        initializer: tech.baoyun.iyb.fc.FcInitializer::initialize
+        initializationTimeout: 30
+        handler: tech.baoyun.iyb.fc.handler.HttpDispatcher::handleRequest
+        timeout: 60
+        customDNS:
+          searches: []
+          nameServers:
+            - 100.100.2.138
+          dnsOptions: []
+        asyncConfiguration:
+          maxAsyncEventAgeInSeconds: 172800
+          maxAsyncRetryAttempts: 3
+          statefulInvocation: true
+      triggers:
+        - name: httpTrigger
+          type: http
+          qualifier: current
+          config:
+            authType: anonymous
+            methods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - HEAD
+              - OPTIONS
+      customDomains:
+        - domainName: auto
+          protocol: HTTP
+          routeConfigs:
+            - path: /*

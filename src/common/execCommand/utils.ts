@@ -1,4 +1,4 @@
-import { isEmpty, get, assign, keys, split, filter, join, includes } from 'lodash';
+import { isEmpty, get, assign, keys, split, filter, join, includes, replace } from 'lodash';
 import path from 'path';
 import {
   IProjectConfig,
@@ -11,6 +11,7 @@ import {
 } from './interface';
 import { makeUnderLine } from '../../libs';
 import { logger } from '../../logger';
+import { COMMON_VARIABLE_TYPE_REG, SPECIALL_VARIABLE_TYPE_REG } from '../constant';
 import chalk from 'chalk';
 
 export function humanWarning(tips: string) {
@@ -43,6 +44,21 @@ export function getCurrentPath(p: string = './', spath: string) {
   return p ? path.join(dir, p) : dir;
 }
 
+function parseAction(actionKey: string, method: string) {
+  const matchResult = replace(actionKey, COMMON_VARIABLE_TYPE_REG, '$1');
+  const funMatchResult = matchResult.match(SPECIALL_VARIABLE_TYPE_REG);
+  if (funMatchResult) {
+    const [start, end] = split(funMatchResult[1], '-');
+    if (end === 'regex') {
+      const reg = new RegExp(funMatchResult[2]);
+      return { action: start as IGlobalActionValue, success: reg.test(method) };
+    }
+  }
+  const [start, end] = split(actionKey, '-');
+  const action = start as IGlobalActionValue;
+  return { action, success: end === method };
+}
+
 export function getActions(configs: IProjectConfig, { method, spath }): IActionHook[] {
   function validate(hook: IActionHook): IActionType {
     if ('run' in hook && !('component' in hook) && !('plugin' in hook)) return 'run';
@@ -61,10 +77,9 @@ export function getActions(configs: IProjectConfig, { method, spath }): IActionH
   const keyList = keys(actions);
   for (const actionKey of keyList) {
     const hookList = actions[actionKey];
-    if(isEmpty(hookList)) continue;
-    const [start, end] = split(actionKey, '-');
-    const action = start as IGlobalActionValue;
-    if (end === method) {
+    if (isEmpty(hookList)) continue;
+    const { action, success } = parseAction(actionKey, method);
+    if (success) {
       for (const hookDetail of hookList) {
         const type = validate(hookDetail);
         if (type === 'run') {
@@ -72,7 +87,7 @@ export function getActions(configs: IProjectConfig, { method, spath }): IActionH
             type,
             value: hookDetail[type],
             path: getCurrentPath(hookDetail.path, spath),
-            pre: start === 'pre' ? true : false,
+            pre: action === 'pre' ? true : false,
             action,
           };
           hooks.push(obj);
@@ -82,7 +97,7 @@ export function getActions(configs: IProjectConfig, { method, spath }): IActionH
           const obj = {
             type,
             value: hookDetail[type],
-            pre: start === 'pre' ? true : false,
+            pre: action === 'pre' ? true : false,
             action,
           };
           hooks.push(obj);
@@ -92,7 +107,7 @@ export function getActions(configs: IProjectConfig, { method, spath }): IActionH
           const obj = {
             type,
             value: hookDetail[type],
-            pre: start === 'pre' ? true : false,
+            pre: action === 'pre' ? true : false,
             action,
             args: hookDetail.args,
           };

@@ -4,10 +4,8 @@ import { getCurrentPath } from './utils';
 import path from 'path';
 import yaml from 'js-yaml';
 import { ICredentials } from './interface';
-import { COMMON_VARIABLE_TYPE_REG } from '../constant';
+import { COMMON_VARIABLE_TYPE_REG, SPECIALL_VARIABLE_TYPE_REG } from '../constant';
 import { HumanWarning } from '../error';
-
-const SPECIALL_VARIABLE_TYPE_REG = new RegExp(/(.*)\((.*)\)/, 'i');
 
 const OTHER_BASIC_DATA_TYPE = ['[object Number]', '[object Boolean]'];
 
@@ -50,7 +48,10 @@ export default class Parse {
       if (!isNil(this.globalJsonKeyMap[`services.${variableName}`]))
         return this.globalJsonKeyMap[`services.${variableName}`];
       const newVariableName = `\${${variableName}}`;
-      !includes(this.unparsedField, newVariableName) && this.unparsedField.push(newVariableName);
+      const shouldCollect = startsWith(variableName, 'env.') || startsWith(variableName, 'vars.');
+      if (shouldCollect && !includes(this.unparsedField, newVariableName)) {
+        this.unparsedField.push(newVariableName);
+      }
       return newVariableName;
     }
     if (type === 'Fun' && (funName === 'Env' || funName === 'env')) {
