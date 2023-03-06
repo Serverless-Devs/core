@@ -28,7 +28,7 @@ vars: # 全局变量
     description: hello world by serverless devs
 
 actions:
-  pre-${regx(.)}:
+  pre-${regex(.)}:
   # pre-deploy:
     - run: echo pre-deploy
     - plugin: /Users/shihuali/workspace/devs/core/test/fixtures/start-fc-http-nodejs14/pluginA.js

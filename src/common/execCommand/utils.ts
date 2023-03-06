@@ -45,7 +45,7 @@ export function getCurrentPath(p: string = './', spath: string) {
 }
 
 function parseAction(actionKey: string, method: string) {
-  const matchResult = replace(actionKey, COMMON_VARIABLE_TYPE_REG, '$1'); // get match result like projectName.key.variable
+  const matchResult = replace(actionKey, COMMON_VARIABLE_TYPE_REG, '$1');
   const funMatchResult = matchResult.match(SPECIALL_VARIABLE_TYPE_REG);
   if (funMatchResult) {
     const [start, end] = split(funMatchResult[1], '-');
