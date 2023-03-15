@@ -3,7 +3,8 @@ import path from 'path';
 const prettyjson = require('prettyjson');
 import ansiEscapes from 'ansi-escapes';
 import ora, { Ora } from 'ora';
-import { isDebugMode, getRootHome, getPid, isCiCdEnv, getCicdEnv } from '../libs';
+import { isDebugMode, getRootHome, getPid } from '../libs';
+import { getCurrentEnvironment, isCiCdEnvironment } from '@serverless-devs/utils';
 import { isFunction } from 'lodash';
 import fs from 'fs-extra';
 import { execDaemon } from '../execDaemon';
@@ -48,11 +49,11 @@ const getLogPath = () => {
     if (fs.existsSync(serverless_devs_log_path)) {
       const stat = fs.statSync(serverless_devs_log_path);
       if (stat.isFile()) return serverless_devs_log_path;
-      if (isCiCdEnv()) return;
+      if (isCiCdEnvironment()) return;
       return path.join(serverless_devs_log_path, `${serverless_devs_trace_id}.log`);
     }
   }
-  if (isCiCdEnv()) return;
+  if (isCiCdEnvironment()) return;
   const logDirPath = path.join(getRootHome(), 'logs');
   fs.ensureDirSync(logDirPath);
   if (serverless_devs_trace_id) {
@@ -239,7 +240,7 @@ export class Logger {
       }
       if (item.title && item.task) {
         const title = isFunction(item.title) ? item.title() : item.title;
-        if (isDebugMode() || getCicdEnv() === 'app_center') {
+        if (isDebugMode() || getCurrentEnvironment() === 'app_center') {
           this.log(gray(title));
           try {
             await item.task();

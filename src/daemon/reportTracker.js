@@ -1,7 +1,7 @@
 const {
   got,
   isDocker,
-  getCicdEnv,
+  getCurrentEnvironment,
   getRootHome,
   getCommand,
   lodash: _,
@@ -14,7 +14,7 @@ const fs = require('fs');
 async function init() {
   const { CLI_VERSION, access, syaml, trackerType, templateName } = process.env;
   const core_version = await getCoreVersion();
-  const os = getCicdEnv();
+  const os = getCurrentEnvironment();
   const node_version = process.version;
   const baseURL = 'http://cn-tracker.cn-heyuan.log.aliyuncs.com/logstores/serverless-devs/track';
   let url = `${baseURL}?APIVersion=0.6.0&cli_version=${CLI_VERSION}&core_version=${core_version}&node_version=${node_version}&os=${os}&isDocker=${isDocker()}&trackerType=${trackerType}`;

@@ -6,11 +6,11 @@ import os from 'os';
 import path from 'path';
 import fs from 'fs-extra';
 import minimist from 'minimist';
-import { includes } from 'lodash';
 import getYamlContent from './getYamlContent';
 import getMAC from 'getmac';
 import yaml from 'js-yaml';
 import _ from 'lodash';
+import { getCurrentEnvironment } from '@serverless-devs/utils';
 
 const semver = require('semver');
 
@@ -21,28 +21,6 @@ export const isDebugMode = () => {
   const args = minimist(process.argv.slice(2));
   return args.debug;
 };
-
-// s工具的家目录
-export function getCicdEnv() {
-  if (process.env.HOME === '/kaniko' && process.env.BUILD_IMAGE_ENV === 'fc-backend') {
-    return 'app_center';
-  }
-  for (const key in process.env) {
-    if (key.startsWith('CLOUDSHELL')) return 'cloud_shell';
-    if (key.startsWith('PIPELINE')) return 'yunxiao';
-    if (key.startsWith('GITHUB')) return 'github';
-    if (key.startsWith('GITLAB')) return 'gitlab';
-    if (key.startsWith('JENKINS')) return 'jenkins';
-  }
-  return process.platform;
-}
-
-export function isCiCdEnv() {
-  return includes(
-    ['app_center', 'cloud_shell', 'yunxiao', 'github', 'gitlab', 'jenkins'],
-    getCicdEnv(),
-  );
-}
 
 export function useLocal() {
   return process.env.default_serverless_devs_registry_mode === 'local';
@@ -120,7 +98,7 @@ export function getRootHome() {
   }
   // 不存在 ～/.s/config/s.json
   if (semver.gt(getCliVersion('0.0.0'), '2.0.92')) {
-    const env = getCicdEnv();
+    const env = getCurrentEnvironment();
     if (env === 'yunxiao') return path.join(USER_HOME, '.cache', '.s');
   }
   return shomedir;

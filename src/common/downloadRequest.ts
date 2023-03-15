@@ -12,7 +12,7 @@ import execa from 'execa';
 import stripDirs from 'strip-dirs';
 import walkSync from 'walk-sync';
 import rimraf from 'rimraf';
-import { getCicdEnv } from '../libs';
+import { getCurrentEnvironment } from '@serverless-devs/utils';
 import { logger } from '../logger';
 import { set } from 'lodash';
 
@@ -40,7 +40,7 @@ async function download(url: string, dest: string, options: IOptions = {}) {
         const file = fs.createWriteStream(filePath);
         file.on('open', () => {
           let spin: Ora;
-          if (getCicdEnv() === 'app_center') {
+          if (getCurrentEnvironment() === 'app_center') {
             logger.log(`Downloading[${chalk.green(decodeURIComponent(uri.pathname))}]...`);
           } else {
             spin = spinner(`Downloading: [${chalk.green(decodeURIComponent(uri.pathname))}]`);
@@ -129,7 +129,7 @@ export default async (url: string, dest: string, options: IOptions = {}) => {
           await fs.unlink(filePath);
           const text = 'file decompression completed';
           spin?.succeed(filename ? `${filename} ${text}` : text);
-          if (getCicdEnv() === 'app_center') {
+          if (getCurrentEnvironment() === 'app_center') {
             logger.log('Downloading completed');
           }
           break;

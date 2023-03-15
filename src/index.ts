@@ -32,3 +32,4 @@ export { default as popCore } from '@alicloud/pop-core';
 export { default as extend2 } from 'extend2';
 export { default as stringArgv } from 'string-argv';
 export { default as tracker } from '@serverless-cd/tracker';
+export * from '@serverless-devs/utils';

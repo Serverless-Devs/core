@@ -1,6 +1,7 @@
 import { execDaemon } from '../execDaemon';
 import path from 'path';
-import { getRootHome, getYamlContent, useLocal, isCiCdEnv } from '../libs';
+import { getRootHome, getYamlContent, useLocal } from '../libs';
+import { isCiCdEnvironment } from '@serverless-devs/utils';
 
 interface IConfig {
   type: 'jsError' | 'networkError' | 'installError';
@@ -15,7 +16,7 @@ async function report(config: IConfig) {
   const data = await getYamlContent(path.join(getRootHome(), 'set-config.yml'));
   if (data?.analysis === 'disable') return;
   if (useLocal()) return;
-  if (isCiCdEnv()) return;
+  if (isCiCdEnvironment()) return;
   execDaemon('report.js', config);
 }
 
