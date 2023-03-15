@@ -10,7 +10,7 @@ class SpinnerDemo {
     await sleep(1000);
     vm.succeed('执行成功');
     // vm.stop();
-    // spinner('请求失败').fail();
+    spinner('请求失败').fail();
   }
 }
 
