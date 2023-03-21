@@ -5,7 +5,6 @@
 import os from 'os';
 import path from 'path';
 import fs from 'fs-extra';
-import minimist from 'minimist';
 import getYamlContent from './getYamlContent';
 import getMAC from 'getmac';
 import yaml from 'js-yaml';
@@ -15,12 +14,6 @@ import { getCurrentEnvironment } from '@serverless-devs/utils';
 const semver = require('semver');
 
 const USER_HOME = os.homedir();
-
-// debug模式
-export const isDebugMode = () => {
-  const args = minimist(process.argv.slice(2));
-  return args.debug;
-};
 
 export function useLocal() {
   return process.env.default_serverless_devs_registry_mode === 'local';
