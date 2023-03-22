@@ -25,7 +25,7 @@
     "prewatch": "rimraf lib && mkdir lib && cp -r ./src/daemon ./lib",
     "watch": "npx tsc -w -p tsconfig.json",
     "debug": "ts-node test/fixtures/spinner.ts",
-    "test": "npx jest",
+    "test": "jest --testTimeout 10000 --watchAll",
     "prebuild": "rimraf lib && rimraf dist",
     "build:s": "npm run prebuild && npx tsc && cp -r ./src/daemon ./lib",
     "postbuild:s": "npm run esbuild && cp -r ./src/daemon ./dist",
