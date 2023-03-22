@@ -10,7 +10,7 @@ const setTrackerData = (componetName: string, data: Record<string, any>) => {
   const traceId = process.env['serverless_devs_trace_id'];
   logger.debug(`traceId: ${traceId}`);
   if (isEmpty(traceId)) return;
-  const tracePath = path.join(getRootHome(), '.s', 'config', `${traceId}.json`);
+  const tracePath = path.join(getRootHome(), 'config', `${traceId}.json`);
   logger.debug(`tracePath: ${tracePath}`);
   logger.debug(`tracePath existed: ${fs.existsSync(tracePath)}`);
   if (fs.existsSync(tracePath)) {

@@ -123,8 +123,12 @@ class GlobalActions {
     }
   }
   private async tracker() {
-    const inputs: IGlobalInputs = await this.getInputs();
-    execDaemon('tracker.js', { inputs: JSON.stringify({ ...inputs, ...this.record }) });
+    const traceId = process.env['serverless_devs_trace_id'];
+    if (isEmpty(traceId)) return;
+    const tracePath = path.join(getRootHome(), 'config', `${traceId}.json`);
+    const data = fs.readJSONSync(tracePath);
+    execDaemon('tracker.js', { inputs: JSON.stringify(data) });
+    fs.unlink(tracePath);
   }
 }
 

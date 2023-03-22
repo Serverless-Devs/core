@@ -2,7 +2,7 @@ import Parse from './parse';
 import { isEmpty, get, isNil, keys, isPlainObject, includes, filter } from 'lodash';
 import { logger, makeLogFile } from '../../logger';
 import Analysis from './analysis';
-import { getProjectConfig, transformServiceList } from './utils';
+import { getProjectConfig, transformServiceList, makeTrackerFile } from './utils';
 import { getTemplatePath, transforYamlPath } from './getTemplatePath';
 import ComponentExec from './component';
 import { IGlobalArgs, STATUS, IGlobalAction, IRecord } from './interface';
@@ -33,6 +33,7 @@ class ExecCommand {
     }
     // 写入日志的时候，先确保创建了日志文件
     makeLogFile();
+    makeTrackerFile();
   }
   async init() {
     const { syaml, serverName, globalArgs = {}, method } = this.configs;

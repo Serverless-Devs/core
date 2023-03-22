@@ -5,7 +5,7 @@ import path from 'path';
 test('setTrackerData', () => {
   const traceId = `${getPid()}${Date.now()}`;
   process.env['serverless_devs_trace_id'] = traceId;
-  const tracePath = path.join(getRootHome(), '.s', 'config', `${traceId}.json`);
+  const tracePath = path.join(getRootHome(), 'config', `${traceId}.json`);
   fs.ensureFileSync(tracePath);
   fs.writeFileSync(tracePath, '{}');
   const dataA = {
