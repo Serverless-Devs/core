@@ -1,4 +1,7 @@
 import fs from 'fs-extra';
+import os from 'os';
+import execa from 'execa';
+import path from 'path';
 import { getActions, getCurrentPath } from '../utils';
 import {
   IActionHook,
@@ -9,17 +12,15 @@ import {
   IProjectConfig,
 } from '../interface';
 import { logger } from '../../../logger';
-import execa from 'execa';
 import { filter, isEmpty, get, join } from 'lodash';
 import { loadComponent } from '../../load';
 import { throwError } from '../utils';
-import os from 'os';
 import { HumanWarning } from '../../error';
 import { ALIYUN_CLI } from '../../constant';
 import { getCredential, getCredentialFromEnv } from '../../credential';
 import { getRootHome, getYamlContent } from '../../../libs';
-import path from 'path';
 import { execDaemon } from '../../../execDaemon';
+import { getCurrentEnvironment } from '@serverless-devs/utils';
 
 interface IConfig {
   realVariables: Record<string, any>;
@@ -125,9 +126,38 @@ class GlobalActions {
   private async tracker() {
     const traceId = process.env['serverless_devs_trace_id'];
     if (isEmpty(traceId)) return;
+    const inputs: IGlobalInputs = await this.getInputs();
+    const newInputs = { ...inputs, ...this.record };
+    const yamlContent = await getYamlContent(get(newInputs, 'path.configPath'));
+    if (isEmpty(yamlContent)) return;
     const tracePath = path.join(getRootHome(), 'config', `${traceId}.json`);
     const data = fs.readJSONSync(tracePath);
-    execDaemon('tracker.js', { inputs: JSON.stringify(data) });
+    console.log(
+      'debug',
+      JSON.stringify(
+        {
+          source: getCurrentEnvironment(),
+          resource: data,
+          org: get(yamlContent, 'org'),
+          name: get(yamlContent, 'name'),
+          env: get(yamlContent, 'env', 'default'),
+          status: get(newInputs, 'status'),
+        },
+        null,
+        2,
+      ),
+    );
+    if (isEmpty(data)) return;
+
+    execDaemon('tracker.js', {
+      inputs: JSON.stringify({
+        source: getCurrentEnvironment(),
+        resource: data,
+        org: get(yamlContent, 'org'),
+        name: get(yamlContent, 'name'),
+        env: get(yamlContent, 'env', 'default'),
+      }),
+    });
     fs.unlink(tracePath);
   }
 }

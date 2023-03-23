@@ -20,6 +20,8 @@ name: hello-world-app
 # Key configuration can refer to: https://www.serverless-devs.com/serverless-devs/command/config
 # For the order of key usage, please refer to: https://www.serverless-devs.com/serverless-devs/tool#Key usage order and specification
 access: default
+org: shl
+env: default
 
 vars: # global variables
   region: cn-hangzhou

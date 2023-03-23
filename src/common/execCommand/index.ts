@@ -114,11 +114,11 @@ class ExecCommand {
     if (record.status === STATUS.SUCCESS) {
       await this.globalActions.run(IGlobalAction.SUCCESS);
     }
-    if (record.status === STATUS.ERROR) {
+    if (record.status === STATUS.FAILURE) {
       await this.globalActions.run(IGlobalAction.FAIL);
     }
     await this.globalActions.run(IGlobalAction.COMPLETE);
-    if (record.status === STATUS.ERROR) {
+    if (record.status === STATUS.FAILURE) {
       throw record.error;
     }
   }
@@ -154,7 +154,7 @@ class ExecCommand {
       const newObj = transformServiceList({ response, inputs, serverName });
       serviceList.push({ ...newObj, status });
       record.status = status;
-      if (status === STATUS.ERROR) {
+      if (status === STATUS.FAILURE) {
         record.error = response;
         break;
       }

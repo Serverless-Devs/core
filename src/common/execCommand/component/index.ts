@@ -43,7 +43,7 @@ class ComponentExec {
       const response = await this.doInit();
       return { response, inputs: this.inputs, status: STATUS.SUCCESS };
     } catch (error) {
-      return { response: error, inputs: this.inputs, status: STATUS.ERROR };
+      return { response: error, inputs: this.inputs, status: STATUS.FAILURE };
     }
   }
   private async doInit() {
