@@ -41,8 +41,10 @@ interface IParams {
 }
 
 async function preInit({ temporaryPath, applicationPath }) {
+  const hookPath = path.join(temporaryPath, 'hook');
+  if (!fs.existsSync(hookPath)) return;
   try {
-    const baseChildComponent = await require(path.join(temporaryPath, 'hook'));
+    const baseChildComponent = await require(hookPath);
     const tempObj = {
       tempPath: temporaryPath,
       targetPath: applicationPath,
@@ -162,9 +164,11 @@ class LoadApplication {
     return applicationPath;
   }
   async postInit({ temporaryPath, applicationPath, parameters }) {
+    const hookPath = path.join(temporaryPath, 'hook');
+    if (!fs.existsSync(hookPath)) return;
     let response: any = {};
     try {
-      const baseChildComponent = await require(path.join(temporaryPath, 'hook'));
+      const baseChildComponent = await require(hookPath);
       const tempObj = {
         tempPath: temporaryPath,
         targetPath: applicationPath,

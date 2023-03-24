@@ -132,21 +132,6 @@ class GlobalActions {
     if (isEmpty(yamlContent)) return;
     const tracePath = path.join(getRootHome(), 'config', `${traceId}.json`);
     const data = fs.readJSONSync(tracePath);
-    console.log(
-      'debug',
-      JSON.stringify(
-        {
-          source: getCurrentEnvironment(),
-          resource: data,
-          org: get(yamlContent, 'org'),
-          name: get(yamlContent, 'name'),
-          env: get(yamlContent, 'env', 'default'),
-          status: get(newInputs, 'status'),
-        },
-        null,
-        2,
-      ),
-    );
     if (isEmpty(data)) return;
 
     execDaemon('tracker.js', {
