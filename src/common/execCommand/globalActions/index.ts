@@ -138,9 +138,11 @@ class GlobalActions {
       inputs: JSON.stringify({
         source: getCurrentEnvironment(),
         resource: data,
-        org: get(yamlContent, 'org'),
+        orgName: get(yamlContent, 'orgName'),
         name: get(yamlContent, 'name'),
         env: get(yamlContent, 'env', 'default'),
+        status: get(newInputs, 'status'),
+        time: new Date().getTime(),
       }),
     });
     fs.unlink(tracePath);
