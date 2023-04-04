@@ -136,7 +136,7 @@ class GlobalActions {
 
     execDaemon('tracker.js', {
       inputs: JSON.stringify({
-        source: getCurrentEnvironment(),
+        platform: getCurrentEnvironment(),
         resource: data,
         orgName: get(yamlContent, 'orgName'),
         name: get(yamlContent, 'name'),
