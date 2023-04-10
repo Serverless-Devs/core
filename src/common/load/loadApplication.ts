@@ -165,28 +165,29 @@ class LoadApplication {
   }
   async postInit({ temporaryPath, applicationPath, parameters }) {
     const hookPath = path.join(temporaryPath, 'hook');
-    if (!fs.existsSync(hookPath)) return;
     let response: any = {};
-    try {
-      const baseChildComponent = await require(hookPath);
-      const tempObj = {
-        tempPath: temporaryPath,
-        targetPath: applicationPath,
-        downloadRequest: downloadRequest,
-        fse: fs,
-        lodash: _,
-        artTemplate: (filePath: string) => {
-          const newPath = path.join(applicationPath, filePath);
-          const newData = this.handleArtTemplate(newPath, parameters);
-          fs.writeFileSync(newPath, newData, 'utf-8');
-        },
-        Logger,
-        execCommand,
-        parameters,
-      };
-      response = await baseChildComponent.postInit(tempObj);
-    } catch (e) {
-      logger.debug(`postInit error: ${e}`);
+    if (fs.existsSync(hookPath)) {
+      try {
+        const baseChildComponent = await require(hookPath);
+        const tempObj = {
+          tempPath: temporaryPath,
+          targetPath: applicationPath,
+          downloadRequest: downloadRequest,
+          fse: fs,
+          lodash: _,
+          artTemplate: (filePath: string) => {
+            const newPath = path.join(applicationPath, filePath);
+            const newData = this.handleArtTemplate(newPath, parameters);
+            fs.writeFileSync(newPath, newData, 'utf-8');
+          },
+          Logger,
+          execCommand,
+          parameters,
+        };
+        response = await baseChildComponent.postInit(tempObj);
+      } catch (e) {
+        logger.debug(`postInit error: ${e}`);
+      }
     }
     // _custom_secret_list：postInit 里面的 secret 字段
     const { _custom_secret_list, ...rest } = response || {};
