@@ -9,7 +9,8 @@ import parseYaml from '../parseYaml';
 
 async function checkYaml(spath: string) {
   const filename = path.basename(spath);
-  const data = await getYamlContent(spath);
+  const data = await parseYaml(fs.readFileSync(spath, 'utf-8'));
+
   // 校验 edition 字段
   if (!['1.0.0', '2.0.0'].includes(get(data, 'edition'))) {
     throw new Error(
