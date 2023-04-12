@@ -189,6 +189,7 @@ class LoadApplication {
         logger.debug(`postInit error: ${e}`);
       }
     }
+    if (isEmpty(this.spath)) return;
     // _custom_secret_list：postInit 里面的 secret 字段
     const { _custom_secret_list, ...rest } = response || {};
     const result = {
