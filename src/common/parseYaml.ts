@@ -1,4 +1,5 @@
 import YAML, { Document } from 'yaml';
+import chalk from 'chalk';
 import { YAMLMap, Pair, Scalar } from 'yaml/types';
 import { isBoolean, isNumber, get, isEmpty, replace } from 'lodash';
 import { COMMON_VARIABLE_TYPE_REG } from './constant';
@@ -7,7 +8,19 @@ class ParseYaml {
   private yamlJson: any;
   constructor(data: string) {
     this.doc = YAML.parseDocument(data);
-    this.yamlJson = this.doc.contents.toJSON();
+    try {
+      // TODO: 临时解决方案，后续优化 https://github.com/Serverless-Devs/Serverless-Devs/issues/671(未复现)
+      this.yamlJson = this.doc.contents.toJSON();
+    } catch (error) {
+      throw new Error(
+        JSON.stringify({
+          message: 'yaml format is incorrect',
+          tips: `Please check the configuration of yaml, Serverless Devs' Yaml specification document can refer to：${chalk.underline(
+            'https://github.com/Serverless-Devs/Serverless-Devs/blob/master/docs/zh/yaml.md',
+          )}`
+        }),
+      );
+    }
   }
   init() {
     const { contents } = this.doc;
