@@ -32,9 +32,9 @@ export function getConfig(key?: string, defaultValue?: any) {
   }
 }
 
-export async function getSetConfig(key: string, defaultValue?: any) {
+export function getSetConfig(key: string, defaultValue?: any) {
   const setConfigPath = path.join(getRootHome(), 'set-config.yml');
-  const res = await getYamlContent(setConfigPath);
+  const res = getYamlContent(setConfigPath);
   if (!res) return defaultValue;
   return res[key];
 }
@@ -109,7 +109,7 @@ export const getCommand = () => {
   try {
     const command = JSON.parse(process.env['serverless_devs_temp_argv']);
     return command ? `s ${command.join(' ')}` : undefined;
-  } catch (error) {}
+  } catch (error) { }
 };
 
 export const getPid = () => {

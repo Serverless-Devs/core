@@ -3,7 +3,7 @@ import path from 'path';
 const prettyjson = require('prettyjson');
 import ansiEscapes from 'ansi-escapes';
 import ora, { Ora } from 'ora';
-import { getRootHome, getPid } from '../libs';
+import { getRootHome, getPid, getSetConfig } from '../libs';
 import { getCurrentEnvironment, isCiCdEnvironment, isDebugMode } from '@serverless-devs/utils';
 import { isFunction } from 'lodash';
 import fs from 'fs-extra';
@@ -43,6 +43,9 @@ interface ITaskOptions {
 }
 
 const getLogPath = () => {
+  const log = getSetConfig('log');
+  if (log === 'disable') return;
+  if (isCiCdEnvironment()) return;
   const serverless_devs_log_path = process.env['serverless_devs_log_path'];
   const serverless_devs_trace_id = process.env['serverless_devs_trace_id'];
   if (serverless_devs_log_path) {
@@ -53,7 +56,6 @@ const getLogPath = () => {
       return path.join(serverless_devs_log_path, `${serverless_devs_trace_id}.log`);
     }
   }
-  if (isCiCdEnvironment()) return;
   const logDirPath = path.join(getRootHome(), 'logs');
   fs.ensureDirSync(logDirPath);
   if (serverless_devs_trace_id) {
@@ -127,6 +129,7 @@ function strip(value: string) {
   const reg = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
   return typeof value === 'string' ? `\n${value.replace(reg, '')}` : `\n${value}`;
 }
+
 
 function logWrite(data) {
   const filePath = getLogPath();
