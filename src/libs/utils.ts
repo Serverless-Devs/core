@@ -77,7 +77,7 @@ export function readJsonFile(filePath: string) {
     const data = fs.readFileSync(filePath, 'utf8');
     try {
       return JSON.parse(data);
-    } catch (error) {}
+    } catch (error) { }
   }
 }
 
@@ -117,5 +117,15 @@ export function generateRandom() {
 export const tryfun = async (fn, ...args) => {
   try {
     return await fn(...args);
-  } catch (ex) {}
+  } catch (ex) { }
 };
+
+
+export const getCommonDaemonEnv = () => {
+  return {
+    DEBUG: process.env.DEBUG,
+    CLI_VERSION: process.env.CLI_VERSION,
+    SERVERLESS_CD_ENDPOINT: process.env.SERVERLESS_CD_ENDPOINT,
+    JWT_TOKEN: process.env.JWT_TOKEN,
+  }
+}

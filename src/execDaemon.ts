@@ -1,6 +1,6 @@
 import path from 'path';
 import { spawn } from 'child_process';
-import { useLocal } from './libs';
+import { useLocal, getCommonDaemonEnv } from './libs';
 import { isCiCdEnvironment } from '@serverless-devs/utils';
 import fs from 'fs-extra';
 import { get } from 'lodash';
@@ -28,13 +28,13 @@ export function execDaemon(filename: string, config?: IConfig) {
     const subprocess = spawn(process.execPath, [filePath], {
       detached: true,
       stdio: 'ignore',
-      env: { ...process.env, ...config },
+      env: { ...getCommonDaemonEnv(), ...config },
     });
     return subprocess.unref();
   }
   spawn(process.execPath, [filePath], {
     stdio: 'inherit',
-    env: { ...process.env, ...config },
+    env: { ...getCommonDaemonEnv(), ...config },
   });
 }
 
