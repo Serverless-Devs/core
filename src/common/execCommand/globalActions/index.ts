@@ -21,6 +21,7 @@ import { getCredential, getCredentialFromEnv } from '../../credential';
 import { getRootHome, getYamlContent } from '../../../libs';
 import { execDaemon } from '../../../execDaemon';
 import { getCurrentEnvironment } from '@serverless-devs/utils';
+import rimraf from 'rimraf';
 
 interface IConfig {
   realVariables: Record<string, any>;
@@ -76,7 +77,10 @@ class GlobalActions {
     }
   }
   async run(type: IGlobalActionValue) {
-    type === IGlobalAction.COMPLETE && (await this.tracker());
+    if (type === IGlobalAction.COMPLETE) {
+      const { tracePath } = await this.tracker();
+      rimraf.sync(tracePath);
+    }
     const hooks = filter(this.actions, (item) => item.action === type);
     if (isEmpty(hooks)) return;
     logger.info(`Start the global ${type}-action`);
@@ -145,7 +149,7 @@ class GlobalActions {
         time: new Date().getTime(),
       }),
     });
-    fs.unlink(tracePath);
+    return { tracePath }
   }
 }
 
