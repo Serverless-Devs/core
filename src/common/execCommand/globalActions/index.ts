@@ -22,7 +22,6 @@ import { getRootHome, getYamlContent } from '../../../libs';
 import { execDaemon } from '../../../execDaemon';
 import { getCurrentEnvironment } from '@serverless-devs/utils';
 import rimraf from 'rimraf';
-
 interface IConfig {
   realVariables: Record<string, any>;
   method: string;
@@ -31,6 +30,7 @@ interface IConfig {
 }
 
 class GlobalActions {
+  private tracePath: string;
   private actions: IActionHook[];
   private record: Record<string, any> = {};
   constructor(private config: IConfig) {
@@ -78,8 +78,8 @@ class GlobalActions {
   }
   async run(type: IGlobalActionValue) {
     if (type === IGlobalAction.COMPLETE) {
-      const { tracePath } = await this.tracker();
-      rimraf.sync(tracePath);
+      await this.tracker();
+      rimraf.sync(this.tracePath);
     }
     const hooks = filter(this.actions, (item) => item.action === type);
     if (isEmpty(hooks)) return;
@@ -134,8 +134,8 @@ class GlobalActions {
     const newInputs = { ...inputs, ...this.record };
     const yamlContent = await getYamlContent(get(newInputs, 'path.configPath'));
     if (isEmpty(yamlContent)) return;
-    const tracePath = path.join(getRootHome(), 'config', `${traceId}.json`);
-    const data = fs.readJSONSync(tracePath);
+    this.tracePath = path.join(getRootHome(), 'config', `${traceId}.json`);
+    const data = fs.readJSONSync(this.tracePath);
     if (isEmpty(data)) return;
 
     execDaemon('tracker.js', {
@@ -149,7 +149,6 @@ class GlobalActions {
         time: new Date().getTime(),
       }),
     });
-    return { tracePath }
   }
 }
 
