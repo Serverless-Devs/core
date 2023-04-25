@@ -1,7 +1,9 @@
 import path from 'path';
 import { spawn } from 'child_process';
-import { useLocal, isCiCdEnv } from './libs';
+import { useLocal, getCommonDaemonEnv } from './libs';
+import { isCiCdEnvironment } from '@serverless-devs/utils';
 import fs from 'fs-extra';
+import { get } from 'lodash';
 const TTL = 10 * 60 * 1000;
 
 interface IConfig {
@@ -21,17 +23,24 @@ function readJsonFile(filePath: string) {
 export function execDaemon(filename: string, config?: IConfig) {
   const filePath = path.join(__dirname, 'daemon', filename);
   if (!fs.existsSync(filePath)) return;
-  const subprocess = spawn(process.execPath, [filePath], {
-    detached: true,
-    stdio: 'ignore',
-    env: { ...process.env, ...config },
+  const core_use_daemon = get(process, 'env.core_use_daemon', 'true');
+  if (core_use_daemon === 'true') {
+    const subprocess = spawn(process.execPath, [filePath], {
+      detached: true,
+      stdio: 'ignore',
+      env: { ...getCommonDaemonEnv(), ...config },
+    });
+    return subprocess.unref();
+  }
+  spawn(process.execPath, [filePath], {
+    stdio: 'inherit',
+    env: { ...getCommonDaemonEnv(), ...config },
   });
-  subprocess.unref();
 }
 
 export function execDaemonWithTTL(filename: string, config: IConfigWithTTL) {
   if (useLocal()) return;
-  if (isCiCdEnv()) return;
+  if (isCiCdEnvironment()) return;
   const { lockPath } = config;
   const lockFileInfo = readJsonFile(lockPath);
   const now = Date.now();

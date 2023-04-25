@@ -1,6 +1,6 @@
 {
   "name": "@serverless-devs/core",
-  "version": "0.1.56",
+  "version": "0.1.57",
   "description": "Serverless Devs Tool Core Component",
   "keywords": [
     "Serverless",
@@ -25,7 +25,8 @@
     "prewatch": "rimraf lib && mkdir lib && cp -r ./src/daemon ./lib",
     "watch": "npx tsc -w -p tsconfig.json",
     "debug": "ts-node test/fixtures/spinner.ts",
-    "test": "npx jest",
+    "test": "jest --testTimeout 10000",
+    "test:watch": "jest --testTimeout 10000 --watchAll",
     "prebuild": "rimraf lib && rimraf dist",
     "build:s": "npm run prebuild && npx tsc && cp -r ./src/daemon ./lib",
     "postbuild:s": "npm run esbuild && cp -r ./src/daemon ./dist",
@@ -43,10 +44,11 @@
   "main": "./dist/index.js",
   "devDependencies": {
     "@alicloud/pop-core": "^1.7.10",
-    "@serverless-cd/tracker": "^0.0.1",
+    "@serverless-cd/tracker": "^0.0.10",
     "@serverless-devs/acc": "^1.1.3",
     "@serverless-devs/got": "^8.3.2",
     "@serverless-devs/s-progress-bar": "^0.0.8",
+    "@serverless-devs/utils": "^0.0.4",
     "@types/archiver": "^5.1.1",
     "@types/command-exists": "^1.2.0",
     "@types/command-line-usage": "^5.0.1",

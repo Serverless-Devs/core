@@ -6,7 +6,7 @@ import yaml from 'js-yaml';
  * @param filePath 文件的当前路径
  * @description 函数内部会兼容yaml和yml文件，返回文件内容
  */
-async function getYamlContent(filePath: string): Promise<Record<string, any>> {
+function getYamlContent(filePath: string): Record<string, any> {
   // yaml 文件
   if (filePath.endsWith('yaml')) {
     if (fs.existsSync(filePath)) {

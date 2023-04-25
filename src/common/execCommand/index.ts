@@ -2,7 +2,7 @@ import Parse from './parse';
 import { isEmpty, get, isNil, keys, isPlainObject, includes, filter } from 'lodash';
 import { logger, makeLogFile } from '../../logger';
 import Analysis from './analysis';
-import { getProjectConfig, transformServiceList } from './utils';
+import { getProjectConfig, transformServiceList, makeTrackerFile } from './utils';
 import { getTemplatePath, transforYamlPath } from './getTemplatePath';
 import ComponentExec from './component';
 import { IGlobalArgs, STATUS, IGlobalAction, IRecord } from './interface';
@@ -33,6 +33,7 @@ class ExecCommand {
     }
     // 写入日志的时候，先确保创建了日志文件
     makeLogFile();
+    makeTrackerFile();
   }
   async init() {
     const { syaml, serverName, globalArgs = {}, method } = this.configs;
@@ -113,11 +114,11 @@ class ExecCommand {
     if (record.status === STATUS.SUCCESS) {
       await this.globalActions.run(IGlobalAction.SUCCESS);
     }
-    if (record.status === STATUS.ERROR) {
+    if (record.status === STATUS.FAILURE) {
       await this.globalActions.run(IGlobalAction.FAIL);
     }
     await this.globalActions.run(IGlobalAction.COMPLETE);
-    if (record.status === STATUS.ERROR) {
+    if (record.status === STATUS.FAILURE) {
       throw record.error;
     }
   }
@@ -153,7 +154,7 @@ class ExecCommand {
       const newObj = transformServiceList({ response, inputs, serverName });
       serviceList.push({ ...newObj, status });
       record.status = status;
-      if (status === STATUS.ERROR) {
+      if (status === STATUS.FAILURE) {
         record.error = response;
         break;
       }

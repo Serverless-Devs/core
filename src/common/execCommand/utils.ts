@@ -1,5 +1,6 @@
 import { isEmpty, get, assign, keys, split, filter, join, includes, replace } from 'lodash';
 import path from 'path';
+import fs from 'fs-extra';
 import {
   IProjectConfig,
   IActionHook,
@@ -9,7 +10,7 @@ import {
   IServiceItem,
   IGlobalActionValue,
 } from './interface';
-import { makeUnderLine } from '../../libs';
+import { makeUnderLine, getRootHome } from '../../libs';
 import { logger } from '../../logger';
 import { COMMON_VARIABLE_TYPE_REG, SPECIALL_VARIABLE_TYPE_REG } from '../constant';
 import chalk from 'chalk';
@@ -184,4 +185,12 @@ export function transformServiceList({ response, inputs, serverName }): IService
     props: get(inputs, 'props'),
     output: response,
   };
+}
+
+export function makeTrackerFile() {
+  const traceId = process.env['serverless_devs_trace_id'];
+  if (isEmpty(traceId)) return;
+  const tracePath = path.join(getRootHome(), 'config', `${traceId}.json`);
+  fs.ensureFileSync(tracePath);
+  fs.writeFileSync(tracePath, '{}');
 }

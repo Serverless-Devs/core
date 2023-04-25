@@ -103,5 +103,5 @@ export interface IServiceItem {
 
 export enum STATUS {
   SUCCESS = 'success',
-  ERROR = 'error',
+  FAILURE = 'failure',
 }

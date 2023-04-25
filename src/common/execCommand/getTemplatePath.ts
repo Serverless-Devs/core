@@ -9,7 +9,8 @@ import parseYaml from '../parseYaml';
 
 async function checkYaml(spath: string) {
   const filename = path.basename(spath);
-  const data = await getYamlContent(spath);
+  const data = await parseYaml(fs.readFileSync(spath, 'utf-8'));
+
   // 校验 edition 字段
   if (!['1.0.0', '2.0.0'].includes(get(data, 'edition'))) {
     throw new Error(
@@ -89,7 +90,9 @@ async function extendsYaml(spath: string, dotspath: string) {
     fs.writeFileSync(dotspath, yaml.dump(newData));
   }
   // 解析base yaml
-  const baseYamlData = await parseYaml(fs.readFileSync(dotspath, 'utf-8'));
+  const baseYamlData = await parseYaml(
+    fs.readFileSync(data?.vars ? dotspath : baseYamlPath, 'utf-8'),
+  );
   // 只合并vars
   const newData = extend2(true, {}, { vars: baseYamlData?.vars }, data);
   fs.writeFileSync(dotspath, yaml.dump(newData));

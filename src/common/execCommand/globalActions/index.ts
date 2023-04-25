@@ -1,4 +1,7 @@
 import fs from 'fs-extra';
+import os from 'os';
+import execa from 'execa';
+import path from 'path';
 import { getActions, getCurrentPath } from '../utils';
 import {
   IActionHook,
@@ -9,18 +12,16 @@ import {
   IProjectConfig,
 } from '../interface';
 import { logger } from '../../../logger';
-import execa from 'execa';
 import { filter, isEmpty, get, join } from 'lodash';
 import { loadComponent } from '../../load';
 import { throwError } from '../utils';
-import os from 'os';
 import { HumanWarning } from '../../error';
 import { ALIYUN_CLI } from '../../constant';
 import { getCredential, getCredentialFromEnv } from '../../credential';
 import { getRootHome, getYamlContent } from '../../../libs';
-import path from 'path';
 import { execDaemon } from '../../../execDaemon';
-
+import { getCurrentEnvironment } from '@serverless-devs/utils';
+import rimraf from 'rimraf';
 interface IConfig {
   realVariables: Record<string, any>;
   method: string;
@@ -29,6 +30,7 @@ interface IConfig {
 }
 
 class GlobalActions {
+  private tracePath: string;
   private actions: IActionHook[];
   private record: Record<string, any> = {};
   constructor(private config: IConfig) {
@@ -75,7 +77,10 @@ class GlobalActions {
     }
   }
   async run(type: IGlobalActionValue) {
-    type === IGlobalAction.COMPLETE && (await this.tracker());
+    if (type === IGlobalAction.COMPLETE) {
+      await this.tracker();
+      rimraf.sync(this.tracePath);
+    }
     const hooks = filter(this.actions, (item) => item.action === type);
     if (isEmpty(hooks)) return;
     logger.info(`Start the global ${type}-action`);
@@ -123,8 +128,27 @@ class GlobalActions {
     }
   }
   private async tracker() {
+    const traceId = process.env['serverless_devs_trace_id'];
+    if (isEmpty(traceId)) return;
     const inputs: IGlobalInputs = await this.getInputs();
-    execDaemon('tracker.js', { inputs: JSON.stringify({ ...inputs, ...this.record }) });
+    const newInputs = { ...inputs, ...this.record };
+    const yamlContent = await getYamlContent(get(newInputs, 'path.configPath'));
+    if (isEmpty(yamlContent)) return;
+    this.tracePath = path.join(getRootHome(), 'config', `${traceId}.json`);
+    const data = fs.readJSONSync(this.tracePath);
+    if (isEmpty(data)) return;
+
+    execDaemon('tracker.js', {
+      inputs: JSON.stringify({
+        platform: getCurrentEnvironment(),
+        resource: data,
+        orgName: get(yamlContent, 'orgName'),
+        name: get(yamlContent, 'name'),
+        env: get(yamlContent, 'env', 'default'),
+        status: get(newInputs, 'status'),
+        time: new Date().getTime(),
+      }),
+    });
   }
 }
 
