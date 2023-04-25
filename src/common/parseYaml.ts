@@ -9,7 +9,6 @@ class ParseYaml {
   constructor(data: string) {
     this.doc = YAML.parseDocument(data);
     try {
-      // TODO: 临时解决方案，后续优化 https://github.com/Serverless-Devs/Serverless-Devs/issues/671(未复现)
       this.yamlJson = this.doc.contents.toJSON();
     } catch (error) {
       throw new Error(
