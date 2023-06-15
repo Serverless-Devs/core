@@ -1,9 +1,5 @@
 process.setMaxListeners(0);
 (process as any).noDeprecation = true;
-import { isCiCdEnvironment, getCurrentEnvironment } from '@serverless-devs/utils';
-export const isCiCdEnv = isCiCdEnvironment;
-export const getCicdEnv = getCurrentEnvironment;
-
 
 export { IInputs } from './interface';
 export { Logger, ILogger, makeLogFile } from './logger';
@@ -36,6 +32,6 @@ export { default as popCore } from '@alicloud/pop-core';
 export { default as extend2 } from 'extend2';
 export { default as stringArgv } from 'string-argv';
 export { default as tracker } from '@serverless-cd/tracker';
-export * from '@serverless-devs/utils';
+export { isDebugMode, isCiCdEnvironment as isCiCdEnv, getCurrentEnvironment as getCicdEnv, getCurrentEnvironment } from '@serverless-devs/utils';
 
 

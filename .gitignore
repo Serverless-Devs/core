@@ -16,3 +16,4 @@ dist
 .s.lock
 website-base/
 .s
+__tests__

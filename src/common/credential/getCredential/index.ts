@@ -12,6 +12,7 @@ import { ALIYUN_CLI, ALIYUN_CONFIG_FILE } from '../../constant';
 import Acc from '@serverless-devs/acc/commands/run';
 import fs from 'fs-extra';
 import getAccountId from '../getAccountId';
+import { isCiCdEnvironment } from '@serverless-devs/utils';
 
 const Crypto = require('crypto-js');
 
@@ -46,6 +47,10 @@ async function getCredential(...args: any[]) {
   if (access === ALIYUN_CLI) {
     result = await getAcc();
   } else {
+    const aliasFromEnv = process.env.serverless_devs_access_cicd_alias_name;
+    if (isCiCdEnvironment() && aliasFromEnv) {
+      access = aliasFromEnv;
+    }
     result = await getCredentialWithAccess(access, ...params);
   }
 
@@ -127,6 +132,10 @@ async function getCredentialWithAccess(access?: string, ...args: any[]) {
     logger.debug(`access information: ${JSON.stringify(result, null, 2)}`);
     return trim(result);
   }
+  if (isCiCdEnvironment()) {
+    // cicd 环境未获取到密钥信息，抛出异常
+    throw new Error(`The access ${accessAlias} is not found.`);
+  }
 
   const userInfo = await getYamlContent(path.join(getRootHome(), 'access.yaml'));
 
@@ -161,8 +170,7 @@ async function getCredentialWithAccess(access?: string, ...args: any[]) {
   }
   const result = formatValue(userInfo, selectAccess);
   logger.warn(
-    `\n\n${
-      os.platform() == 'win32' ? '' : '🤡'
+    `\n\n${os.platform() == 'win32' ? '' : '🤡'
     }   If you don't want to select access every time, configure it in yaml：${chalk.underline.cyan(
       'https://github.com/Serverless-Devs/Serverless-Devs/discussions/149',
     )}\n\n`,
