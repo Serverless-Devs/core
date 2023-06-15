@@ -38,7 +38,9 @@
     "fix": "f2elint fix",
     "pub": "npm run build && npm publish",
     "typecheck": "npx tsc -p tsconfig.json --noEmit",
-    "beta": "npm publish --tag=beta"
+    "beta": "npm publish --tag=beta",
+    "preln": "rm -rf ~/.s/cache/core/dist",
+    "ln": "ln -s $(pwd)/lib ~/.s/cache/core/dist"
   },
   "autoInstall": false,
   "main": "./dist/index.js",
