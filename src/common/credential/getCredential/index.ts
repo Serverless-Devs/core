@@ -134,7 +134,7 @@ async function getCredentialWithAccess(access?: string, ...args: any[]) {
   }
   if (isCiCdEnvironment()) {
     // cicd 环境未获取到密钥信息，抛出异常
-    throw new Error(`the credential ${accessAlias} is not found.`);
+    throw new Error(`The access ${accessAlias} is not found.`);
   }
 
   const userInfo = await getYamlContent(path.join(getRootHome(), 'access.yaml'));
