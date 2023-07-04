@@ -20,7 +20,7 @@ import { ALIYUN_CLI } from '../../constant';
 import { getCredential, getCredentialFromEnv } from '../../credential';
 import { getRootHome, getYamlContent } from '../../../libs';
 import { execDaemon } from '../../../execDaemon';
-import { getCurrentEnvironment } from '@serverless-devs/utils';
+import { getCurrentEnvironment, isCiCdEnvironment } from '@serverless-devs/utils';
 import rimraf from 'rimraf';
 interface IConfig {
   realVariables: Record<string, any>;
@@ -130,6 +130,7 @@ class GlobalActions {
   private async tracker() {
     const traceId = process.env['serverless_devs_trace_id'];
     if (isEmpty(traceId)) return;
+    if (isCiCdEnvironment()) return;
     const inputs: IGlobalInputs = await this.getInputs();
     const newInputs = { ...inputs, ...this.record };
     const yamlContent = await getYamlContent(get(newInputs, 'path.configPath'));
