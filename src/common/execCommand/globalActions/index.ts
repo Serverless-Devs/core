@@ -79,7 +79,7 @@ class GlobalActions {
   async run(type: IGlobalActionValue) {
     if (type === IGlobalAction.COMPLETE) {
       await this.tracker();
-      rimraf.sync(this.tracePath);
+      this.tracePath && rimraf.sync(this.tracePath);
     }
     const hooks = filter(this.actions, (item) => item.action === type);
     if (isEmpty(hooks)) return;
