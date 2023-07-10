@@ -79,7 +79,7 @@ class GlobalActions {
   async run(type: IGlobalActionValue) {
     if (type === IGlobalAction.COMPLETE) {
       await this.tracker();
-      rimraf.sync(this.tracePath);
+      this.tracePath && rimraf.sync(this.tracePath);
     }
     const hooks = filter(this.actions, (item) => item.action === type);
     if (isEmpty(hooks)) return;
@@ -136,6 +136,7 @@ class GlobalActions {
     const yamlContent = await getYamlContent(get(newInputs, 'path.configPath'));
     if (isEmpty(yamlContent)) return;
     this.tracePath = path.join(getRootHome(), 'config', `${traceId}.json`);
+    if(!fs.existsSync(this.tracePath)) return;
     const data = fs.readJSONSync(this.tracePath);
     if (isEmpty(data)) return;
 
