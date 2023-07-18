@@ -70,10 +70,11 @@ class LoadApplication {
   async byUrl() {
     const { source, registry, target } = this.config;
     const applicationPath = path.resolve(target, source);
-    await downloadRequest(registry, applicationPath, {
-      extract: true,
+    return this.handleDecompressFile({
+      zipball_url: registry,
+      applicationPath,
+      name: this.config.name,
     });
-    return applicationPath;
   }
   async loadType() {
     const { registry } = this.config;
