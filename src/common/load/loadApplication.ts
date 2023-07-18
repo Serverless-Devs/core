@@ -18,6 +18,7 @@ import {
   getYamlContent,
   S_CURRENT,
   getSetConfig,
+  setConfigYaml,
   isYamlFile,
   generateRandom,
 } from '../../libs';
@@ -446,7 +447,9 @@ async function loadApplication(
   if (config.registry) {
     if (config.registry !== RegistryEnum.github && config.registry !== RegistryEnum.serverless) {
       // 支持 自定义
-      return await instance.byUrl();
+      let res =  await instance.byUrl();
+      setConfigYaml('registry', RegistryEnum.serverless)
+      return res;
     }
   }
   let appPath: string;
