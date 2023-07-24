@@ -29,9 +29,27 @@ export interface IOptions extends DecompressOptions {
 
 async function download(url: string, dest: string, options: IOptions = {}) {
   const { filename = 'demo.zip' } = options;
-  const uri = new URL(url);
-  const pkg = url.toLowerCase().startsWith('https:') ? https : http;
+  
+  
   return await new Promise<{ filePath: string; spin: Ora }>((resolve, reject) => {
+    if (!url.toLocaleLowerCase().startsWith('http')) {
+      // local file
+      let spin: Ora;
+
+      fs.mkdirpSync(dest);
+      if (url.endsWith('.zip')) {
+        const filePath = path.join(dest, filename);
+        fs.copyFileSync(url, filePath);
+        return resolve({ filePath: filePath, spin: spin });
+      } else {
+        // copy dir to dest dir
+        fs.copySync(url, dest);
+        return resolve({ filePath: dest, spin: spin });
+      }
+    }
+
+    const pkg = url.toLowerCase().startsWith('https:') ? https : http;
+    const uri = new URL(url);
     pkg.get(uri.href).on('response', (res) => {
       const len = parseInt(res.headers['content-length'], 10);
       fs.ensureDirSync(dest);
@@ -86,6 +104,9 @@ export default async (url: string, dest: string, options: IOptions = {}) => {
   const { extract, filename, ...restOpts } = options;
   try {
     const { filePath, spin } = await download(url, dest, options);
+    if (filePath == dest) {
+      return;
+    }
     if (extract) {
       let timer;
       let num = 0;
