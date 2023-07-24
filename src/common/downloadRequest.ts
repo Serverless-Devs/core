@@ -35,10 +35,17 @@ async function download(url: string, dest: string, options: IOptions = {}) {
     if (!url.toLocaleLowerCase().startsWith('http')) {
       // local file
       let spin: Ora;
-      const filePath = path.join(dest, filename);
+
       fs.mkdirpSync(dest);
-      fs.copyFileSync(url, filePath);
-      return resolve({ filePath: filePath, spin: spin });
+      if (url.endsWith('.zip')) {
+        const filePath = path.join(dest, filename);
+        fs.copyFileSync(url, filePath);
+        return resolve({ filePath: filePath, spin: spin });
+      } else {
+        // copy dir to dest dir
+        fs.copySync(url, dest);
+        return resolve({ filePath: dest, spin: spin });
+      }
     }
 
     const pkg = url.toLowerCase().startsWith('https:') ? https : http;
@@ -97,6 +104,9 @@ export default async (url: string, dest: string, options: IOptions = {}) => {
   const { extract, filename, ...restOpts } = options;
   try {
     const { filePath, spin } = await download(url, dest, options);
+    if (filePath == dest) {
+      return;
+    }
     if (extract) {
       let timer;
       let num = 0;
