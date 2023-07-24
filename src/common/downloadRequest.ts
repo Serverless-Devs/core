@@ -105,6 +105,7 @@ export default async (url: string, dest: string, options: IOptions = {}) => {
   try {
     const { filePath, spin } = await download(url, dest, options);
     if (filePath == dest) {
+      // init from local registry dir
       return;
     }
     if (extract) {
