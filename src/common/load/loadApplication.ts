@@ -39,6 +39,7 @@ interface IParams {
   parameters?: object; // s.yaml文件接收的入参
   appName?: string; // s.yaml文件里的项目名称
   access?: string; // s.yaml文件里的密钥
+  uri?: string; // 自定义应用模板地址
 }
 
 async function preInit({ temporaryPath, applicationPath }) {
@@ -68,14 +69,22 @@ class LoadApplication {
   constructor(config: IParams) {
     this.config = config;
   }
-  async byUrl() {
-    const { source, registry, target } = this.config;
+  async byUri() {
+    const { source, uri, target } = this.config;
     const applicationPath = path.resolve(target, source);
     return this.handleDecompressFile({
-      zipball_url: registry,
+      template_uri: uri,
       applicationPath,
       name: this.config.name,
     });
+  }
+  async byUrl() {
+    const { source, registry, target } = this.config;
+    const applicationPath = path.resolve(target, source);
+    await downloadRequest(registry, applicationPath, {
+      extract: true,
+    });
+    return applicationPath;
   }
   async loadType() {
     const { registry } = this.config;
@@ -109,7 +118,7 @@ class LoadApplication {
     const newName = this.config.name || name;
     const applicationPath = path.resolve(this.config.target, newName);
     return this.handleDecompressFile({
-      zipball_url,
+      template_uri: zipball_url,
       applicationPath,
       name: newName,
     });
@@ -133,17 +142,17 @@ class LoadApplication {
     const newName = this.config.name || name;
     const applicationPath = path.join(this.config.target, newName);
     return this.handleDecompressFile({
-      zipball_url,
+      template_uri: zipball_url,
       applicationPath,
       name: newName,
     });
   }
-  async handleDecompressFile({ zipball_url, applicationPath, name }) {
+  async handleDecompressFile({ template_uri, applicationPath, name }) {
     const answer = await this.checkFileExists(applicationPath, name);
     if (!answer) return applicationPath;
     const temporaryPath = `${applicationPath}${new Date().getTime()}`;
     this.temporaryPath = temporaryPath;
-    await downloadRequest(zipball_url, temporaryPath, {
+    await downloadRequest(template_uri, temporaryPath, {
       extract: true,
       strip: 1,
     });
@@ -440,16 +449,19 @@ async function loadApplication(
     config.parameters = oldsource.parameters;
     config.appName = oldsource.appName;
     config.access = oldsource.access;
+    config.uri = oldsource.uri;
   }
 
   const instance = new LoadApplication(config);
 
+  if (config.uri) {
+    // 支持 自定义
+    return  await instance.byUri();
+  }
   if (config.registry) {
     if (config.registry !== RegistryEnum.github && config.registry !== RegistryEnum.serverless) {
       // 支持 自定义
-      let res =  await instance.byUrl();
-      setConfigYaml('registry', RegistryEnum.serverless)
-      return res;
+      return  await instance.byUrl();
     }
   }
   let appPath: string;
