@@ -9,7 +9,7 @@ import getYamlContent from './getYamlContent';
 import getMAC from 'getmac';
 import yaml from 'js-yaml';
 import _ from 'lodash';
-import { getCurrentEnvironment } from '@serverless-devs/utils';
+import * as utils from '@serverless-devs/utils';
 
 const semver = require('semver');
 
@@ -82,20 +82,7 @@ export const getCliVersion = (defaultValue?: string) => {
   return CLI_VERSION || defaultValue;
 };
 
-export function getRootHome() {
-  const shomedir = path.join(USER_HOME, '.s');
-  const sJsonPath = path.join(shomedir, 'config', 's.json');
-  if (fs.existsSync(sJsonPath)) {
-    const data = fs.readJsonSync(sJsonPath);
-    return data.workspace ? formatWorkspacePath(data.workspace) : shomedir;
-  }
-  // 不存在 ～/.s/config/s.json
-  if (semver.gt(getCliVersion('0.0.0'), '2.0.92')) {
-    const env = getCurrentEnvironment();
-    if (env === 'yunxiao') return path.join(USER_HOME, '.cache', '.s');
-  }
-  return shomedir;
-}
+export const getRootHome = utils.getRootHome;
 
 export const isBetaS = () => getCliVersion('0.0.0').includes('beta');
 
