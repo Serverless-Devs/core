@@ -1,6 +1,6 @@
 {
   "name": "@serverless-devs/core",
-  "version": "0.1.63-beta.1",
+  "version": "0.1.64-beta.1",
   "description": "Serverless Devs Tool Core Component",
   "keywords": [
     "Serverless",
@@ -50,7 +50,7 @@
     "@serverless-devs/acc": "^1.1.3",
     "@serverless-devs/got": "^8.3.2",
     "@serverless-devs/s-progress-bar": "^0.0.8",
-    "@serverless-devs/utils": "^0.0.5",
+    "@serverless-devs/utils": "^0.0.8",
     "@types/archiver": "^5.1.1",
     "@types/command-exists": "^1.2.0",
     "@types/command-line-usage": "^5.0.1",
