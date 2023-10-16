@@ -127,5 +127,6 @@ export const getCommonDaemonEnv = () => {
     CLI_VERSION: process.env.CLI_VERSION,
     SERVERLESS_CD_ENDPOINT: process.env.SERVERLESS_CD_ENDPOINT,
     JWT_TOKEN: process.env.JWT_TOKEN,
+    serverless_devs_temp_argv: process.env.serverless_devs_temp_argv,
   }
 }
