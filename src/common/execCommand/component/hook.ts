@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 import { logger } from '../../../logger';
 import { IActionHook, IInputs } from '../interface';
-import execa from 'execa';
+import { spawnSync } from 'child_process';
 import { filter, get, isEmpty, join, includes } from 'lodash';
 import { getGlobalArgs } from '../../../libs';
 import { loadComponent } from '../../load';
@@ -15,7 +15,7 @@ class Hook {
   private preHooks: IActionHook[] = [];
   private afterHooks: IActionHook[] = [];
   private output: any;
-  constructor(private inputs: IInputs) {}
+  constructor(private inputs: IInputs) { }
   init(hooks: IActionHook[] = []) {
     this.preHooks = [];
     this.afterHooks = [];
@@ -53,8 +53,10 @@ class Hook {
     if (configs.type === 'run') {
       const execPath = configs.path;
       if (fs.existsSync(execPath) && fs.lstatSync(execPath).isDirectory()) {
+        logger.debug(`cwd: ${execPath}`)
+        logger.debug(`process.env.PATH: ${process.env.PATH}`)
         try {
-          execa.sync(configs.value, {
+          spawnSync(configs.value, {
             cwd: execPath,
             stdio: 'inherit',
             shell: true,
