@@ -11,6 +11,7 @@ import { assign } from 'lodash';
 import { logger } from '../../../logger';
 import { get } from 'lodash';
 import { ALIYUN_CLI } from '../../constant';
+import { isCiCdEnvironment } from '@serverless-devs/utils';
 
 class ComponentExec {
   protected hook: Hook;
@@ -28,8 +29,10 @@ class ComponentExec {
     }
     const accessPath = path.join(getRootHome(), 'access.yaml');
     const data = await getYamlContent(accessPath);
-    // 密钥存在 才去获取密钥信息
-    if (get(data, projectConfig.access)) {
+    // 密钥存在 才去获取密钥信息 
+    // cicd 环境下存在 serverless_devs_access_cicd_alias_name
+    const isExist = get(data, projectConfig.access) || (isCiCdEnvironment() && process.env.serverless_devs_access_cicd_alias_name)
+    if (isExist) {
       const credentials = await getCredential(projectConfig.access);
       this.projectConfig = assign({}, projectConfig, { credentials });
     }
@@ -95,13 +98,13 @@ class ComponentExec {
       get(payload, 'type') === 'plugin'
         ? get(payload, 'data')
         : getInputs(this.projectConfig, {
-            method,
-            args,
-            spath,
-            serverName,
-            serviceList,
-            output: get(payload, 'data'),
-          });
+          method,
+          args,
+          spath,
+          serverName,
+          serviceList,
+          output: get(payload, 'data'),
+        });
 
     const registry: IRegistry = await getSetConfig('registry', DEFAULT_REGIRSTRY);
     const instance = await loadComponent(this.projectConfig.component, registry);
@@ -129,11 +132,10 @@ class ComponentExec {
         JSON.stringify({
           code: 100,
           message: `The [${method}] command was not found.`,
-          tips: `Please check the component ${
-            this.projectConfig.component
-          } has the ${method} method. Serverless Devs documents：${chalk.underline(
-            'https://github.com/Serverless-Devs/Serverless-Devs/blob/master/docs/zh/command',
-          )}`,
+          tips: `Please check the component ${this.projectConfig.component
+            } has the ${method} method. Serverless Devs documents：${chalk.underline(
+              'https://github.com/Serverless-Devs/Serverless-Devs/blob/master/docs/zh/command',
+            )}`,
         }),
       );
     }
