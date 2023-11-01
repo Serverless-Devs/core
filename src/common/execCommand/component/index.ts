@@ -11,6 +11,7 @@ import { assign } from 'lodash';
 import { logger } from '../../../logger';
 import { get } from 'lodash';
 import { ALIYUN_CLI } from '../../constant';
+import { isCiCdEnvironment } from '@serverless-devs/utils';
 
 class ComponentExec {
   protected hook: Hook;
@@ -28,9 +29,13 @@ class ComponentExec {
     }
     const accessPath = path.join(getRootHome(), 'access.yaml');
     const data = await getYamlContent(accessPath);
-    // 密钥存在 才去获取密钥信息
-    const credentials = await getCredential(projectConfig.access);
-    this.projectConfig = assign({}, projectConfig, { credentials });
+    // 密钥存在 才去获取密钥信息 
+    // cicd 环境下存在 serverless_devs_access_cicd_alias_name
+    const isExist = get(data, projectConfig.access) || (isCiCdEnvironment() && process.env.serverless_devs_access_cicd_alias_name)
+    if (isExist) {
+      const credentials = await getCredential(projectConfig.access);
+      this.projectConfig = assign({}, projectConfig, { credentials });
+    }
     const accessFromEnv = await getCredentialFromEnv(projectConfig.access);
     if (accessFromEnv) {
       this.projectConfig = assign({}, projectConfig, { credentials: accessFromEnv });
