@@ -29,10 +29,8 @@ class ComponentExec {
     const accessPath = path.join(getRootHome(), 'access.yaml');
     const data = await getYamlContent(accessPath);
     // 密钥存在 才去获取密钥信息
-    if (get(data, projectConfig.access)) {
-      const credentials = await getCredential(projectConfig.access);
-      this.projectConfig = assign({}, projectConfig, { credentials });
-    }
+    const credentials = await getCredential(projectConfig.access);
+    this.projectConfig = assign({}, projectConfig, { credentials });
     const accessFromEnv = await getCredentialFromEnv(projectConfig.access);
     if (accessFromEnv) {
       this.projectConfig = assign({}, projectConfig, { credentials: accessFromEnv });
@@ -95,13 +93,13 @@ class ComponentExec {
       get(payload, 'type') === 'plugin'
         ? get(payload, 'data')
         : getInputs(this.projectConfig, {
-            method,
-            args,
-            spath,
-            serverName,
-            serviceList,
-            output: get(payload, 'data'),
-          });
+          method,
+          args,
+          spath,
+          serverName,
+          serviceList,
+          output: get(payload, 'data'),
+        });
 
     const registry: IRegistry = await getSetConfig('registry', DEFAULT_REGIRSTRY);
     const instance = await loadComponent(this.projectConfig.component, registry);
@@ -129,11 +127,10 @@ class ComponentExec {
         JSON.stringify({
           code: 100,
           message: `The [${method}] command was not found.`,
-          tips: `Please check the component ${
-            this.projectConfig.component
-          } has the ${method} method. Serverless Devs documents：${chalk.underline(
-            'https://github.com/Serverless-Devs/Serverless-Devs/blob/master/docs/zh/command',
-          )}`,
+          tips: `Please check the component ${this.projectConfig.component
+            } has the ${method} method. Serverless Devs documents：${chalk.underline(
+              'https://github.com/Serverless-Devs/Serverless-Devs/blob/master/docs/zh/command',
+            )}`,
         }),
       );
     }
