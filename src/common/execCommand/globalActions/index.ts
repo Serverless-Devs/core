@@ -77,6 +77,7 @@ class GlobalActions {
     }
   }
   async run(type: IGlobalActionValue) {
+    if (get(this.config.globalArgs, 'skipActions', false)) return;
     if (type === IGlobalAction.COMPLETE) {
       await this.tracker();
       this.tracePath && rimraf.sync(this.tracePath);
