@@ -78,11 +78,10 @@ class Hook {
         }
 
         if (result.error || result.status !== 0 || result.signal !== null) {
-          const errStr = `Command ${configs.value} failed`;
+          const errStr = `Command failed with exit code ${result.status}: ${configs.value}`;
           throwError({
-            error: result.error ? ': ' + result.error.toString() : '',
+            error: {message: errStr},
             serviceName: get(this.inputs, 'project.projectName'),
-            prefix: errStr
           });
         }
       }
