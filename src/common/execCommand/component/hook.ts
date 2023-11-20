@@ -55,8 +55,10 @@ class Hook {
       if (fs.existsSync(execPath) && fs.lstatSync(execPath).isDirectory()) {
         logger.debug(`cwd: ${execPath}`)
         logger.debug(`process.env.PATH: ${process.env.PATH}`)
+
+        let result;
         try {
-          spawnSync(configs.value, {
+          result = spawnSync(configs.value, {
             cwd: execPath,
             stdio: 'inherit',
             shell: true,
@@ -71,6 +73,14 @@ class Hook {
           }
           throwError({
             error,
+            serviceName: get(this.inputs, 'project.projectName'),
+          });
+        }
+
+        if (result.error || result.status !== 0 || result.signal !== null) {
+          const errStr = `Command failed with exit code ${result.status}: ${configs.value}`;
+          throwError({
+            error: {message: errStr},
             serviceName: get(this.inputs, 'project.projectName'),
           });
         }
