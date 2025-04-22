@@ -237,9 +237,10 @@ async function loadComponent(source: string, registry?: IRegistry, params?: any)
       registry !== RegistryEnum.serverless &&
       registry !== RegistryEnum.serverlessOld
     ) {
-      throw new Error(
-        `Please check the value of registry and set it to [${RegistryEnum.github}, ${RegistryEnum.serverless}]`,
-      );
+      registry = RegistryEnum.serverless;
+      // throw new Error(
+      //   `Please check the value of registry and set it to [${RegistryEnum.github}, ${RegistryEnum.serverless}]`,
+      // );
     }
   }
   return await loadRemoteComponent(source, registry, params);
