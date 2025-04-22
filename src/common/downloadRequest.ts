@@ -29,8 +29,8 @@ export interface IOptions extends DecompressOptions {
 
 async function download(url: string, dest: string, options: IOptions = {}) {
   const { filename = 'demo.zip' } = options;
-  
-  
+
+
   return await new Promise<{ filePath: string; spin: Ora }>((resolve, reject) => {
     if (!url.toLocaleLowerCase().startsWith('http')) {
       // local file
@@ -89,7 +89,11 @@ async function download(url: string, dest: string, options: IOptions = {}) {
         });
       } else if (res.statusCode === 302 || res.statusCode === 301) {
         // Recursively follow redirects, only a 200 will resolve.
-        download(res.headers.location, dest, options).then((val) => resolve(val));
+        download(res.headers.location, dest, options).then((val) => {
+          // fix: download hang in node20+
+          res.destroy();
+          resolve(val)
+        });
       } else {
         reject({
           code: res.statusCode,
